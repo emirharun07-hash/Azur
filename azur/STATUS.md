@@ -338,6 +338,21 @@ on every device without losing quality.
 - Room camera: from high in the doorway, loc (2.1, 0, 2.15) -> (1.2, 3.1, 0.45), 15 mm (was above the bed's head,
   where the bed hardly showed). Tried 9 positions (scratchpad r6/cams); the far corner hid the window.
 - PC request `r6-1` (rebuild, all jobs) pushed 2026-10-10 23:36 UTC.
+- PC run: `r6-1` from 2026-10-11 ~04:30 UTC (test still in full quality, previews, models, queue). At the owner's
+  request a 2 h pause: `render_step.ps1` learned `pause_until_unix` (a request held back until then; the running one
+  stops between two renders like for any newer request). `r6-2` (no rebuild; queue, glow, outside, moves; everything
+  rendered is skipped) replaced r6-1 at 13:57 UTC; the owner ended the pause early, r6-2 ran 14:17-17:48 UTC, no errors.
+  The rail's evening and morning states no longer differ from day in that view (boots and backpack are in every state).
+- Checks: browser at 7:30, 11, 19, 23:30 in room, bed, rail (one light for all views; by day room ~52, bed ~41, rail
+  ~69 of 255 on screen; at night the hallway light makes the bed view the brightest, global keys left as they were);
+  flights land within 1-2 % of the view at 11, 19 and 23:30; `test_room.cjs` all passed.
+- Published 2026-10-11 ~18:10 UTC: artifact v38 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 267 files; the
+  47 rail morning/evening patches of round 5 removed), Shopify Files `azr6-` (241, all READY, from commit ce706df),
+  draft theme **"Azur Zimmer Runde 6 (Entwurf)" `gid://shopify/OnlineStoreTheme/208975364435`** (a copy of the live
+  theme, now Runde 5 208914973011; section, data snippet and js upserted, checksums match; css and index.json were
+  identical). Preview: https://azurclothing.com/?preview_theme_id=208975364435 · editor:
+  https://admin.shopify.com/store/5vpchz-hd/themes/208975364435/editor. Publishing it is the owner's step; the shop
+  stays password-protected.
 
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
