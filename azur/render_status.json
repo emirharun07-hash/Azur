@@ -1,10 +1,10 @@
 {
-    "state":  "abgeloest",
-    "request":  "r6-1",
+    "state":  "pausiert",
+    "request":  "r6-2",
     "job":  "",
-    "note":  "neuer Auftrag auf dem Branch, dieser wurde bei queue beendet",
+    "note":  "Pause bis 17:45, danach: Runde 6 geht weiter nach 2 Stunden Pause (Wunsch des Inhabers): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
     "watch":  3,
-    "time":  "2026-10-11T13:57:22Z",
+    "time":  "2026-10-11T13:59:26Z",
     "device":  "06:48:07 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "13:08:36 state room night 1 patches, 100% of the picture (region 100%), changed per pass {\u0027sky\u0027: 0.2, \u0027neon\u0027: 0.172, \u0027spot\u0027: 0.172, \u0027street\u0027: 0.893} 2661 s",
