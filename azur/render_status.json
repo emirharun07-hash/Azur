@@ -1,10 +1,10 @@
 {
     "state":  "arbeitet",
     "request":  "r6-2",
-    "job":  "outside",
-    "note":  "outside fertig nach 30.9 min",
+    "job":  "moves",
+    "note":  "Runde 6 geht weiter (Pause auf Wunsch des Inhabers vorzeitig beendet): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
     "watch":  3,
-    "time":  "2026-10-11T15:35:42Z",
+    "time":  "2026-10-11T15:35:45Z",
     "device":  "17:04:52 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "17:33:04 outside rail 64 726 s",
