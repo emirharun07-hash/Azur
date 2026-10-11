@@ -8,6 +8,7 @@
 #         past the window, after queue: it needs the window maps); "queue:room,bed" passes arguments.
 #   rebuild: build the scene again and drop that set's earlier outputs (they belong to the old scene).
 #   redo: outputs to delete first so they render again, as patterns in the set's folder ("views/*/masks*.png").
+#   pause_until_unix: start no earlier than this (UTC seconds); a request with it is how the cloud pauses the PC.
 # A request runs once (its id is remembered in azur/.cache/render_request_done.txt). A newer request stops a running
 # one between two renders. One cut short (the PC switched off) resumes at the next start: no rebuild, no redo, only the
 # jobs that had not finished (and those skip what they already rendered). What the PC is doing goes to
@@ -89,6 +90,20 @@ if (-not (Test-Path "azur\render_request.json")) { return }
 $last = if (Test-Path $DoneFile) { (Get-Content $DoneFile -Raw).Trim() } else { "" }
 $req = Get-Content "azur\render_request.json" -Raw | ConvertFrom-Json
 if (-not $req.id -or $req.id -eq $last) { return }
+
+# a pause: "pause_until_unix" (seconds since 1970, UTC) holds the request back until then. A running request stops
+# for it like for any newer one (between two renders); this one starts by itself when the time has passed.
+if ($req.pause_until_unix -and [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() -lt [int64]$req.pause_until_unix) {
+  $until = [DateTimeOffset]::FromUnixTimeSeconds([int64]$req.pause_until_unix).LocalDateTime.ToString("HH:mm")
+  $cur = $null
+  try { $cur = Get-Content "azur\render_status.json" -Raw | ConvertFrom-Json } catch { }
+  if (-not $cur -or $cur.state -ne "pausiert" -or $cur.request -ne $req.id) {
+    Write-Host ("[{0}] Pause bis {1}, danach geht es mit {2} weiter" -f (Get-Date -Format "HH:mm"), $until, $req.id)
+    Write-Status "pausiert" $req.id "" ("Pause bis $until, danach: " + $req.note)
+    Push-All "AZUR PC: Pause bis $until (dann $($req.id))" | Out-Null
+  }
+  return
+}
 
 # begun before and cut short (the PC was switched off): resume it, without rebuilding or deleting what is done,
 # and without the jobs that already finished. Begun: noted in $StartedFile, or this PC's own commits for it are in

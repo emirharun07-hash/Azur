@@ -1,7 +1,9 @@
 {
-  "id": "r6-1",
-  "note": "Runde 6: Zimmer-Kamera von der Tuer aus (Bett gut sichtbar), drei grosse Fussball-Poster statt der Collage, Schuhe und Rucksack immer im Zimmer, Magazin groesser und lesbar auf der Decke. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+  "id": "r6-2",
+  "note": "Runde 6 geht weiter nach 2 Stunden Pause (Wunsch des Inhabers): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
   "set": "scene3",
-  "rebuild": true,
-  "jobs": ["preview:full,room_day", "preview", "export", "queue", "glow", "outside", "moves"]
+  "rebuild": false,
+  "pause_until": "2026-10-11T15:45:00Z",
+  "pause_until_unix": 1791733500,
+  "jobs": ["queue", "glow", "outside", "moves"]
 }
