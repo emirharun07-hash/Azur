@@ -1,10 +1,10 @@
 {
     "state":  "arbeitet",
     "request":  "r6-2",
-    "job":  "queue",
-    "note":  "queue fertig nach 46.9 min",
+    "job":  "glow",
+    "note":  "Runde 6 geht weiter (Pause auf Wunsch des Inhabers vorzeitig beendet): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
     "watch":  3,
-    "time":  "2026-10-11T15:04:37Z",
+    "time":  "2026-10-11T15:04:39Z",
     "device":  "16:17:48 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "00:02.250  blend            | Read blend: \"C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\azur_room_scene3.blend\"",
