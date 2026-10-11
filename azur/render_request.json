@@ -1,9 +1,7 @@
 {
   "id": "r6-2",
-  "note": "Runde 6 geht weiter nach 2 Stunden Pause (Wunsch des Inhabers): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
+  "note": "Runde 6 geht weiter (Pause auf Wunsch des Inhabers vorzeitig beendet): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
   "set": "scene3",
   "rebuild": false,
-  "pause_until": "2026-10-11T15:45:00Z",
-  "pause_until_unix": 1791733500,
   "jobs": ["queue", "glow", "outside", "moves"]
 }
