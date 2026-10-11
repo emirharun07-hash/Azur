@@ -33,8 +33,8 @@ AZUR.config = {
     room:   { label: 'Zimmer', parallax: 0.010, focus: 0.55, garmentScale: 1.0,
               bedHotspot: [[0.20, 0.83], [0.46, 0.79], [0.53, 1.0], [0.18, 1.0]] },
     rail:   { label: 'Ständer', parallax: 0.014, focus: 0.62, garmentScale: 1.0 },
-    bed:    { label: 'Bett', parallax: 0.012, focus: 0.5, exposure: 0.5, exposureNight: -0.8, ids: false, window: false },   // exposure: extra stops on top of the clock
-                                                                         // (at night the hallway light through the door ajar falls on the bed)
+    bed:    { label: 'Bett', parallax: 0.012, focus: 0.5, ids: false, window: false },
+                // round 6: no view has its own exposure any more (the bed had +0.5 stops, -0.8 at night): one light for all
     rail_m: { label: 'Ständer', parallax: 0.008, focus: 0.62, garmentScale: 1.0, swipe: true }
   },
   startView: { desktop: 'room', mobile: 'rail_m' },
@@ -795,9 +795,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
        the clock moves the light slowly, so this runs a few times a minute instead of every frame. */
     mix(state) {
       const gl = this.gl, v = this.view, W = state.weights;
-      const vc = A.config.views[v.key.split('@')[0]] || {};      // per-view art direction (the bed corner gets less window light)
-      const night = A.app && A.app.dayState === 'night' && vc.exposureNight != null;   // his room at night: the hallway light
-      const exp = state.exposure + (night ? vc.exposureNight : (vc.exposure || 0));
+      const exp = state.exposure;       // one exposure for every view (round 6: it was set per view, the light jumped)
       const q = x => Math.round(x * 400) / 400;
       const key = [v.key, v.version || 0, v.texW, q(exp), q(state.contrast || 1), q(state.saturation || 1), A.config.neonGlow, A.config.neonCore,
         ...PASSES.map(p => (W[p] || [0, 0, 0]).map(q).join(','))].join('|');
@@ -828,6 +826,33 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.useProgram(this.drawP.p);
       gl.bindTexture(gl.TEXTURE_2D, this.lit); gl.generateMipmap(gl.TEXTURE_2D);    // smaller screens: filtered levels
       this.litKey = key;
+    }
+
+    /* A view's picture at this light, averaged as displayed (0..1 per channel): the camera flights grade their frames
+       to it at both ends, so changing the view never changes the light. null when the view's passes are not on the GPU. */
+    meanColor(key, state) {
+      const gl = this.gl, v = this.cache[key];
+      if (!gl || !v || v.mode !== 'passes' || v.evicted || !PASSES.some(p => v.tex[p])) return null;
+      const keep = this.view;
+      this.view = v; this.litKey = null; this.mix(state);
+      // a mip level about 400 px wide: small enough to read, fine enough that averaging sRGB-encoded texels (which
+      // pulls the mean down where light and shade meet) stays small; the flights average their frames alike
+      let lv = 0; while ((this.litW >> (lv + 1)) >= 320) lv++;
+      const lw = Math.max(1, this.litW >> lv), lh = Math.max(1, this.litH >> lv), px = new Uint8Array(lw * lh * 4);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lit, lv);
+      gl.readPixels(0, 0, lw, lh, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      this.view = keep; this.litKey = null;
+      if (keep && keep.mode === 'passes' && !keep.evicted) this.mix(state);
+      return Compositor.meanDisplay(px);
+    }
+    /* Average of RGBA bytes as displayed. The eye judges a jump in light by this, not by linear light: a flight frame
+       with a hard noon sun patch and a view with soft light can have the same linear mean and still read darker. */
+    static meanDisplay(px) {
+      const m = [0, 0, 0], n = px.length / 4;
+      for (let i = 0; i < px.length; i += 4) { m[0] += px[i]; m[1] += px[i + 1]; m[2] += px[i + 2]; }
+      return m.map(x => x / n / 255);
     }
 
     render(state) {
@@ -2570,30 +2595,57 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         sw *= os; sh *= os;
         return [(F.w - sw) * pan, (F.h - sh) / 2, sw, sh, 0, 0, c.width, c.height];
       };
-      const blit = F => { const q = cover(F); ctx.drawImage(F.im, q[0], q[1] + F.y, q[2], q[3], q[4], q[5], q[6], q[7]); };
-      // the views' own exposure (config.views exposure / exposureNight, as the compositor uses it) eases in along the
-      // flight: the frames are rendered at the clock's exposure, so the arrival would jump (the bed at night)
-      const ev = v => { const vc = A.config.views[v] || {}; return this.dayState === 'night' && vc.exposureNight != null ? vc.exposureNight : (vc.exposure || 0); };
-      const lift = k => Math.pow(2, 0.5 * (ev(m.from_) * (1 - k / (n - 1)) + ev(m.to) * k / (n - 1)));
       const canFilter = ctx.filter !== undefined;
-      const draw = k => {
-        ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-        const lk = lift(k);
+      // frame f of the day/evening and night sets, laid over each other by how dark it is, brightened by b; fit: the
+      // plates' crop on the stage canvas, else the whole frame on a small canvas
+      const layers = (x, f, w, h, b, fit) => {
+        const put = F => {
+          if (fit) { const q = cover(F); x.drawImage(F.im, q[0], q[1] + F.y, q[2], q[3], q[4], q[5], q[6], q[7]); }
+          else x.drawImage(F.im, 0, F.y, F.w, F.h, 0, 0, w, h);
+        };
+        x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
         if (day) {
-          if (canFilter && Math.abs(lk - 1) > 0.002) ctx.filter = `brightness(${lk.toFixed(3)})`;
-          blit(day[k]);
-          if (canFilter) ctx.filter = 'none';
-          if (mul !== 'rgb(255,255,255)') { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = mul; ctx.fillRect(0, 0, c.width, c.height); ctx.globalCompositeOperation = 'source-over'; }
+          if (canFilter && Math.abs(b - 1) > 0.002) x.filter = `brightness(${b.toFixed(3)})`;
+          put(day[f]);
+          if (canFilter) x.filter = 'none';
         }
         if (night) {
-          ctx.globalAlpha = day ? mix.night : 1;
-          if (canFilter && Math.abs(nb * lk - 1) > 0.002) ctx.filter = `brightness(${(nb * lk).toFixed(3)})`;
-          blit(night[k]);
-          if (canFilter) ctx.filter = 'none';
-          ctx.globalAlpha = 1;
+          x.globalAlpha = day ? mix.night : 1;
+          if (canFilter && Math.abs(nb * b - 1) > 0.002) x.filter = `brightness(${(nb * b).toFixed(3)})`;
+          put(night[f]);
+          if (canFilter) x.filter = 'none';
+          x.globalAlpha = 1;
         }
       };
       const idx = k => mv.reverse ? n - 1 - k : k;
+      // round 6: the frames carry the light of their set (noon, golden hour, night), the views the light of this hour.
+      // Graded at both ends to the views as the compositor shows them now (their averages), so a change of view never
+      // changes the light: the flight leaves the room and lands at the bed in the same light.
+      const frameMean = f => {
+        const t = this.meanCanvas || (this.meanCanvas = document.createElement('canvas')); t.width = 400; t.height = 225;
+        const x = t.getContext('2d', { willReadFrequently: true });
+        x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';   // ~400 px, as the views are read (meanColor)
+        layers(x, f, 400, 225, 1, false);
+        try { return A.Compositor.meanDisplay(x.getImageData(0, 0, 400, 225).data); } catch (e) { return null; }
+      };
+      const gainOf = (vm, fm) => vm && fm ? vm.map((x, i) => Math.min(2.5, Math.max(0.3, (x + 1e-3) / (fm[i] + 1e-3)))) : null;
+      const from = this.comp.view && this.comp.view.key;
+      const gS = gainOf(from && this.comp.meanColor(from, this.light), frameMean(idx(0)));
+      const gE = gainOf(this.comp.meanColor(to, this.light), frameMean(idx(n - 1))) || gS || [1, 1, 1];
+      const g0 = gS || gE;
+      const gainAt = k => { const t = k / (n - 1); return g0.map((a, i) => Math.pow(a, 1 - t) * Math.pow(gE[i], t)); };
+      this.moveGrade = { start: gS, end: gE };          // for tests (tools/test_room.cjs)
+      const draw = k => {
+        const gk = gainAt(k), gm = Math.max(1, gk[0], gk[1], gk[2]);
+        layers(ctx, idx(k), c.width, c.height, gm, true);
+        const col = gk.map(x => Math.round(Math.min(1, x / gm) * 255));
+        if (mul !== 'rgb(255,255,255)' || col.some(x => x < 255)) {
+          ctx.globalCompositeOperation = 'multiply';
+          if (mul !== 'rgb(255,255,255)') { ctx.fillStyle = mul; ctx.fillRect(0, 0, c.width, c.height); }
+          if (col.some(x => x < 255)) { ctx.fillStyle = `rgb(${col.join(',')})`; ctx.fillRect(0, 0, c.width, c.height); }
+          ctx.globalCompositeOperation = 'source-over';
+        }
+      };
       // garments fly along: the frames are rendered without them, the live garment layer follows the projected
       // hangers frame by frame (moves.json track). Older moves without a track hide the garments instead.
       const tr = !this.plate && m.track && m.track.length === n ? m.track : null;
@@ -2610,7 +2662,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const dropSrc = j => { const v = j / (n - 1) < 0.5 ? m.from_ : m.to; return sb(v) ? A.url(A.config.assetBase + v + '/drop.webp') : null; };
       const fly = k => { if (tr) { const j = idx(k); this.rail.fly(tr[j], proxy, dropAt(j), dropSrc(j)); } };
       // the first frame is the current camera: fade it in
-      draw(idx(0)); c.style.transform = ''; c.hidden = false;
+      draw(0); c.style.transform = ''; c.hidden = false;
       if (tr) { this.world.insertBefore(c, this.layer); c.style.zIndex = '0'; this.root.classList.add('is-flying'); fly(0); }
       else this.layer.classList.add('is-moving');
       await c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
@@ -2618,7 +2670,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const t0 = performance.now();
         const tick = now => {
           const k = Math.max(0, Math.min(n - 1, Math.floor((now - t0) / 1000 * fps)));   // rAF time can precede t0
-          draw(idx(k)); fly(k);
+          draw(k); fly(k);
           if (k < n - 1) requestAnimationFrame(tick); else res();
         };
         requestAnimationFrame(tick);
