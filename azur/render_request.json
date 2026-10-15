@@ -1,7 +1,7 @@
 {
-  "id": "r6-2",
-  "note": "Runde 6 geht weiter (Pause auf Wunsch des Inhabers vorzeitig beendet): restliche Tageszeiten, Leuchten, Blick nach draussen, Kamerafahrten. Schon Gerendertes wird uebersprungen.",
+  "id": "r7-1",
+  "note": "Runde 7: Fussballschuhe (Stil Ende der 60er: schwarzes Leder, cremefarbener Seitenstreifen, braune Senkel) und Rucksack (blaues Leder nach Vorlage) im Detail; Kamerafahrten mit 60 Bildern pro Sekunde und Bewegungsunschaerfe, als Video. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
   "set": "scene3",
-  "rebuild": false,
-  "jobs": ["queue", "glow", "outside", "moves"]
+  "rebuild": true,
+  "jobs": ["preview:full,room_day", "preview", "export", "queue", "glow", "outside", "moves"]
 }
