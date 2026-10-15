@@ -354,6 +354,31 @@ on every device without losing quality.
   https://admin.shopify.com/store/5vpchz-hd/themes/208975364435/editor. Publishing it is the owner's step; the shop
   stays password-protected.
 
+## Round 7 (owner 2026-10-15: everything too shaky and not smooth; more detail on the boots and the backpack)
+
+- Flights (`scene/render_moves.py`): 60 frames a second (72 frames, 1.2 s) with Cycles motion blur (the camera is
+  keyframed per frame, shutter 0.5) and a fixed noise seed; one calm path: the position eases along a straight line
+  (no rise), the view turns by quaternion slerp, the lens changes on a log scale (round 6: the eye led the body and the
+  lens changed linearly, the picture swam). Frames stay on the PC (`.cache/moves/<set>`, cleared on a rebuild); each
+  move and light set becomes `<f|e|n>.mp4/.webm` plus `_r` (the way back), moves.json gets `video: true` and the
+  average colour of the first and last frames (`ends`). Progress: `moves/progress.json` every 12 frames.
+- Browser: `playVideoMove` plays the video in a layer over the stage with the plates' crop (pan, overscan), graded at
+  both ends to the views (round 6 light rule) with a CSS brightness and a multiplied tint, animated over the flight.
+  The set for the hour (day / golden hour / night) preloads 6 s after the start and when the time of day changes;
+  a flight whose video is not buffered yet falls back to the soft blend. `build_artifact.py` and `build_theme.py`
+  copy the videos (no strips).
+- Live view: half the parallax (follows the pointer by time, frame-rate independent), no cloth ripple, no idle sway
+  (it re-rendered at 30 fps), a smaller swing that settles faster; jerseys only move when touched.
+- Boots (`scene/props.py`): a late-sixties leather boot after the owner's reference (the black boot with the white
+  side stripe and brown laces): a lofted last with the foot opening and lace slot cut by a boolean (lined dark), padded
+  collar, tongue, punched eyelets, flat brown laces criss-crossed with a bow (one boot's ends on the floor), stitched
+  vamp and heel seams, a cream side stripe of our own shape (even width, rounded ends, stitched; not the maker's stripe,
+  no name, no signature), a cream sole plate with ten screw-in studs.
+- Backpack (`scene/props.py`): after the owner's reference (Jafferjees "IST", 30 x 16 x 47 cm): a soft navy-blue
+  leather box with a rounded top, brass zip over the top and down both sides with two pulls, a stitched seam and a
+  zipped pocket on the front, a leather top handle, padded shoulder straps with brass buckles; it stands on the rug.
+- Nothing in props.py uses `random`, so the rest of the room builds exactly as before.
+
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
 - Preview render 960×540: about 1.5 min (incl. cloth simulation)

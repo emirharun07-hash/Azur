@@ -1,7 +1,8 @@
 """Assemble the prototype for publishing as a Claude Artifact: one page plus its files, within the file limits.
 
-An artifact version holds at most 511 files, and camera moves are hundreds of frames. This packs each move's frames
-into a few vertical strips (moves.json gets "atlas": {"per": n}; azur-app.js reads both layouts) and copies only
+An artifact version holds at most 511 files, and camera moves were hundreds of frames. This packs each move's frames
+into a few vertical strips (moves.json gets "atlas": {"per": n}; azur-app.js reads both layouts); round 7 flights are
+videos (moves.json "video": true) and are copied as they are. It copies only
 the scene set the page uses. scene3: every light pass also gets a half-size copy (views/<view>/lo/, passes.json
 "_lo": true): the page starts on those and swaps in the full plates once it runs.
 
@@ -32,6 +33,15 @@ def pack_moves(set_dir):
     if not os.path.exists(mpath): return
     moves = json.load(open(mpath)); out = {}
     for name, m in moves.items():
+        if m.get('video'):                     # round 7: the flights are videos, copied as they are
+            files = [f"{PRE[v]}{r}.{x}" for v in m.get('variants', ['day']) for r in ('', '_r') for x in ('mp4', 'webm')]
+            if not all(os.path.exists(os.path.join(src, name, f)) for f in files):
+                print('skip (videos missing):', name); continue
+            for f in files:
+                dst = os.path.join(OUT, set_dir, 'moves', name, f); os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.copy2(os.path.join(src, name, f), dst)
+            out[name] = {k: v for k, v in m.items() if k != 'track'}
+            continue
         n = m['frames']; variants = m.get('variants', ['day'])
         frames = {v: [os.path.join(src, name, f"{PRE[v]}{i:03d}.webp") for i in range(n)] for v in variants}
         if not all(os.path.exists(f) for fs in frames.values() for f in fs):

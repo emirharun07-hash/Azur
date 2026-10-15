@@ -28,12 +28,13 @@ AZUR.config = {
   /* Views = camera positions rendered in Blender (scene/render_queue.py). Positions of hangers, window and
      bed come from assets/views/views.json; the values here are art direction on top of that. */
   views: {
-    room:   { label: 'Zimmer', parallax: 0.010, focus: 0.55, garmentScale: 1.0,
+    // round 7 (the owner: "zu wackelig"): half the parallax; the room shifts gently instead of bending at depth edges
+    room:   { label: 'Zimmer', parallax: 0.005, focus: 0.55, garmentScale: 1.0,
               bedHotspot: [[0.20, 0.83], [0.46, 0.79], [0.53, 1.0], [0.18, 1.0]] },
-    rail:   { label: 'Ständer', parallax: 0.014, focus: 0.62, garmentScale: 1.0 },
-    bed:    { label: 'Bett', parallax: 0.012, focus: 0.5, ids: false, window: false },
+    rail:   { label: 'Ständer', parallax: 0.006, focus: 0.62, garmentScale: 1.0 },
+    bed:    { label: 'Bett', parallax: 0.005, focus: 0.5, ids: false, window: false },
                 // round 6: no view has its own exposure any more (the bed had +0.5 stops, -0.8 at night): one light for all
-    rail_m: { label: 'Ständer', parallax: 0.008, focus: 0.62, garmentScale: 1.0, swipe: true }
+    rail_m: { label: 'Ständer', parallax: 0.004, focus: 0.62, garmentScale: 1.0, swipe: true }
   },
   startView: { desktop: 'room', mobile: 'rail_m' },
   /* Hover outlines (scene3 glow.png) and the white dots that invite a click: where each view can go. */
@@ -68,9 +69,11 @@ AZUR.config = {
     select: { lift: 0.06, forward: 0.16, turnDeg: -24, push: 0.42, dimRoom: 0.62, blurRoom: 2.5 },
     labelDelay: 90,
     /* scene3: the jerseys in the render swing on their hooks (degrees, per second); ripple = cloth wave in plate px */
-    sway: { stiffness: 9, damping: 1.5, maxDeg: 2.6, hoverKick: 2.2, leaveKick: 1.0, brush: 0.00025, clickKick: 4.5, idleDeg: 0.22, ripple: 2.4, neighbour: 0.35 },
+    /* round 7: calmer, no jelly: no cloth ripple, no idle breathing (it ran at 30 fps), a smaller swing that settles
+       quickly; the jerseys only move when touched */
+    sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, idleDeg: 0, ripple: 0, neighbour: 0.3 },
     pan: { outMs: 520, inMs: 820, zoom: 1.32, blurPx: 14, drift: 0.04 },   // fake camera move between views
-    parallaxEase: 0.06        // how fast the room follows the pointer
+    parallaxEase: 3.5         // how fast the room follows the pointer (per second; round 7: by time, not per frame)
   },
   interactionStrength: 1.0,
 

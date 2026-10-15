@@ -9,29 +9,37 @@ crossfades them by how dark it is. Day frames of every move render first, so a u
 
 Usage:  python3 azur/scene/render_moves.py              (all moves, resumable)
         python3 azur/scene/render_moves.py room-rail    (one move)
-Env:    AZUR_MOVES_FRAMES=36  AZUR_MOVES_SAMPLES=48  AZUR_MOVES_RES=1280x720  AZUR_MOVES_OUT=<dir> (tests)
-Rough cost on this 4-core CPU: ~1.5 min per frame, so 36 frames ~ 1 h per move and variant.
+Env:    AZUR_MOVES_FPS=60  AZUR_MOVES_FRAMES=72  AZUR_MOVES_SAMPLES=128  AZUR_MOVES_RES=1920x1080  AZUR_MOVES_OUT=<dir> (tests)
+Round 7: scene3 moves render 72 frames (1.2 s at 60 fps) with motion blur and become videos: <variant>.mp4/.webm and
+<variant>_r.mp4/.webm (the way back) per move; moves.json has the average colour of the first and last frames.
+On the owner's PC about 35 s a frame, ~45 min per move and variant.
 
 scene3: no pull moves (a click opens the product view right away); three variants that match the times of day, each
 with that state's objects: 'day' (midday light, also used in the morning), 'evening' (golden hour) and 'night'.
 """
-import os, sys, json, math, time
+import os, sys, json, math, time, subprocess
 import bpy
 from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import render_queue as rq   # reuses scene loading, views, light setup and git saving
 
-FRAMES = int(os.environ.get('AZUR_MOVES_FRAMES', 36))
+# round 7 (the owner: "zu wackelig, nicht flüssig genug"): 60 frames a second with motion blur, one calm path (the
+# position eases along a straight line, the view turns by slerp, the lens zooms evenly), the frames encoded as video
+# (H.264 + VP9, forward and reversed: smooth, hardware-decoded playback, lighter than image strips). The PNG frames
+# stay on this machine (.cache/moves); only the videos and moves.json go up.
+FPS = int(os.environ.get('AZUR_MOVES_FPS', 60 if rq.HI else 30))
+FRAMES = int(os.environ.get('AZUR_MOVES_FRAMES', round(1.2 * FPS)))
 SAMPLES = int(os.environ.get('AZUR_MOVES_SAMPLES', 128 if rq.HI else 48))   # round 5: 48 smeared in the shade
 RES = tuple(int(x) for x in os.environ.get('AZUR_MOVES_RES', '1920x1080' if rq.HI else '1280x720').split('x'))
 VARIANTS = ('day', 'evening', 'night') if rq.HI else ('day', 'night')
 STATE_OF = {'day': 'day', 'evening': 'evening', 'night': 'night'}
 OUT = os.environ.get('AZUR_MOVES_OUT') or os.path.join(rq.ROOT, 'prototype', 'assets', rq.SET, 'moves')
+FRAMES_DIR = os.environ.get('AZUR_MOVES_FRAMES_DIR') or os.path.join(rq.ROOT, '.cache', 'moves', rq.SET)
 PULL_FRAMES = int(os.environ.get('AZUR_PULL_FRAMES', 14))
 MOVES = {
-    'room-rail': dict(a='room', b='rail', lift=0.18),     # the camera rises a little mid-flight, like a person stepping in
-    'room-bed':  dict(a='room', b='bed', lift=0.08),
+    'room-rail': dict(a='room', b='rail', lift=0.0),     # round 7: no rise mid-flight (the doorway camera is high already)
+    'room-bed':  dict(a='room', b='bed', lift=0.0),
 }
 # a chosen garment is taken off the rail toward the camera (camera stays): 'rail-rail@2' = view rail to view rail@2
 PULL_RES = {'rail': (1280, 720), 'rail_m': (720, 800)}
@@ -44,13 +52,20 @@ def ease(t):          # smooth start and stop
     return t * t * t * (t * (6 * t - 15) + 10)
 
 
+def view_quat(v):
+    V = rq.VIEWS[v]
+    return (Vector(V['target']) - Vector(V['loc'])).to_track_quat('-Z', 'Y')
+
+
 def camera_at(a, b, t, lift):
+    """One easing for everything: the camera glides from view a to view b, turns by slerp and zooms evenly (the
+    lens on a log scale). Round 6 and before: the eye led the body and the lens changed linearly, the picture swam."""
     A, B = rq.VIEWS[a], rq.VIEWS[b]
     e = ease(t)
     loc = Vector(A['loc']).lerp(Vector(B['loc']), e) + Vector((0, 0, lift * math.sin(math.pi * e)))
-    tgt = Vector(A['target']).lerp(Vector(B['target']), ease(min(1, t * 1.15)))   # the eye leads the body slightly
-    lens = A['lens'] + (B['lens'] - A['lens']) * e
-    return loc, tgt, lens
+    rot = view_quat(a).slerp(view_quat(b), e)
+    lens = A['lens'] * (B['lens'] / A['lens']) ** e
+    return loc, rot, lens
 
 
 def srgb2lin(c): return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
@@ -107,6 +122,44 @@ def drop_box(sc, cam, objs):
     return [round(min(xs), 4), round(min(ys), 4), round(max(xs), 4), round(max(ys), 4)]
 
 
+def frame_mean(png):
+    """Average colour of a frame as the browser reads it (sRGB 0..1 at ~400 px): grades the flight to the views."""
+    from PIL import Image
+    import numpy as np
+    a = np.asarray(Image.open(png).convert('RGB').resize((400, 225), Image.BILINEAR), dtype=np.float64) / 255.0
+    return [round(float(x), 5) for x in a.reshape(-1, 3).mean(0)]
+
+
+def encode(src_dir, prefix, base):
+    """PNG frames -> <base>.mp4/.webm and the way back <base>_r.mp4/.webm."""
+    import imageio_ffmpeg
+    ff = imageio_ffmpeg.get_ffmpeg_exe(); src = os.path.join(src_dir, prefix + '%03d.png'); out = []
+    for rev in (False, True):
+        vf = ('reverse,' if rev else '') + 'format=yuv420p'
+        b = base + ('_r' if rev else '')
+        subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libx264', '-preset', 'slow',
+                        '-crf', '19', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', b + '.mp4'], check=True)
+        subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p',
+                        '-b:v', '0', '-crf', '31', '-row-mt', '1', '-an', b + '.webm'], check=True)
+        out += [b + '.mp4', b + '.webm']
+    return out
+
+
+def keyframe_camera(sc, cam, spec, frames):
+    """The whole path as keyframes (one per frame, linear between): Cycles takes the motion blur from it."""
+    prefs = bpy.context.preferences.edit; keep = prefs.keyframe_new_interpolation_type
+    prefs.keyframe_new_interpolation_type = 'LINEAR'
+    cam.animation_data_clear(); cam.data.animation_data_clear()
+    cam.rotation_mode = 'QUATERNION'
+    for i in range(frames):
+        loc, rot, lens = camera_at(spec['a'], spec['b'], i / (frames - 1), spec['lift'])
+        cam.location = loc; cam.rotation_quaternion = rot; cam.data.lens = lens
+        cam.keyframe_insert('location', frame=i); cam.keyframe_insert('rotation_quaternion', frame=i)
+        cam.data.keyframe_insert('lens', frame=i)
+    prefs.keyframe_new_interpolation_type = keep
+    sc.render.fps = FPS; sc.frame_start, sc.frame_end = 0, frames - 1
+
+
 def render_move(sc, name, spec, variant):
     d = os.path.join(OUT, name); os.makedirs(d, exist_ok=True)
     prefix = {'day': 'f', 'night': 'n', 'evening': 'e'}[variant]
@@ -121,38 +174,57 @@ def render_move(sc, name, spec, variant):
         res = RES
     sc.render.resolution_x, sc.render.resolution_y = res
     cam = sc.camera; cd = cam.data
-    if not pull: cd.sensor_fit = 'AUTO'; cd.sensor_width = 36
-    saved = []; track = []
+    video = not pull
+    if video:
+        cd.sensor_fit = 'AUTO'; cd.sensor_width = 36
+        keyframe_camera(sc, cam, spec, frames)
+        sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = 0.5
+        sc.cycles.seed = 0; sc.cycles.use_animated_seed = False      # the same noise every frame: the denoiser holds still
+        fdir = os.path.join(FRAMES_DIR, name); os.makedirs(fdir, exist_ok=True)
+        base = os.path.join(d, prefix)
+        done = all(os.path.exists(base + x) for x in ('.mp4', '.webm', '_r.mp4', '_r.webm'))
+    saved = []; track = []; t0 = time.time()
     for i in range(frames):
-        dst = os.path.join(d, f'{prefix}{i:03d}.webp')
         t = i / (frames - 1)
         posed = None
         if pull:
             posed = rq.pose_garment(pull[0], pull[1], rq.ease(t))
+            dst = os.path.join(d, f'{prefix}{i:03d}.webp')
         else:
-            loc, tgt, lens = camera_at(spec['a'], spec['b'], t, spec['lift'])
-            cam.location = loc; cd.lens = lens
-            cam.rotation_euler = (tgt - loc).to_track_quat('-Z', 'Y').to_euler()
-            cd.dof.focus_distance = (rq.FOCUS - loc).length
+            sc.frame_set(i)
+            cd.dof.focus_distance = (rq.FOCUS - cam.matrix_world.translation).length
+            dst = os.path.join(fdir, f'{prefix}{i:03d}.png')
         bpy.context.view_layer.update()
         slots, neon = rq.project_slots(sc, cam); track.append(dict(slots=slots, neon=neon, drop=drop_box(sc, cam, drops)))
-        if os.path.exists(dst):
+        if (video and done) or os.path.exists(dst):
             if posed: rq.unpose(posed)
             continue
         png = dst.replace('.webp', '.png')
         try: secs = rq.render_to(sc, png)
         finally:
             if posed: rq.unpose(posed)
-        rq.to_webp(png, dst, q=88 if rq.HI else 80)
+        if pull:
+            rq.to_webp(png, dst, q=88 if rq.HI else 80); saved.append(dst)
         rq.stop_if_superseded()
-        rq.log('move', name, variant, i, secs, 's'); saved.append(dst)
-        if len(saved) >= 6:                     # commit in small batches
+        rq.log('move', name, variant, i, secs, 's')
+        if pull and len(saved) >= 6:
             rq.git_save(saved, f'AZUR move {name} ({variant}): frames up to {i}'); saved = []
+        elif video and (i + 1) % 12 == 0:                 # progress for the cloud (the frames stay here)
+            pj = os.path.join(OUT, 'progress.json')
+            json.dump(dict(move=name, variant=variant, frame=i + 1, of=frames, minutes=round((time.time() - t0) / 60, 1)), open(pj, 'w'))
+            rq.git_save([pj], f'AZUR move {name} ({variant}): {i + 1} of {frames} frames')
     meta = os.path.join(OUT, 'moves.json')
     m = json.load(open(meta)) if os.path.exists(meta) else {}
     e = m.setdefault(name, {})
-    e.update(from_=spec['a'], to=spec['b'], frames=frames, fps=30, res=list(res), track=track)
+    e.update(from_=spec['a'], to=spec['b'], frames=frames, fps=FPS if video else 30, res=list(res), track=track)
     if pull: e['kind'] = 'pull'
+    if video:
+        if not done: saved += encode(fdir, prefix, base)
+        e['video'] = True
+        e.setdefault('ends', {})[prefix] = dict(first=frame_mean(os.path.join(fdir, f'{prefix}000.png')),
+                                                last=frame_mean(os.path.join(fdir, f'{prefix}{frames - 1:03d}.png')))
+        cam.animation_data_clear(); cd.animation_data_clear(); cam.rotation_mode = 'XYZ'
+        sc.render.use_motion_blur = False
     e['variants'] = sorted(set(e.get('variants', [])) | {variant})
     json.dump(m, open(meta, 'w'), indent=1)
     rq.git_save(saved + [meta], f'AZUR move {name} ({variant}): complete')

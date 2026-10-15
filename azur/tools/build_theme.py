@@ -84,7 +84,7 @@ def build_data():
     moves = json.load(open(mp)) if os.path.exists(mp) else {}
     slim = {}
     for name, m in moves.items():
-        keep = {k: m[k] for k in ('frames', 'fps', 'res', 'variants', 'atlas', 'from_', 'to', 'kind') if k in m}
+        keep = {k: m[k] for k in ('frames', 'fps', 'res', 'variants', 'atlas', 'from_', 'to', 'kind', 'video', 'ends') if k in m}
         if m.get('track'): keep['track'] = [{'slots': m['track'][-1].get('slots')}]   # a pulled garment's final place
         slim[name] = keep
     data = {v + 'views.json': views, v + 'passes.json': passes, f'assets/{SET}/moves/moves.json': slim}
@@ -116,8 +116,8 @@ def build_files():
     strips = os.path.join(PUB, f'assets/{SET}/moves')
     for dp, _, fs in os.walk(strips):
         for f in sorted(fs):
-            if not f.endswith('.webp'): continue
-            rel = os.path.relpath(os.path.join(dp, f), PUB)                 # assets/scene3/moves/<move>/<strip>
+            if not f.endswith(('.webp', '.mp4', '.webm')): continue
+            rel = os.path.relpath(os.path.join(dp, f), PUB)                 # assets/scene3/moves/<move>/<strip or video>
             dst = os.path.join(OUT, 'files', os.path.relpath(rel, f'assets/{SET}'))
             os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy2(os.path.join(PUB, rel), dst)
             out.append((files_name(rel), RAW + 'azur/' + os.path.relpath(dst, ROOT)))

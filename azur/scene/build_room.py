@@ -903,75 +903,13 @@ for lx in (0.16,):
     ch.append(box('cback', lx - 0.004, lx + 0.03, -0.155, 0.16, 0.72, 0.84, pine, 0.003))   # between the posts
 group('chair', ch, loc=(0.88, 2.47, 0), rot_z=math.radians(9))        # pulled out from the desk, facing it (round 4: clear of the desk legs)
 
-# football boots: dropped by the bed, one on its side (metaball upper, rubber soleplate, studs)
-def boot(name, loc, rot, tilt=0.0):
-    """Football boot, lofted from cross-sections heel to toe: black synthetic upper with an azure side stripe,
-    white laces over the instep, a dark collar opening, grey sole plate with conical studs (no real brand)."""
-    L, N = 0.27, 28                      # length (kid's size), points per ring
-    secs = [  # t (heel 0 .. toe 1), half width, height of the upper
-        (0.00, 0.026, 0.085), (0.04, 0.033, 0.098), (0.12, 0.036, 0.100), (0.24, 0.038, 0.088), (0.36, 0.041, 0.078),
-        (0.50, 0.045, 0.068), (0.64, 0.047, 0.056), (0.76, 0.046, 0.045), (0.86, 0.041, 0.036), (0.94, 0.031, 0.027),
-        (0.985, 0.017, 0.018), (1.0, 0.004, 0.010)]
-    bm = bmesh.new(); rings = []
-    for t, hw, hh in secs:
-        ring = []
-        for j in range(N):
-            a = 2 * math.pi * j / N
-            ca, sa = math.cos(a), math.sin(a)
-            x = hw * math.copysign(abs(ca) ** 0.7, ca)
-            z = hh * math.copysign(abs(sa) ** 0.8, sa) if sa > 0 else 0.004 * sa     # flat bottom
-            ring.append(bm.verts.new((x, -0.12 + t * L, 0.016 + z)))
-        rings.append(ring)
-    for r0, r1 in zip(rings, rings[1:]):
-        for j in range(N):
-            bm.faces.new((r0[j], r0[(j + 1) % N], r1[(j + 1) % N], r1[j]))
-    bm.faces.new(list(reversed(rings[0]))); bm.faces.new(rings[-1])
-    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
-    up = link(bpy.data.objects.new(name, me))
-    up.modifiers.new('sub', 'SUBSURF').levels = 2
-    for p_ in me.polygons: p_.use_smooth = True
-    # upper material: black synthetic with clear coat, azure stripe along the side (object coordinates)
-    m = bpy.data.materials.new(name + '_upper'); m.use_nodes = True; nt = m.node_tree; Nn = nt.nodes; b = Nn['Principled BSDF']
-    tc = Nn.new('ShaderNodeTexCoord'); sep = Nn.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sep.inputs[0])
-    def band(src, lo, hi, soft=0.004):
-        g1 = Nn.new('ShaderNodeMapRange'); g1.inputs['From Min'].default_value = lo - soft; g1.inputs['From Max'].default_value = lo + soft
-        g2 = Nn.new('ShaderNodeMapRange'); g2.inputs['From Min'].default_value = hi + soft; g2.inputs['From Max'].default_value = hi - soft
-        nt.links.new(src, g1.inputs['Value']); nt.links.new(src, g2.inputs['Value'])
-        mm = Nn.new('ShaderNodeMath'); mm.operation = 'MULTIPLY'; nt.links.new(g1.outputs[0], mm.inputs[0]); nt.links.new(g2.outputs[0], mm.inputs[1]); return mm.outputs[0]
-    zb = band(sep.outputs['Z'], 0.038, 0.050); yb = band(sep.outputs['Y'], -0.02, 0.07, 0.02)
-    mk = Nn.new('ShaderNodeMath'); mk.operation = 'MULTIPLY'; nt.links.new(zb, mk.inputs[0]); nt.links.new(yb, mk.inputs[1])
-    mix = Nn.new('ShaderNodeMix'); mix.data_type = 'RGBA'; mix.inputs[6].default_value = (0.012, 0.012, 0.015, 1); mix.inputs[7].default_value = (0.0, 0.42, 0.85, 1)
-    nt.links.new(mk.outputs[0], mix.inputs['Factor']); nt.links.new(mix.outputs[2], b.inputs['Base Color'])
-    b.inputs['Roughness'].default_value = 0.38; b.inputs['Coat Weight'].default_value = 0.45; b.inputs['Coat Roughness'].default_value = 0.2
-    up.data.materials.append(m)
-    parts = [up]
-    # collar opening (dark, slightly sunken) and a padded rim
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=1.0, location=(0, -0.075, 0.016 + 0.099))
-    op = bpy.context.object; op.name = name + '_opening'; op.scale = (0.024, 0.042, 0.006); bpy.ops.object.shade_smooth()
-    op.data.materials.append(flat('boot_inside', (0.006, 0.006, 0.007), rough=0.9)); parts.append(op)
-    bpy.ops.mesh.primitive_torus_add(major_radius=1.0, minor_radius=0.12, location=(0, -0.075, 0.016 + 0.1))
-    rim = bpy.context.object; rim.name = name + '_collar'; rim.scale = (0.027, 0.046, 0.06); bpy.ops.object.shade_smooth()
-    rim.data.materials.append(m); parts.append(rim)
-    # sole plate and studs
-    sole = box(name + '_sole', -0.044, 0.044, -0.122, 0.148, 0.004, 0.018, flat('sole', (0.55, 0.56, 0.58), rough=0.4), 0.008)
-    parts.append(sole)
-    for sx, sy in [(-0.026, -0.095), (0.026, -0.095), (-0.022, -0.055), (0.022, -0.055), (-0.03, 0.03), (0.03, 0.035),
-                   (-0.03, 0.075), (0.03, 0.08), (-0.02, 0.115), (0.02, 0.118), (0.0, 0.135)]:
-        bpy.ops.mesh.primitive_cone_add(vertices=12, radius1=0.0075, radius2=0.004, depth=0.013, location=(sx, sy, -0.0025))
-        st = bpy.context.object; st.name = name + '_stud'; st.rotation_euler = (math.pi, 0, 0); st.data.materials.append(M['rubber']); parts.append(st)
-    lace_m = flat('lace', (0.92, 0.92, 0.9), rough=0.7)
-    for i in range(6):   # laces across the instep, following the top of the upper
-        t = 0.36 + i * 0.07; yy = -0.12 + t * L
-        hh = 0.078 - (t - 0.36) * 0.16
-        parts.append(cyl(name + '_lace', (-0.022, yy, 0.016 + hh - 0.002), (0.022, yy + 0.004, 0.016 + hh - 0.002), 0.0028, lace_m, verts=8))
-    r = group(name + '_root', parts, loc=loc, rot_z=rot)
-    r.rotation_euler = (0, tilt, rot)
-    return r
-# (round 4: off the duvet that spills onto the floor; the scene check found them inside it)
-# round 6: always in the room, kicked off next to the ball where the doorway camera sees them (they were by the bed,
-# at the bottom edge of that view, and away in the day)
-boot('boot_l', (2.50, 2.02, 0.012), math.radians(-35))
-boot('boot_r', (2.68, 1.89, 0.05), math.radians(60), tilt=math.radians(-80))
+# football boots (round 7: modelled in detail in props.py, after a late-sixties black leather boot with a white side
+# stripe and brown laces; no maker's marks). Round 6: always in the room, kicked off next to the ball where the
+# doorway camera sees them.
+import props
+props.LINK = link
+rest_on(props.boot('boot_l', (2.50, 2.02, 0.0), math.radians(-35)), 0.0)
+rest_on(props.boot('boot_r', (2.68, 1.89, 0.0), math.radians(60), tilt=math.radians(-80), mirror=True, lace_ends='short'), 0.0)
 
 # training bag on the floor at the foot of the bed
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.15, depth=0.42, location=(0, 0, 0))
@@ -1134,30 +1072,9 @@ pz, _ = surface_z(0.55, 0.62)
 phone = box('phone', -0.036, 0.036, -0.075, 0.075, 0.0, 0.008, flat('phone', (0.02, 0.02, 0.025), rough=0.12, **{'Coat Weight': 0.8}), 0.006)
 phone.location = (0.55, 0.62, pz + 0.002); phone.rotation_euler = (math.radians(3), math.radians(-4), math.radians(35)); tag(phone, 'morning')
 
-# evening (and still there at night): the school backpack dropped by the desk, exercise books slid out of it
-def backpack(loc, rot_z):
-    bpy.ops.mesh.primitive_cube_add(size=1.0)
-    bp = bpy.context.object; bp.name = 'backpack'; bp.scale = (0.30, 0.15, 0.40); bp.location = (0, 0, 0.20); apply_tf(bp)
-    bv = bp.modifiers.new('bev', 'BEVEL'); bv.width = 0.05; bv.segments = 5
-    bp.modifiers.new('sub', 'SUBSURF').levels = 2
-    tx = bpy.data.textures.new('packslump', 'CLOUDS'); tx.noise_scale = 0.15
-    dm = bp.modifiers.new('disp', 'DISPLACE'); dm.texture = tx; dm.strength = 0.02
-    bpy.ops.object.shade_smooth()
-    mat = fabric('backpack', (0.012, 0.03, 0.075), sheen=0.12, rough=0.75, scale=60)   # round 6: navy (the green read mint in the sun)
-    bp.data.materials.append(mat)
-    bpy.ops.mesh.primitive_cube_add(size=1.0)
-    pk = bpy.context.object; pk.name = 'backpack_pocket'; pk.scale = (0.22, 0.06, 0.18); pk.location = (0, -0.09, 0.14); apply_tf(pk)
-    pk.modifiers.new('bev', 'BEVEL').width = 0.03; pk.modifiers.new('sub', 'SUBSURF').levels = 2; bpy.ops.object.shade_smooth()
-    pk.data.materials.append(mat)
-    hd = bpy.data.curves.new('pack_handle', 'CURVE'); hd.dimensions = '3D'; hd.bevel_depth = 0.008
-    spx = hd.splines.new('BEZIER'); spx.bezier_points.add(2)
-    for i, pt in enumerate([(-0.04, 0.02, 0.39), (0.0, 0.03, 0.44), (0.04, 0.02, 0.39)]):
-        bpt = spx.bezier_points[i]; bpt.co = pt; bpt.handle_left_type = bpt.handle_right_type = 'AUTO'
-    ho = link(bpy.data.objects.new('pack_handle', hd)); ho.data.materials.append(flat('webbing', (0.02, 0.02, 0.02), rough=0.8))
-    root = group('backpack_root', [bp, pk, ho], loc=loc, rot_z=rot_z)
-    root.rotation_euler = (math.radians(-14), 0, rot_z)          # leaning back against nothing, half tipped
-    return root
-backpack((1.48, 2.42, 0.008), math.radians(20))      # round 6: always there (was at school in the day)
+# the backpack by the desk (round 6: always there), exercise books slid out of it in the evening. Round 7: a navy
+# leather backpack after the owner's reference (props.py), standing, a little slumped.
+rest_on(props.backpack('backpack', (1.48, 2.42, 0.0), math.radians(20)), 0.008)
 for i, (x, y, rz, hcol) in enumerate([(1.72, 2.24, 18, (0.75, 0.2, 0.15)), (1.84, 2.42, -30, (0.15, 0.32, 0.55)), (1.66, 2.66, 64, (0.9, 0.85, 0.25))]):
     hb = box('floor_heft', -0.105, 0.105, -0.148, 0.148, 0.0, 0.006, flat('heft', hcol, rough=0.6), 0.001)
     hb.location = (x, y, 0.009 + i * 0.0002); hb.rotation_euler = (0, 0, math.radians(rz)); tag(hb, 'evening night')

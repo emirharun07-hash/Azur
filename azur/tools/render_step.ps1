@@ -131,6 +131,7 @@ if ($req.rebuild -and -not $resume) {
     # outputs of the old scene would be skipped as "done": remove them (they come back from the new scene)
     Remove-Item -Recurse -Force ("azur\prototype\assets\" + $env:AZUR_SET) -ErrorAction SilentlyContinue
     Remove-Item -Recurse -Force ("$Cache\exr\" + $env:AZUR_SET) -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force ("$Cache\moves\" + $env:AZUR_SET) -ErrorAction SilentlyContinue   # round 7: flight frames
   }
 }
 if ($req.redo -and -not $resume) {

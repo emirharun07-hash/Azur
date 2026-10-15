@@ -104,6 +104,7 @@
       this.comp.render(this.light); this.placeChrome(); this.setTease(); this.kick();
       if (fade) { await this.snap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in-out' }).finished.catch(() => { }); this.snap.hidden = true; }
       this.stateBusy = false;
+      if (this.root.classList.contains('is-ready')) this.preloadMoves();      // the flights of this time of day
     }
 
     /* The line under the bed view: at night the magazine has slid off the duvet onto the floor. */
@@ -258,11 +259,53 @@
       }
       return this.moveFrames[key];
     }
+    /* round 7: flights as video (render_moves.py: 60 frames a second, motion blur; <set>.mp4/.webm forward and
+       <set>_r the way back). One set for the hour: day, golden hour or night, graded to the views at both ends. */
+    flightPrefix(name) {
+      const m = this.moves[name], mix = this.moveMix(), have = v => (m.variants || []).includes(v);
+      if (mix.night > 0.5 && have('night')) return 'n';
+      return mix.base === 'evening' && have('evening') ? 'e' : have('day') ? 'f' : have('night') ? 'n' : null;
+    }
+    moveVideo(name, pre, rev) {
+      const key = `${name}:${pre}${rev ? '_r' : ''}`; this.moveVids = this.moveVids || {};
+      if (!this.moveVids[key]) {
+        const base = A.config.assetBase.replace(/views\/$/, 'moves/') + name + '/' + pre + (rev ? '_r' : '');
+        const vid = document.createElement('video');
+        Object.assign(vid, { muted: true, playsInline: true, preload: 'auto' });
+        vid.setAttribute('muted', ''); vid.setAttribute('playsinline', ''); vid.setAttribute('aria-hidden', 'true');
+        [[base + '.mp4', 'video/mp4'], [base + '.webm', 'video/webm']].forEach(([f, t]) => {
+          const so = document.createElement('source'); so.src = A.url(f); so.type = t; vid.appendChild(so); });
+        Object.assign(vid.style, { position: 'absolute', left: '0', top: '0', transformOrigin: '0 0', maxWidth: 'none' });
+        vid.load(); this.moveVids[key] = vid;
+      }
+      return this.moveVids[key];
+    }
+    videoReady(vid) {
+      if (!vid || vid.error) return false;
+      if (vid.readyState >= 4) return true;
+      try { return vid.readyState >= 2 && vid.buffered.length > 0 && vid.duration > 0 && vid.buffered.end(vid.buffered.length - 1) >= vid.duration - 0.05; }
+      catch (e) { return false; }
+    }
+    flightLayer() {
+      if (!this.flightBox) {
+        const box = document.createElement('div'); box.className = 'azur-flight'; box.hidden = true; box.setAttribute('aria-hidden', 'true');
+        Object.assign(box.style, { position: 'absolute', inset: '0', overflow: 'hidden', zIndex: '30', pointerEvents: 'none' });
+        const tint = document.createElement('div');
+        Object.assign(tint.style, { position: 'absolute', inset: '0', mixBlendMode: 'multiply', backgroundColor: 'rgb(255,255,255)' });
+        box.appendChild(tint); this.snap.after(box); this.flightBox = box; this.flightTint = tint;
+      }
+      return this.flightBox;
+    }
     preloadMoves() {
       if (A.config.realMoves === false) return;
       const mix = this.moveMix(), base = A.config.assetBase;
       Object.keys(this.moves || {}).forEach(name => {
         if (this.isMobile !== name.startsWith('rail_m-')) return;
+        if (this.moves[name].video) {
+          const pre = this.flightPrefix(name);
+          if (pre) { this.moveVideo(name, pre, false); this.moveVideo(name, pre, true); }
+          return;
+        }
         if (mix.day) this.baseFrames(name, mix); if (mix.nightOn) this.moveFramesFor(name, 'night');
         const m = this.moves[name]; [m.from_, m.to].forEach(v => { if (A.sprites && A.sprites[v]) new Image().src = A.url(base + v + '/drop.webp'); });
       });
@@ -271,6 +314,11 @@
       if (A.config.realMoves === false) return null;             // the flights show an older room: blend instead
       const mix = this.moveMix();
       const ready = name => {
+        const m = this.moves && this.moves[name]; if (!m) return false;
+        if (m.video) {
+          const pre = this.flightPrefix(name);
+          return !!pre && this.videoReady(this.moveVideo(name, pre, name !== `${from}-${to}`));
+        }
         const need = [];
         if (mix.day) need.push(this.baseFrames(name, mix));
         if (mix.nightOn) need.push(this.moveFramesFor(name, 'night'));
@@ -282,7 +330,49 @@
       if (ready(`${to}-${from}`)) return { name: `${to}-${from}`, reverse: true };
       return null;
     }
+    async playVideoMove(mv, to) {
+      const m = this.moves[mv.name], pre = this.flightPrefix(mv.name), vid = this.moveVideo(mv.name, pre, mv.reverse);
+      const box = this.flightLayer(), tint = this.flightTint;
+      const W = this.stage.clientWidth, H = this.stage.clientHeight;
+      // the plates' crop: cover the stage, pan, overscan (as playMove's cover())
+      const vw = vid.videoWidth || m.res[0], vh = vid.videoHeight || m.res[1];
+      const os = 1 / (1 + (this.comp.overscan || 0)), pan = this.comp.pan, ia = vw / vh, ca = W / H;
+      let sw = vw, sh = vh; if (ca > ia) sh = sw / ca; else sw = sh * ca; sw *= os; sh *= os;
+      const sx = (vw - sw) * pan, sy = (vh - sh) / 2, k = W / sw;
+      Object.assign(vid.style, { width: vw * k + 'px', height: vh * k + 'px', transform: `translate3d(${-sx * k}px,${-sy * k}px,0)` });
+      if (vid.parentNode !== box) box.insertBefore(vid, tint);
+      // the light: graded at both ends to the views as the compositor shows them now (round 6), from the average colour
+      // of the first and last frames (moves.json); brightness lifts, a multiplied tint sets the colour
+      const ends = (m.ends || {})[pre] || {}, mS = mv.reverse ? ends.last : ends.first, mE = mv.reverse ? ends.first : ends.last;
+      const gainOf = (vm, fm) => vm && fm ? vm.map((x, i) => Math.min(2.5, Math.max(0.3, (x + 1e-3) / (fm[i] + 1e-3)))) : null;
+      const from = this.comp.view && this.comp.view.key;
+      const gS = gainOf(from && this.comp.meanColor(from, this.light), mS), gE = gainOf(this.comp.meanColor(to, this.light), mE) || gS || [1, 1, 1];
+      const g0 = gS || gE;
+      this.moveGrade = { start: gS, end: gE };          // for tests (tools/test_room.cjs)
+      const look = g => { const gm = Math.max(1, g[0], g[1], g[2]);
+        return [`brightness(${gm.toFixed(3)})`, `rgb(${g.map(x => Math.round(Math.min(1, x / gm) * 255)).join(',')})`]; };
+      const [f0, t0] = look(g0), [f1, t1] = look(gE);
+      vid.style.filter = f0; tint.style.backgroundColor = t0;
+      try { vid.pause(); if (vid.currentTime > 0.001) vid.currentTime = 0; } catch (e) { }
+      box.hidden = false;
+      await box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
+      const dur = Math.max(200, ((vid.duration && isFinite(vid.duration)) ? vid.duration : m.frames / (m.fps || 60)) * 1000);
+      let anims = [];
+      const ended = new Promise(res => { vid.onended = res; setTimeout(res, dur + 2000); });
+      try {
+        await vid.play();
+        anims = [vid.animate([{ filter: f0 }, { filter: f1 }], { duration: dur, fill: 'forwards' }),
+                 tint.animate([{ backgroundColor: t0 }, { backgroundColor: t1 }], { duration: dur, fill: 'forwards' })];
+        await ended;
+      } catch (e) { }                                     // no playback (a blocked autoplay): land without the flight
+      await this.enterView(to);
+      this.comp.render(this.light);
+      await box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
+      box.hidden = true; box.getAnimations().forEach(a => a.cancel()); anims.forEach(a => a.cancel());
+      vid.onended = null; vid.pause(); try { vid.currentTime = 0; } catch (e) { }
+    }
     async playMove(mv, to) {
+      if (this.moves[mv.name] && this.moves[mv.name].video) return this.playVideoMove(mv, to);
       const mix = this.moveMix(), m = this.moves[mv.name];
       const day = mix.day && this.baseFrames(mv.name, mix), night = mix.nightOn && this.moveFramesFor(mv.name, 'night');
       const n = m.frames, fps = m.fps || 30;
@@ -1022,7 +1112,7 @@
       const vc = cfg.views[this.viewKey] || {}, k = this.reduced ? 0 : (vc.parallax || 0.01) * cfg.motion.intensity;
       let tx = this.parallaxTarget[0], ty = this.parallaxTarget[1];
       if (this.isMobile && !this.reduced) { const s = t / 1000; tx = Math.sin(s * 0.21) * 0.6; ty = Math.sin(s * 0.17) * 0.3; }
-      const e = cfg.motion.parallaxEase;
+      const e = 1 - Math.exp(-dt * cfg.motion.parallaxEase);      // the same glide at 60, 120 or 144 Hz
       const nx = this.parallax[0] + (-tx * k - this.parallax[0]) * e, ny = this.parallax[1] + (-ty * k * 0.6 - this.parallax[1]) * e;
       const pmove = Math.abs(nx - this.parallax[0]) + Math.abs(ny - this.parallax[1]) > 1e-6;
       this.parallax = [nx, ny]; this.comp.parallax = this.parallax;
