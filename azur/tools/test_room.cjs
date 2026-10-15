@@ -90,7 +90,8 @@ function serve() {
       await click(p, D); await p.waitForTimeout(1500); await p.keyboard.press('Escape'); await p.waitForTimeout(500);
       s = await st(p); ok('drop: Escape closes the card', !s.drop && s.sel === -1, s);
     }
-    await p.keyboard.press('Escape'); await p.waitForTimeout(2500);
+    await p.keyboard.press('Escape');
+    await p.waitForFunction(() => AZUR.app.viewKey === 'room' && !AZUR.app.busy, null, { timeout: 12000 }).catch(() => {});   // a flight lands
     s = await st(p); ok('Escape on the rail goes back to the room', s.view === 'room', s);
     // links
     const h = await p.evaluate(() => AZUR.products[0].handle);

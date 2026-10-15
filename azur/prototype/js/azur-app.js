@@ -356,6 +356,7 @@
       try { vid.pause(); if (vid.currentTime > 0.001) vid.currentTime = 0; } catch (e) { }
       box.hidden = false;
       await box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
+      this.covered = true;                                // the room under the video needs no drawing meanwhile
       const dur = Math.max(200, ((vid.duration && isFinite(vid.duration)) ? vid.duration : m.frames / (m.fps || 60)) * 1000);
       let anims = [];
       const ended = new Promise(res => { vid.onended = res; setTimeout(res, dur + 2000); });
@@ -365,6 +366,7 @@
                  tint.animate([{ backgroundColor: t0 }, { backgroundColor: t1 }], { duration: dur, fill: 'forwards' })];
         await ended;
       } catch (e) { }                                     // no playback (a blocked autoplay): land without the flight
+      this.covered = false;
       await this.enterView(to);
       this.comp.render(this.light);
       await box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
@@ -1145,7 +1147,7 @@
       if (drift || this.dirty) { this.rail.place(); this.placeChrome(); }
       const swaying = this.rail.step(dt, this.reduced);
       if (this.plate && A.config.scene3) this.applySway(t, swaying);
-      if (this.dirty || drift) { this.comp.render(this.light); this.dirty = false; }
+      if ((this.dirty || drift) && !this.covered) { this.comp.render(this.light); this.dirty = false; }
       requestAnimationFrame(tt => this.frame(tt));
     }
 
