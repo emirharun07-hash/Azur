@@ -2,11 +2,26 @@
     "state":  "arbeitet",
     "request":  "r7-1",
     "job":  "preview:full,room_day",
-    "note":  "Runde 7: Fussballschuhe (Stil Ende der 60er: schwarzes Leder, cremefarbener Seitenstreifen, braune Senkel) und Rucksack (blaues Leder nach Vorlage) im Detail; Kamerafahrten mit 60 Bildern pro Sekunde und Bewegungsunschaerfe, als Video. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+    "note":  "preview:full,room_day fertig nach 11.6 min",
     "watch":  3,
-    "time":  "2026-10-16T21:01:51Z",
-    "device":  "17:35:50 render device HIP: AMD Radeon RX 6750 XT",
+    "time":  "2026-10-16T21:13:27Z",
+    "device":  "23:02:56 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
-
+                "23:01:58 building scene (no saved .blend found)",
+                "00:00.546  cycles           | WARNING CUEW initialization failed: Error opening the library",
+                "PORTAL_ON",
+                "jersey jersey_frankfurt: frozen drape from frankfurt.glb (3620 vertices)",
+                "jersey jersey_berlin: frozen drape from berlin.glb (3874 vertices)",
+                "jersey jersey_brasilien: frozen drape from brasilien.glb (3016 vertices)",
+                "jersey jersey_deutschland: frozen drape from deutschland.glb (3444 vertices)",
+                "jersey jersey_tuerkei: frozen drape from tuerkei.glb (3514 vertices)",
+                "SHELF_LEVELS [0.129, 0.349, 0.608, 0.867, 1.126, 1.385, 1.644, 1.914]",
+                "Info: Saved as \"azur_room_scene3.blend\"",
+                "00:52.500  blend            | Read blend: \"C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\azur_room_scene3.blend\"",
+                "00:54.891  cycles           | WARNING CUEW initialization failed: Error opening the library",
+                "23:02:56 render device HIP: AMD Radeon RX 6750 XT",
+                "11:26.235  render           | Saved: \u0027C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\previews\\room_day.png\u0027",
+                "23:13:22 preview room_day 625.1 s",
+                "23:13:26 preview finished 1 shots"
             ]
 }
