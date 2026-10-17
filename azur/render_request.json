@@ -1,6 +1,6 @@
 {
-  "id": "r8-1",
-  "note": "Runde 8: neuer Ball (modernes Wirbel-Design in Blau mit Sternen, Rot und Gruen, ohne Marken) und knallige Fussballschuhe (Aqua, Neon-Streifen, kleiner Azur-Schriftzug). Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+  "id": "r8-2",
+  "note": "Runde 8: neuer Ball (modernes Wirbel-Design in Blau mit Sternen, Rot und Gruen, ohne Marken) und knallige Fussballschuhe (Aqua, Neon-Streifen, kleiner Azur-Schriftzug), jetzt hoeher, mit zwoelf langen Stollen, einer liegt auf der Seite mit der Sohle zur Tuer. Ersetzt r8-1. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
   "set": "scene3",
   "rebuild": true,
   "jobs": ["preview:full,room_day", "preview", "export", "queue", "glow", "outside", "moves"]
