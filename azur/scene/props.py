@@ -4,7 +4,7 @@ boot()      A football boot on a late-sixties cut (the owner's round 7 reference
             flat laces), in round 8's bright colours (the owner's reference: a modern boot in aqua with neon accents):
             an aqua upper on a curved last, a side stripe of our own shape (even width, rounded ends, stitched; no
             maker's stripe) fading from neon yellow to coral, white flat laces criss-crossed over the tongue through
-            punched eyelets, a padded collar, the foot opening lined navy, a white sole plate with ten blue screw-in
+            punched eyelets, a padded collar, the foot opening lined navy, a white sole plate with twelve long blue
             studs, and a small navy AZUR script (the brand's own logo) on the forefoot's sides. No other name or mark.
 backpack()  After the owner's reference (a minimalist leather backpack, 30 x 16 x 47 cm): a tall soft leather box with
             a rounded top, a brass zip over the top and down both sides, a seam and a zipped pocket on the front, a
@@ -292,6 +292,11 @@ HT = [(0.0, 0.068), (0.07, 0.070), (0.16, 0.064), (0.26, 0.0595), (0.36, 0.0645)
 CAP_H, CAP_T = 0.085, 0.075           # heel and toe rounding (in t)
 EYELETS = [0.425 + k * 0.052 for k in range(6)]
 THROAT = 0.0075                       # half width of the lace slot
+RISE = 1.2                            # round 8: the upper 20 % higher above ZC (the owner: the boots looked flat)
+STUD_TIP = -0.0125                    # round 8: longer studs (round 7: -0.0085)
+
+
+def risen(z): return ZC + (z - ZC) * RISE
 
 
 def last_hw(t):
@@ -302,7 +307,7 @@ def last_hw(t):
 
 
 def last_h(t):
-    h = spline(HT, t)
+    h = risen(spline(HT, t))
     if t < 0.03: h -= 0.006 * ((0.03 - t) / 0.03) ** 2                 # the heel's top edge rolls over
     if t > 1 - CAP_T: h = ZC + (h - ZC) * max(0.15, math.sqrt(max(0.0, 1 - ((t - (1 - CAP_T)) / CAP_T) ** 2)) ** 0.7)
     return h
@@ -382,7 +387,7 @@ def cutter(name, mat):
 
 
 def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
-    """One boot. Local frame: heel at -y, toe at +y, stud tips at z = -0.0085 (build_room puts the root on the
+    """One boot. Local frame: heel at -y, toe at +y, stud tips at z = STUD_TIP (build_room puts the root on the
     floor). Returns the root empty."""
     # round 8 (the owner: brighter, after a modern boot in aqua with neon accents): an aqua upper, the stripe fading
     # from neon yellow at the heel to coral at the front, white laces and sole plate, blue studs, and a small navy
@@ -390,7 +395,7 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
     aqua, navy = (0.11, 0.56, 0.62), (0.012, 0.025, 0.09)
     upper = leather(name + '_leather', aqua, rough=0.34, coat=0.3, grain=1300.0, crease=60.0, bump=0.16,
                     seams=[('y', boot_y(0.745), -9.0, None), ('y', boot_y(0.13), 6.0, None)], seam_col=(0.03, 0.20, 0.24))
-    decal(upper, logo_image(), boot_y(0.59), 0.0285, 0.032, navy, flip=-1.0 if mirror else 1.0)
+    decal(upper, logo_image(), boot_y(0.59), risen(0.0285), 0.032, navy, flip=-1.0 if mirror else 1.0)
     collar_m = leather(name + '_collar', (0.06, 0.38, 0.43), rough=0.55, coat=0.08, grain=1600.0, bump=0.35)
     lining = plain(name + '_lining', navy, rough=0.9, **{'Sheen Weight': 0.3})
     sole_m = plain(name + '_sole', (0.80, 0.81, 0.80), rough=0.36, **{'Coat Weight': 0.2})
@@ -500,13 +505,13 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
         for side in (-1, 1):                              # the two ends: over the side, down onto the floor
             hw = last_hw(0.66)
             if lace_ends == 'floor':
-                ctrl = [knot, knot + Vector((side * 0.010, 0.004, 0.0)), Vector((last_cx(0.68) + side * (hw * 0.80), knot.y + 0.010, 0.046)),
+                ctrl = [knot, knot + Vector((side * 0.010, 0.004, 0.0)), Vector((last_cx(0.68) + side * (hw * 0.80), knot.y + 0.010, risen(0.046))),
                         Vector((last_cx(0.70) + side * (hw + 0.005), knot.y + 0.016, 0.018)),
-                        Vector((last_cx(0.72) + side * (hw + 0.014), knot.y + 0.024 + 0.010 * side, -0.0068)),
-                        Vector((last_cx(0.74) + side * (hw + 0.022), knot.y + 0.030 + 0.016 * side, -0.0068))]
+                        Vector((last_cx(0.72) + side * (hw + 0.014), knot.y + 0.024 + 0.010 * side, STUD_TIP + 0.0017)),
+                        Vector((last_cx(0.74) + side * (hw + 0.022), knot.y + 0.030 + 0.016 * side, STUD_TIP + 0.0017))]
             else:
-                ctrl = [knot, knot + Vector((side * 0.010, 0.004, 0.0)), Vector((last_cx(0.68) + side * (hw * 0.80), knot.y + 0.012, 0.045)),
-                        Vector((last_cx(0.70) + side * (hw + 0.004), knot.y + 0.020, 0.030))]
+                ctrl = [knot, knot + Vector((side * 0.010, 0.004, 0.0)), Vector((last_cx(0.68) + side * (hw * 0.80), knot.y + 0.012, risen(0.045))),
+                        Vector((last_cx(0.70) + side * (hw + 0.004), knot.y + 0.020, risen(0.030)))]
             path = catmull(ctrl, 28)
             norms = []
             for p in path:                                # lying on the instep, then on the side, then on the floor
@@ -515,8 +520,8 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
             parts.append(ribbon(name + '_laceend', path, 0.0055, norms, lace_m, thick=0.0010))
 
     # the side stripe (both sides): even width, rounded ends, stitched along its edges
-    C = [Vector((0, -0.113, 0.0285)), Vector((0, -0.084, 0.0272)), Vector((0, -0.050, 0.0292)), Vector((0, -0.016, 0.0362)),
-         Vector((0, 0.010, 0.0468)), Vector((0, 0.027, 0.0560))]
+    C = [Vector((0, y, risen(z))) for y, z in ((-0.113, 0.0285), (-0.084, 0.0272), (-0.050, 0.0292), (-0.016, 0.0362),
+                                               (0.010, 0.0468), (0.027, 0.0560))]
     cl = catmull(C, 46); W = 0.0132
     for side in (-1, 1):
         rows = []; length = [0.0]
@@ -539,7 +544,7 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
         so = sg.modifiers.new('sol', 'SOLIDIFY'); so.thickness = 0.0008; so.offset = -1
         sg.data.materials.append(stripe_m); parts.append(sg)
 
-    # sole plate (white, its rim shows all round) and ten screw-in studs
+    # sole plate (white, its rim shows all round) and twelve studs (round 8: longer, two more down the middle)
     outline = []
     for k in range(64):
         t = k / 63; outline.append((last_cx(t) + last_hw(t) + 0.0017, boot_y(t)))
@@ -558,9 +563,9 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
     me.polygons.foreach_set('use_smooth', [True] * len(me.polygons))
     so_ = link(bpy.data.objects.new(name + '_sole', me)); so_.data.materials.append(sole_m); parts.append(so_)
     for sx, t in [(-0.024, 0.60), (0.024, 0.60), (-0.0295, 0.74), (0.0295, 0.74), (-0.020, 0.88), (0.020, 0.88),
-                  (-0.019, 0.075), (0.019, 0.075), (-0.021, 0.215), (0.021, 0.215)]:
+                  (0.0, 0.67), (0.0, 0.81), (-0.019, 0.075), (0.019, 0.075), (-0.021, 0.215), (0.021, 0.215)]:
         x, y = last_cx(t) + sx, boot_y(t)
-        bpy.ops.mesh.primitive_cone_add(vertices=20, radius1=0.0085, radius2=0.0051, depth=0.0115, location=(x, y, -0.0027))
+        bpy.ops.mesh.primitive_cone_add(vertices=20, radius1=0.0080, radius2=0.0044, depth=0.004 - STUD_TIP, location=(x, y, (0.004 + STUD_TIP) / 2))
         st = bpy.context.object; st.name = name + '_stud'; st.rotation_euler = (math.pi, 0, 0)
         bv = st.modifiers.new('bev', 'BEVEL'); bv.width = 0.0012; bv.segments = 2
         bpy.ops.object.shade_smooth(); st.data.materials.append(stud_m); parts.append(st)

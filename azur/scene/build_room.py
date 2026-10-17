@@ -902,8 +902,22 @@ group('chair', ch, loc=(0.88, 2.47, 0), rot_z=math.radians(9))        # pulled o
 # room, kicked off next to the ball where the doorway camera sees them.
 import props
 props.LINK = link
-rest_on(props.boot('boot_l', (2.50, 2.02, 0.0), math.radians(-35)), 0.0)
-rest_on(props.boot('boot_r', (2.68, 1.89, 0.0), math.radians(60), tilt=math.radians(-80), mirror=True, lace_ends='short'), 0.0)
+def rest_exact(root, z):
+    """Like rest_on, from the parts' actual vertices (a tipped-over boot's bounding boxes reach below it)."""
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get(); lo = None
+    for o in root.children_recursive:
+        if o.type not in ('MESH', 'CURVE'): continue
+        ev = o.evaluated_get(dg); me = ev.to_mesh()
+        for v in me.vertices:
+            w = (o.matrix_world @ v.co).z
+            lo = w if lo is None or w < lo else lo
+        ev.to_mesh_clear()
+    root.location.z += z - lo
+rest_exact(props.boot('boot_l', (2.50, 2.02, 0.0), math.radians(-35)), 0.0)
+# round 8 (the owner: one should see they are football boots): the other one lies on its side, rolled a little past it,
+# the sole and studs turned up toward the doorway camera (round 7: on its side, the sole facing the wall)
+rest_exact(props.boot('boot_r', (2.76, 1.86, 0.0), math.radians(-80), tilt=math.radians(-105), mirror=True, lace_ends='short'), 0.0)
 # round 8 (the owner: the ball should stand out): a glossy modern ball with bold swirls (props.ball, no marks), where
 # the worn ball lay since round 4, the print turned toward the doorway camera
 props.ball('football', (2.18, 1.795, props.BALL_R * 0.985), (math.radians(-43.5), math.radians(-1.2), math.radians(-1.8)))
