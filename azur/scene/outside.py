@@ -331,10 +331,10 @@ def enc(fdir, key):
     src = os.path.join(fdir, '%03d.png')
     base = os.path.join(OUT, key)
     pad = 'scale=trunc(iw/2)*2:trunc(ih/2)*2'
-    subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', pad, '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-                    '-crf', '20', '-preset', 'slow', '-movflags', '+faststart', '-an', base + '.mp4'], check=True)
-    subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', pad, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p', '-b:v', '0',
-                    '-crf', '30', '-row-mt', '1', '-an', base + '.webm'], check=True)
+    subprocess.run([ff, '-nostdin', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', pad, '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
+                    '-crf', '20', '-preset', 'slow', '-movflags', '+faststart', '-an', base + '.mp4'], check=True, stdin=subprocess.DEVNULL)
+    subprocess.run([ff, '-nostdin', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', pad, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p', '-b:v', '0',
+                    '-crf', '30', '-row-mt', '1', '-an', base + '.webm'], check=True, stdin=subprocess.DEVNULL)
     rq.log('outside clip', key, os.path.getsize(base + '.mp4') // 1024, 'KB mp4', os.path.getsize(base + '.webm') // 1024, 'KB webm')
 
 

@@ -137,10 +137,10 @@ def encode(src_dir, prefix, base):
     for rev in (False, True):
         vf = ('reverse,' if rev else '') + 'format=yuv420p'
         b = base + ('_r' if rev else '')
-        subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libx264', '-preset', 'slow',
-                        '-crf', '19', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', b + '.mp4'], check=True)
-        subprocess.run([ff, '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p',
-                        '-b:v', '0', '-crf', '31', '-row-mt', '1', '-an', b + '.webm'], check=True)
+        subprocess.run([ff, '-nostdin', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libx264', '-preset', 'slow',
+                        '-crf', '19', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', b + '.mp4'], check=True, stdin=subprocess.DEVNULL)
+        subprocess.run([ff, '-nostdin', '-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', src, '-vf', vf, '-c:v', 'libvpx-vp9', '-pix_fmt', 'yuv420p',
+                        '-b:v', '0', '-crf', '31', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', '-an', b + '.webm'], check=True, stdin=subprocess.DEVNULL)
         out += [b + '.mp4', b + '.webm']
     return out
 
