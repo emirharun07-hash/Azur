@@ -1,10 +1,10 @@
 {
-    "state":  "arbeitet",
+    "state":  "fertig",
     "request":  "r7-1",
-    "job":  "moves",
-    "note":  "moves fertig nach 232.8 min",
+    "job":  "",
+    "note":  "Runde 7: Fussballschuhe (Stil Ende der 60er: schwarzes Leder, cremefarbener Seitenstreifen, braune Senkel) und Rucksack (blaues Leder nach Vorlage) im Detail; Kamerafahrten mit 60 Bildern pro Sekunde und Bewegungsunschaerfe, als Video. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-17T16:01:40Z",
+    "time":  "2026-10-17T16:01:42Z",
     "device":  "14:08:56 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "17:52:44 move room-bed night 57 36.6 s",
