@@ -182,7 +182,8 @@ def render_move(sc, name, spec, variant):
         sc.cycles.seed = 0; sc.cycles.use_animated_seed = False      # the same noise every frame: the denoiser holds still
         fdir = os.path.join(FRAMES_DIR, name); os.makedirs(fdir, exist_ok=True)
         base = os.path.join(d, prefix)
-        done = all(os.path.exists(base + x) for x in ('.mp4', '.webm', '_r.mp4', '_r.webm'))
+        # a file left empty by an interrupted encode does not count (round 7: f_r.webm came up with 0 bytes)
+        done = all(os.path.exists(base + x) and os.path.getsize(base + x) > 1000 for x in ('.mp4', '.webm', '_r.mp4', '_r.webm'))
     saved = []; track = []; t0 = time.time()
     for i in range(frames):
         t = i / (frames - 1)
