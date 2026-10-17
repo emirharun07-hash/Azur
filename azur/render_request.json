@@ -1,6 +1,6 @@
 {
-  "id": "r7-1",
-  "note": "Runde 7: Fussballschuhe (Stil Ende der 60er: schwarzes Leder, cremefarbener Seitenstreifen, braune Senkel) und Rucksack (blaues Leder nach Vorlage) im Detail; Kamerafahrten mit 60 Bildern pro Sekunde und Bewegungsunschaerfe, als Video. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+  "id": "r8-1",
+  "note": "Runde 8: neuer Ball (modernes Wirbel-Design in Blau mit Sternen, Rot und Gruen, ohne Marken) und knallige Fussballschuhe (Aqua, Neon-Streifen, kleiner Azur-Schriftzug). Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
   "set": "scene3",
   "rebuild": true,
   "jobs": ["preview:full,room_day", "preview", "export", "queue", "glow", "outside", "moves"]

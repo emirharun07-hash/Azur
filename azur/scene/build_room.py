@@ -906,7 +906,7 @@ rest_on(props.boot('boot_l', (2.50, 2.02, 0.0), math.radians(-35)), 0.0)
 rest_on(props.boot('boot_r', (2.68, 1.89, 0.0), math.radians(60), tilt=math.radians(-80), mirror=True, lace_ends='short'), 0.0)
 # round 8 (the owner: the ball should stand out): a glossy modern ball with bold swirls (props.ball, no marks), where
 # the worn ball lay since round 4, the print turned toward the doorway camera
-props.ball('football', (2.18, 1.795, props.BALL_R * 0.985), (math.radians(20), math.radians(-15), math.radians(40)))
+props.ball('football', (2.18, 1.795, props.BALL_R * 0.985), (math.radians(-43.5), math.radians(-1.2), math.radians(-1.8)))
 
 # training bag on the floor at the foot of the bed
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.15, depth=0.42, location=(0, 0, 0))
