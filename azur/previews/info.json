@@ -1,34 +1,15 @@
 {
- "request": "r8-1",
+ "request": "r8-2",
  "set": "scene3",
- "samples": 64,
+ "samples": 1024,
  "res": [
   1280,
   720
  ],
- "full": false,
- "seconds": 280,
+ "full": true,
+ "seconds": 628,
  "shots": [
-  "room_day.jpg",
-  "room_morning.jpg",
-  "room_evening.jpg",
-  "room_night.jpg",
-  "bed_day.jpg",
-  "bed_morning.jpg",
-  "bed_evening.jpg",
-  "bed_night.jpg",
-  "rail_day.jpg",
-  "rail_morning.jpg",
-  "rail_evening.jpg",
-  "rail_night.jpg",
-  "rail_m_day.jpg",
-  "jerseys.jpg",
-  "jersey_detail.jpg",
-  "jersey_side.jpg",
-  "neon.jpg",
-  "desk.jpg",
-  "floor_evening.jpg",
-  "bed_close_night.jpg"
+  "room_day.jpg"
  ],
- "time": "2026-10-17T20:09:16Z"
+ "time": "2026-10-17T23:19:58Z"
 }
