@@ -1,23 +1,28 @@
-"""Round 7: the boots and the backpack in detail (build_room.py places them).
+"""Round 7: the boots and the backpack in detail; round 8: brighter boots and a modern ball (build_room.py places them).
 
-boot()      A late-sixties leather football boot, after the owner's reference (the black boot with the white side
-            stripe and brown laces that Pele and Eusebio made famous): black glossy leather on a curved last, a cream
-            side stripe (our own shape: even width, rounded ends, stitched; no maker's stripe, no name, no signature),
-            brown flat laces criss-crossed over the tongue through punched eyelets, a padded collar, the foot opening
-            lined dark, a cream sole plate with ten screw-in studs.
+boot()      A football boot on a late-sixties cut (the owner's round 7 reference: the boot with the side stripe and
+            flat laces), in round 8's bright colours (the owner's reference: a modern boot in aqua with neon accents):
+            an aqua upper on a curved last, a side stripe of our own shape (even width, rounded ends, stitched; no
+            maker's stripe) fading from neon yellow to coral, white flat laces criss-crossed over the tongue through
+            punched eyelets, a padded collar, the foot opening lined navy, a white sole plate with ten blue screw-in
+            studs, and a small navy AZUR script (the brand's own logo) on the forefoot's sides. No other name or mark.
 backpack()  After the owner's reference (a minimalist leather backpack, 30 x 16 x 47 cm): a tall soft leather box with
             a rounded top, a brass zip over the top and down both sides, a seam and a zipped pocket on the front, a
             leather top handle, padded shoulder straps with brass buckles. Navy-blue leather (the bag stays blue).
+ball()      A glossy modern match ball (the owner's reference: white with bold swirls): four curved panels, blue swooshes
+            with small stars, red and green ones, pressed-in seams. The print is made in ball_texture(); no text.
 
 Everything is built from functions with bmesh; nothing here touches the random module (build_room's random stream,
 and with it the rest of the room, stays as it was).
 """
-import math
+import math, os
 import bpy, bmesh
 from mathutils import Vector, Matrix
 from mathutils.bvhtree import BVHTree
 
 LINK = None          # build_room.py sets its link(); standalone tests link into the scene collection
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))     # azur/
+CACHE = os.path.join(ROOT, '.cache', 'props')                          # generated textures (ball, logo)
 
 
 def link(o):
@@ -69,7 +74,7 @@ def plain(name, col, rough=0.5, **kw):
     return m
 
 
-def leather(name, col, rough=0.3, coat=0.4, grain=900.0, crease=55.0, bump=0.25, seams=None):
+def leather(name, col, rough=0.3, coat=0.4, grain=900.0, crease=55.0, bump=0.25, seams=None, seam_col=(0.036, 0.034, 0.031)):
     """Leather: a fine pebble grain (Voronoi) and soft creases (noise) as bump, the shine a little uneven.
     seams: optional list of (axis, a, b, c) lines a + b*u^2 = axis value in object space (u = the other horizontal
     axis), drawn as a stitched groove: [('y', y0, k, None)] gives y = y0 + k*x^2."""
@@ -103,7 +108,7 @@ def leather(name, col, rough=0.3, coat=0.4, grain=900.0, crease=55.0, bump=0.25,
             else:
                 mx = N.new('ShaderNodeMath'); mx.operation = 'MAXIMUM'; L.new(line, mx.inputs[0]); L.new(st.outputs[0], mx.inputs[1]); line = mx.outputs[0]
         mixc = N.new('ShaderNodeMix'); mixc.data_type = 'RGBA'
-        mixc.inputs[6].default_value = (*col, 1); mixc.inputs[7].default_value = (0.036, 0.034, 0.031, 1)
+        mixc.inputs[6].default_value = (*col, 1); mixc.inputs[7].default_value = (*seam_col, 1)
         L.new(line, mixc.inputs['Factor']); col_out = mixc.outputs[2]
         hl = N.new('ShaderNodeMath'); hl.operation = 'MULTIPLY_ADD'; L.new(line, hl.inputs[0]); hl.inputs[1].default_value = 0.6; L.new(height, hl.inputs[2])
         height = hl.outputs[0]
@@ -117,8 +122,9 @@ def leather(name, col, rough=0.3, coat=0.4, grain=900.0, crease=55.0, bump=0.25,
     return m
 
 
-def stitched(name, col, thread, rough=0.45, edges=(0.13, 0.87), period=0.0034, coat=0.15):
-    """A leather band with stitches along both edges, from its UVs (u: metres along, v: 0..1 across)."""
+def stitched(name, col, thread, rough=0.45, edges=(0.13, 0.87), period=0.0034, coat=0.15, col2=None, grad=(0.0, 1.0)):
+    """A leather band with stitches along both edges, from its UVs (u: metres along, v: 0..1 across).
+    col2: the band fades from col to col2 along the object's y, from grad[0] to grad[1] (round 8: the boots' stripe)."""
     m, nt, N, L, b = _mat(name)
     uv = N.new('ShaderNodeUVMap'); sep = N.new('ShaderNodeSeparateXYZ'); L.new(uv.outputs['UV'], sep.inputs[0])
     line = None
@@ -132,8 +138,16 @@ def stitched(name, col, thread, rough=0.45, edges=(0.13, 0.87), period=0.0034, c
     on = N.new('ShaderNodeMath'); on.operation = 'LESS_THAN'; L.new(fr.outputs[0], on.inputs[0]); on.inputs[1].default_value = 0.6
     st = N.new('ShaderNodeMath'); st.operation = 'MULTIPLY'; L.new(line, st.inputs[0]); L.new(on.outputs[0], st.inputs[1])
     mixc = N.new('ShaderNodeMix'); mixc.data_type = 'RGBA'; mixc.inputs[6].default_value = (*col, 1); mixc.inputs[7].default_value = (*thread, 1)
+    tc = N.new('ShaderNodeTexCoord')
+    if col2 is not None:
+        so = N.new('ShaderNodeSeparateXYZ'); L.new(tc.outputs['Object'], so.inputs[0])
+        gr = N.new('ShaderNodeMapRange'); gr.interpolation_type = 'SMOOTHSTEP'
+        gr.inputs['From Min'].default_value, gr.inputs['From Max'].default_value = grad
+        L.new(so.outputs['Y'], gr.inputs['Value'])
+        mg = N.new('ShaderNodeMix'); mg.data_type = 'RGBA'; mg.inputs[6].default_value = (*col, 1); mg.inputs[7].default_value = (*col2, 1)
+        L.new(gr.outputs['Result'], mg.inputs['Factor']); L.new(mg.outputs[2], mixc.inputs[6])
     L.new(st.outputs[0], mixc.inputs['Factor']); L.new(mixc.outputs[2], b.inputs['Base Color'])
-    tc = N.new('ShaderNodeTexCoord'); no = N.new('ShaderNodeTexNoise'); no.inputs['Scale'].default_value = 420.0
+    no = N.new('ShaderNodeTexNoise'); no.inputs['Scale'].default_value = 420.0
     L.new(tc.outputs['Object'], no.inputs['Vector'])
     hh = N.new('ShaderNodeMath'); hh.operation = 'MULTIPLY_ADD'; L.new(st.outputs[0], hh.inputs[0]); hh.inputs[1].default_value = 0.8; L.new(no.outputs['Fac'], hh.inputs[2])
     bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.3; bp.inputs['Distance'].default_value = 0.0005
@@ -144,6 +158,53 @@ def stitched(name, col, thread, rough=0.45, edges=(0.13, 0.87), period=0.0034, c
 
 def _max(N, L, a, b_):
     mx = N.new('ShaderNodeMath'); mx.operation = 'MAXIMUM'; L.new(a, mx.inputs[0]); L.new(b_, mx.inputs[1]); return mx.outputs[0]
+
+
+def _math(N, L, op, a, b_=None, c=None):
+    """A Math node: a, b_, c are sockets or numbers."""
+    n = N.new('ShaderNodeMath'); n.operation = op
+    for i, v in enumerate((a, b_, c)):
+        if v is None: continue
+        if isinstance(v, (int, float)): n.inputs[i].default_value = v
+        else: L.new(v, n.inputs[i])
+    return n.outputs[0]
+
+
+def logo_image():
+    """The brand's script logo (azur/prototype/assets/brand), as a PNG Blender reads everywhere."""
+    out = os.path.join(CACHE, 'logo_ink.png')
+    if not os.path.exists(out):
+        from PIL import Image
+        os.makedirs(CACHE, exist_ok=True)
+        Image.open(os.path.join(ROOT, 'prototype', 'assets', 'brand', 'azur-logo-ink.webp')).convert('RGBA').save(out)
+    img = bpy.data.images.load(out, check_existing=True); img.colorspace_settings.name = 'Non-Color'
+    return img
+
+
+def decal(m, img, y, z, w, col, flip=1.0):
+    """Print img (its alpha) on both sides of a part, projected along x in object space: centred at (y, z), w wide,
+    upright and readable from either side (flip=-1 for a part mirrored by its parent's scale)."""
+    nt = m.node_tree; N, L = nt.nodes, nt.links; b = N['Principled BSDF']
+    h = w * img.size[1] / img.size[0]
+    tc = N.new('ShaderNodeTexCoord')
+    sp = N.new('ShaderNodeSeparateXYZ'); L.new(tc.outputs['Object'], sp.inputs[0])
+    sn = N.new('ShaderNodeSeparateXYZ'); L.new(tc.outputs['Normal'], sn.inputs[0])
+    side = _math(N, L, 'MULTIPLY', _math(N, L, 'SIGN', sp.outputs['X']), flip)
+    u = _math(N, L, 'MULTIPLY_ADD', _math(N, L, 'MULTIPLY', _math(N, L, 'SUBTRACT', sp.outputs['Y'], y), side), 1.0 / w, 0.5)
+    v = _math(N, L, 'MULTIPLY_ADD', _math(N, L, 'SUBTRACT', sp.outputs['Z'], z), 1.0 / h, 0.5)
+    cb = N.new('ShaderNodeCombineXYZ'); L.new(u, cb.inputs[0]); L.new(v, cb.inputs[1])
+    tex = N.new('ShaderNodeTexImage'); tex.image = img; tex.extension = 'CLIP'; tex.interpolation = 'Cubic'
+    L.new(cb.outputs[0], tex.inputs['Vector'])
+    facing = N.new('ShaderNodeMapRange'); facing.interpolation_type = 'SMOOTHSTEP'
+    facing.inputs['From Min'].default_value = 0.35; facing.inputs['From Max'].default_value = 0.6
+    L.new(_math(N, L, 'ABSOLUTE', sn.outputs['X']), facing.inputs['Value'])
+    fac = _math(N, L, 'MULTIPLY', tex.outputs['Alpha'], facing.outputs['Result'])
+    mx = N.new('ShaderNodeMix'); mx.data_type = 'RGBA'
+    bc = b.inputs['Base Color']
+    if bc.links: L.new(bc.links[0].from_socket, mx.inputs[6])
+    else: mx.inputs[6].default_value = bc.default_value[:]
+    mx.inputs[7].default_value = (*col, 1); L.new(fac, mx.inputs['Factor']); L.new(mx.outputs[2], bc)
+    return m
 
 
 def zip_teeth(name, metal=(0.80, 0.56, 0.26)):
@@ -323,18 +384,24 @@ def cutter(name, mat):
 def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
     """One boot. Local frame: heel at -y, toe at +y, stud tips at z = -0.0085 (build_room puts the root on the
     floor). Returns the root empty."""
-    black = leather(name + '_leather', (0.0052, 0.0049, 0.0046), rough=0.3, coat=0.28, bump=0.22,
-                    seams=[('y', boot_y(0.745), -9.0, None), ('y', boot_y(0.13), 6.0, None)])
-    collar_m = leather(name + '_collar', (0.011, 0.0105, 0.01), rough=0.42, coat=0.15, bump=0.3)
-    lining = plain(name + '_lining', (0.022, 0.021, 0.02), rough=0.9, **{'Sheen Weight': 0.3})
-    cream = plain(name + '_cream', (0.80, 0.72, 0.53), rough=0.38, **{'Coat Weight': 0.15})
-    stud_m = plain(name + '_stud', (0.74, 0.67, 0.49), rough=0.42)
-    stripe_m = stitched(name + '_stripe', (0.82, 0.75, 0.57), (0.40, 0.33, 0.22), rough=0.35, coat=0.25)
-    lace_m = plain(name + '_lace', (0.085, 0.034, 0.012), rough=0.8, **{'Sheen Weight': 0.15})
-    hole_m = plain(name + '_eyelet', (0.004, 0.004, 0.004), rough=0.8)
+    # round 8 (the owner: brighter, after a modern boot in aqua with neon accents): an aqua upper, the stripe fading
+    # from neon yellow at the heel to coral at the front, white laces and sole plate, blue studs, and a small navy
+    # AZUR script (the brand's own logo) on the outsides of the forefoot. Linear colours.
+    aqua, navy = (0.11, 0.56, 0.62), (0.012, 0.025, 0.09)
+    upper = leather(name + '_leather', aqua, rough=0.34, coat=0.3, grain=1300.0, crease=60.0, bump=0.16,
+                    seams=[('y', boot_y(0.745), -9.0, None), ('y', boot_y(0.13), 6.0, None)], seam_col=(0.03, 0.20, 0.24))
+    decal(upper, logo_image(), boot_y(0.59), 0.0285, 0.032, navy, flip=-1.0 if mirror else 1.0)
+    collar_m = leather(name + '_collar', (0.06, 0.38, 0.43), rough=0.55, coat=0.08, grain=1600.0, bump=0.35)
+    lining = plain(name + '_lining', navy, rough=0.9, **{'Sheen Weight': 0.3})
+    sole_m = plain(name + '_sole', (0.80, 0.81, 0.80), rough=0.36, **{'Coat Weight': 0.2})
+    stud_m = plain(name + '_stud', (0.015, 0.06, 0.52), rough=0.4, **{'Coat Weight': 0.2})
+    stripe_m = stitched(name + '_stripe', (0.62, 1.0, 0.0), navy, rough=0.32, coat=0.3,
+                        col2=(1.0, 0.07, 0.02), grad=(-0.10, 0.02))
+    lace_m = plain(name + '_lace', (0.80, 0.80, 0.78), rough=0.75, **{'Sheen Weight': 0.15})
+    hole_m = plain(name + '_eyelet', navy, rough=0.6)
     parts = []
 
-    body = boot_body(name, black)
+    body = boot_body(name, upper)
     full = bvh_of(body)                                   # the closed last: the top surface for laces and collar
     cut = cutter(name + '_cut', lining)
     bo = body.modifiers.new('cut', 'BOOLEAN'); bo.operation = 'DIFFERENCE'; bo.object = cut
@@ -472,7 +539,7 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
         so = sg.modifiers.new('sol', 'SOLIDIFY'); so.thickness = 0.0008; so.offset = -1
         sg.data.materials.append(stripe_m); parts.append(sg)
 
-    # sole plate (cream, its rim shows all round) and ten screw-in studs
+    # sole plate (white, its rim shows all round) and ten screw-in studs
     outline = []
     for k in range(64):
         t = k / 63; outline.append((last_cx(t) + last_hw(t) + 0.0017, boot_y(t)))
@@ -489,7 +556,7 @@ def boot(name, loc, rot, tilt=0.0, mirror=False, lace_ends='floor'):
     bmesh.ops.bevel(bm, geom=sharp + list({v for e in sharp for v in e.verts}), offset=0.0016, segments=3, affect='EDGES', profile=0.5)
     me = bpy.data.meshes.new(name + '_sole'); bm.to_mesh(me); bm.free()
     me.polygons.foreach_set('use_smooth', [True] * len(me.polygons))
-    so_ = link(bpy.data.objects.new(name + '_sole', me)); so_.data.materials.append(cream); parts.append(so_)
+    so_ = link(bpy.data.objects.new(name + '_sole', me)); so_.data.materials.append(sole_m); parts.append(so_)
     for sx, t in [(-0.024, 0.60), (0.024, 0.60), (-0.0295, 0.74), (0.0295, 0.74), (-0.020, 0.88), (0.020, 0.88),
                   (-0.019, 0.075), (0.019, 0.075), (-0.021, 0.215), (0.021, 0.215)]:
         x, y = last_cx(t) + sx, boot_y(t)
@@ -689,3 +756,101 @@ def _front_material(name, col):
     dent = N.new('ShaderNodeMath'); dent.operation = 'MULTIPLY_ADD'; L.new(groove.outputs[0], dent.inputs[0]); dent.inputs[1].default_value = -2.0; L.new(hsrc, dent.inputs[2])
     L.new(dent.outputs[0], bump.inputs['Height'])
     return m
+
+
+# ---------------------------------------------------------------- the ball (round 8)
+BALL_R = 0.111                        # a size 5 ball
+
+
+def ball_texture(res=2048):
+    """The ball's print as an equirectangular map (colour and height), made here so no image is needed: four panels
+    (tetrahedral, like a modern match ball) with curved seams, each with two colour swooshes on white that swell
+    and thin around it (blue with small stars, red, green), the seams pressed in. No text, no marks.
+    Returns (colour path, height path) in the props cache."""
+    import numpy as np
+    from PIL import Image
+    os.makedirs(CACHE, exist_ok=True)
+    pc, ph = os.path.join(CACHE, 'ball_col.png'), os.path.join(CACHE, 'ball_h.png')
+    W, H = res, res // 2
+    lon = (np.arange(W) + 0.5) / W * 2 * np.pi - np.pi
+    lat = np.pi / 2 - (np.arange(H) + 0.5) / H * np.pi
+    LON, LAT = np.meshgrid(lon, lat)
+    d = np.stack([np.cos(LAT) * np.cos(LON), np.cos(LAT) * np.sin(LON), np.sin(LAT)], -1)
+    # the panels' seams curve: classify a twisted copy of the sphere
+    a = 1.1 * d[..., 2]
+    dw = np.stack([d[..., 0] * np.cos(a) - d[..., 1] * np.sin(a), d[..., 0] * np.sin(a) + d[..., 1] * np.cos(a), d[..., 2]], -1)
+    C = np.array([(1, 1, 1), (1, -1, -1), (-1, 1, -1), (-1, -1, 1)], float) / math.sqrt(3)
+    dots = dw @ C.T
+    order = np.sort(dots, -1)
+    k = np.argmax(dots, -1)
+    m = order[..., -1] - order[..., -2]                     # 0 on a seam, 4/3 in a panel's middle
+    E1 = np.cross(C, np.array([0.3, 0.5, 0.8])); E1 /= np.linalg.norm(E1, axis=1, keepdims=True)
+    E2 = np.cross(C, E1)
+    th = np.arctan2(np.einsum('hwc,hwc->hw', dw, E2[k]), np.einsum('hwc,hwc->hw', dw, E1[k]))
+    phase = np.array([0.0, 2.1, 4.0, 5.3])[k]
+    sw = lambda x: (0.5 + 0.5 * np.sin(x)) ** 2
+    t1 = 0.16 + 0.68 * sw(th + phase)                       # the outer swoosh hugs the seams
+    t2 = 0.06 + 0.34 * sw(th + phase + 2.6)                 # the inner one, out of step with it
+    g0, gap = 0.035, 0.03
+    aa = 0.006
+    step = lambda x: np.clip(x / aa + 0.5, 0.0, 1.0)
+    band1 = step(m - g0) * step(g0 + t1 - m)
+    band2 = step(m - (g0 + t1 + gap)) * step(g0 + t1 + gap + t2 - m)
+    white = np.array([0.95, 0.95, 0.93])
+    blue, red, green, star = np.array([0.04, 0.20, 0.72]), np.array([0.84, 0.06, 0.12]), np.array([0.03, 0.52, 0.22]), np.array([0.45, 0.64, 1.0])
+    first = np.stack([blue, red, green, blue])[k]
+    second = np.stack([red, green, blue, green])[k]
+    col = white * (1 - band1[..., None]) + first * band1[..., None]
+    col = col * (1 - band2[..., None]) + second * band2[..., None]
+    # small five-point stars on the blue swooshes (points spread evenly over the ball)
+    n = 240; i = np.arange(n) + 0.5
+    zz = 1 - 2 * i / n; rr = np.sqrt(1 - zz * zz); ph_ = np.pi * (3 - math.sqrt(5)) * i
+    S = np.stack([rr * np.cos(ph_), rr * np.sin(ph_), zz], -1)
+    Sa = np.cross(S, np.array([0.0, 0.0, 1.0]) + 1e-3); Sa /= np.linalg.norm(Sa, axis=1, keepdims=True); Sb = np.cross(S, Sa)
+    starm = np.zeros((H, W))
+    isblue = (k == 0) | (k == 3)
+    for r0 in range(0, H, 64):
+        dd = d[r0:r0 + 64].reshape(-1, 3).astype(np.float32)
+        j = np.argmax(dd @ S.T.astype(np.float32), -1)
+        x = np.einsum('pc,pc->p', dd, Sa[j]); y = np.einsum('pc,pc->p', dd, Sb[j])
+        r = np.hypot(x, y); f = np.arctan2(y, x)
+        R = 0.034 * (0.42 + 0.58 * ((1 + np.cos(5 * f)) / 2) ** 2.5)
+        starm[r0:r0 + 64] = np.clip((R - r) / 0.004 + 0.5, 0, 1).reshape(-1, W)
+    starm *= band1 * isblue
+    col = col * (1 - starm[..., None]) + star * starm[..., None]
+    # height: the seams pressed in, the swooshes a hair proud of the white
+    h = np.clip(m / 0.03, 0, 1) ** 0.6 * 0.8 + 0.12 * band1 + 0.08 * band2
+    Image.fromarray((np.clip(col, 0, 1) * 255 + 0.5).astype(np.uint8), 'RGB').save(pc)
+    Image.fromarray((np.clip(h, 0, 1) * 65535 + 0.5).astype(np.uint16)).save(ph)
+    return pc, ph
+
+
+def ball(name, loc, rot=(0.0, 0.0, 0.0)):
+    """A glossy modern match ball with the print from ball_texture(), mapped by direction (no UV seams to hide).
+    loc is its centre; rot (radians, xyz) turns the print toward the camera. Returns the object."""
+    pc, ph = ball_texture()
+    m, nt, N, L, b = _mat(name)
+    tc = N.new('ShaderNodeTexCoord')
+    nv = N.new('ShaderNodeVectorMath'); nv.operation = 'NORMALIZE'; L.new(tc.outputs['Object'], nv.inputs[0])
+    sp = N.new('ShaderNodeSeparateXYZ'); L.new(nv.outputs['Vector'], sp.inputs[0])
+    u = _math(N, L, 'MULTIPLY_ADD', _math(N, L, 'ARCTAN2', sp.outputs['Y'], sp.outputs['X']), 1 / (2 * math.pi), 0.5)
+    v = _math(N, L, 'MULTIPLY_ADD', _math(N, L, 'ARCSINE', sp.outputs['Z']), 1 / math.pi, 0.5)
+    cb = N.new('ShaderNodeCombineXYZ'); L.new(u, cb.inputs[0]); L.new(v, cb.inputs[1])
+    ic = N.new('ShaderNodeTexImage'); ic.image = bpy.data.images.load(pc, check_existing=True); ic.extension = 'REPEAT'
+    ih = N.new('ShaderNodeTexImage'); ih.image = bpy.data.images.load(ph, check_existing=True); ih.extension = 'REPEAT'
+    ih.image.colorspace_settings.name = 'Non-Color'
+    for t in (ic, ih): L.new(cb.outputs[0], t.inputs['Vector'])
+    L.new(ic.outputs['Color'], b.inputs['Base Color'])
+    # the cover's fine texture (tiny dimples) on top of the seams
+    vo = N.new('ShaderNodeTexVoronoi'); vo.inputs['Scale'].default_value = 900.0; L.new(tc.outputs['Object'], vo.inputs['Vector'])
+    hh = _math(N, L, 'MULTIPLY_ADD', vo.outputs['Distance'], 0.08, ih.outputs['Color'])
+    bp = N.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.5; bp.inputs['Distance'].default_value = 0.0012
+    L.new(hh, bp.inputs['Height']); L.new(bp.outputs['Normal'], b.inputs['Normal'])
+    b.inputs['Roughness'].default_value = 0.4
+    b.inputs['Coat Weight'].default_value = 0.55; b.inputs['Coat Roughness'].default_value = 0.14
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=BALL_R, location=loc)
+    o = bpy.context.object; o.name = name; bpy.ops.object.shade_smooth()
+    o.scale = (1.0, 1.0, 0.985)                       # it sits a little on the floor
+    o.rotation_euler = rot
+    o.data.materials.append(m)
+    return o

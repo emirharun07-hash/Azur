@@ -811,15 +811,9 @@ for i, (dx, s_) in enumerate([(-0.25, 0.8), (0.05, 1.0)]):
 # little cup on the window sill
 trophy(W - 0.06, y0 + 0.22, z0 + 0.006, 0.8, 'gold')
 
-# ---------------------------------------------------------------- floor: rug, worn football, gamepad, box
+# ---------------------------------------------------------------- floor: rug, gamepad, box (the ball: with the boots)
 rug = box('rug', 0.75, 2.35, 2.15, 3.35, 0.0, 0.008, M['rug'], 0.004)
 rug.rotation_euler = (0, 0, math.radians(-4))
-rb, ms = import_gltf('football', loc=(2.05, 1.72, 0.0), rot_z=math.radians(30))   # round 4: in the room (it sat in the scarf)
-bpy.context.view_layer.update()
-# keep only the round ball (the model ships a cut-away half next to it)
-cx = [sum((o.matrix_world @ Vector(c)).x for c in o.bound_box) / 8 for o in ms]
-for o, c in zip(ms, cx):
-    if c < max(cx) - 0.05: o.hide_render = True; o.hide_viewport = True
 rg, _ = import_gltf('gamepad', loc=(0.62, 2.38, 0.004), rot_z=math.radians(-25))
 rc, _ = import_gltf('cardboard_box_01', loc=(0.30, 3.72, 0.0), rot_z=math.radians(8), scale=0.9)
 # flush opal ceiling light (the light source for the night passes)
@@ -903,13 +897,16 @@ for lx in (0.16,):
     ch.append(box('cback', lx - 0.004, lx + 0.03, -0.155, 0.16, 0.72, 0.84, pine, 0.003))   # between the posts
 group('chair', ch, loc=(0.88, 2.47, 0), rot_z=math.radians(9))        # pulled out from the desk, facing it (round 4: clear of the desk legs)
 
-# football boots (round 7: modelled in detail in props.py, after a late-sixties black leather boot with a white side
-# stripe and brown laces; no maker's marks). Round 6: always in the room, kicked off next to the ball where the
-# doorway camera sees them.
+# football boots (round 7: modelled in detail in props.py, after a late-sixties leather boot with a side stripe and flat
+# laces; round 8: in bright aqua with a neon stripe and a small AZUR script; no maker's marks). Round 6: always in the
+# room, kicked off next to the ball where the doorway camera sees them.
 import props
 props.LINK = link
 rest_on(props.boot('boot_l', (2.50, 2.02, 0.0), math.radians(-35)), 0.0)
 rest_on(props.boot('boot_r', (2.68, 1.89, 0.0), math.radians(60), tilt=math.radians(-80), mirror=True, lace_ends='short'), 0.0)
+# round 8 (the owner: the ball should stand out): a glossy modern ball with bold swirls (props.ball, no marks), where
+# the worn ball lay since round 4, the print turned toward the doorway camera
+props.ball('football', (2.18, 1.795, props.BALL_R * 0.985), (math.radians(20), math.radians(-15), math.radians(40)))
 
 # training bag on the floor at the foot of the bed
 bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.15, depth=0.42, location=(0, 0, 0))
