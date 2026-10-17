@@ -384,7 +384,7 @@ on every device without losing quality.
 - Checks: every flight video has 72 frames (mp4, webm, both ways); in the browser the video set for the hour preloads
   (readyState 4) and plays to the end at 12, 19 and 23 h, room -> bed -> room -> rail -> room; mid-flight frames match
   the views at both ends; `test_room.cjs` all passed.
-- Published 2026-10-17 ~16:40 UTC: artifact v40 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 283 files; the 48
+- Published 2026-10-17 ~17:20 UTC: artifact v40 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 283 files; the 48
   move strips of round 6 removed, 24 flight videos added), Shopify Files `azr7-` (257, all READY, from commit e7ca6f2),
   draft theme **"Azur Zimmer Runde 7 (Entwurf)" `gid://shopify/OnlineStoreTheme/209492050259`** (a copy of the live
   theme, now Runde 6 208975364435; section (Files prefix azr7-), data snippet and js upserted, checksums match; css,
