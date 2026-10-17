@@ -1,10 +1,10 @@
 {
     "state":  "arbeitet",
     "request":  "r7-1",
-    "job":  "outside",
-    "note":  "outside fertig nach 31.4 min",
+    "job":  "moves",
+    "note":  "Runde 7: Fussballschuhe (Stil Ende der 60er: schwarzes Leder, cremefarbener Seitenstreifen, braune Senkel) und Rucksack (blaues Leder nach Vorlage) im Detail; Kamerafahrten mit 60 Bildern pro Sekunde und Bewegungsunschaerfe, als Video. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-17T07:39:44Z",
+    "time":  "2026-10-17T07:39:47Z",
     "device":  "09:08:23 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "09:37:03 outside rail 64 738 s",
