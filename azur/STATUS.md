@@ -378,6 +378,19 @@ on every device without losing quality.
   leather box with a rounded top, brass zip over the top and down both sides with two pulls, a stitched seam and a
   zipped pocket on the front, a leather top handle, padded shoulder straps with brass buckles; it stands on the rug.
 - Nothing in props.py uses `random`, so the rest of the room builds exactly as before.
+- PC run: `r7-1` (rebuild, all jobs) 2026-10-15/17. ffmpeg on the PC stopped at "Enter command:" (it read the
+  PowerShell console): every ffmpeg call now has `-nostdin` and no stdin; a video under 1 KB no longer counts as done.
+  Flights 2026-10-17 12:08-16:01 UTC, about 37 min each (72 frames x ~36 s), no errors.
+- Checks: every flight video has 72 frames (mp4, webm, both ways); in the browser the video set for the hour preloads
+  (readyState 4) and plays to the end at 12, 19 and 23 h, room -> bed -> room -> rail -> room; mid-flight frames match
+  the views at both ends; `test_room.cjs` all passed.
+- Published 2026-10-17 ~16:40 UTC: artifact v40 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 283 files; the 48
+  move strips of round 6 removed, 24 flight videos added), Shopify Files `azr7-` (257, all READY, from commit e7ca6f2),
+  draft theme **"Azur Zimmer Runde 7 (Entwurf)" `gid://shopify/OnlineStoreTheme/209492050259`** (a copy of the live
+  theme, now Runde 6 208975364435; section (Files prefix azr7-), data snippet and js upserted, checksums match; css,
+  fonts and index.json were identical). Preview: https://azurclothing.com/?preview_theme_id=209492050259 · editor:
+  https://admin.shopify.com/store/5vpchz-hd/themes/209492050259/editor. Publishing it is the owner's step; the shop
+  stays password-protected.
 
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
