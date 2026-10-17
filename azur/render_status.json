@@ -1,10 +1,10 @@
 {
     "state":  "arbeitet",
     "request":  "r8-1",
-    "job":  "preview",
-    "note":  "preview fertig nach 4.8 min",
+    "job":  "export",
+    "note":  "Runde 8: neuer Ball (modernes Wirbel-Design in Blau mit Sternen, Rot und Gruen, ohne Marken) und knallige Fussballschuhe (Aqua, Neon-Streifen, kleiner Azur-Schriftzug). Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-17T20:09:22Z",
+    "time":  "2026-10-17T20:09:25Z",
     "device":  "22:04:36 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "22:05:59 preview bed_morning 13.2 s",
