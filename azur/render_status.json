@@ -1,10 +1,10 @@
 {
     "state":  "arbeitet",
     "request":  "r8-2",
-    "job":  "queue",
-    "note":  "queue fertig nach 605.2 min",
+    "job":  "glow",
+    "note":  "Runde 8: neuer Ball (modernes Wirbel-Design in Blau mit Sternen, Rot und Gruen, ohne Marken) und knallige Fussballschuhe (Aqua, Neon-Streifen, kleiner Azur-Schriftzug), jetzt hoeher, mit zwoelf langen Stollen, einer liegt auf der Seite mit der Sohle zur Tuer. Ersetzt r8-1. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-18T09:37:57Z",
+    "time":  "2026-10-18T09:37:59Z",
     "device":  "01:32:47 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "08:31:27.250  render           | Saved: \u0027C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\exr\\scene3\\bed\\night_street_tmp.exr\u0027",
