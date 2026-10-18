@@ -21,7 +21,7 @@ REPO = os.path.dirname(ROOT)
 SRC = os.path.join(ROOT, 'prototype')
 PUB = os.path.join(ROOT, '.cache', 'publish')          # tools/build_artifact.py output (move strips)
 OUT = os.path.join(ROOT, 'theme')
-PREFIX = 'azr7-'                                        # bumped when the renders change (Files are cached); azr7 = round 7 (flight videos, boots, backpack)
+PREFIX = 'azr8-'                                        # bumped when the renders change (Files are cached); azr8 = round 8 (ball, boots with studs)
 SET = os.environ.get('AZUR_SET', 'scene3')
 BRANCH = 'claude/shopify-notification-signup-o5avym'
 RAW = f'https://raw.githubusercontent.com/emirharun07-hash/S-per-Lig-Fantasy-Manager/{BRANCH}/'
