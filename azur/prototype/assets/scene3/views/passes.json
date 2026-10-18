@@ -242,6 +242,38 @@
     ],
     "complete": true
    }
+  },
+  "rail_m": {
+   "evening": {
+    "rects": [
+     [
+      0,
+      1847,
+      1239,
+      2000
+     ],
+     [
+      1309,
+      1847,
+      1504,
+      2000
+     ]
+    ],
+    "passes": [
+     "sky",
+     "sun_low",
+     "sun_high",
+     "neon",
+     "lamp",
+     "spot",
+     "street"
+    ],
+    "res": [
+     1800,
+     2000
+    ],
+    "complete": true
+   }
   }
  }
 }
