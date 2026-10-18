@@ -392,6 +392,32 @@ on every device without losing quality.
   https://admin.shopify.com/store/5vpchz-hd/themes/209492050259/editor. Publishing it is the owner's step; the shop
   stays password-protected.
 
+## Round 8 (owner 2026-10-17: the ball should stand out; brighter boots with a subtle AZUR; then: studs, not flat)
+
+- Ball (`scene/props.py` `ball()`, `ball_texture()`): replaces the worn football at the same spot. A glossy modern match
+  ball, after the owner's reference (white with bold swirls): four curved panels (tetrahedral, seams twisted), on each
+  two colour swooshes that swell and thin around it (blue with small stars, red, green), seams pressed in, a fine
+  dimpled cover. The print is generated with numpy at build time (`.cache/props/ball_col.png`, `ball_h.png`, mapped by
+  direction, no UV seams). No text, no marks. Turned so the doorway camera sees mostly blue and red.
+- Boots (`boot()`): the round 7 cut in bright colours after the owner's reference (a modern aqua boot with neon
+  accents): aqua upper, the stripe fading from neon yellow (heel) to coral (front), white laces and sole plate, navy
+  lining, and the brand's script logo small in navy on the forefoot's sides (a decal from
+  `prototype/assets/brand/azur-logo-ink.webp`, readable from both sides and on the mirrored boot). After the owner's
+  second note (r8-1 replaced by r8-2): the upper 20 % higher (`RISE`), twelve longer blue studs (tips at -12.5 mm), and
+  the second boot lies on its side with the sole and studs turned to the doorway camera; both rest on the floor by
+  their vertices (`rest_exact`).
+- PC run: `r8-1` started 2026-10-17 19:53 UTC and was replaced by `r8-2` (rebuild, all jobs) at 23:02 UTC; r8-2 ran
+  23:08-14:46 UTC (queue 23:32-09:38, flights 10:10-14:46), no errors.
+- Checks: the full-quality test still (ball, boots, studs); 24 flight videos with 72 frames each; flights play to the
+  end at 12, 19 and 23 h; `test_room.cjs` all passed.
+- Published 2026-10-18 ~15:30 UTC: artifact v42 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 258 files; 25 morning
+  state patches of round 7 that the new scene no longer needs removed), Shopify Files `azr8-` (232, all READY, from
+  commit c5f60c5), draft theme **"Azur Zimmer Runde 8 (Entwurf)" `gid://shopify/OnlineStoreTheme/209556078931`** (a copy
+  of the live theme, now Runde 7 209492050259; section (Files prefix azr8-), data snippet and js upserted, checksums
+  match; css, fonts and index.json were identical). Preview: https://azurclothing.com/?preview_theme_id=209556078931 ·
+  editor: https://admin.shopify.com/store/5vpchz-hd/themes/209556078931/editor. Publishing it is the owner's step; the
+  shop stays password-protected.
+
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
 - Preview render 960×540: about 1.5 min (incl. cloth simulation)
