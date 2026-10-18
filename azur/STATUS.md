@@ -410,7 +410,7 @@ on every device without losing quality.
   23:08-14:46 UTC (queue 23:32-09:38, flights 10:10-14:46), no errors.
 - Checks: the full-quality test still (ball, boots, studs); 24 flight videos with 72 frames each; flights play to the
   end at 12, 19 and 23 h; `test_room.cjs` all passed.
-- Published 2026-10-18 ~15:30 UTC: artifact v42 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 258 files; 25 morning
+- Published 2026-10-18 ~16:00 UTC: artifact v42 (https://claude.ai/artifact/B4j6WH1yNHNeEG6rJLJ2Sy, 258 files; 25 morning
   state patches of round 7 that the new scene no longer needs removed), Shopify Files `azr8-` (232, all READY, from
   commit c5f60c5), draft theme **"Azur Zimmer Runde 8 (Entwurf)" `gid://shopify/OnlineStoreTheme/209556078931`** (a copy
   of the live theme, now Runde 7 209492050259; section (Files prefix azr8-), data snippet and js upserted, checksums
