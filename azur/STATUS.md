@@ -424,6 +424,10 @@ on every device without losing quality.
 - Design round 1 (swipe tool): `azur/design/swipe.html`, artifact https://claude.ai/artifact/ASxoX7hgSL2FbYLiFxcajH
   (50 product views + 50 shop pages as HTML/CSS mocks; Ja / Nein / Super per owner in the artifact db `votes/<uid>`,
   localStorage fallback). Next rounds build on the likes and stars.
+- Design round 2 (artifact v2 of the swipe tool, `azur/design/r2.js`): owner feedback on round 1 was that colour
+  variants are not new designs and that the palette gets its own round. So every card is now its own layout in one
+  neutral palette: 24 product views built from his three favourite families (match programme, ticket, magazine, plus
+  two crossovers) and 30 new shop-page concepts. Votes go to `votes/<uid>.r2` next to `r1`.
 - Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,
   `assets/azur.css`, `assets/azur.js`), imported unchanged first (md5 checked), then changed:
   - announcement: messages one per line (textarea with defaults), a seamless marquee (40 px/s, setting), pause
