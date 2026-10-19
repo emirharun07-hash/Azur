@@ -444,10 +444,22 @@ on every device without losing quality.
     for a few frames. The last frame now stays; a clip that arrives after the room fades in.
   - Shopify scroll into the shop: the shop slides over the room like a sheet (shadow); the room stays behind, shrinks
     to 95 % and darkens (transform/opacity on the stage only).
-- No new renders this round: Shopify Files stay `azr8-`.
+- Admin editing on the website (`azur/admin/`): a Cloudflare Worker holds the Shopify access (Dev Dashboard app,
+  client credentials grant: admin-created custom apps can no longer be made) and two logins from secrets; signed
+  12 h tokens, lockout after 5 misses, CORS to the shop. It writes the bar to the shop metafield `azur.announcement`
+  (definition created 2026-10-19) and product descriptions through `productUpdate` with an HTML allow-list. Theme:
+  `snippets/azur-admin.liquid` (loads `assets/azur-admin.js` only with `#admin` or a signed-in session; the worker
+  URL goes into `admin_api` there), the bar reads the metafield first, the product description is editable in
+  place. Tested: `azur/admin/test_worker.mjs` (Miniflare, 15 checks) and an end-to-end browser run. **Open: the
+  owners set it up (`azur/admin/ANLEITUNG.md`), then the worker URL goes into the snippet.**
+- Code cleanup (room): the paths before scene3 removed (DOM jerseys, sprites, frame flights, drawn hotspots, the CSS
+  kid, the Bolzplatz loop, scene2 detection): about 1,200 lines; keyboard targets now sit on their jerseys; the
+  magazine opens out of its dot. Theme and shop code follow after the design decisions.
+- No new renders this round: Shopify Files stay `azr8-` (the two Bolzplatz files are no longer used).
 - Published 2026-10-19: artifact v43 (code only), draft theme **"Azur Zimmer Runde 9 (Entwurf)"
   `gid://shopify/OnlineStoreTheme/209608147283`** (copy of the live Runde 8 209556078931; room section, room js/css,
-  announcement, azur.css, azur.js upserted from commit 8bbaed2, checksums match). Preview:
+  announcement, azur.css, azur.js upserted from commit 8bbaed2; then layout, announcement, main-product, admin snippet
+  and js from eb6f051 and the cleaned room from bfc8fb7, checksums match); artifact v44 (code only). Preview:
   https://azurclothing.com/?preview_theme_id=209608147283 · editor:
   https://admin.shopify.com/store/5vpchz-hd/themes/209608147283/editor. Publishing it is the owner's step.
 
