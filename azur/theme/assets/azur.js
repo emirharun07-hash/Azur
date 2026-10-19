@@ -240,12 +240,63 @@
       if (header.classList.contains('header--overlay')) {
         header.classList.toggle('is-solid', !hero || hero.getBoundingClientRect().bottom <= bottom + 1);
       }
+      // schmal, sobald die Leiste oben weggescrollt ist
+      header.classList.toggle('is-compact', window.scrollY > 48);
     };
     const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
     update();
     window.addEventListener('scroll', queue, { passive: true });
     window.addEventListener('resize', queue);
+    header.addEventListener('transitionend', queue); // Unterkante nach dem Schrumpfen neu messen
   }
+
+  /* ---- Leiste oben: Laufband ----------------------------------------------- */
+  // Kopiert die Gruppe der Meldungen, bis das Band die Leiste mehr als füllt, und lässt es genau eine Gruppenbreite weit
+  // laufen (danach steht die nächste Kopie an derselben Stelle: nahtlos). Tempo in px/s aus den Einstellungen.
+  // Hält bei Maus darüber, Fokus, Pause-Knopf und außerhalb des Bildes; bei „Bewegung reduzieren“ gar nicht erst an.
+  $$('[data-marquee]').forEach((bar) => {
+    const group = $('.bar__group', bar);
+    const run = group.parentElement;
+    const pause = $('[data-marquee-pause]', bar);
+    const speed = Number(bar.dataset.marquee) || 40;
+    let width = 0;
+
+    const fit = () => {
+      const w = group.getBoundingClientRect().width;
+      if (calm.matches || !w) {
+        bar.classList.remove('is-running');
+        pause.hidden = true;
+        return;
+      }
+      while (run.children.length < Math.ceil(bar.clientWidth / w) + 1) {
+        const copy = group.cloneNode(true);
+        copy.setAttribute('aria-hidden', 'true');
+        run.appendChild(copy);
+      }
+      if (w !== width) {
+        width = w;
+        bar.style.setProperty('--bar-shift', -w + 'px');
+        bar.style.setProperty('--bar-dur', (w / speed).toFixed(2) + 's');
+      }
+      bar.classList.add('is-running');
+      pause.hidden = false;
+    };
+
+    pause.addEventListener('click', () => {
+      const paused = bar.classList.toggle('is-paused');
+      pause.setAttribute('aria-pressed', String(paused));
+      $('.sr-only', pause).textContent = paused ? 'Laufband fortsetzen' : 'Laufband anhalten';
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => bar.classList.toggle('is-off', !entry.isIntersecting)).observe(bar);
+    }
+    let raf = 0;
+    const refit = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); };
+    window.addEventListener('resize', refit);
+    calm.addEventListener('change', refit);
+    if (document.fonts) document.fonts.ready.then(refit);
+    fit();
+  });
 
   /* ---- Produktkarte: vorne / hinten ---------------------------------------- */
   document.addEventListener('click', (e) => {

@@ -42,6 +42,7 @@
   --gap: var(--s-3);
   --bar-h: 2.25rem;          /* schwarze Leiste über dem Header */
   --header-h: 3.5rem;
+  --header-h-compact: 3rem;  /* Header nach dem Scrollen */
   --tap: 2.75rem;            /* Mindestgröße für Tippflächen (44 px) */
   --measure: 36rem;
 
@@ -321,21 +322,47 @@ textarea.form__input { resize: vertical; }
 
 /* 5. Leiste, Header, Menü ================================================= */
 .bar { background: var(--c-ink); color: var(--c-paper); --focus: var(--c-paper); }
-.bar__text {
+/* Laufband: die Meldungen stehen einmal im HTML; azur.js kopiert die Gruppe, bis sie die Leiste füllt, und lässt das
+   Band genau eine Gruppenbreite weit laufen (--bar-shift, --bar-dur), dann nahtlos von vorn. Ohne Skript: stehende Zeile. */
+.bar--run { position: relative; display: flex; align-items: center; height: var(--bar-h); overflow: hidden; }
+.bar__run { display: flex; flex: none; align-items: center; height: 100%; padding-left: var(--gutter); }
+.bar__group { display: flex; flex: none; align-items: center; margin: 0; padding: 0; list-style: none; }
+.bar__item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: var(--bar-h);
-  padding-block: var(--s-1);
-  text-align: center;
+  white-space: nowrap;
   font-size: 0.6875rem;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0.05em;
+  line-height: 1;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-@media (min-width: 30em) { .bar__text { letter-spacing: 0.12em; } }
-.bar__link { display: inline-flex; align-items: center; min-height: var(--tap); text-decoration: underline; text-underline-offset: 0.3em; }
+.bar__item::after { content: ""; flex: none; width: 4px; height: 4px; margin-inline: 1.75rem; background: currentColor; opacity: 0.45; transform: rotate(45deg); }
+@keyframes bar-run { to { transform: translate3d(var(--bar-shift, 0), 0, 0); } }
+.bar.is-running .bar__run { animation: bar-run var(--bar-dur, 30s) linear infinite; will-change: transform; }
+.bar.is-running:is(:hover, :focus-within, .is-paused, .is-off) .bar__run { animation-play-state: paused; }
+.bar__pause {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--bar-h);
+  background: var(--c-ink);
+  box-shadow: -1rem 0 1rem var(--c-ink);
+}
+.bar__pause svg { width: 0.625rem; height: 0.625rem; fill: currentColor; opacity: 0.7; }
+.bar__pause:hover svg { opacity: 1; }
+.bar__pause[aria-pressed="true"] .bar__icon-pause,
+.bar__pause[aria-pressed="false"] .bar__icon-play { display: none; }
+/* Bewegung reduzieren: nur die erste Meldung, still und mittig */
+@media (prefers-reduced-motion: reduce) {
+  .bar--run { justify-content: center; }
+  .bar__run { padding-left: 0; }
+  .bar__group + .bar__group,
+  .bar__item + .bar__item,
+  .bar__pause { display: none; }
+  .bar__item::after { content: none; }
+}
 
 .section-header { position: sticky; top: 0; z-index: var(--z-header); }
 .header {
@@ -350,7 +377,14 @@ textarea.form__input { resize: vertical; }
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   height: var(--header-h);
+  transition: height var(--dur-panel) var(--ease);
 }
+/* Schmal, sobald die Seite gescrollt ist (is-compact aus azur.js). Der Abschnitt behält seine Höhe im Fluss: was der
+   Header schrumpft, kommt als Rand darunter dazu, im selben Takt, damit der Inhalt nicht springt. */
+.section-header { transition: margin-bottom var(--dur-panel) var(--ease); }
+.section-header:has(> .header.is-compact) { margin-bottom: calc(var(--header-h) - var(--header-h-compact)); }
+.header.is-compact .header__bar,
+.header.is-compact .header__links { height: var(--header-h-compact); }
 /* Symbole haben 44 px Tippfläche; die negativen Ränder setzen das Zeichen selbst auf die Satzkante */
 .header__start { display: flex; align-items: center; height: 100%; margin-left: -0.625rem; }
 .header__end { display: flex; align-items: center; justify-content: flex-end; height: 100%; margin-right: -0.625rem; }
@@ -369,7 +403,7 @@ textarea.form__input { resize: vertical; }
 .header__menu-btn[aria-expanded="true"] .icon--menu { display: none; }
 .header__menu-btn[aria-expanded="true"] .icon--close { display: block; }
 .header__logo { display: flex; align-items: center; justify-content: center; height: 100%; padding-inline: var(--s-3); }
-.header__logo .logo { height: 1.75rem; width: auto; }
+.header__logo .logo { height: 1.75rem; width: auto; transition: height var(--dur-panel) var(--ease); }
 .header__logo .logo--paper { display: none; }
 .header__nav,
 .header__search-end,
@@ -393,6 +427,7 @@ textarea.form__input { resize: vertical; }
   .header__logo .logo { height: 2.125rem; }
   .header__account { display: inline-flex; }
 }
+.header.is-compact .header__logo .logo { height: 1.5rem; }
 /* Ab 1200 px ist links Platz für alle Menüpunkte, darunter öffnet das Menü-Symbol die Liste */
 @media (min-width: 75em) {
   .header__start { margin-left: 0; }

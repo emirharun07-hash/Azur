@@ -3,8 +3,7 @@
     python3 azur/tools/theme_harness.py [port]      -> http://127.0.0.1:8770/
 
 Renders sections/azur-room.liquid with python-liquid (Shopify filters stubbed), wraps it in the live theme's page
-structure (announcement bar, overlay header, #inhalt, cart drawer) with the live theme's CSS (fetched into
-azur/.cache/theme_live/azur.css), serves the renders under /files/ with their Shopify Files names, and answers
+structure (the real announcement bar, overlay header, #inhalt, cart drawer) with the theme's CSS (azur/theme/assets/azur.css), serves the renders under /files/ with their Shopify Files names, and answers
 POST /cart/add.js and POST /contact like Shopify does (enough for the room's cart and drop sign-up).
 """
 import http.server, json, os, re, socketserver, sys
@@ -53,12 +52,22 @@ def render_section():
     return env.from_string(src).render(**ctx)
 
 
+def render_bar():
+    src = open(os.path.join(THEME, 'sections', 'announcement.liquid')).read()
+    schema = json.loads(re.search(r'{% schema %}(.*?){% endschema %}', src, re.S).group(1))
+    src = re.sub(r'{% schema %}.*?{% endschema %}', '', src, flags=re.S)
+    env = Environment()
+    env.filters['newline_to_br'] = lambda v: (v or '').replace('\n', '<br />\n')
+    settings = {s['id']: s.get('default') or '' for s in schema['settings'] if 'id' in s}
+    return env.from_string(src).render(section={'settings': settings}, settings={'shipping_cost': 'in Deutschland 1,99 €, ab 90 € kostenlos'})
+
+
 PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness</title>
-<link rel="stylesheet" href="/live/azur.css">
+<link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = { routes: { root: '/' } };</script>
 </head><body class="template-index">
-<div class="shopify-section"><div class="announcement" style="min-height:var(--bar-h);display:grid;place-items:center;background:#121212;color:#f3f0ea;font-size:.75rem">Kostenloser Versand ab 90 €</div></div>
+<div class="shopify-section section-bar">__BAR__</div>
 <div class="shopify-section section-header"><header class="header header--overlay" data-header>
   <div class="header__bar wrap" style="display:flex;justify-content:space-between;align-items:center;height:var(--header-h);padding:0 var(--gutter)">
     <nav><a href="#">Berlin 030</a> &nbsp; <a href="#">Frankfurt 069</a> &nbsp; <a href="#">Shop</a></nav>
@@ -103,7 +112,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200); self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
         if self.path.split('?')[0] in ('/', '/index.html'):
-            body = PAGE.replace('__SECTION__', render_section()).encode()
+            body = PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section()).encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
         return super().do_GET()
