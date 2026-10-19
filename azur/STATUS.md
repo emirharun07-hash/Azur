@@ -418,6 +418,39 @@ on every device without losing quality.
   editor: https://admin.shopify.com/store/5vpchz-hd/themes/209556078931/editor. Publishing it is the owner's step; the
   shop stays password-protected.
 
+## Round 9 (owner 2026-10-19: design rounds, a running bar on top, a slimmer header, the light jump at the bed, the
+## white flash at the window, lag at a change of view, cleaner motion, a nicer way down into the shop, admin editing)
+
+- Design round 1 (swipe tool): `azur/design/swipe.html`, artifact https://claude.ai/artifact/ASxoX7hgSL2FbYLiFxcajH
+  (50 product views + 50 shop pages as HTML/CSS mocks; Ja / Nein / Super per owner in the artifact db `votes/<uid>`,
+  localStorage fallback). Next rounds build on the likes and stars.
+- Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,
+  `assets/azur.css`, `assets/azur.js`), imported unchanged first (md5 checked), then changed:
+  - announcement: messages one per line (textarea with defaults), a seamless marquee (40 px/s, setting), pause
+    button, stops on hover/focus and off screen; reduced motion shows the first message still.
+  - header: `is-compact` after 48 px of scroll (64 -> 48 px desktop, 56 -> 48 px phone, smaller logo); the section's
+    margin grows by what the header loses, so nothing below moves.
+- Room (`prototype/js`, rebuilt into the theme):
+  - light jump at the bed: the rendered flights carry their own light (e.g. 18:30 a sun patch on the wall the room
+    view does not have; the frames are 1.3-1.8x brighter on average). Measured end frame vs. landed view: mean abs
+    difference 11-45 levels, up to 77 in a region. Default now `flights: 'blend'`: the room's own picture zooms toward
+    the target and dissolves into the next view (made ready under a still copy first; only transform/opacity).
+    The flights stay selectable: section setting "Übergang", Regie panel "Ortswechsel".
+  - lag: only 2 views keep their 8 light passes on the GPU; the third view's passes were uploaded at the click (plus
+    two read-backs for the flight grade): 1-2.3 s long tasks in the software browser. Now every view keeps its mixed
+    picture, passes come back one per idle moment, background loads and sharper copies upload in idle time, the
+    flight grade's means are cached: no long task over 0.1 s at a change of view.
+  - window flash: while the boy's clip seeks to its start (play, end) it had no frame and the plate's hazy glass showed
+    for a few frames. The last frame now stays; a clip that arrives after the room fades in.
+  - Shopify scroll into the shop: the shop slides over the room like a sheet (shadow); the room stays behind, shrinks
+    to 95 % and darkens (transform/opacity on the stage only).
+- No new renders this round: Shopify Files stay `azr8-`.
+- Published 2026-10-19: artifact v43 (code only), draft theme **"Azur Zimmer Runde 9 (Entwurf)"
+  `gid://shopify/OnlineStoreTheme/209608147283`** (copy of the live Runde 8 209556078931; room section, room js/css,
+  announcement, azur.css, azur.js upserted from commit 8bbaed2, checksums match). Preview:
+  https://azurclothing.com/?preview_theme_id=209608147283 · editor:
+  https://admin.shopify.com/store/5vpchz-hd/themes/209608147283/editor. Publishing it is the owner's step.
+
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
 - Preview render 960×540: about 1.5 min (incl. cloth simulation)
