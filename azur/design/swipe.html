@@ -26,7 +26,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 .top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .top h1 { margin: 0; font-size: 22px; font-weight: 800; font-stretch: 70%; text-transform: uppercase; letter-spacing: .02em; text-wrap: balance; }
 .top h1 span { color: var(--muted); font-weight: 600; }
-.tabs { display: flex; gap: 6px; margin-left: auto; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
 .tabs button { font: 600 13px/1 var(--f-display); padding: 9px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
 .tabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .tabs button:focus-visible, .ctl button:focus-visible, .link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -85,7 +85,8 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 .zoom .view { position: relative; overflow: hidden; border-radius: 8px; }
 .zoom .scaler { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
 @media (max-width: 560px) { .ctl { gap: 10px; } .ctl .big { width: 64px; height: 64px; } .meta h2 { font-size: 20px; } .tabs { margin-left: 0; } }
-@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; }
+  .m.anim:not(.play) *, .m.anim:not(.play) *::before, .m.anim:not(.play) *::after { animation-play-state: paused !important; } }
 
 /* ============ design mocks (fixed 1280 px canvas, scaled into the card) ============ */
 .m { position: relative; width: 1280px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Archivo', Arial, sans-serif; font-stretch: 100%; font-size: 15px; line-height: 1.4; }
@@ -170,24 +171,27 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-Runde <span id="roundLabel">2</span></h1>
+    <h1>Azur Design-Runde <span id="roundLabel">3</span></h1>
     <div class="tabs" role="group" aria-label="Bereich">
       <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
       <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
+      <button type="button" id="tab-anim" aria-pressed="false">Animation</button>
+      <button type="button" id="tab-color" aria-pressed="false">Farbe</button>
       <button type="button" id="tab-result" aria-pressed="false">Ergebnis</button>
     </div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Runde 2: jede Karte ist ein eigener Aufbau. Die Farben sind absichtlich überall gleich und neutral, die Farbpalette entscheiden wir in einer eigenen Runde. Produktansicht: Varianten deiner drei Favoriten (Spielprogramm, Ticket, Magazin). Shopseite: 30 neue Konzepte.</p>
+  <p class="note">Runde 3: Produktansicht und Shopseite zeigen deine Ja-Stimmen aus Runde 2 noch einmal zum Vergleich und dazu Mischungen daraus. Vergib ruhig Sterne für die besten. Animation: jede Karte spielt eine Bewegung in Schleife vor (eine Maus zeigt, wann sie startet). Farbe: dieselbe Seite in 19 Paletten, alle auf Lesbarkeit geprüft.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
 </div>
 
 <script src="r2.js"></script>
+<script src="r3.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r2';
+const ROUND = 'r3';
 const PRODUCTS = [
   { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
   { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
@@ -208,25 +212,28 @@ const fsbar = p => `<div class="fs"><p>Noch <b>${eur(90 - p.price)}</b> bis zum 
 const ups = p => `<div class="ups">${others(p).map(q => `<div class="u"><span class="plus">+</span><img src="${q.img}" alt=""><b>${q.name}${q.city ? ' ' + q.code : ''}</b><span>${eur(q.price)}</span></div>`).join('')}</div>`;
 const guide = () => `<span class="guide">Größentabelle</span>`;
 const logo = dark => `img/azur-logo-${dark ? 'paper' : 'ink'}.webp`;
-const marquee = () => `<div class="mq">${['Versand in Deutschland ca. 3 Werktage', 'Europa ca. 5 Werktage', 'Ab 90 € versandkostenfrei', '14 Tage Rückgabe', 'Kostenloser Rückversand', 'Neue Städte im nächsten Drop', 'Versand in Deutschland ca. 3 Werktage'].map(s => `<span>${s}</span>`).join('<i>✦</i>')}</div>`;
+const marquee = () => `<div class="mq">${['Versand in Deutschland ca. 3 Werktage', 'Europa ca. 5 Werktage', 'Ab 90 € versandkostenfrei', '14 Tage Rückgabe', 'Kostenloser Rückversand', 'Sichere Zahlung', 'Versand in Deutschland ca. 3 Werktage'].map(s => `<span>${s}</span>`).join('<i>✦</i>')}</div>`;
 const header = (dark, cls = '') => `<header class="hd ${cls}"><img class="logo" src="${logo(dark)}" alt="Azur"><nav><span>Trikots</span><span>Drops</span><span>Magazin</span><span>Über uns</span></nav><div class="hd-r"><span>Suche</span><span>Konto</span><span class="bag">Warenkorb <b>1</b></span></div></header>`;
 const pcard = (p, h = 300, o = {}) => `<div class="pc">${o.badge ? `<span class="badge new">${o.badge}</span>` : ''}<div class="ph" style="height:${h}px">${o.qa ? '' : ''}<img src="${p.img}" alt="">${o.qa ? `<span class="qa">+ Schnell in den Warenkorb</span>` : ''}</div><div class="nm"><span>${p.name}${p.city ? ' ' + p.code : ''} Trikot</span><span>${eur(p.price)}</span></div></div>`;
 
-/* ---------------------------------------------------------------- product view layouts (50 = 10 x 5 themes) */
-/* round 2: every card its own layout (layouts in r2.js), the jerseys take turns */
+/* ---------------------------------------------------------------- decks (round 3 layouts in r3.js, the jerseys take turns) */
+const KINDS = { pdp: { id: 'P', cls: 'L', label: 'Produktansicht', h: 800 }, shop: { id: 'S', cls: 'S', label: 'Shopseite', h: 1240 },
+  anim: { id: 'A', cls: 'A', label: 'Animation', h: 800 }, color: { id: 'F', cls: 'F', label: 'Farbe', h: 800 } };
+const ORDER = Object.keys(KINDS);
 function buildDeck(kind, layouts) {
-  return layouts.map((L, i) => ({ id: `${kind === 'pdp' ? 'P' : 'S'}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
+  return layouts.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
 }
-const DECKS = { pdp: buildDeck('pdp', PDP2), shop: buildDeck('shop', SHOP2) };
-const ALL = [...DECKS.pdp, ...DECKS.shop];
+const DECKS = { pdp: buildDeck('pdp', PDP3), shop: buildDeck('shop', SHOP3), anim: buildDeck('anim', ANIM3), color: buildDeck('color', COLOR3) };
+const ALL = ORDER.flatMap(k => DECKS[k]);
 const BY_ID = Object.fromEntries(ALL.map(c => [c.id, c]));
 
-document.head.insertAdjacentHTML('beforeend', `<style>${[...PDP2.map(l => l.css), ...SHOP2.map(l => l.css)].join('\n')}</style>`);
+document.head.insertAdjacentHTML('beforeend', `<style>${[R3_CSS, ...new Set(ALL.map(c => c.L.css))].join('\n')}</style>`);
 
 function mockHTML(c) {
-  return `<div class="m ${c.kind} t-paper ${c.kind === 'pdp' ? 'L' : 'S'}-${c.L.key}">${c.L.html(c.P)}</div>`;
+  const pal = c.L.pal ? ` style="${Object.entries(c.L.pal).map(([k, v]) => `--${k}:${v}`).join(';')}"` : '';
+  return `<div class="m ${c.kind}${c.L.pal ? '' : ' t-paper'} ${KINDS[c.kind].cls}-${c.L.key}"${pal}>${c.L.html(c.P)}</div>`;
 }
-const MOCK_H = { pdp: 800, shop: 1240 };
+const MOCK_H = Object.fromEntries(ORDER.map(k => [k, KINDS[k].h]));
 function mountMock(view, c, width, maxH) {
   const s = Math.min(width / 1280, maxH ? maxH / MOCK_H[c.kind] : 9);
   view.style.width = Math.round(1280 * s) + 'px';
@@ -286,14 +293,14 @@ async function initStore() {
 }
 async function renderWho() {
   const el = document.getElementById('who');
-  const n = d => Object.keys(DECKS[d].reduce((a, c) => (state.mine[c.id] !== undefined && (a[c.id] = 1), a), {})).length;
-  let txt = `<span>Du: <b>${n('pdp')}/${DECKS.pdp.length}</b> Produktansicht · <b>${n('shop')}/${DECKS.shop.length}</b> Shopseite</span>`;
+  const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
+  let txt = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
   const ids = Object.keys(state.others);
   if (ids.length && state.user) {
     const ps = await state.user.profiles(ids);
     ids.forEach(id => {
       const v = state.others[id], cnt = d => DECKS[d].filter(c => v[c.id] !== undefined).length;
-      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: <b>${cnt('pdp')}/${DECKS.pdp.length}</b> · <b>${cnt('shop')}/${DECKS.shop.length}</b></span>`;
+      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>`).join(' · ')}</span>`;
     });
   } else txt += `<span>Partner: noch keine Stimmen</span>`;
   el.innerHTML = txt;
@@ -302,13 +309,14 @@ const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;'
 
 /* ---------------------------------------------------------------- views */
 const main = document.getElementById('main');
+function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
 function nextIndex(deck) { const d = DECKS[deck]; const i = d.findIndex(c => state.mine[c.id] === undefined); return i; }
 function setProgress() {
   const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => state.mine[c.id] !== undefined).length;
   document.getElementById('progress').style.width = (done / d.length * 100) + '%';
 }
 function render() {
-  ['pdp', 'shop', 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
+  [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
   setProgress();
   if (state.deck === 'result') return renderResult();
   const i = nextIndex(state.deck);
@@ -324,12 +332,12 @@ function renderCard(c, i) {
       <div class="view" id="cardView"></div>
       <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length}${c.L.fam ? ' · Familie: ' + c.L.fam : ''}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
       <div class="tags">${c.L.tags.map(t => `<span>${t}</span>`).join('')}</div>
-      <div><button type="button" class="link" id="zoomBtn">Groß ansehen</button></div></div></article></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="zoomBtn">Groß ansehen</button>${c.kind === 'anim' ? '<button type="button" class="link" id="replayBtn">Neu abspielen</button>' : ''}</div></div></article></div>
     <div class="ctl"><button type="button" class="small" id="undo" ${state.history.length ? '' : 'disabled'}>Zurück</button>
       <button type="button" class="big no" id="vNo" aria-label="Nein"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 14V4M7 14l4.5 6.2c.7 1 2.2.6 2.3-.6l.4-4.6h4.6a2 2 0 0 0 2-2.3l-1-6A2 2 0 0 0 17.8 5H7"/></svg>Nein</button>
       <button type="button" class="star" id="vStar" aria-label="Super"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2.8l2.8 6 6.5.6-4.9 4.3 1.5 6.4L12 16.8 6.1 20.1l1.5-6.4L2.7 9.4l6.5-.6z"/></svg>Super</button>
       <button type="button" class="big yes" id="vYes" aria-label="Ja"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 10v10M7 10l4.5-6.2c.7-1 2.2-.6 2.3.6l.4 4.6h4.6a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 17.8 19H7"/></svg>Ja</button>
-      <button type="button" class="small" id="skipDeck">${state.deck === 'pdp' ? 'Zur Shopseite' : 'Zur Produktansicht'}</button></div>
+      <button type="button" class="small" id="skipDeck">Weiter: ${KINDS[nextKind(state.deck)].label}</button></div>
     <p class="hint">Wischen oder Tasten: ← Nein · ↑ Super · → Ja · Z zurück</p>`;
   const view = document.getElementById('cardView'), card = view.parentElement;
   const wide = matchMedia('(min-width: 1000px)').matches, top = card.getBoundingClientRect().top + scrollY;
@@ -359,7 +367,9 @@ function bindCard(c) {
   document.getElementById('vStar').onclick = () => vote(c, 2);
   document.getElementById('undo').onclick = undo;
   document.getElementById('zoomBtn').onclick = () => zoom(c);
-  document.getElementById('skipDeck').onclick = () => { state.deck = state.deck === 'pdp' ? 'shop' : 'pdp'; render(); };
+  document.getElementById('skipDeck').onclick = () => { state.deck = nextKind(state.deck); render(); };
+  const rp = document.getElementById('replayBtn');
+  if (rp) rp.onclick = () => { const v = document.getElementById('cardView'); v.innerHTML = v.innerHTML; v.querySelector('.m').classList.add('play'); };
   let x0 = null, y0 = 0, dx = 0, dy = 0, id = null;
   const stamps = { yes: card.querySelector('.stamp.yes'), no: card.querySelector('.stamp.no'), star: card.querySelector('.stamp.star') };
   card.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; id = e.pointerId; });
@@ -416,10 +426,10 @@ function mountTiles() {
 function renderDone() {
   state.view = 'done';
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
-  const other = state.deck === 'pdp' ? 'shop' : 'pdp', rest = nextIndex(other) >= 0;
-  main.innerHTML = `<section class="done"><h2>${state.deck === 'pdp' ? 'Produktansicht' : 'Shopseite'}: fertig</h2>
-    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Beide Bereiche sind durch.'} Claude liest eure Stimmen aus und baut daraus die nächste Runde.</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter mit ${other === 'pdp' ? 'der Produktansicht' : 'der Shopseite'}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
+  const i0 = ORDER.indexOf(state.deck), other = [...ORDER.slice(i0 + 1), ...ORDER.slice(0, i0)].find(k => nextIndex(k) >= 0), rest = !!other;
+  main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: fertig</h2>
+    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch.'} Claude liest eure Stimmen aus und baut daraus die nächste Runde.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
     <div class="grid">${tiles(d.filter(c => state.mine[c.id] > 0))}</div></section>`;
   if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
   document.getElementById('goRes').onclick = () => { state.deck = 'result'; render(); };
@@ -436,10 +446,10 @@ function renderResult() {
       .sort((a, b) => score(b) - score(a)).slice(0, 12);
     return `<h2>${label}: eure Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Stimmen.</p>'}`;
   };
-  main.innerHTML = `<section class="done"><p>Punkte: Stern 3, Ja 1, Nein −1, von euch beiden zusammengezählt. Tippe auf eine Kachel, um sie groß zu sehen.</p>${sect('pdp', 'Produktansicht')}${sect('shop', 'Shopseite')}</section>`;
+  main.innerHTML = `<section class="done"><p>Punkte: Stern 3, Ja 1, Nein −1, von euch beiden zusammengezählt. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
   mountTiles();
 }
-['pdp', 'shop', 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));
+[...ORDER, 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));
 let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(render, 150); });
 render();
 if (window.claude && claude.use) initStore(); else { state.local = true; showNote('Deine Stimmen werden nur in diesem Browser gespeichert.'); renderWho(); }

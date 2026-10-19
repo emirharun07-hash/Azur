@@ -428,6 +428,23 @@ on every device without losing quality.
   variants are not new designs and that the palette gets its own round. So every card is now its own layout in one
   neutral palette: 24 product views built from his three favourite families (match programme, ticket, magazine, plus
   two crossovers) and 30 new shop-page concepts. Votes go to `votes/<uid>.r2` next to `r1`.
+- Owner's round-2 likes (no stars): product view Aufstellung (pteam), Platzwahl (tseat), Drehkreuz (tgate),
+  Modemagazin (mclassic); shop Horizontale Reihe (hrail), Klassischer Shop (classic), Spielerkarten (cards).
+- Design round 3 (artifact v3, `azur/design/r3.js`, votes `r3`), owner alone; the partner joins only in the last round:
+  - product view 13: the four likes again plus mixes (magazine + lineup / seat map / turnstile bar, turnstile +
+    lineup / seat map, lineup as stage, round stadium plan, magazine lookbook) and a phone card;
+  - shop 13: the three likes plus mixes (classic + cards, filters as chips, sizes on the card, classic + big numbers,
+    real clothes rail with hangers and price tags, two rails cities/countries, cards rail, flip cards, sticker album)
+    and a phone card;
+  - animation 21 (new tab): live CSS demos in a 4.5 s loop with a moving cursor: card hover (lift, swing on the hanger,
+    flip, zoom, quick add), buying (fly to bag, button to tick, ticket tear, stamp, cart drawer, ball rolls to free
+    shipping), size pick (lineup, seat block), page build-up (stagger, numbers, split-flap board, big marquee, TV
+    replay wipe), product image float, top bar (current marquee vs. one message at a time). Paused under reduced
+    motion until "Neu abspielen";
+  - colour 19 (new tab): one fixed composite (room strip, bar, header, grid, product panel, swatches) in 19
+    palettes; text, muted text, button text and button edge checked against WCAG contrast (AA or better).
+- Open, owner asked to be reminded: the room transition (Überblendung vs. rendered camera flight) and the 30-minute
+  admin setup (`azur/admin/ANLEITUNG.md`).
 - Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,
   `assets/azur.css`, `assets/azur.js`), imported unchanged first (md5 checked), then changed:
   - announcement: messages one per line (textarea with defaults), a seamless marquee (40 px/s, setting), pause
