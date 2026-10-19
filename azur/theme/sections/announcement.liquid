@@ -3,9 +3,15 @@
   Laufband: eine Meldung pro Zeile im Feld „Meldungen“; sie laufen endlos von rechts nach links, halten bei Maus darüber,
   Fokus oder dem Pause-Knopf an. Bei „Bewegung reduzieren“ steht nur die erste Meldung still in der Mitte.
   Ohne Meldungen: „Versand …“ aus Theme-Einstellungen → Azur (Versandkosten). Beides leer = keine Leiste.
+  Vorrang hat das Shop-Metafeld azur.announcement: das setzt die Admin-Bearbeitung direkt auf der Website (azur/admin).
 {%- endcomment -%}
 {%- liquid
-  assign messages = section.settings.messages | newline_to_br | split: '<br />'
+  assign source = section.settings.messages
+  assign edited = shop.metafields.azur.announcement.value
+  if edited != blank
+    assign source = edited
+  endif
+  assign messages = source | newline_to_br | split: '<br />'
   assign items = ''
   for m in messages
     assign t = m | strip | escape
@@ -23,7 +29,7 @@
   endif
 -%}
 {%- if items != blank -%}
-  <div class="bar bar--run" data-marquee="{{ section.settings.speed }}">
+  <div class="bar bar--run" data-marquee="{{ section.settings.speed }}" data-azur-bar="{{ source | strip | escape }}">
     <{{ tag }} class="bar__run"{% if tag == 'a' %} href="{{ section.settings.link }}"{% endif %}>
       <ul class="bar__group" role="list">{{ items }}</ul>
     </{{ tag }}>

@@ -200,12 +200,11 @@
       {%- endif -%}
 
       <div class="pdp__more">
-        {%- if product.description != blank -%}
-          <details class="acc" open>
-            <summary class="acc__head">Beschreibung</summary>
-            <div class="acc__body rte">{{ product.description }}</div>
-          </details>
-        {%- endif -%}
+        {%- comment -%} leer: versteckt, die Admin-Bearbeitung (azur/admin) blendet sie zum Schreiben ein {%- endcomment -%}
+        <details class="acc" open{% if product.description == blank %} hidden{% endif %}>
+          <summary class="acc__head">Beschreibung</summary>
+          <div class="acc__body rte" data-azur-edit="product" data-product-id="{{ product.id }}">{{ product.description }}</div>
+        </details>
         {%- for block in section.blocks -%}
           {%- liquid
             assign has_link = false

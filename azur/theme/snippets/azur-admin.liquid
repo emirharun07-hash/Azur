@@ -1,0 +1,20 @@
+{%- comment -%}
+  Admin-Bearbeitung auf der Website (azur/admin/ANLEITUNG.md): lädt assets/azur-admin.js nur, wenn die Adresse #admin
+  enthält oder in diesem Browser schon ein Admin angemeldet ist. Besucher laden davon nichts.
+  admin_api: die Adresse des Admin-Servers (Cloudflare Worker), nach dem Einrichten hier eintragen.
+{%- endcomment -%}
+{%- assign admin_api = 'https://azur-admin.CHANGE-ME.workers.dev' -%}
+<script>
+  (function () {
+    var asked = function () { return /(^|[#&?])admin\b/.test(location.hash + location.search); };
+    var load = function () {
+      if (window.AZUR_ADMIN_API) return;
+      window.AZUR_ADMIN_API = {{ admin_api | json }};
+      var s = document.createElement('script'); s.src = {{ 'azur-admin.js' | asset_url | json }}; s.defer = true;
+      document.head.appendChild(s);
+    };
+    var on = asked();
+    try { var v = JSON.parse(localStorage.getItem('azur-admin') || 'null'); on = on || !!(v && v.exp > Date.now()); } catch (e) { }
+    if (on) load(); else window.addEventListener('hashchange', function () { if (asked()) load(); });
+  })();
+</script>

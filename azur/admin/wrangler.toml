@@ -1,0 +1,11 @@
+# AZUR admin server (Cloudflare Worker). Deploy: npx wrangler deploy (in azur/admin). Secrets: see ANLEITUNG.md.
+name = "azur-admin"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+[vars]
+SHOP = "5vpchz-hd"
+ALLOWED_ORIGINS = "https://azurclothing.com,https://www.azurclothing.com,https://5vpchz-hd.myshopify.com"
+
+[observability]
+enabled = true
