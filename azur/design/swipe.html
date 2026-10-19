@@ -132,9 +132,9 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 /* shop chrome */
 .m .fromroom { height: 70px; background: linear-gradient(to bottom, rgb(0 0 0 / 0), var(--bg)), url(img/room.webp) center 92%/1280px auto; }
-.m .mq { height: 32px; display: flex; align-items: center; gap: 22px; padding: 0 22px; background: var(--ink); color: var(--bg); white-space: nowrap; overflow: hidden;
+.m .mq { height: 32px; display: flex; align-items: center; gap: 22px; padding: 0 22px; background: var(--bar, var(--ink)); color: var(--barInk, var(--bg)); white-space: nowrap; overflow: hidden;
   font-family: 'Martian Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-.m .mq i { font-style: normal; color: var(--acc); }
+.m .mq i { font-style: normal; color: var(--barStar, var(--acc)); }
 .m .hd { height: 54px; display: flex; align-items: center; gap: 30px; padding: 0 40px; border-bottom: 1px solid var(--line); background: var(--bg); }
 .m .hd .logo { height: 26px; width: auto; }
 .m .hd nav { display: flex; gap: 22px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; font-stretch: 80%; }
@@ -171,7 +171,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-Runde <span id="roundLabel">3</span></h1>
+    <h1>Azur Design-Runde <span id="roundLabel">4</span></h1>
     <div class="tabs" role="group" aria-label="Bereich">
       <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
       <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
@@ -181,7 +181,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
     </div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Runde 3: Produktansicht und Shopseite zeigen deine Ja-Stimmen aus Runde 2 noch einmal zum Vergleich und dazu Mischungen daraus. Vergib ruhig Sterne für die besten. Animation: jede Karte spielt eine Bewegung in Schleife vor (eine Maus zeigt, wann sie startet). Farbe: dieselbe Seite in 19 Paletten, alle auf Lesbarkeit geprüft.</p>
+  <p class="note">Runde 4: Produktansicht und Shopseite zeigen nur noch deine Ja-Stimmen aus Runde 3 und je drei neue Mischungen daraus. Gib deinen 1–2 Favoriten pro Bereich einen Stern, die kommen ins Finale mit deinem Partner. Animation steht schon (deine 9 Ja). Farbe: 40 neue, mutigere Paletten direkt auf deinen Lieblingsentwürfen, viele in Richtung Flutlicht.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
@@ -189,9 +189,10 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <script src="r2.js"></script>
 <script src="r3.js"></script>
+<script src="r4.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r3';
+const ROUND = 'r4';
 const PRODUCTS = [
   { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
   { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
@@ -219,21 +220,22 @@ const pcard = (p, h = 300, o = {}) => `<div class="pc">${o.badge ? `<span class=
 /* ---------------------------------------------------------------- decks (round 3 layouts in r3.js, the jerseys take turns) */
 const KINDS = { pdp: { id: 'P', cls: 'L', label: 'Produktansicht', h: 800 }, shop: { id: 'S', cls: 'S', label: 'Shopseite', h: 1240 },
   anim: { id: 'A', cls: 'A', label: 'Animation', h: 800 }, color: { id: 'F', cls: 'F', label: 'Farbe', h: 800 } };
-const ORDER = Object.keys(KINDS);
 function buildDeck(kind, layouts) {
   return layouts.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
 }
-const DECKS = { pdp: buildDeck('pdp', PDP3), shop: buildDeck('shop', SHOP3), anim: buildDeck('anim', ANIM3), color: buildDeck('color', COLOR3) };
+const DECKS = { pdp: buildDeck('pdp', PDP4), shop: buildDeck('shop', SHOP4), anim: buildDeck('anim', ANIM4), color: buildDeck('color', COLOR4) };
+const ORDER = Object.keys(KINDS).filter(k => DECKS[k].length);
+Object.keys(KINDS).forEach(k => { if (!DECKS[k].length) document.getElementById('tab-' + k).hidden = true; });
 const ALL = ORDER.flatMap(k => DECKS[k]);
 const BY_ID = Object.fromEntries(ALL.map(c => [c.id, c]));
 
-document.head.insertAdjacentHTML('beforeend', `<style>${[R3_CSS, ...new Set(ALL.map(c => c.L.css))].join('\n')}</style>`);
+document.head.insertAdjacentHTML('beforeend', `<style>${[R3_CSS, R4_CSS, ...new Set([...PDP3, ...SHOP3, ...ALL.map(c => c.L)].map(l => l.css))].join('\n')}</style>`);
 
 function mockHTML(c) {
   const pal = c.L.pal ? ` style="${Object.entries(c.L.pal).map(([k, v]) => `--${k}:${v}`).join(';')}"` : '';
-  return `<div class="m ${c.kind}${c.L.pal ? '' : ' t-paper'} ${KINDS[c.kind].cls}-${c.L.key}"${pal}>${c.L.html(c.P)}</div>`;
+  return `<div class="m ${c.kind}${c.L.pal ? '' : ' t-paper'} ${c.L.cls || ''} ${KINDS[c.kind].cls}-${c.L.key}"${pal}>${c.L.html(c.P)}</div>`;
 }
-const MOCK_H = Object.fromEntries(ORDER.map(k => [k, KINDS[k].h]));
+const MOCK_H = Object.fromEntries(Object.keys(KINDS).map(k => [k, KINDS[k].h]));
 function mountMock(view, c, width, maxH) {
   const s = Math.min(width / 1280, maxH ? maxH / MOCK_H[c.kind] : 9);
   view.style.width = Math.round(1280 * s) + 'px';

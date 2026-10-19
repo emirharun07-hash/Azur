@@ -443,6 +443,18 @@ on every device without losing quality.
     motion until "Neu abspielen";
   - colour 19 (new tab): one fixed composite (room strip, bar, header, grid, product panel, swatches) in 19
     palettes; text, muted text, button text and button edge checked against WCAG contrast (AA or better).
+- Owner's round-3 likes: product view mclassic, mlineup, mseat, glineup, gseat; shop classiccards, quicksize,
+  railcards, cards, cardflip, phoneshop; animation lift, check, tear, drawer, ball, lpick, spick, stagger, flap (this is
+  the animation set, no further animation round); colour only Flutlicht ("too few, almost all meh": 12 of 19 were
+  cream + one accent on a plain generic page).
+- Design round 4 (artifact v4, `azur/design/r4.js`, votes `r4`), owner alone, stars pick the finalists:
+  product view 8 (the five likes + magazine with the dark bar and lineup / seat map, magazine with lineup in the light
+  bar), shop 9 (the six likes + cards with sizes, classic + cards + sizes, card rail + sizes); colour 41 (the liked
+  Flutlicht + 40 new, bolder: 11 more floodlight variants, 8 dark with another light, 10 colour-as-surface, 11 light
+  but bold), each shown on the favourites (player-card shop under the room strip, magazine + lineup product view, a
+  detail strip with button, sizes, badge, free-shipping bar, handwriting) with swatches. New palette variables: `bar`,
+  `barInk`, `barStar` (top bar), `cd1a/cd1b/cd1i`, `cd2a/cd2b/cd2i` (player card colours), `bgimg`; all 41 pass the
+  contrast check (text and muted text AA, button text AA, button edge 3:1).
 - Open, owner asked to be reminded: the room transition (Überblendung vs. rendered camera flight) and the 30-minute
   admin setup (`azur/admin/ANLEITUNG.md`).
 - Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,

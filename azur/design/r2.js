@@ -446,8 +446,8 @@ const SHOP2 = [
 
   { key: 'cards', name: 'Spielerkarten', idea: 'Jedes Trikot als Sammelkarte wie in Fußball-Spielen: großes Bild, Name, ein paar Eigenschaften und der Preis als Wert. Junge Zielgruppe erkennt das sofort.',
     tags: ['Sammelkarten', 'Junge Zielgruppe', 'Auffällig', 'Echte Eigenschaften'],
-    css: `.S-cards .g{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;padding:60px 50px}.S-cards .cd{height:430px;background:linear-gradient(160deg,#e9d9a8,#b8954a);clip-path:polygon(50% 0,100% 8%,100% 92%,50% 100%,0 92%,0 8%);padding:34px 18px;display:grid;grid-template-rows:auto 1fr auto;text-align:center;color:#2a2010}
-      .S-cards .cd.s{background:linear-gradient(160deg,#e3e5ea,#9aa1ad)}.S-cards .cd img{height:200px;justify-self:center}.S-cards .cd b{font-size:24px;font-weight:900;font-stretch:62%;text-transform:uppercase}
+    css: `.S-cards .g{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;padding:60px 50px}.S-cards .cd{height:430px;background:linear-gradient(160deg,var(--cd1a,#e9d9a8),var(--cd1b,#b8954a));clip-path:polygon(50% 0,100% 8%,100% 92%,50% 100%,0 92%,0 8%);padding:34px 18px;display:grid;grid-template-rows:auto 1fr auto;text-align:center;color:var(--cd1i,#2a2010)}
+      .S-cards .cd.s{background:linear-gradient(160deg,var(--cd2a,#e3e5ea),var(--cd2b,#9aa1ad));color:var(--cd2i,#2a2010)}.S-cards .cd img{height:200px;justify-self:center}.S-cards .cd b{font-size:24px;font-weight:900;font-stretch:62%;text-transform:uppercase}
       .S-cards .cd .at{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-family:'Martian Mono',monospace;font-size:10px;text-align:left}.S-cards .val{font-size:30px;font-weight:900;font-stretch:62%}
       .S-cards h2{font-size:90px;padding:40px 50px 0}`,
     html: () => `${shopTop()}<h2>Sammel deine Stadt</h2><div class="g">${PRODUCTS.map(q => `<div class="cd ${q.city ? '' : 's'}"><div><span class="val">${q.code}</span></div><div style="display:grid;align-content:center;gap:8px"><img src="${q.img}" alt=""><b>${q.name}</b></div>
