@@ -166,17 +166,11 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 /* themes */
 .t-paper { --bg: #f3f0ea; --surf: #fbfaf6; --surf2: #e9e4da; --ink: #16181b; --mut: #6d6a63; --line: #d6cfc2; --acc: #1f5fbf; --accInk: #ffffff; --r: 2px; --hand: #1f5fbf; }
-.t-night { --bg: #0e1013; --surf: #161a1f; --surf2: #1d2229; --ink: #eef1f4; --mut: #8b939d; --line: #2a3039; --acc: #53d6ff; --accInk: #041219; --r: 10px; --hand: #53d6ff; }
-.t-wood { --bg: #d9c3a3; --surf: #efe2cc; --surf2: #e2cfb2; --ink: #2b1e13; --mut: #6f5a44; --line: #bea27e; --acc: #23395d; --accInk: #f5ecdc; --r: 4px; --hand: #23395d; }
-.t-flood { --bg: #0a1730; --surf: #0f2142; --surf2: #142a52; --ink: #f4f7fb; --mut: #9fb1cc; --line: #23406f; --acc: #ffd23f; --accInk: #0a1730; --r: 0px; --hand: #ffd23f; }
-.t-flood h1, .t-flood h2, .t-flood h3 { font-stretch: 62%; font-weight: 900; }
-.t-night h1, .t-night h2, .t-night h3 { font-weight: 700; }
-.t-wood h1, .t-wood h2 { font-weight: 800; }
 </style>
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-Runde <span id="roundLabel">1</span></h1>
+    <h1>Azur Design-Runde <span id="roundLabel">2</span></h1>
     <div class="tabs" role="group" aria-label="Bereich">
       <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
       <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
@@ -184,32 +178,22 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
     </div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
+  <p class="note">Runde 2: jede Karte ist ein eigener Aufbau. Die Farben sind absichtlich überall gleich und neutral, die Farbpalette entscheiden wir in einer eigenen Runde. Produktansicht: Varianten deiner drei Favoriten (Spielprogramm, Ticket, Magazin). Shopseite: 30 neue Konzepte.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
 </div>
 
+<script src="r2.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r1';
+const ROUND = 'r2';
 const PRODUCTS = [
-  { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp',
-    team: { bg: '#efe9da', surf: '#f8f4ea', surf2: '#e2dbc9', ink: '#0f2419', mut: '#4f6457', line: '#c9c1ac', acc: '#1d5c3a', accInk: '#f6f1e4', hand: '#a8832a', r: '3px' } },
-  { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp',
-    team: { bg: '#121212', surf: '#1b1b1b', surf2: '#262523', ink: '#efe6d2', mut: '#a39d8f', line: '#38352f', acc: '#efe6d2', accInk: '#121212', hand: '#d8c79a', r: '2px' } },
-  { id: 'brasilien', name: 'Brasilien', code: 'BRA', city: false, price: 54.99, img: 'img/brasilien.webp',
-    team: { bg: '#ffd52e', surf: '#ffe47e', surf2: '#ffcb12', ink: '#0b3d1f', mut: '#2f5e3d', line: '#dfb000', acc: '#1f7a3a', accInk: '#fff2b3', hand: '#1d4ea8', r: '6px' } },
-  { id: 'deutschland', name: 'Deutschland', code: 'GER', city: false, price: 54.99, img: 'img/deutschland.webp',
-    team: { bg: '#f4f4f1', surf: '#ffffff', surf2: '#e8e8e4', ink: '#111111', mut: '#666666', line: '#d0d0cb', acc: '#111111', accInk: '#ffffff', hand: '#b5121b', r: '0px' } },
-  { id: 'tuerkei', name: 'Türkei', code: 'TUR', city: false, price: 54.99, img: 'img/tuerkei.webp',
-    team: { bg: '#c8141c', surf: '#d6252c', surf2: '#b10f17', ink: '#ffffff', mut: '#ffd9d9', line: '#e2575c', acc: '#ffffff', accInk: '#c8141c', hand: '#ffffff', r: '4px' } },
-];
-const THEMES = [
-  { key: 'paper', name: 'Papier', dark: false, note: 'helles Papier wie im Zimmer, Azurblau als Akzent' },
-  { key: 'night', name: 'Nacht', dark: true, note: 'dunkel wie das Zimmer nachts, Neon-Cyan vom Schild' },
-  { key: 'team', name: 'Trikotfarben', dark: null, note: 'die Seite nimmt die Farben des Trikots an' },
-  { key: 'wood', name: 'Holz & Kreide', dark: false, note: 'warm wie Schreibtisch und Kleiderstange, Marineblau' },
-  { key: 'flood', name: 'Flutlicht', dark: true, note: 'Nachtblau und Flutlicht-Gelb, Stadion-Gefühl' },
+  { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
+  { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
+  { id: 'brasilien', name: 'Brasilien', code: 'BRA', city: false, price: 54.99, img: 'img/brasilien.webp' },
+  { id: 'deutschland', name: 'Deutschland', code: 'GER', city: false, price: 54.99, img: 'img/deutschland.webp' },
+  { id: 'tuerkei', name: 'Türkei', code: 'TUR', city: false, price: 54.99, img: 'img/tuerkei.webp' },
 ];
 
 const eur = v => v.toFixed(2).replace('.', ',') + ' €';
@@ -229,276 +213,18 @@ const header = (dark, cls = '') => `<header class="hd ${cls}"><img class="logo" 
 const pcard = (p, h = 300, o = {}) => `<div class="pc">${o.badge ? `<span class="badge new">${o.badge}</span>` : ''}<div class="ph" style="height:${h}px">${o.qa ? '' : ''}<img src="${p.img}" alt="">${o.qa ? `<span class="qa">+ Schnell in den Warenkorb</span>` : ''}</div><div class="nm"><span>${p.name}${p.city ? ' ' + p.code : ''} Trikot</span><span>${eur(p.price)}</span></div></div>`;
 
 /* ---------------------------------------------------------------- product view layouts (50 = 10 x 5 themes) */
-const PDP = [
-  { key: 'drawer', name: 'Seitenpanel', idea: 'Das Zimmer bleibt verschwommen im Hintergrund, das Trikot groß in der Mitte, rechts ein klares Panel mit allem zum Kaufen untereinander.',
-    tags: ['Größen sofort sichtbar', 'Lieferzeit am Button', 'Passt dazu', 'Vertrauens-Zeile'],
-    css: `.L-drawer .stage{position:absolute;left:0;top:0;bottom:0;right:460px;display:grid;place-items:center}.L-drawer .stage img{height:600px}
-      .L-drawer .panel{position:absolute;right:0;top:0;bottom:0;width:460px;background:var(--surf);padding:48px 44px;display:flex;flex-direction:column;gap:15px;box-shadow:-30px 0 60px rgb(0 0 0/.3)}
-      .L-drawer h1{font-size:66px}.L-drawer .x{position:absolute;top:20px;right:22px;font-size:22px;color:var(--mut)}`,
-    html: p => `<div class="bgroom"></div><div class="stage"><img class="shadow" src="${p.img}" alt=""></div>
-      <aside class="panel"><span class="x">✕</span><span class="eyebrow">Drop 01 · ${p.city ? 'Städte-Trikot' : 'Länder-Trikot'}</span><h1>${title(p)}</h1><div class="price">${eur(p.price)}</div>
-      <p class="desc">${desc(p)}</p><div class="row"><span class="lab">Größe wählen</span>${guide()}</div>${sizes()}${cta(p)}${ship()}${trust()}
-      <span class="lab" style="margin-top:6px">Passt dazu</span>${ups(p)}</aside>` },
-  { key: 'tag', name: 'Hang-Tag', idea: 'Die Kaufinfos hängen als Etikett an einer Schnur am Bügel, wie im Laden. Preis groß auf dem Etikett, Kaufen direkt darunter.',
-    tags: ['Preis im Fokus', 'Größen auf dem Etikett', 'Lieferzeit', 'Retro-Ladengefühl'],
-    css: `.L-tag .rail{position:absolute;top:96px;left:120px;right:120px;height:10px;border-radius:5px;background:linear-gradient(#c9ccd1,#7c828b)}
-      .L-tag .hang{position:absolute;left:250px;top:110px;width:460px;height:640px;display:grid;place-items:center}.L-tag .hang img{height:560px}
-      .L-tag .string{position:absolute;left:600px;top:250px;width:150px;height:60px;border-top:2px solid var(--mut);transform:rotate(18deg);transform-origin:0 0;opacity:.8}
-      .L-tag .tg{position:absolute;left:730px;top:250px;width:360px;padding:46px 34px 30px;background:var(--surf);transform:rotate(3deg);display:grid;gap:14px;
-        clip-path:polygon(16% 0,84% 0,100% 9%,100% 100%,0 100%,0 9%);box-shadow:0 30px 50px rgb(0 0 0/.35)}
-      .L-tag .tg::before{content:"";position:absolute;top:18px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 2px var(--line)}
-      .L-tag .tg h2{font-size:54px}.L-tag .tg .price{font-size:30px}.L-tag .foot{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center}
-      .L-tag .foot .trust{color:#e9e6df}.L-tag .foot .trust li::before{color:#fff}`,
-    html: p => `<div class="bgroom"></div><div class="rail"></div><div class="hang"><img class="shadow" src="${p.img}" alt=""></div><div class="string"></div>
-      <div class="tg"><span class="eyebrow">Azur · Größe · Preis</span><h2>${title(p)}</h2><div class="price">${eur(p.price)}</div>${sizes()}${cta(p, 'Mitnehmen')}${ship()}<span class="hand" style="font-size:24px">gewaschen &amp; gebügelt ✓</span></div>
-      <div class="foot">${trust()}</div>` },
-  { key: 'programme', name: 'Spielprogramm', idea: 'Die Produktansicht als aufgeschlagenes Stadionheft: links das Trikot als Titelseite, rechts die „Aufstellung“ mit Größen, Preis und Kaufen.',
-    tags: ['Storytelling', 'Größen als Aufstellung', 'Lieferzeit', 'Passt dazu'],
-    css: `.L-programme .book{position:absolute;inset:44px 70px;display:grid;grid-template-columns:1fr 1fr;box-shadow:0 40px 80px rgb(0 0 0/.45);background:var(--surf)}
-      .L-programme .book::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:40px;margin-left:-20px;background:linear-gradient(90deg,transparent,rgb(0 0 0/.12),transparent)}
-      .L-programme .lp{position:relative;background:var(--acc);color:var(--accInk);padding:34px;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
-      .L-programme .lp .mast{font-family:'Libre Bodoni',serif;font-style:italic;font-size:34px;display:flex;justify-content:space-between;align-items:baseline}
-      .L-programme .lp .mast span{font-family:'Martian Mono',monospace;font-style:normal;font-size:11px;letter-spacing:.12em}
-      .L-programme .lp img{height:470px;justify-self:center;align-self:center}.L-programme .lp h1{font-size:76px;color:var(--accInk)}.L-programme .lp h1 em{color:var(--accInk);opacity:.6}
-      .L-programme .rp{padding:38px 44px;display:flex;flex-direction:column;gap:14px}
-      .L-programme .rp h2{font-family:'Libre Bodoni',serif;text-transform:none;font-size:38px;font-weight:700;font-stretch:100%}
-      .L-programme .line{display:grid;grid-template-columns:44px 1fr auto;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
-      .L-programme .line b{font-family:'Martian Mono',monospace}.L-programme .line.on{background:var(--surf2)}.L-programme .pg{position:absolute;bottom:14px;font-family:'Martian Mono',monospace;font-size:10px;color:var(--mut)}`,
-    html: p => `<div class="bgroom"></div><div class="book"><div class="lp"><div class="mast">Azur Programm <span>Saison 26/27 · Nr. 01</span></div><img class="shadow" src="${p.img}" alt=""><h1>${title(p)}</h1></div>
-      <div class="rp"><span class="eyebrow">Seite 2 · Aufstellung</span><h2>Wähl deine Nummer</h2>
-      ${['S', 'M', 'L', 'XL'].map((s, i) => `<div class="line ${s === 'M' ? 'on' : ''}"><b>${[7, 9, 10, 11][i]}</b><span>Größe ${s}</span><span>${s === 'M' ? 'gewählt' : 'verfügbar'}</span></div>`).join('')}
-      <div class="row"><span class="lab">Eintritt</span><span class="price">${eur(p.price)}</span></div>${cta(p, 'Jetzt sichern')}${ship()}${trust()}<span class="pg" style="right:30px">2</span></div></div>` },
-  { key: 'label', name: 'Waschetikett', idea: 'Rechts ein langes, genähtes Stoffetikett wie im Kragen: Größen als Etiketten-Reiter, Versand und Rückgabe als Pflegesymbole.',
-    tags: ['Material-Gefühl', 'Größen als Reiter', 'Versand-Symbole', 'Größentabelle'],
-    css: `.L-label .stage{position:absolute;left:60px;top:0;bottom:0;width:640px;display:grid;place-items:center}.L-label .stage img{height:640px}
-      .L-label .lb{position:absolute;right:120px;top:60px;width:330px;bottom:60px;background:repeating-linear-gradient(90deg,var(--surf) 0 3px,var(--surf2) 3px 4px);
-        border-radius:6px;padding:30px 26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 26px 50px rgb(0 0 0/.25);outline:2px dashed var(--line);outline-offset:-10px}
-      .L-label .lb h2{font-size:52px;text-align:center}.L-label .lb .eyebrow,.L-label .lb .price{text-align:center}.L-label .care{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;font-size:11px;color:var(--mut)}
-      .L-label .care i{display:grid;place-items:center;margin:0 auto 4px;width:38px;height:38px;border:1.5px solid var(--ink);border-radius:50%;font-style:normal;font-weight:800;color:var(--ink);font-size:12px}
-      .L-label .care i.sq{border-radius:4px}.L-label .sz{justify-content:center}.L-label .tabs2{display:flex;justify-content:center;gap:0}.L-label .tabs2 span{border-radius:0}`,
-    html: p => `<div class="stage"><img class="shadow" src="${p.img}" alt=""></div><div class="lb"><span class="eyebrow">Azur · Made for the city</span><h2>${title(p)}</h2><div class="price">${eur(p.price)}</div>
-      <div class="row" style="justify-content:center;gap:14px"><span class="lab">Größe</span>${guide()}</div>${sizes('L')}
-      <div class="care"><div><i>3T</i>Versand DE</div><div><i class="sq">14</i>Tage Rückgabe</div><div><i>90€</i>Gratis-Versand</div></div>${cta(p)}<p class="desc" style="text-align:center">${desc(p)}</p></div>` },
-  { key: 'sheet', name: 'Bottom Sheet', idea: 'Das Zimmer bleibt scharf und sichtbar, das gewählte Trikot ist markiert. Von unten fährt eine breite Leiste mit allem zum Kaufen in einer Zeile hoch.',
-    tags: ['Zimmer bleibt sichtbar', 'Alles in einer Zeile', 'Gratis-Versand-Balken', 'Handy-freundlich'],
-    css: `.L-sheet .room{position:absolute;inset:0;background:url(img/rail.webp) center 30%/cover;filter:brightness(.8)}
-      .L-sheet .ring{position:absolute;left:560px;top:110px;width:190px;height:300px;border-radius:40%;box-shadow:0 0 0 3px var(--acc),0 0 0 2000px rgb(0 0 0/.35)}
-      .L-sheet .sh{position:absolute;left:0;right:0;bottom:0;height:300px;background:var(--surf);border-radius:22px 22px 0 0;padding:26px 44px;display:grid;grid-template-columns:200px 1.2fr 1fr 1.25fr;gap:34px;box-shadow:0 -20px 50px rgb(0 0 0/.35)}
-      .L-sheet .sh::before{content:"";position:absolute;top:10px;left:50%;width:54px;height:5px;margin-left:-27px;border-radius:3px;background:var(--line)}
-      .L-sheet .th{background:var(--surf2);border-radius:var(--r);display:grid;place-items:center}.L-sheet .th img{height:210px}
-      .L-sheet .col{display:flex;flex-direction:column;gap:12px;justify-content:center}.L-sheet h1{font-size:56px}`,
-    html: p => `<div class="room"></div><div class="ring"></div><div class="sh"><div class="th"><img src="${p.img}" alt=""></div>
-      <div class="col"><span class="eyebrow">Drop 01</span><h1>${title(p)}</h1><div class="price">${eur(p.price)}</div><p class="desc">${desc(p)}</p></div>
-      <div class="col"><div class="row"><span class="lab">Größe</span>${guide()}</div>${sizes()}${fsbar(p)}</div>
-      <div class="col">${cta(p)}${ship()}${trust()}</div></div>` },
-  { key: 'split', name: 'Split', idea: 'Vollbild in zwei Hälften: links das Trikot vor seiner Vorwahl in Riesenschrift, rechts eine ruhige, klassische Produktseite mit aufklappbaren Infos.',
-    tags: ['Klassisch & klar', 'Aufklappbare Details', 'Lieferzeit', 'Passt dazu'],
-    css: `.L-split .l{position:absolute;left:0;top:0;bottom:0;width:640px;background:var(--acc);overflow:hidden;display:grid;place-items:center}
-      .L-split .l .code{position:absolute;font-size:420px;font-weight:900;font-stretch:62%;color:transparent;-webkit-text-stroke:2px var(--accInk);opacity:.35;line-height:1;letter-spacing:-.02em}
-      .L-split .l img{position:relative;height:600px}.L-split .r{position:absolute;right:0;top:0;bottom:0;width:640px;background:var(--surf);padding:56px 60px;display:flex;flex-direction:column;gap:15px}
-      .L-split h1{font-size:70px}.L-split .crumb{font-size:12px;color:var(--mut)}`,
-    html: p => `<div class="l"><span class="code">${p.code}</span><img class="shadow" src="${p.img}" alt=""></div><div class="r"><span class="crumb">Trikots / ${p.city ? 'Städte' : 'Länder'} / ${p.name}</span>
-      <h1>${title(p)}</h1><div class="price">${eur(p.price)}</div><div class="row"><span class="lab">Größe</span>${guide()}</div>${sizes()}${cta(p)}${ship()}
-      <div class="acc-list"><div>Details</div><div>Größe &amp; Passform</div><div>Versand &amp; Rückgabe</div></div><span class="lab">Passt dazu</span>${ups(p)}</div>` },
-  { key: 'ticket', name: 'Ticket', idea: 'Das Trikot wird wie eine Eintrittskarte gelöst: Größe als Block, Lieferung als Anstoßzeit, Preis und Kaufen auf dem Abriss.',
-    tags: ['Stadion-Idee', 'Klarer Kauf-Abriss', 'Lieferzeit', 'Vertrauens-Zeile'],
-    css: `.L-ticket .tk{position:absolute;left:100px;right:100px;top:150px;height:440px;display:grid;grid-template-columns:330px 1fr 250px;background:var(--surf);border-radius:18px;box-shadow:0 40px 80px rgb(0 0 0/.45)}
-      .L-ticket .tk::before,.L-ticket .tk::after{content:"";position:absolute;right:236px;width:28px;height:28px;border-radius:50%;background:#1b1a19}.L-ticket .tk::before{top:-14px}.L-ticket .tk::after{bottom:-14px}
-      .L-ticket .im{background:var(--surf2);border-radius:18px 0 0 18px;display:grid;place-items:center}.L-ticket .im img{height:360px}
-      .L-ticket .fd{padding:34px 36px;display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:18px 26px}.L-ticket .fd h1{grid-column:1/-1;font-size:62px}
-      .L-ticket .f{display:grid;gap:6px}.L-ticket .f b{font-size:16px}.L-ticket .stub{border-left:2px dashed var(--line);padding:34px 26px;display:flex;flex-direction:column;gap:14px;justify-content:space-between}.L-ticket .stub .cta{flex-direction:column;justify-content:center;gap:4px;height:auto;padding:12px 16px}
-      .L-ticket .stub .price{font-size:30px}.L-ticket .bc{height:60px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 9px)}
-      .L-ticket .foot{position:absolute;left:0;right:0;bottom:120px;display:flex;justify-content:center}.L-ticket .foot .trust{color:#e9e6df}.L-ticket .foot .trust li::before{color:#fff}`,
-    html: p => `<div class="bgroom"></div><div class="tk"><div class="im"><img src="${p.img}" alt=""></div><div class="fd"><h1>${title(p)}</h1>
-      <div class="f"><span class="lab">Block · Größe</span>${sizes()}</div><div class="f"><span class="lab">Anstoß · Lieferung</span><b>ca. 3 Werktage</b><span class="desc">ab 90 € versandkostenfrei</span></div>
-      <div class="f" style="grid-column:1/-1"><span class="lab">Spiel</span><span class="desc">${desc(p)}</span></div></div>
-      <div class="stub"><span class="lab">Eintritt</span><div class="price">${eur(p.price)}</div><div class="bc"></div>${cta(p, 'Ticket lösen')}</div></div><div class="foot">${trust()}</div>` },
-  { key: 'locker', name: 'Spind', idea: 'Das Trikot hängt in einem offenen Spind mit Namensschild, daneben ein Klemmbrett mit Größen, Preis und Kaufen, wie in der Kabine vor dem Spiel.',
-    tags: ['Kabinen-Gefühl', 'Handschrift-Notiz', 'Lieferzeit', 'Vertrauens-Zeile'],
-    css: `.L-locker .wall{position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--surf2) 0 210px,var(--line) 210px 214px)}
-      .L-locker .wall::after{content:"";position:absolute;left:0;right:0;top:40px;height:40px;background:repeating-linear-gradient(90deg,transparent 0 30px,rgb(0 0 0/.12) 30px 34px)}
-      .L-locker .lk{position:absolute;left:150px;top:90px;width:420px;height:660px;background:#16181b;border:14px solid var(--surf);border-radius:4px;display:grid;place-items:center;box-shadow:inset 0 30px 60px rgb(0 0 0/.6)}
-      .L-locker .lk img{height:470px;margin-top:40px}.L-locker .plate{position:absolute;top:22px;left:50%;translate:-50% 0;padding:8px 18px;background:var(--surf);font-weight:800;font-stretch:62%;font-size:26px;text-transform:uppercase;border-radius:3px}
-      .L-locker .clip{position:absolute;right:150px;top:120px;width:400px;padding:52px 34px 30px;background:#fbfaf5;color:#1a1a1a;border-radius:6px;transform:rotate(-1.5deg);display:grid;gap:14px;box-shadow:0 30px 60px rgb(0 0 0/.35)}
-      .L-locker .clip::before{content:"";position:absolute;top:-16px;left:50%;width:120px;height:40px;margin-left:-60px;background:linear-gradient(#b9bcc2,#6e737b);border-radius:6px}
-      .L-locker .clip h2{font-size:50px;color:#1a1a1a}.L-locker .clip .desc,.L-locker .clip .ship,.L-locker .clip .trust{color:#5c5b57}.L-locker .clip .ship b{color:#1a1a1a}
-      .L-locker .clip .sz span{background:#fff;color:#1a1a1a;border-color:#cfcbc2}.L-locker .clip .sz span.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}`,
-    html: p => `<div class="wall"></div><div class="lk"><span class="plate">${p.name}${p.city ? ' ' + p.code : ''}</span><img class="shadow" src="${p.img}" alt=""></div>
-      <div class="clip"><span class="hand" style="font-size:28px">Neu in der Kabine</span><h2>${title(p)}</h2><div class="price">${eur(p.price)}</div><div class="row"><span class="lab">Größe</span>${guide()}</div>${sizes()}${cta(p)}${ship()}${trust()}</div>` },
-  { key: 'editorial', name: 'Magazin', idea: 'Groß gesetzter Stadtname quer über die Seite, das Trikot davor, Text in Spalten wie ein Modemagazin. Unten eine feste Kaufleiste, die immer sichtbar bleibt.',
-    tags: ['Mode statt Fanartikel', 'Feste Kaufleiste', 'Lieferzeit', 'Storytelling'],
-    css: `.L-editorial .big{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:250px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85;letter-spacing:-.01em;color:var(--ink)}
-      .L-editorial .im{position:absolute;left:50%;top:120px;translate:-50% 0;height:540px}.L-editorial .colL{position:absolute;left:70px;top:330px;width:300px;display:grid;gap:12px}
-      .L-editorial .colR{position:absolute;right:70px;top:330px;width:280px;display:grid;gap:10px;font-size:13px}.L-editorial .colR div{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px}
-      .L-editorial .bar2{position:absolute;left:40px;right:40px;bottom:30px;height:84px;background:var(--surf);border-radius:var(--r);display:grid;grid-template-columns:1.2fr 1fr 1fr 1.2fr;align-items:center;gap:26px;padding:0 26px;box-shadow:0 20px 40px rgb(0 0 0/.18)}
-      .L-editorial .bar2 h3{font-size:30px}`,
-    html: p => `<div class="big">${p.name}</div><img class="im shadow" src="${p.img}" alt=""><div class="colL"><span class="eyebrow">Ausgabe 01 · ${p.city ? 'Die Stadt auf dem Rücken' : 'Retro-Länder'}</span>
-      <p style="font-size:17px;line-height:1.5">${desc(p)} Getragen auf dem Platz und danach.</p><span class="hand" style="font-size:26px">für jeden Tag, nicht nur Spieltag</span></div>
-      <div class="colR"><div><span>Schnitt</span><b>Retro, gerade</b></div><div><span>Kragen</span><b>${p.city ? 'Polo' : 'Rund'}</b></div><div><span>Rückgabe</span><b>14 Tage</b></div><div><span>Versand DE</span><b>ca. 3 Werktage</b></div></div>
-      <div class="bar2"><div><h3>${title(p)}</h3><div class="price">${eur(p.price)}</div></div>${sizes()}${ship()}${cta(p)}</div>` },
-  { key: 'float', name: 'Schwebekarte', idea: 'Kein Wechsel weg vom Zimmer: neben dem angeklickten Trikot öffnet sich eine kompakte Karte zum schnellen Kaufen, mit Link zu allen Details.',
-    tags: ['Schnellster Kauf', 'Zimmer bleibt da', 'Größen + Button', 'Mehr Details auf Wunsch'],
-    css: `.L-float .room{position:absolute;inset:0;background:url(img/rail.webp) center 30%/cover}.L-float .room::after{content:"";position:absolute;inset:0;background:radial-gradient(40% 50% at 52% 40%,transparent,rgb(0 0 0/.55))}
-      .L-float .dot{position:absolute;left:640px;top:230px;width:22px;height:22px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 8px color-mix(in srgb,var(--acc) 35%,transparent)}
-      .L-float .ln{position:absolute;left:662px;top:241px;width:130px;height:2px;background:var(--acc)}
-      .L-float .fc{position:absolute;left:792px;top:120px;width:380px;background:var(--surf);border-radius:calc(var(--r) + 8px);padding:22px;display:grid;gap:13px;box-shadow:0 30px 60px rgb(0 0 0/.45)}
-      .L-float .top2{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center}.L-float .top2 .th{background:var(--surf2);border-radius:var(--r);height:130px;display:grid;place-items:center}.L-float .top2 img{height:115px}
-      .L-float h2{font-size:42px}.L-float .more{font-weight:700;font-size:13px;color:var(--ink)}`,
-    html: p => `<div class="room"></div><span class="dot"></span><span class="ln"></span><div class="fc"><div class="top2"><div class="th"><img src="${p.img}" alt=""></div><div style="display:grid;gap:6px"><span class="eyebrow">Drop 01</span><h2>${title(p)}</h2><div class="price">${eur(p.price)}</div></div></div>
-      ${sizes()}${cta(p)}${ship()}<div class="row"><span class="more">Alle Details ansehen →</span>${guide()}</div></div>` },
-];
-
-/* ---------------------------------------------------------------- shop page layouts (50 = 10 x 5 themes) */
-const SHOP = [
-  { key: 'rail', name: 'Kleiderstange', idea: 'Der Shop setzt die Kleiderstange aus dem Zimmer fort: alle Trikots hängen nebeneinander mit Preisschild, darunter Filter, Service und Drop-Anmeldung.',
-    tags: ['Fortsetzung vom Zimmer', 'Preis am Bügel', 'Filter Städte/Länder', 'Drop-Newsletter'],
-    css: `.S-rail .hero{position:relative;height:560px;padding:40px}.S-rail .hero h2{font-size:80px;max-width:520px}.S-rail .hero p{max-width:420px;margin-top:14px;color:var(--mut);font-size:16px}
-      .S-rail .bar3{position:absolute;left:40px;right:40px;top:250px;height:8px;border-radius:4px;background:linear-gradient(#c9ccd1,#7c828b)}
-      .S-rail .hangs{position:absolute;left:40px;right:40px;top:240px;display:flex;justify-content:space-between}.S-rail .h{position:relative;width:220px;display:grid;justify-items:center}
-      .S-rail .h img{height:260px;margin-top:20px}.S-rail .h .pt{position:absolute;right:6px;top:70px;background:var(--surf);color:var(--ink);font-family:'Martian Mono',monospace;font-size:12px;padding:6px 8px;transform:rotate(6deg);box-shadow:0 6px 12px rgb(0 0 0/.18)}
-      .S-rail .h b{font-size:15px}.S-rail .tools{display:flex;justify-content:space-between;align-items:center;padding:20px 40px}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="hero"><span class="eyebrow">Die Stange · Drop 01</span><h2>Such dir deine Stadt aus.</h2><p>Fünf Trikots, jedes mit seiner Vorwahl oder seinen Farben. Ab 90 € versandkostenfrei.</p>
-      <div class="bar3"></div><div class="hangs">${PRODUCTS.map(q => `<div class="h"><img class="shadow" src="${q.img}" alt=""><span class="pt">${eur(q.price)}</span><b>${q.name}${q.city ? ' ' + q.code : ''}</b></div>`).join('')}</div></div>
-      <div class="tools"><div class="chips"><span class="on">Alle</span><span>Städte</span><span>Länder</span></div><span class="btn">Alle Trikots ansehen</span></div>
-      <div class="trustrow"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ab 90 € gratis</b>sonst 1,99 €</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>
-      <div class="signup"><h3>Nächster Drop zuerst?</h3><p class="desc">Wir sagen dir Bescheid, sobald neue Städte da sind.</p><div class="in"><span>E-Mail-Adresse</span><b>Eintragen</b></div></div>` },
-  { key: 'codes', name: 'Vorwahl-Raster', idea: 'Jede Kachel ist eine Stadt: die Vorwahl riesig im Hintergrund, das Trikot davor, Kaufen direkt auf der Kachel. Eine Kachel fragt, welche Stadt als Nächstes kommen soll.',
-    tags: ['Stadt-Identität', 'Schnell kaufen', 'Mitmachen: Stadt wünschen', 'Gratis-Versand-Hinweis'],
-    css: `.S-codes .in2{padding:36px 40px;display:grid;gap:22px}.S-codes h2{font-size:64px}.S-codes .g{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-      .S-codes .k{position:relative;height:330px;background:var(--surf2);border-radius:var(--r);overflow:hidden;display:grid;place-items:center}
-      .S-codes .k .c{position:absolute;top:-10px;left:16px;font-size:190px;font-weight:900;font-stretch:62%;color:var(--line);line-height:1}.S-codes .k img{position:relative;height:230px;margin-top:20px}
-      .S-codes .k .n{position:absolute;left:16px;right:16px;bottom:14px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
-      .S-codes .k .n i{font-style:normal;background:var(--ink);color:var(--bg);padding:8px 12px;border-radius:var(--r);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-      .S-codes .k.wish{background:transparent;border:2px dashed var(--line);text-align:center;padding:30px}.S-codes .k.wish h3{font-size:40px}
-      .S-codes .fsb{display:flex;justify-content:center;gap:10px;padding:16px;background:var(--acc);color:var(--accInk);font-weight:700}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="in2"><div class="row"><h2>Wähl deine Vorwahl</h2><div class="chips"><span class="on">Alle</span><span>Städte</span><span>Länder</span></div></div>
-      <div class="g">${PRODUCTS.map(q => `<div class="k"><span class="c">${q.code}</span><img class="shadow" src="${q.img}" alt=""><div class="n"><span>${q.name} · ${eur(q.price)}</span><i>+ Warenkorb</i></div></div>`).join('')}
-      <div class="k wish"><div style="display:grid;gap:12px"><span class="eyebrow">Deine Stadt fehlt?</span><h3>Stimm für die nächste Vorwahl</h3><span class="btn ghost" style="justify-self:center">Stadt vorschlagen</span></div></div></div></div>
-      <div class="fsb">Zwei Trikots = Versand gratis · ab 90 € liefern wir kostenlos</div>
-      <div class="trustrow"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ca. 5 Werktage</b>Europa</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>` },
-  { key: 'programme', name: 'Spielprogramm', idea: 'Die Shopseite als Stadionheft: links das Titelblatt der aktuellen Ausgabe, rechts die „Aufstellung“, eine nummerierte Liste aller Trikots mit Preis und Plus-Button.',
-    tags: ['Storytelling', 'Schnell kaufen', 'Magazin-Anbindung', 'Newsletter'],
-    css: `.S-programme .wrap{display:grid;grid-template-columns:520px 1fr;gap:40px;padding:36px 40px}
-      .S-programme .cov{position:relative;height:700px;background:var(--acc);color:var(--accInk);padding:30px;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}
-      .S-programme .cov .mast{display:flex;justify-content:space-between;align-items:baseline;font-family:'Libre Bodoni',serif;font-style:italic;font-size:44px}.S-programme .cov .mast span{font-family:'Martian Mono',monospace;font-style:normal;font-size:11px;letter-spacing:.1em}
-      .S-programme .cov img{height:440px;justify-self:center;align-self:center}.S-programme .cov h2{font-size:64px;color:var(--accInk)}
-      .S-programme h3{font-family:'Libre Bodoni',serif;text-transform:none;font-size:46px;font-weight:700;font-stretch:100%;margin-bottom:14px}
-      .S-programme .ln2{display:grid;grid-template-columns:52px 96px 1fr auto 44px;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
-      .S-programme .ln2 b{font-family:'Martian Mono',monospace;font-size:20px}.S-programme .ln2 img{height:84px;justify-self:center}.S-programme .ln2 .nm2{font-weight:800;font-size:22px;font-stretch:62%;text-transform:uppercase}
-      .S-programme .ln2 .pl{width:40px;height:40px;border-radius:50%;background:var(--acc);color:var(--accInk);display:grid;place-items:center;font-weight:800;font-size:20px}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark, 'center')}<div class="wrap"><div class="cov"><div class="mast">Azur Programm <span>Saison 26/27 · Nr. 01</span></div><img class="shadow" src="${p.img}" alt=""><h2>${title(p)} ist da</h2></div>
-      <div><span class="eyebrow">Die Aufstellung</span><h3>Fünf Trikots, ein Kader</h3>${PRODUCTS.map((q, i) => `<div class="ln2"><b>${[7, 9, 10, 11, 8][i]}</b><img src="${q.img}" alt=""><span class="nm2">${q.name}${q.city ? ' ' + q.code : ''}</span><span class="price">${eur(q.price)}</span><span class="pl">+</span></div>`).join('')}
-      <div style="display:flex;gap:14px;margin-top:22px"><span class="btn">Ganzen Kader ansehen</span><span class="btn ghost">Das Heft lesen</span></div><p class="ship" style="margin-top:16px"><span>Lieferung in Deutschland ca. <b>3 Werktage</b> · ab 90 € versandkostenfrei</span></p></div></div>
-      <div class="signup"><h3 style="font-family:inherit">Anpfiff im Postfach</h3><p class="desc">Neue Ausgaben und Drops per E-Mail.</p><div class="in"><span>E-Mail-Adresse</span><b>Abonnieren</b></div></div>` },
-  { key: 'scoreboard', name: 'Anzeigetafel', idea: 'Oben eine Stadion-Anzeigetafel mit Leuchtschrift für Neuheiten, darunter Produktkarten wie Ergebnis-Tafeln mit großer Vorwahl und Preis.',
-    tags: ['Stadion-Idee', 'Neuheiten im Blick', 'Schnell kaufen', 'Gratis-Versand-Hinweis'],
-    css: `.S-scoreboard .sb{margin:30px 40px 0;background:#0b0c0d;border-radius:var(--r);padding:26px 30px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;box-shadow:inset 0 0 0 6px #1c1e21}
-      .S-scoreboard .sb .led{font-family:'Martian Mono',monospace;font-weight:600;font-size:34px;color:#ffcf4a;letter-spacing:.06em;text-shadow:0 0 12px rgb(255 207 74/.6)}
-      .S-scoreboard .sb .led small{display:block;font-size:13px;color:#8de3ff;text-shadow:0 0 10px rgb(141 227 255/.6);margin-top:8px}
-      .S-scoreboard .g{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:26px 40px}.S-scoreboard .tile{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-      .S-scoreboard .tile .top3{background:#0b0c0d;color:#ffcf4a;font-family:'Martian Mono',monospace;display:flex;justify-content:space-between;padding:10px 12px;font-size:13px}
-      .S-scoreboard .tile img{display:block;height:200px;margin:14px auto}.S-scoreboard .tile .bt{display:flex;justify-content:space-between;align-items:center;padding:12px;border-top:1px solid var(--line);font-weight:700}
-      .S-scoreboard .tile .bt i{font-style:normal;font-size:12px;background:var(--acc);color:var(--accInk);padding:7px 10px;border-radius:var(--r)}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="sb"><div class="led">NEU: ${p.name.toUpperCase()} ${p.city ? p.code : ''} · ${eur(p.price).replace(' €', '')} €<small>AB 90 € VERSANDKOSTENFREI · LIEFERUNG CA. 3 WERKTAGE</small></div><span class="btn">Jetzt ansehen</span></div>
-      <div class="g">${PRODUCTS.map(q => `<div class="tile"><div class="top3"><span>${q.code}</span><span>${eur(q.price)}</span></div><img src="${q.img}" alt=""><div class="bt"><span>${q.name}</span><i>+ Korb</i></div></div>`).join('')}</div>
-      <div class="trustrow"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ab 90 € gratis</b>sonst 1,99 €</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>
-      <div class="signup"><h3>Auswechslung angekündigt</h3><p class="desc">Neue Städte zuerst erfahren.</p><div class="in"><span>E-Mail-Adresse</span><b>Eintragen</b></div></div>` },
-  { key: 'mosaic', name: 'Lookbook-Mosaik', idea: 'Ein ungleichmäßiges Raster aus großem Zimmerbild mit Kauf-Punkten auf den Trikots, Produktkacheln und einem Zitat. Wirkt wie ein Modelabel, nicht wie ein Fanshop.',
-    tags: ['Mode statt Fanartikel', 'Shop the look', 'Kauf-Punkte im Bild', 'Markenzitat'],
-    css: `.S-mosaic .g{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:330px 330px;gap:14px;padding:30px 40px}
-      .S-mosaic .big{grid-column:span 2;grid-row:span 2;position:relative;background:url(img/rail.webp) center 30%/cover;border-radius:var(--r)}
-      .S-mosaic .big .hs{position:absolute;display:flex;align-items:center;gap:8px;background:var(--surf);color:var(--ink);padding:6px 10px 6px 6px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:0 6px 16px rgb(0 0 0/.3)}
-      .S-mosaic .big .hs i{width:22px;height:22px;border-radius:50%;background:var(--acc);color:var(--accInk);display:grid;place-items:center;font-style:normal}
-      .S-mosaic .q{background:var(--acc);color:var(--accInk);border-radius:var(--r);padding:28px;display:grid;align-content:space-between}.S-mosaic .q h3{font-size:44px;color:var(--accInk)}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark, 'center')}<div style="padding:30px 40px 0" class="row"><h2 style="font-size:58px">Getragen auf dem Platz und danach.</h2><span class="btn">Alle Trikots</span></div>
-      <div class="g"><div class="big"><span class="hs" style="left:42%;top:30%"><i>+</i>Frankfurt 069 · 64,99 €</span><span class="hs" style="left:22%;top:52%"><i>+</i>Berlin 030 · 64,99 €</span></div>
-      ${pcard(PRODUCTS[0], 250, { qa: true, badge: 'Neu' })}${pcard(PRODUCTS[1], 250, { badge: 'Neu' })}<div class="q"><span class="eyebrow" style="color:inherit;opacity:.8">Azur</span><h3>Stadt statt Verein.</h3></div>${pcard(PRODUCTS[2], 250)}</div>
-      <div class="trustrow"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ab 90 € gratis</b>sonst 1,99 €</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>` },
-  { key: 'gallery', name: 'Galerie', idea: 'Ruhig und hochwertig: großes Drei-Spalten-Raster, viel Weißraum, Filter und Sortierung oben. Beim Drüberfahren erscheint ein Schnell-kaufen-Button.',
-    tags: ['Klar & schnell', 'Schnell kaufen', 'Filter + Sortierung', 'Gratis-Versand-Hinweis'],
-    css: `.S-gallery .ttl{padding:44px 40px 18px;display:flex;align-items:end;justify-content:space-between}.S-gallery h2{font-size:72px}
-      .S-gallery .fb{display:flex;justify-content:space-between;align-items:center;padding:12px 40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px}
-      .S-gallery .g{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 18px;padding:26px 40px}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="ttl"><div><span class="eyebrow">Kollektion · Drop 01</span><h2>Alle Trikots</h2></div><span class="desc">5 Trikots · ab 90 € versandkostenfrei</span></div>
-      <div class="fb"><div class="chips"><span class="on">Alle</span><span>Städte</span><span>Länder</span></div><span>Sortieren: Neu zuerst ▾</span></div>
-      <div class="g">${PRODUCTS.slice(0, 3).map((q, i) => pcard(q, 330, { qa: i === 1, badge: q.city ? 'Neu' : '' })).join('')}${PRODUCTS.slice(3).map(q => pcard(q, 160)).join('')}</div>` },
-  { key: 'album', name: 'Sammelalbum', idea: 'Eine Seite wie ein Stickeralbum: jedes Trikot ist ein Sticker auf seinem Platz, leere Plätze zeigen kommende Städte. Weckt Sammellust.',
-    tags: ['Sammeln & wiederkommen', 'Kommende Drops', 'Schnell kaufen', 'Drop-Newsletter'],
-    css: `.S-album .pg2{margin:30px 40px;background:var(--surf);border-radius:var(--r);padding:30px;box-shadow:inset 0 0 0 1px var(--line)}
-      .S-album .g{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:20px}.S-album .sl{position:relative;height:300px;border-radius:6px;background:var(--surf2);display:grid;place-items:center}
-      .S-album .sl .no{position:absolute;top:10px;left:12px;font-family:'Martian Mono',monospace;font-size:12px;color:var(--mut)}
-      .S-album .st{width:84%;height:84%;background:#fff;border-radius:8px;padding:10px;display:grid;grid-template-rows:1fr auto;box-shadow:0 10px 20px rgb(0 0 0/.18)}
-      .S-album .st img{width:100%;height:170px;object-fit:contain}.S-album .st b{color:#111;font-size:14px;display:flex;justify-content:space-between}
-      .S-album .sl.empty{border:2px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;text-align:center}.S-album h2{font-size:60px}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="pg2"><div class="row"><div><span class="eyebrow">Album · Seite 1</span><h2>Sammle deine Stadt</h2></div><div style="display:grid;gap:6px;justify-items:end"><span class="price">5 / 8 Sticker</span><span class="btn">Alle kaufen</span></div></div>
-      <div class="g">${PRODUCTS.map((q, i) => `<div class="sl"><span class="no">0${i + 1}</span><div class="st" style="transform:rotate(${[-2, 1.5, -1, 2, -1.5][i]}deg)"><img src="${q.img}" alt=""><b><span>${q.name}</span><span>${eur(q.price)}</span></b></div></div>`).join('')}
-      ${[6, 7, 8].map(n => `<div class="sl empty"><span class="no">0${n}</span>Bald hier:<br>nächste Stadt</div>`).join('')}</div></div>
-      <div class="signup"><h3>Fehlt dir ein Sticker?</h3><p class="desc">Wir melden uns, wenn die nächsten Städte kommen.</p><div class="in"><span>E-Mail-Adresse</span><b>Eintragen</b></div></div>` },
-  { key: 'table', name: 'Tabelle', idea: 'Die Trikots als Bundesliga-Tabelle: Platz, Trikot, Vorwahl, Größen und Preis in einer Zeile, Kaufen direkt in der Zeile. Rechts ein kleiner Warenkorb mit Gratis-Versand-Balken.',
-    tags: ['Alles auf einen Blick', 'Größe direkt in der Zeile', 'Mini-Warenkorb', 'Gratis-Versand-Balken'],
-    css: `.S-table .wrap{display:grid;grid-template-columns:1fr 320px;gap:30px;padding:34px 40px}.S-table h2{font-size:60px;margin-bottom:16px}
-      .S-table .th2,.S-table .tr{display:grid;grid-template-columns:44px 1.6fr 90px 1.6fr 100px 140px;align-items:center;gap:14px;padding:12px 10px}
-      .S-table .th2{font-family:'Martian Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);border-bottom:2px solid var(--ink)}
-      .S-table .tr{border-bottom:1px solid var(--line)}.S-table .tr:nth-child(odd){background:var(--surf2)}.S-table .tr .tn{display:flex;align-items:center;gap:12px;font-weight:800}
-      .S-table .tr img{height:64px;width:56px;object-fit:contain}.S-table .tr .sz span{min-width:34px;height:30px;font-size:12px}.S-table .tr .go{background:var(--acc);color:var(--accInk);border-radius:var(--r);padding:9px 10px;text-align:center;font-weight:800;font-size:12px;text-transform:uppercase}
-      .S-table .mini{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px;align-content:start}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="wrap"><div><span class="eyebrow">Saison 26/27</span><h2>Die Tabelle</h2><div class="th2"><span>Pl.</span><span>Trikot</span><span>Kürzel</span><span>Größe</span><span>Preis</span><span></span></div>
-      ${PRODUCTS.map((q, i) => `<div class="tr"><b>${i + 1}.</b><span class="tn"><img src="${q.img}" alt="">${q.name}</span><span class="price" style="font-size:14px">${q.code}</span>${sizes(['M', 'L', 'S', 'M', 'XL'][i])}<span class="price" style="font-size:14px">${eur(q.price)}</span><span class="go">In den Korb</span></div>`).join('')}</div>
-      <aside class="mini"><span class="lab">Dein Warenkorb</span><div class="row"><b>Frankfurt 069 · M</b><span class="price" style="font-size:14px">64,99 €</span></div>${fsbar(PRODUCTS[0])}<span class="btn" style="justify-content:center">Zur Kasse</span>${trust()}</aside></div>` },
-  { key: 'drops', name: 'Drop-Kalender', idea: 'Alles dreht sich um Drops: der aktuelle Drop groß mit allen Trikots, daneben der nächste Drop mit Benachrichtigung per E-Mail und eine Drop-Zeitleiste.',
-    tags: ['Limitierte Drops', 'Benachrichtigung', 'Schnell kaufen', 'Wiederkommen'],
-    css: `.S-drops .wrap{display:grid;grid-template-columns:1fr 340px;gap:26px;padding:34px 40px}.S-drops h2{font-size:76px}.S-drops .g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
-      .S-drops .nx{background:var(--acc);color:var(--accInk);border-radius:var(--r);padding:26px;display:grid;gap:14px;align-content:start}.S-drops .nx h3{font-size:46px;color:var(--accInk)}
-      .S-drops .nx .in3{height:46px;background:var(--surf);color:var(--mut);border-radius:var(--r);display:flex;align-items:center;padding:0 14px;font-size:13px}
-      .S-drops .nx .b2{height:46px;background:var(--ink);color:var(--bg);border-radius:var(--r);display:grid;place-items:center;font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.06em}
-      .S-drops .tl{display:grid;grid-template-columns:repeat(4,1fr);margin:0 40px;border-top:2px solid var(--ink)}.S-drops .tl div{padding:14px 0;display:grid;gap:4px;font-size:13px;color:var(--mut)}.S-drops .tl b{color:var(--ink);font-size:16px}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark)}<div class="wrap"><div><span class="badge">Jetzt erhältlich</span><h2 style="margin-top:12px">Drop 01 ist da.</h2>
-      <div class="g">${PRODUCTS.slice(0, 3).map((q, i) => pcard(q, 250, { qa: i === 0 })).join('')}</div></div>
-      <div class="nx"><span class="eyebrow" style="color:inherit;opacity:.8">Als Nächstes</span><h3>Drop 02 · Datum folgt</h3><p>Neue Städte. Wer sich einträgt, erfährt es zuerst.</p><div class="in3">E-Mail-Adresse</div><div class="b2">Benachrichtige mich</div></div></div>
-      <div class="tl"><div><b>Drop 01 ✓</b>Frankfurt, Berlin, Länder</div><div><b>Drop 02</b>Datum folgt</div><div><b>Drop 03</b>in Planung</div><div><b>Deine Stadt?</b>Vorschlag schicken</div></div>
-      <div class="trustrow" style="margin-top:26px"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ab 90 € gratis</b>sonst 1,99 €</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>` },
-  { key: 'kiosk', name: 'Kiosk', idea: 'Die Trikots stehen wie Hefte am Zeitungsständer: jedes auf einem eigenen Cover mit Preisaufkleber, daneben das Azur-Magazin. Verbindet Shop und Magazin.',
-    tags: ['Magazin-Anbindung', 'Preis-Aufkleber', 'Schnell kaufen', 'Entdecken'],
-    css: `.S-kiosk .rack{position:relative;margin:30px 40px;padding:26px 26px 10px;background:var(--surf2);border-radius:var(--r)}
-      .S-kiosk .rack .ln3{position:absolute;left:0;right:0;height:5px;background:linear-gradient(#c9ccd1,#7c828b)}
-      .S-kiosk .g{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}.S-kiosk .cv{position:relative;height:300px;border-radius:4px;overflow:hidden;padding:12px;display:grid;grid-template-rows:auto 1fr;box-shadow:0 12px 22px rgb(0 0 0/.25)}
-      .S-kiosk .cv .ms{font-weight:900;font-stretch:62%;font-size:26px;overflow-wrap:anywhere;text-transform:uppercase;line-height:.9}.S-kiosk .cv img{width:100%;height:220px;object-fit:contain;align-self:end}
-      .S-kiosk .cv .st2{position:absolute;right:10px;top:54px;width:64px;height:64px;border-radius:50%;background:#ffd23f;color:#111;display:grid;place-items:center;font-family:'Martian Mono',monospace;font-size:11px;font-weight:600;transform:rotate(-12deg);text-align:center;line-height:1.1}`,
-    html: (p, t) => `<div class="fromroom"></div>${marquee()}${header(t.dark, 'center')}<div style="padding:30px 40px 0" class="row"><div><span class="eyebrow">Am Kiosk</span><h2 style="font-size:64px">Neu am Ständer</h2></div><span class="btn">Alle Trikots</span></div>
-      <div class="rack"><span class="ln3" style="top:150px"></span><div class="g">${PRODUCTS.map(q => `<div class="cv" style="background:${q.team.acc};color:${q.team.accInk}"><span class="ms">Azur<br>${q.city ? q.code : q.name}</span><img src="${q.img}" alt=""><span class="st2">nur<br>${eur(q.price)}</span></div>`).join('')}
-      <div class="cv" style="background:url(img/cover.webp) center/cover;color:#fff"><span class="ms" style="text-shadow:0 2px 10px rgb(0 0 0/.5)">Anstoß<br>Nr. 01</span><span class="st2">Heft<br>lesen</span></div></div></div>
-      <div class="trustrow"><div><b>ca. 3 Werktage</b>Versand in Deutschland</div><div><b>ab 90 € gratis</b>sonst 1,99 €</div><div><b>14 Tage Rückgabe</b>Rückversand kostenlos</div><div><b>Sichere Zahlung</b>verschlüsselt</div></div>
-      <div class="signup"><h3>Das Heft im Abo</h3><p class="desc">Neue Ausgaben und Drops per E-Mail, kostenlos.</p><div class="in"><span>E-Mail-Adresse</span><b>Abonnieren</b></div></div>` },
-];
-
-/* 10 layouts x 5 themes, interleaved so neighbours differ in both */
+/* round 2: every card its own layout (layouts in r2.js), the jerseys take turns */
 function buildDeck(kind, layouts) {
-  const out = [];
-  for (let i = 0; i < 50; i++) {
-    const L = layouts[i % 10], T = THEMES[(Math.floor(i / 10) + (i % 10)) % 5], P = PRODUCTS[(i * 3 + Math.floor(i / 10)) % 5];
-    out.push({ id: `${kind === 'pdp' ? 'P' : 'S'}${String(i + 1).padStart(2, '0')}`, kind, L, T, P });
-  }
-  return out;
+  return layouts.map((L, i) => ({ id: `${kind === 'pdp' ? 'P' : 'S'}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
 }
-const DECKS = { pdp: buildDeck('pdp', PDP), shop: buildDeck('shop', SHOP) };
+const DECKS = { pdp: buildDeck('pdp', PDP2), shop: buildDeck('shop', SHOP2) };
 const ALL = [...DECKS.pdp, ...DECKS.shop];
 const BY_ID = Object.fromEntries(ALL.map(c => [c.id, c]));
 
-document.head.insertAdjacentHTML('beforeend', `<style>${[...PDP.map(l => l.css), ...SHOP.map(l => l.css)].join('\n')}</style>`);
+document.head.insertAdjacentHTML('beforeend', `<style>${[...PDP2.map(l => l.css), ...SHOP2.map(l => l.css)].join('\n')}</style>`);
 
-function themeVars(c) {
-  if (c.T.key !== 'team') return '';
-  const t = c.P.team;
-  return `--bg:${t.bg};--surf:${t.surf};--surf2:${t.surf2};--ink:${t.ink};--mut:${t.mut};--line:${t.line};--acc:${t.acc};--accInk:${t.accInk};--hand:${t.hand};--r:${t.r}`;
-}
-function isDark(c) {
-  if (c.T.key !== 'team') return c.T.dark;
-  const h = c.P.team.bg.slice(1), n = parseInt(h, 16);
-  return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) < 140;
-}
 function mockHTML(c) {
-  const t = { dark: isDark(c) };
-  return `<div class="m ${c.kind} t-${c.T.key === 'team' ? 'paper' : c.T.key} ${c.kind === 'pdp' ? 'L' : 'S'}-${c.L.key}" style="${themeVars(c)}">${c.L.html(c.P, t)}</div>`;
+  return `<div class="m ${c.kind} t-paper ${c.kind === 'pdp' ? 'L' : 'S'}-${c.L.key}">${c.L.html(c.P)}</div>`;
 }
 const MOCK_H = { pdp: 800, shop: 1240 };
 function mountMock(view, c, width, maxH) {
@@ -561,13 +287,13 @@ async function initStore() {
 async function renderWho() {
   const el = document.getElementById('who');
   const n = d => Object.keys(DECKS[d].reduce((a, c) => (state.mine[c.id] !== undefined && (a[c.id] = 1), a), {})).length;
-  let txt = `<span>Du: <b>${n('pdp')}/50</b> Produktansicht · <b>${n('shop')}/50</b> Shopseite</span>`;
+  let txt = `<span>Du: <b>${n('pdp')}/${DECKS.pdp.length}</b> Produktansicht · <b>${n('shop')}/${DECKS.shop.length}</b> Shopseite</span>`;
   const ids = Object.keys(state.others);
   if (ids.length && state.user) {
     const ps = await state.user.profiles(ids);
     ids.forEach(id => {
       const v = state.others[id], cnt = d => DECKS[d].filter(c => v[c.id] !== undefined).length;
-      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: <b>${cnt('pdp')}/50</b> · <b>${cnt('shop')}/50</b></span>`;
+      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: <b>${cnt('pdp')}/${DECKS.pdp.length}</b> · <b>${cnt('shop')}/${DECKS.shop.length}</b></span>`;
     });
   } else txt += `<span>Partner: noch keine Stimmen</span>`;
   el.innerHTML = txt;
@@ -596,7 +322,7 @@ function renderCard(c, i) {
   main.innerHTML = `<div class="stage"><article class="card" id="card" aria-label="Entwurf ${c.id}">
       <span class="stamp yes">Ja</span><span class="stamp no">Nein</span><span class="stamp star">Super</span>
       <div class="view" id="cardView"></div>
-      <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length} · Stil: ${c.T.name}</span><h2>${c.L.name}</h2><p>${c.L.idea} <span style="color:var(--muted)">Farbwelt: ${c.T.note}.</span></p>
+      <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length}${c.L.fam ? ' · Familie: ' + c.L.fam : ''}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
       <div class="tags">${c.L.tags.map(t => `<span>${t}</span>`).join('')}</div>
       <div><button type="button" class="link" id="zoomBtn">Groß ansehen</button></div></div></article></div>
     <div class="ctl"><button type="button" class="small" id="undo" ${state.history.length ? '' : 'disabled'}>Zurück</button>
@@ -677,7 +403,7 @@ function voteChip(v, who) {
 function tiles(list) {
   return list.map(c => {
     const ov = Object.values(state.others).map(o => voteChip(o[c.id], 'P')).join('');
-    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name} · ${c.T.name}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
+    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
   }).join('');
 }
 function mountTiles() {
@@ -692,7 +418,7 @@ function renderDone() {
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
   const other = state.deck === 'pdp' ? 'shop' : 'pdp', rest = nextIndex(other) >= 0;
   main.innerHTML = `<section class="done"><h2>${state.deck === 'pdp' ? 'Produktansicht' : 'Shopseite'}: fertig</h2>
-    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Beide Bereiche sind durch.'} Claude liest eure Stimmen aus und baut daraus Runde 2.</p>
+    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Beide Bereiche sind durch.'} Claude liest eure Stimmen aus und baut daraus die nächste Runde.</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter mit ${other === 'pdp' ? 'der Produktansicht' : 'der Shopseite'}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
     <div class="grid">${tiles(d.filter(c => state.mine[c.id] > 0))}</div></section>`;
   if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
