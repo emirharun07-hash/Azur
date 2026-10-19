@@ -171,7 +171,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-Runde <span id="roundLabel">4</span></h1>
+    <h1>Azur Design-<span id="roundLabel">Finale</span></h1>
     <div class="tabs" role="group" aria-label="Bereich">
       <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
       <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
@@ -181,7 +181,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
     </div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Runde 4: Produktansicht und Shopseite zeigen nur noch deine Ja-Stimmen aus Runde 3 und je drei neue Mischungen daraus. Gib deinen 1–2 Favoriten pro Bereich einen Stern, die kommen ins Finale mit deinem Partner. Animation steht schon (deine 9 Ja). Farbe: 40 neue, mutigere Paletten direkt auf deinen Lieblingsentwürfen, viele in Richtung Flutlicht.</p>
+  <p class="note">Finale: die Vorauswahl aus vier Abstimmungsrunden, und in dieser Runde entscheidest nur du. Rechts wischen heißt Ja, links Nein, nach oben Stern. Gib pro Bereich 1–2 Sterne für deine klaren Favoriten. Animationen lassen sich kombinieren: sag Ja zu allen, die auf die Seite sollen. Farbe: dieselben Entwürfe in 41 Paletten.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
@@ -193,6 +193,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 <script>
 /* ---------------------------------------------------------------- data */
 const ROUND = 'r4';
+const PARTNER_ONLY = true; /* the final: only the partner votes, the owner (artifact owner) watches */
 const PRODUCTS = [
   { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
   { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
@@ -245,7 +246,7 @@ function mountMock(view, c, width, maxH) {
 
 /* ---------------------------------------------------------------- votes: db per person, localStorage fallback */
 const VOTE = { '-1': 'Nein', '1': 'Ja', '2': 'Super' };
-const state = { deck: 'pdp', mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false };
+const state = { deck: 'pdp', mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false, readonly: false };
 const LKEY = 'azur-design-votes';
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || '{}'); } catch (e) { return {}; } }
 function saveLocal() { try { localStorage.setItem(LKEY, JSON.stringify(state.all)); } catch (e) { /* storage blocked */ } }
@@ -272,6 +273,8 @@ async function initStore() {
     state.db = await claude.use('db');
   } catch (e) { /* not in a viewer */ }
   if (state.user) state.uid = await state.user.id();
+  if (state.user && PARTNER_ONLY) state.readonly = await state.user.isOwner();
+  const viewOnly = state.user && !state.readonly && (await state.user.can('data.write')) === false;
   if (state.db && state.uid) {
     try {
       const snap = await state.db.doc('votes/' + state.uid).get();
@@ -284,9 +287,10 @@ async function initStore() {
     state.db.collection('votes').onSnapshot(s => {
       const o = {};
       s.docs.forEach(d => { if (d.id !== state.uid) o[d.id] = (d.data() || {})[ROUND] || {}; });
-      state.others = o; renderWho(); if (state.view === 'done' || state.view === 'result') render();
+      state.others = o; renderWho(); setProgress(); if (['done', 'result', 'browse'].includes(state.view)) render();
     }, () => {});
-    showNote('');
+    showNote(state.readonly ? 'In dieser Runde stimmt nur dein Partner ab. Du siehst hier alle Karten und, sobald abgestimmt ist, seine Stimmen.'
+      : viewOnly ? 'Du kannst die Seite gerade nur ansehen. Bitte darum, dass sie dir mit Mitmach-Rechten freigegeben wird, dann zählen deine Stimmen.' : '');
   } else {
     state.local = true;
     showNote('Deine Stimmen werden nur in diesem Browser gespeichert, weil die gemeinsame Ablage hier nicht verfügbar ist. Öffne die Seite angemeldet in Claude, damit Claude sie lesen kann.');
@@ -296,15 +300,15 @@ async function initStore() {
 async function renderWho() {
   const el = document.getElementById('who');
   const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
-  let txt = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
-  const ids = Object.keys(state.others);
+  let txt = state.readonly ? '' : `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
+  const ids = PARTNER_ONLY && !state.readonly ? [] : Object.keys(state.others);
   if (ids.length && state.user) {
     const ps = await state.user.profiles(ids);
     ids.forEach(id => {
       const v = state.others[id], cnt = d => DECKS[d].filter(c => v[c.id] !== undefined).length;
-      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>`).join(' · ')}</span>`;
+      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>${state.readonly ? ' ' + KINDS[k].label : ''}`).join(' · ')}</span>`;
     });
-  } else txt += `<span>Partner: noch keine Stimmen</span>`;
+  } else if (state.readonly || !PARTNER_ONLY) txt += `<span>Partner: noch keine Stimmen</span>`;
   el.innerHTML = txt;
 }
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -314,13 +318,15 @@ const main = document.getElementById('main');
 function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
 function nextIndex(deck) { const d = DECKS[deck]; const i = d.findIndex(c => state.mine[c.id] === undefined); return i; }
 function setProgress() {
-  const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => state.mine[c.id] !== undefined).length;
+  const src = state.readonly ? (Object.values(state.others)[0] || {}) : state.mine;
+  const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => src[c.id] !== undefined).length;
   document.getElementById('progress').style.width = (done / d.length * 100) + '%';
 }
 function render() {
   [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
   setProgress();
   if (state.deck === 'result') return renderResult();
+  if (state.readonly) return renderBrowse();
   const i = nextIndex(state.deck);
   if (i < 0) return renderDone();
   renderCard(DECKS[state.deck][i], i);
@@ -414,8 +420,8 @@ function voteChip(v, who) {
 }
 function tiles(list) {
   return list.map(c => {
-    const ov = Object.values(state.others).map(o => voteChip(o[c.id], 'P')).join('');
-    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
+    const ov = PARTNER_ONLY && !state.readonly ? '' : Object.values(state.others).map(o => voteChip(o[c.id], state.readonly ? '' : 'P')).join('');
+    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${state.readonly ? '' : voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
   }).join('');
 }
 function mountTiles() {
@@ -430,7 +436,7 @@ function renderDone() {
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
   const i0 = ORDER.indexOf(state.deck), other = [...ORDER.slice(i0 + 1), ...ORDER.slice(0, i0)].find(k => nextIndex(k) >= 0), rest = !!other;
   main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: fertig</h2>
-    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch.'} Claude liest eure Stimmen aus und baut daraus die nächste Runde.</p>
+    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch.'} ${PARTNER_ONLY ? 'Danke! Claude liest die Stimmen aus und baut daraus die fertige Seite.' : 'Claude liest eure Stimmen aus und baut daraus die nächste Runde.'}</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
     <div class="grid">${tiles(d.filter(c => state.mine[c.id] > 0))}</div></section>`;
   if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
@@ -441,6 +447,12 @@ function score(c) {
   const vs = [state.mine[c.id], ...Object.values(state.others).map(o => o[c.id])].filter(v => v !== undefined);
   return vs.reduce((a, v) => a + (v === 2 ? 3 : v), 0);
 }
+function renderBrowse() {
+  state.view = 'browse';
+  const d = DECKS[state.deck];
+  main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: alle ${d.length} Entwürfe</h2><p>Nur zum Ansehen: in dieser Runde stimmt dein Partner ab. Tippe auf eine Kachel, um sie groß zu sehen.</p><div class="grid">${tiles(d)}</div></section>`;
+  mountTiles();
+}
 function renderResult() {
   state.view = 'result';
   const sect = (kind, label) => {
@@ -448,7 +460,7 @@ function renderResult() {
       .sort((a, b) => score(b) - score(a)).slice(0, 12);
     return `<h2>${label}: eure Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Stimmen.</p>'}`;
   };
-  main.innerHTML = `<section class="done"><p>Punkte: Stern 3, Ja 1, Nein −1, von euch beiden zusammengezählt. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
+  main.innerHTML = `<section class="done"><p>Punkte: Stern 3, Ja 1, Nein −1${PARTNER_ONLY ? '' : ', von euch beiden zusammengezählt'}. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
   mountTiles();
 }
 [...ORDER, 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));

@@ -455,6 +455,11 @@ on every device without losing quality.
   detail strip with button, sizes, badge, free-shipping bar, handwriting) with swatches. New palette variables: `bar`,
   `barInk`, `barStar` (top bar), `cd1a/cd1b/cd1i`, `cd2a/cd2b/cd2i` (player card colours), `bgimg`; all 41 pass the
   contrast check (text and muted text AA, button text AA, button edge 3:1).
+- Owner: if round 4 is the last round, only the partner votes. Round 4 is now the final (artifact v5, `PARTNER_ONLY`):
+  the owner (artifact owner, `user.isOwner()`) only browses all cards with the partner's votes, no voting; the
+  partner votes alone and sees no other votes. The nine liked animations are back as a deck for the partner; card
+  texts are neutral (no "your yes from round 3"). The partner needs the page shared with a role that may take part
+  (not view or comment only), otherwise the page says so.
 - Open, owner asked to be reminded: the room transition (Überblendung vs. rendered camera flight) and the 30-minute
   admin setup (`azur/admin/ANLEITUNG.md`).
 - Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,

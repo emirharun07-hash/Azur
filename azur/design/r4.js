@@ -1,6 +1,6 @@
-/* Design round 4 (owner alone; the partner joins in the final round).
-   Product view and shop page: only the round-3 likes plus three new mixes each, stars pick the finalists.
-   Animation: the nine round-3 likes are settled, no cards this round.
+/* Design round 4 = the final, voted by the partner alone (owner's wish; the owner only watches).
+   Product view and shop page: the owner's round-3 likes plus three new mixes each.
+   Animation: the owner's nine round-3 likes, the partner says yes or no to each.
    Colour: 40 new, bolder palettes (many in the liked floodlight direction), shown on the owner's favourites
    (player-card shop under the room, magazine + lineup product view). Uses the helpers of swipe.html, r2.js, r3.js. */
 
@@ -16,15 +16,15 @@ const SIZE4 = `.m .qs4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
   .m .qs4 span.on{border-color:var(--ink);background:var(--ink);color:var(--bg)}.m .add4{height:38px;display:grid;place-items:center;background:var(--acc);color:var(--accInk);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-stretch:80%;border-radius:var(--r)}`;
 
 const PDP4_NEW = [
-  { key: 'mglineup', fam: 'Neue Mischung', name: 'Modemagazin + dunkle Leiste mit Aufstellung', idea: 'Oben dein Modemagazin, unten die dunkle Einlass-Leiste vom Drehkreuz. In der Leiste wählst du die Größe auf dem kleinen Feld, so wie bei „Drehkreuz + Aufstellung“.',
+  { key: 'mglineup', fam: '', name: 'Modemagazin + dunkle Leiste mit Aufstellung', idea: 'Oben das Modemagazin, unten die dunkle Einlass-Leiste vom Drehkreuz. In der Leiste wählst du die Größe auf dem kleinen Feld, so wie bei „Drehkreuz + Aufstellung“.',
     tags: ['Modemagazin', 'Dunkle Leiste', 'Aufstellung', 'Lieferzeit'],
     css: `${gateCSS('mglineup')}.L-mglineup .gate .pm{--pmc:var(--bg);--pmf:var(--ink);--pl:42px;width:340px;height:112px;flex:none}`,
     html: p => `${magTop(p)}<div class="gate">${scan()}${pitch('M', { h: true })}<div style="display:grid;gap:4px"><span class="lab" style="color:inherit;opacity:.7">Aufgestellt: M</span><span class="price">${eur(p.price)}</span></div>${cta(p)}</div>` },
-  { key: 'mgseat', fam: 'Neue Mischung', name: 'Modemagazin + dunkle Leiste mit Stadionplan', idea: 'Gleiches Modemagazin, in der dunklen Leiste wählst du deinen Block im Stadion. Zum direkten Vergleich mit der Karte davor.',
+  { key: 'mgseat', fam: '', name: 'Modemagazin + dunkle Leiste mit Stadionplan', idea: 'Gleiches Modemagazin, in der dunklen Leiste wählst du deinen Block im Stadion. Zum direkten Vergleich mit der Karte davor.',
     tags: ['Modemagazin', 'Dunkle Leiste', 'Platzwahl', 'Zusammenfassung'],
     css: `${gateCSS('mgseat')}.L-mgseat .gate .st{--stc:var(--bg);--stf:var(--ink);width:220px;height:130px;flex:none}.L-mgseat .gate .st .b b{font-size:16px}`,
     html: p => `${magTop(p)}<div class="gate">${scan()}${stadium('M', { labels: false })}<div style="display:grid;gap:4px"><span class="lab" style="color:inherit;opacity:.7">Block M · Haupttribüne</span><span class="price">${eur(p.price)}</span></div>${cta(p, 'Platz sichern')}</div>` },
-  { key: 'mlineupbar', fam: 'Neue Mischung', name: 'Modemagazin, Aufstellung in der Kaufleiste', idea: 'Das Modemagazin bleibt ganz ruhig, die helle Kaufleiste unten bekommt statt normaler Größenknöpfe ein kleines Feld mit den Spielern S bis XL.',
+  { key: 'mlineupbar', fam: '', name: 'Modemagazin, Aufstellung in der Kaufleiste', idea: 'Das Modemagazin bleibt ganz ruhig, die helle Kaufleiste unten bekommt statt normaler Größenknöpfe ein kleines Feld mit den Spielern S bis XL.',
     tags: ['Modemagazin', 'Helle Kaufleiste', 'Aufstellung', 'Ruhig'],
     css: `.m.L-mlineupbar{background:var(--bg)}.L-mlineupbar .big{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:250px;font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.85}
       .L-mlineupbar .im{position:absolute;left:50%;top:120px;translate:-50% 0;height:520px}.L-mlineupbar .colL{position:absolute;left:70px;top:320px;width:300px;display:grid;gap:12px}
@@ -35,25 +35,32 @@ const PDP4_NEW = [
       <div class="colR"><div><span>Kragen</span><b>${p.city ? 'Polo' : 'Rund'}</b></div><div><span>Rückgabe</span><b>14 Tage</b></div><div><span>Versand DE</span><b>ca. 3 Werktage</b></div></div>
       <div class="bar2"><div><h3>${title(p)}</h3><div class="price">${eur(p.price)}</div></div>${pitch('M', { h: true })}${ship()}${cta(p)}</div>` },
 ];
-const byKey = (list, keys, fam) => keys.map(k => ({ ...list.find(l => l.key === k), fam }));
+/* neutral wording for the partner: no "your favourite" or round history in the cards */
+const FIX = {
+  mlineup: { idea: 'Das Modemagazin mit dem riesigen Namen. Die Größe wählt man aber auf einer kleinen Aufstellung rechts neben dem Trikot. Unten bleibt die feste Kaufleiste.' },
+  mclassic: { tags: ['Modemagazin', 'Feste Kaufleiste', 'Mode statt Fanartikel', 'Storytelling'] },
+  cardflip: { idea: 'Spielerkarten: fährt man drüber oder tippt drauf, dreht sich die Karte um, hinten Größe und Warenkorb. Kaufen ohne die Seite zu wechseln.' },
+  phoneshop: { idea: 'So sähen drei der Shop-Entwürfe auf dem Handy aus: Klassisch mit Filterknöpfen, die Reihe mit Spielerkarten zum Wischen und die Größen direkt auf der Karte.' },
+};
+const byKey = (list, keys, fam) => keys.map(k => ({ ...list.find(l => l.key === k), fam, ...(FIX[k] || {}) }));
 const PDP4 = [
-  ...byKey(PDP3, ['mlineup'], 'Dein Ja aus Runde 3'), PDP4_NEW[2], ...byKey(PDP3, ['mclassic', 'mseat'], 'Dein Ja aus Runde 3'),
-  PDP4_NEW[0], PDP4_NEW[1], ...byKey(PDP3, ['glineup', 'gseat'], 'Dein Ja aus Runde 3'),
+  ...byKey(PDP3, ['mlineup'], ''), PDP4_NEW[2], ...byKey(PDP3, ['mclassic', 'mseat'], ''),
+  PDP4_NEW[0], PDP4_NEW[1], ...byKey(PDP3, ['glineup', 'gseat'], ''),
 ];
 
 const SHOP4_NEW = [
-  { key: 'cardsize', fam: 'Neue Mischung', name: 'Spielerkarten + Größe direkt', idea: 'Die fünf Spielerkarten nebeneinander, unter jeder Karte die Größen als Knöpfe und „+ Warenkorb“. Deine zwei Lieblinge aus Runde 3 in einem.',
+  { key: 'cardsize', fam: '', name: 'Spielerkarten + Größe direkt', idea: 'Die fünf Spielerkarten nebeneinander, unter jeder Karte die Größen als Knöpfe und „+ Warenkorb“. Spielerkarten und Schnellkauf in einem.',
     tags: ['Sammelkarten', 'Ein Klick weniger', 'Größen sichtbar', 'Junge Zielgruppe'],
     css: `.S-cardsize h2{font-size:90px;padding:46px 50px 0}.S-cardsize .g{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;padding:46px 50px 30px}.S-cardsize .it{display:grid;gap:10px}`,
     html: () => `${shopTop()}<h2>Sammel deine Stadt</h2><div class="g">${PRODUCTS.map((q, i) => `<div class="it">${card3(q, 420)}${sizeRow(i === 1 ? 'M' : '')}<span class="add4">+ Warenkorb</span></div>`).join('')}</div>
       <div style="display:flex;justify-content:center">${ship()}</div><div style="height:30px"></div>${trustRow('0 50px')}` },
-  { key: 'classiccardsize', fam: 'Neue Mischung', name: 'Klassisch + Karten + Größe direkt', idea: 'Der klassische Aufbau mit Filtern links und Spielerkarten im Raster. Unter jeder Karte stehen direkt die Größen: ein Tipp, und das Trikot liegt im Warenkorb.',
+  { key: 'classiccardsize', fam: '', name: 'Klassisch + Karten + Größe direkt', idea: 'Der klassische Aufbau mit Filtern links und Spielerkarten im Raster. Unter jeder Karte stehen direkt die Größen: ein Tipp, und das Trikot liegt im Warenkorb.',
     tags: ['Filter links', 'Sammelkarten', 'Ein Klick weniger', 'Vertraut'],
     css: `${filtersCSS('classiccardsize')}.S-classiccardsize .g{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px}.S-classiccardsize .it{display:grid;gap:10px}
       .S-classiccardsize .info{border:1.5px dashed var(--line);display:grid;align-content:center;gap:12px;padding:28px}`,
     html: () => `${shopTop()}<div class="wrap"><div class="f"><h2 style="font-size:54px">Trikots</h2>${filters3()}${ship()}</div><div><div class="top2"><span class="desc">5 Trikots</span><span class="chips"><span class="on">Neu zuerst</span><span>Preis</span></span></div>
       <div class="g">${PRODUCTS.map((q, i) => `<div class="it">${card3(q, 390)}${sizeRow(i === 0 ? 'M' : '')}<span class="add4">+ Warenkorb</span></div>`).join('')}<div class="info"><h3 style="font-size:34px">Welche Größe?</h3><p class="desc">Alle Trikots von S bis XL.</p>${guide()}${trust()}</div></div></div></div>` },
-  { key: 'railcardsize', fam: 'Neue Mischung', name: 'Kartenreihe + Größe direkt', idea: 'Die Reihe mit den großen Nummern und Spielerkarten, unter jeder Karte die Größen. Auf dem Handy wischen und direkt in der Reihe kaufen.',
+  { key: 'railcardsize', fam: '', name: 'Kartenreihe + Größe direkt', idea: 'Die Reihe mit den großen Nummern und Spielerkarten, unter jeder Karte die Größen. Auf dem Handy wischen und direkt in der Reihe kaufen.',
     tags: ['Reihe', 'Sammelkarten', 'Ein Klick weniger', 'Wischen'],
     css: `.S-railcardsize .hd2{display:flex;align-items:flex-end;justify-content:space-between;padding:50px 60px 24px}.S-railcardsize h2{font-size:90px}
       .S-railcardsize .strip{display:flex;gap:30px;padding:56px 60px 0;overflow:hidden}.S-railcardsize .it{flex:none;width:340px;display:grid;gap:10px;position:relative}
@@ -65,17 +72,17 @@ const SHOP4_NEW = [
       <div class="prog"><i></i></div>${trustRow()}` },
 ];
 const SHOP4 = [
-  SHOP4_NEW[0], ...byKey(SHOP3, ['cards', 'cardflip'], 'Dein Ja aus Runde 3'), SHOP4_NEW[1], ...byKey(SHOP3, ['classiccards', 'quicksize'], 'Dein Ja aus Runde 3'),
-  SHOP4_NEW[2], ...byKey(SHOP3, ['railcards', 'phoneshop'], 'Dein Ja aus Runde 3'),
+  SHOP4_NEW[0], ...byKey(SHOP3, ['cards', 'cardflip'], ''), SHOP4_NEW[1], ...byKey(SHOP3, ['classiccards', 'quicksize'], ''),
+  SHOP4_NEW[2], ...byKey(SHOP3, ['railcards', 'phoneshop'], ''),
 ];
-const ANIM4 = [];
+const ANIM4 = ['lift', 'stagger', 'flap', 'lpick', 'spick', 'check', 'tear', 'drawer', 'ball'].map(k => ANIM3.find(a => a.key === k));
 
 /* ---------------------------------------------------------------- colour round 2 */
 const CARD_BY = { blackyellow: { cd1a: '#2a2a2a', cd1b: '#050505', cd1i: '#ffd400', cd2a: '#ffe14d', cd2b: '#f2c200', cd2i: '#111111' } };
 const FLOOD = { bg: '#111214', surf: '#1b1c1f', surf2: '#24262a', ink: '#f5f3ea', mut: '#a9a79f', line: '#33353a', acc: '#ffd400', accInk: '#111111', hand: '#ffd400' };
 const PAL4 = [
   /* floodlight family */
-  { key: 'flood', fam: 'Flutlicht', name: 'Flutlicht (dein Ja)', idea: 'Dein Ja aus Runde 3 als Bezug: fast schwarz wie ein Stadion bei Nacht, Gelb wie das Flutlicht. Jetzt auf deinen Lieblingsentwürfen.', tags: ['Dunkel', 'Gelb', 'Bezug'], pal: { ...FLOOD } },
+  { key: 'flood', fam: 'Flutlicht', name: 'Flutlicht', idea: 'Fast schwarz wie ein Stadion bei Nacht, Gelb wie das Flutlicht für Knöpfe und Hinweise. Sehr sportlich, der Kaufen-Knopf springt sofort ins Auge.', tags: ['Dunkel', 'Gelb', 'Sportlich'], pal: { ...FLOOD } },
   { key: 'floodneon', fam: 'Flutlicht', name: 'Flutlicht Neon', idea: 'Noch schwärzer, das Gelb kippt ins Neon-Zitronengelb wie bei Leuchtwesten und Hallenschuhen. Sehr jung, sehr laut.', tags: ['Dunkel', 'Neon', 'Laut'], pal: { bg: '#0c0d0e', surf: '#16181a', surf2: '#1f2225', ink: '#f4f6f0', mut: '#a4aaa0', line: '#2c3033', acc: '#d7ff1f', accInk: '#0c0d0e', hand: '#d7ff1f' } },
   { key: 'floodamber', fam: 'Flutlicht', name: 'Flutlicht Bernstein', idea: 'Wärmeres Gelb, fast Orange, wie alte Natriumlampen über dem Parkplatz am Stadion. Wirkt hochwertiger und weniger grell.', tags: ['Dunkel', 'Warm', 'Hochwertig'], pal: { bg: '#121011', surf: '#1c191a', surf2: '#262224', ink: '#f6efe4', mut: '#b0a596', line: '#352f2c', acc: '#ffb000', accInk: '#121011', hand: '#ffb000' } },
   { key: 'floodbar', fam: 'Flutlicht', name: 'Flutlicht mit gelbem Laufband', idea: 'Wie Flutlicht, aber das Laufband oben ist ein gelbes Band mit schwarzer Schrift und die Knöpfe sind weiß. Gelb wird zum Markenzeichen statt zur Knopffarbe.', tags: ['Dunkel', 'Gelbes Band', 'Weiße Knöpfe'], pal: { ...FLOOD, acc: '#ffffff', accInk: '#111111', bar: '#ffd400', barInk: '#111111', barStar: '#111111' } },
@@ -100,7 +107,7 @@ const PAL4 = [
   { key: 'violetyellow', fam: 'Nacht', name: 'Dunkelviolett & Gelb', idea: 'Dunkles Violett mit Gelb, die Gegenfarbe macht beides stärker. Sehr eigen, erinnert an alte Torwarttrikots.', tags: ['Dunkel', 'Violett + Gelb', 'Eigen'], pal: { bg: '#1b1030', surf: '#24173d', surf2: '#2d1f4a', ink: '#f5f0ff', mut: '#b8acd1', line: '#3a2c5a', acc: '#ffd400', accInk: '#1b1030', hand: '#ffd400' } },
 
   /* colour as the surface */
-  { key: 'azureyellow', fam: 'Farbe als Fläche', name: 'Azurblau & Gelb', idea: 'Die ganze Seite in Azurblau, Knöpfe und Laufband im Flutlicht-Gelb. Name und Lieblingsfarbe in einem.', tags: ['Farbig', 'Blau + Gelb', 'Marke'], pal: { bg: '#1d4fa3', surf: '#2358b0', surf2: '#2a62bd', ink: '#ffffff', mut: '#d2def3', line: '#4a76c2', acc: '#ffd400', accInk: '#111111', hand: '#ffd400', bar: '#ffd400', barInk: '#111111', barStar: '#111111' } },
+  { key: 'azureyellow', fam: 'Farbe als Fläche', name: 'Azurblau & Gelb', idea: 'Die ganze Seite in Azurblau, Knöpfe und Laufband im Flutlicht-Gelb. Name und Flutlicht in einem.', tags: ['Farbig', 'Blau + Gelb', 'Marke'], pal: { bg: '#1d4fa3', surf: '#2358b0', surf2: '#2a62bd', ink: '#ffffff', mut: '#d2def3', line: '#4a76c2', acc: '#ffd400', accInk: '#111111', hand: '#ffd400', bar: '#ffd400', barInk: '#111111', barStar: '#111111' } },
   { key: 'redfield', fam: 'Farbe als Fläche', name: 'Rot als Fläche', idea: 'Kräftiges Trikotrot als Grund, weiße Knöpfe, schwarzes Laufband, Gelb für die Handschrift. Wie ein Heimtrikot aus den 80ern.', tags: ['Farbig', 'Rot', '80er'], pal: { bg: '#c8102e', surf: '#d01834', surf2: '#b30d28', ink: '#ffffff', mut: '#fff2f4', line: '#e04a60', acc: '#ffffff', accInk: '#a00d24', hand: '#ffd400', bar: '#111111', barInk: '#ffffff', barStar: '#ffd400' } },
   { key: 'greenfield', fam: 'Farbe als Fläche', name: 'Rasengrün & Gelb', idea: 'Sattes Rasengrün als Fläche, Gelb für Knöpfe und Laufband. Wie der Platz am Samstagnachmittag.', tags: ['Farbig', 'Grün + Gelb', 'Platz'], pal: { bg: '#0f5132', surf: '#135c39', surf2: '#0c4529', ink: '#ffffff', mut: '#cfe5d8', line: '#2e6e4d', acc: '#ffd400', accInk: '#111111', hand: '#ffd400', bar: '#ffd400', barInk: '#111111', barStar: '#111111' } },
   { key: 'orangefield', fam: 'Farbe als Fläche', name: 'Orange als Fläche', idea: 'Leuchtendes Orange über die ganze Seite, Schwarz für Schrift und Knöpfe. Sehr laut, sehr Sommer, sehr Holland.', tags: ['Farbig', 'Orange', 'Laut'], pal: { bg: '#ff5a1f', surf: '#ff6a33', surf2: '#f04d14', ink: '#111111', mut: '#3b1a0b', line: '#ff8a5c', acc: '#111111', accInk: '#ff5a1f', hand: '#111111', bar: '#111111', barInk: '#ff5a1f', barStar: '#ffffff' } },
