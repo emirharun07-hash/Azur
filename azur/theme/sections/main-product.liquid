@@ -1,0 +1,273 @@
+{%- comment -%}
+  Produktseite: Galerie (alle Produktbilder in Shopify-Reihenfolge, Klick vergrößert) und Kaufbereich (Name, Farben,
+  Preis mit Steuerhinweis, Größe mit Größentabelle, Warenkorb, Versand/Lieferung/Rückgabe offen, Fit/Model/Material/Pflege
+  aus den Metafeldern custom.*, Beschreibung, Aufklapper).
+  Ab 1024 px: alle Bilder groß untereinander (erstes über die volle Breite, dann zu zweit), der Kaufbereich läuft mit.
+  Darunter: wischen mit Zähler; auf dem Handy erscheint unten eine feste Kaufleiste, sobald der Kaufknopf aus dem Bild ist.
+  Ansichtsnamen kommen aus den Alt-Texten: "…Vorderseite" → Vorne, "…Rückseite" → Hinten, "Detail…" → Detail,
+  "…Seitenansicht…" → Seite, "3/4" → 3/4.
+{%- endcomment -%}
+{%- liquid
+  capture label
+    render 'product-field', product: product, field: 'label'
+  endcapture
+  capture colorway
+    render 'product-field', product: product, field: 'colorway'
+  endcapture
+  capture motto
+    render 'product-field', product: product, field: 'motto'
+  endcapture
+
+  assign shipping_page = pages[settings.shipping_page_handle]
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+  # Brotkrumen: Produkte der Navigations-Kategorie (z. B. Nationaltrikots) zeigen dorthin
+  assign crumb = shop_coll
+  assign cat = settings.nav_collection
+  if cat.url != blank
+    for c in product.collections
+      if c.handle == cat.handle
+        assign crumb = cat
+      endif
+    endfor
+  endif
+  assign form_id = 'buy-' | append: section.id
+  assign images = product.media | where: 'media_type', 'image'
+-%}
+
+<article class="pdp" data-product data-product-label="{{ label | strip | escape }}">
+  <nav class="crumbs wrap" aria-label="Brotkrumen">
+    <ol>
+      <li><a class="link" href="{{ shop_coll.url }}">Shop</a></li>
+      {%- if crumb.handle != shop_coll.handle -%}
+        <li><a class="link" href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+      {%- endif -%}
+      <li aria-current="page">{{ label }}</li>
+    </ol>
+  </nav>
+
+  <div class="pdp__grid wrap">
+    <section class="gallery" aria-label="Bilder: {{ label }}" data-gallery>
+      <div class="gallery__stage">
+        <ul class="gallery__track" data-track tabindex="0" aria-label="Produktbilder. Mit den Pfeiltasten wechseln.">
+          {%- for media in images -%}
+            {%- liquid
+              assign a = media.alt | downcase
+              assign head = a | slice: 0, 6
+              assign view = 'Bild ' | append: forloop.index
+              if a contains '3/4'
+                assign view = '3/4'
+              elsif head == 'detail'
+                assign view = 'Detail'
+              elsif a contains 'seitenansicht'
+                assign view = 'Seite'
+              elsif a contains 'rückseite' or a contains 'hinten'
+                assign view = 'Hinten'
+              elsif a contains 'vorderseite' or a contains 'vorne'
+                assign view = 'Vorne'
+              elsif forloop.first
+                assign view = 'Vorne'
+              endif
+              assign loading = 'lazy'
+              if forloop.first
+                assign loading = 'eager'
+              endif
+            -%}
+            {%- liquid
+              assign img_sizes = '(min-width: 1024px) 28vw, 100vw'
+              if forloop.first
+                assign img_sizes = '(min-width: 1024px) 56vw, 100vw'
+              endif
+            -%}
+            <li class="gallery__slide{% if head == 'detail' %} gallery__slide--detail{% endif %}" data-view="{{ view }}" aria-label="{{ forloop.index }} von {{ forloop.length }}: {{ view }}">
+              <button class="gallery__zoom" type="button" data-zoom="{{ media | image_url: width: 2400 }}" data-zoom-alt="{{ media.alt | escape }}">
+                {{
+                  media
+                  | image_url: width: 1600
+                  | image_tag:
+                    widths: '480, 720, 960, 1200, 1600',
+                    sizes: img_sizes,
+                    loading: loading,
+                    fetchpriority: 'auto',
+                    alt: media.alt
+                }}
+                <span class="sr-only">Vergrößern</span>
+              </button>
+            </li>
+          {%- else -%}
+            <li class="gallery__slide">{{ 'product-apparel-1' | placeholder_svg_tag: 'gallery__placeholder' }}</li>
+          {%- endfor -%}
+        </ul>
+        {%- if images.size > 1 -%}
+          <p class="gallery__count" aria-hidden="true"><span data-gallery-now>01</span> / {% if images.size < 10 %}0{% endif %}{{ images.size }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- if images.size > 1 -%}
+        <div class="gallery__thumbs" role="group" aria-label="Ansicht wählen" style="--n: {{ images.size }}">
+          {%- for media in images -%}
+            {%- liquid
+              assign a = media.alt | downcase
+              assign head = a | slice: 0, 6
+              assign view = 'Bild ' | append: forloop.index
+              if a contains '3/4'
+                assign view = '3/4'
+              elsif head == 'detail'
+                assign view = 'Detail'
+              elsif a contains 'seitenansicht'
+                assign view = 'Seite'
+              elsif a contains 'rückseite' or a contains 'hinten'
+                assign view = 'Hinten'
+              elsif a contains 'vorderseite' or a contains 'vorne'
+                assign view = 'Vorne'
+              elsif forloop.first
+                assign view = 'Vorne'
+              endif
+            -%}
+            <button class="gallery__thumb" type="button" data-go="{{ forloop.index0 }}"{% if forloop.first %} aria-current="true"{% endif %}>
+              <span class="gallery__thumb-img">{{ media | image_url: width: 200 | image_tag: widths: '100, 200', sizes: '6rem', alt: '', loading: 'lazy' }}</span>
+              <span class="gallery__thumb-label">{{ view }}</span>
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </section>
+
+    <div class="pdp__info">
+      <header class="pdp__head">
+        <h1 class="pdp__title">{{ label }}</h1>
+        {%- if colorway != blank -%}
+          <p class="pdp__colors"><span class="sr-only">Farben: </span>{{ colorway }}</p>
+        {%- endif -%}
+      </header>
+
+      <div class="pdp__price-row">
+        <p class="pdp__price" data-price>{% render 'price', amount: product.selected_or_first_available_variant.price %}</p>
+        {%- if settings.tax_note != blank -%}<p class="pdp__tax">{{ settings.tax_note }}</p>{%- endif -%}
+      </div>
+
+      {%- form 'product', product, id: form_id, class: 'pdp__buy', data-buy: '' -%}
+        {% render 'size-picker', product: product, form_id: form_id %}
+        <p class="pdp__error" data-buy-error role="alert" hidden></p>
+        <button class="btn btn--solid btn--block btn--big pdp__add" type="submit" name="add" data-buy-btn{% unless product.available %} disabled{% endunless %}>
+          <span data-buy-label>{% if product.available %}In den Warenkorb{% else %}Ausverkauft{% endif %}</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </button>
+        <p class="pdp__status" data-buy-status role="status"></p>
+      {%- endform -%}
+
+      {% render 'trust-line', class: 'pdp__trust' %}
+
+      {%- if motto != blank -%}
+        <p class="pdp__motto">{{ motto }}</p>
+      {%- endif -%}
+
+      {%- liquid
+        assign f_fit = product.metafields.custom.fit.value
+        assign f_model = product.metafields.custom.model.value
+        assign f_material = product.metafields.custom.material.value
+        assign f_care = product.metafields.custom.care.value
+        assign has_facts = false
+        if f_fit != blank or f_model != blank or f_material != blank or f_care != blank or request.design_mode
+          assign has_facts = true
+        endif
+      -%}
+      {%- if has_facts -%}
+        <dl class="facts pdp__facts">
+          {%- if f_fit != blank -%}
+            <div class="facts__row"><dt>Fit</dt><dd>{{ f_fit | escape }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Fit</dt><dd>{% render 'placeholder', text: 'Metafeld custom.fit fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_model != blank -%}
+            <div class="facts__row"><dt>Model</dt><dd>{{ f_model | escape }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Model</dt><dd>{% render 'placeholder', text: 'Metafeld custom.model fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_material != blank -%}
+            <div class="facts__row"><dt>Material</dt><dd>{{ f_material | escape | newline_to_br }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Material</dt><dd>{% render 'placeholder', text: 'Metafeld custom.material fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_care != blank -%}
+            <div class="facts__row"><dt>Pflege</dt><dd>{{ f_care | escape | newline_to_br }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Pflege</dt><dd>{% render 'placeholder', text: 'Metafeld custom.care fehlt' %}</dd></div>
+          {%- endif -%}
+        </dl>
+      {%- endif -%}
+
+      <div class="pdp__more">
+        {%- if product.description != blank -%}
+          <details class="acc" open>
+            <summary class="acc__head">Beschreibung</summary>
+            <div class="acc__body rte">{{ product.description }}</div>
+          </details>
+        {%- endif -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign has_link = false
+            if block.settings.show_shipping_link and shipping_page.url != blank
+              assign has_link = true
+            endif
+            if block.settings.text == blank and has_link == false
+              continue
+            endif
+          -%}
+          <details class="acc" {{ block.shopify_attributes }}{% if block.settings.open %} open{% endif %}>
+            <summary class="acc__head">{{ block.settings.title }}</summary>
+            <div class="acc__body rte">
+              {{ block.settings.text }}
+              {%- if has_link -%}
+                <p><a class="link acc__link" href="{{ shipping_page.url }}">{{ shipping_page.title }}</a></p>
+              {%- endif -%}
+            </div>
+          </details>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  {%- if product.available -%}
+    <div class="buybar" data-buybar hidden>
+      <label class="sr-only" for="{{ form_id }}-bar">{{ product.options.first | default: 'Größe' }}</label>
+      <select class="buybar__size" id="{{ form_id }}-bar" data-buybar-size>
+        <option value="">{{ product.options.first | default: 'Größe' }}</option>
+        {%- for variant in product.variants -%}
+          <option value="{{ variant.id }}"{% unless variant.available %} disabled{% endunless %}>{{ variant.option1 }}{% unless variant.available %} – ausverkauft{% endunless %}</option>
+        {%- endfor -%}
+      </select>
+      <button class="btn btn--solid buybar__add" type="button" data-buybar-add>In den Warenkorb · <span data-buybar-price>{% render 'price', amount: product.selected_or_first_available_variant.price %}</span></button>
+    </div>
+  {%- endif -%}
+
+  <dialog class="zoom" data-zoom-dialog aria-label="Bild vergrößert">
+    <button class="zoom__close" type="button" data-zoom-close>Schließen</button>
+    <div class="zoom__pane"><img class="zoom__img" alt="" width="2400" height="2400" data-zoom-img></div>
+  </dialog>
+</article>
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "Produkt",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "collapsible",
+      "name": "Aufklapper",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Versand & Rückgabe" },
+        { "type": "richtext", "id": "text", "label": "Text", "info": "Nur bestätigte Angaben eintragen. Leer = Aufklapper wird ausgeblendet." },
+        { "type": "checkbox", "id": "show_shipping_link", "label": "Link zur Versandseite anhängen (wenn veröffentlicht)", "default": false },
+        { "type": "checkbox", "id": "open", "label": "Offen anzeigen", "default": false }
+      ]
+    }
+  ]
+}
+{% endschema %}
