@@ -4,9 +4,7 @@
 window.AZUR = window.AZUR || {};
 
 AZUR.config = {
-  assetBase: 'assets/views/',
-  scene3Base: 'assets/scene3/views/',   // round 3 renders (used when they exist; scene2 otherwise)
-  outsideBase: 'assets/scene2/outside/', // footage of the Bolzplatz behind the window (shared by every scene set)
+  assetBase: 'assets/scene3/views/',   // the renders (round 3 on): light passes, masks, depth per view
   neonGlow: 1.4,            // round 4: strength of the sign's soft glow (neon_glow.webp, added with the neon light)
   neonCore: 4.0,            // the tubes' cores this much brighter (the stored neon pass stops below them: white-hot core)
   flights: 'blend',         // change of view: 'blend' zooms the room's own picture into the next view (round 9: always the
@@ -51,27 +49,14 @@ AZUR.config = {
   dayStates: [{ from: 6.5, state: 'morning' }, { from: 9, state: 'day' }, { from: 17, state: 'evening' }, { from: 23, state: 'night' }],
   mobileQuery: '(max-width: 760px), (pointer: coarse) and (max-width: 1024px) and (orientation: portrait)',
 
-  /* Garments on the rail. The 3D rail fans them 25° toward the window; CSS mirrors that. */
-  garments: {
-    fanDeg: 24,               // resting turn toward the window (matches FAN in build_room.py)
-    perspective: 1400,        // px, CSS perspective of the garment layer
-    hangerWidthM: 0.43,       // hanger shoulder width in metres (for sprite scaling)
-    shadow: { x: -0.05, y: 0.035, blur: 0.06, alpha: 0.35 }   // fractions of garment height
-  },
-
-  /* Motion. All durations in ms, springs as stiffness/damping per second. Tweak freely. */
+  /* Motion. Durations in ms, pendulums in degrees and degrees per second. Tweak freely. */
   motion: {
     intensity: 1.0,           // global multiplier (design panel)
-    spring: { stiffness: 170, damping: 19 },          // lift, push, turn
-    swing:  { stiffness: 38,  damping: 3.2, impulse: 0.012, maxDeg: 7, hoverKick: 9, leaveKick: 5, selectKick: 14 },   // pendulum on the hook (deg, deg/s)
-    idle:   { swayDeg: 0.45, periodS: 6.5 },          // garments breathe a little
-    hover:  { lift: 0.035, forward: 0.045, turnDeg: -9, tiltDeg: 1.4, bright: 1.07, neighbourPush: 0.16, falloff: 0.45 },
-    select: { lift: 0.06, forward: 0.16, turnDeg: -24, push: 0.42, dimRoom: 0.62, blurRoom: 2.5 },
-    labelDelay: 90,
-    /* scene3: the jerseys in the render swing on their hooks (degrees, per second); ripple = cloth wave in plate px */
-    /* round 7: calmer, no jelly: no cloth ripple, no idle breathing (it ran at 30 fps), a smaller swing that settles
-       quickly; the jerseys only move when touched */
-    sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, idleDeg: 0, ripple: 0, neighbour: 0.3 },
+    /* the jerseys in the render swing on their hooks (degrees, per second); ripple = cloth wave in plate px.
+       Round 7: calmer, no jelly: no cloth ripple, no idle breathing, a small swing that settles quickly; the jerseys
+       only move when touched (hover, brush, click, chosen, the phone rail panning) */
+    sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, selectKick: 14,
+            panImpulse: 0.0108, idleDeg: 0, ripple: 0, neighbour: 0.3 },
     // change of view ('blend'): this view zooms toward the next one and fades; the next settles from a little closer
     pan: { ms: 950, zoom: 1.6, drift: 0.05, settle: 1.06, back: 1.2 },
     parallaxEase: 3.5         // how fast the room follows the pointer (per second; round 7: by time, not per frame)

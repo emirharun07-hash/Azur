@@ -238,13 +238,12 @@
       const baseKey = key.split('@')[0], baseDir = A.config.assetBase + baseKey + '/';
       const vc = A.config.views[baseKey] || {};
       const wantIds = vc.ids !== false && vc.masks !== false, wantWin = vc.window !== false && vc.masks !== false;
-      const s3 = !!A.config.scene3;
       const [depth, ids, win, masks, glow] = await Promise.all([
         loadImage(baseDir + 'depth.png'),
         key.includes('@') || !wantIds ? null : loadImage(baseDir + 'ids.png'),
         wantWin ? loadImage(baseDir + 'window.png') : null,
-        s3 ? loadImage(baseDir + 'masks.png') : null,
-        s3 ? loadImage(baseDir + 'glow.png') : null]);
+        loadImage(baseDir + 'masks.png'),
+        loadImage(baseDir + 'glow.png')]);
       if (have && this.gl) {
         const lo = meta && meta._lo && !key.includes('@');
         const list = PASSES.filter(p => scales[FILES[p]]);
@@ -414,7 +413,7 @@
         if (patches.some(arr => arr.some(x => !x))) patches = null;
       }
       const night = state === 'night';
-      const [masksN, glowN] = A.config.scene3 && night && !v.masksNight
+      const [masksN, glowN] = night && !v.masksNight
         ? await Promise.all([loadImage(A.config.assetBase + v.key.split('@')[0] + '/masks_night.png'), loadImage(A.config.assetBase + v.key.split('@')[0] + '/glow_night.png')]) : [null, null];
       if (v.state === state) return;            // another call got there first
       const put = (tex, img, r, k) => this.putPatch(tex, img, r, k, v);
@@ -620,14 +619,7 @@
       } else { bind(5, null); if (v.win) this.vidMix = 0; }
       gl.uniform1f(u.uHasWin, vidOk ? 1 : 0); gl.uniform1f(u.uWinAmt, this.winAmt * this.vidMix);
       if (vidOk) {
-        const b = v.winBox, vw = vid.videoWidth, vh = vid.videoHeight;
-        if (this.clipBox) { gl.uniform4fv(u.uWinBox, this.clipBox); gl.uniform4fv(u.uVidMap, [0, 0, 1, 1]); }   // rendered for this window
-        else {   // footage: cover the window box with it (box measured in plate pixels)
-          gl.uniform4fv(u.uWinBox, b);
-          const ba = ((b[2] - b[0]) * v.size[0]) / ((b[3] - b[1]) * v.size[1]), va = vw / vh;
-          let mw = 1, mh = 1; if (ba > va) mh = va / ba; else mw = ba / va;
-          gl.uniform4fv(u.uVidMap, [(1 - mw) / 2, (1 - mh) * 0.35, mw, mh]);
-        }
+        gl.uniform4fv(u.uWinBox, this.clipBox || v.winBox); gl.uniform4fv(u.uVidMap, [0, 0, 1, 1]);   // the clip is rendered for this window
         gl.uniform3fv(u.uVidGrade, this.videoGrade || [1, 1, 1]);
       }
       gl.uniform1f(u.uHasIds, v.ids ? 1 : 0); gl.uniform1f(u.uHover, this.hover); gl.uniform1f(u.uHoverAmt, this.hoverAmt);

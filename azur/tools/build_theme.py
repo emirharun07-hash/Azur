@@ -121,7 +121,7 @@ def build_files():
             dst = os.path.join(OUT, 'files', os.path.relpath(rel, f'assets/{SET}'))
             os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy2(os.path.join(PUB, rel), dst)
             out.append((files_name(rel), RAW + 'azur/' + os.path.relpath(dst, ROOT)))
-    for rel in ('assets/mag/cover.webp', 'assets/mag/story.webp', 'assets/scene2/outside/bolzplatz.mp4', 'assets/scene2/outside/bolzplatz.webm'):
+    for rel in ('assets/mag/cover.webp', 'assets/mag/story.webp'):
         out.append((files_name(rel), RAW + 'azur/prototype/' + rel))
     from urllib.parse import quote
     out = [(n, quote(u, safe=':/')) for n, u in out]
