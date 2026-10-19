@@ -9,8 +9,8 @@ AZUR.config = {
   outsideBase: 'assets/scene2/outside/', // footage of the Bolzplatz behind the window (shared by every scene set)
   neonGlow: 1.4,            // round 4: strength of the sign's soft glow (neon_glow.webp, added with the neon light)
   neonCore: 4.0,            // the tubes' cores this much brighter (the stored neon pass stops below them: white-hot core)
-  realMoves: true,          // the rendered camera flights; false blends the views into each other instead (round 4 in
-                            // the cloud used that while the flights still showed the round 3 room)
+  flights: 'blend',         // change of view: 'blend' zooms the room's own picture into the next view (round 9: always the
+                            // room's light); 'video' plays the rendered flights (round 7: their light can differ from the room's)
   gpuViews: 2,              // views that keep their light passes on the GPU (the others upload again when needed)
   modelExt: 'glb',                       // jersey models for the product view ('glb.json' where .glb is not served)
 
@@ -72,7 +72,8 @@ AZUR.config = {
     /* round 7: calmer, no jelly: no cloth ripple, no idle breathing (it ran at 30 fps), a smaller swing that settles
        quickly; the jerseys only move when touched */
     sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, idleDeg: 0, ripple: 0, neighbour: 0.3 },
-    pan: { outMs: 520, inMs: 820, zoom: 1.32, blurPx: 14, drift: 0.04 },   // fake camera move between views
+    // change of view ('blend'): this view zooms toward the next one and fades; the next settles from a little closer
+    pan: { ms: 950, zoom: 1.6, drift: 0.05, settle: 1.06, back: 1.2 },
     parallaxEase: 3.5         // how fast the room follows the pointer (per second; round 7: by time, not per frame)
   },
   interactionStrength: 1.0,

@@ -149,7 +149,8 @@
     return new Promise((res) => {
       const im = new Image();
       im.decoding = 'async';
-      im.onload = () => res(im); im.onerror = () => res(null);
+      im.onload = () => (im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
+      im.onerror = () => res(null);
       im.src = A.url(src);
     });
   }
@@ -195,8 +196,8 @@
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       this.blank = this.texture(null);
-      this.lit = null; this.litKey = ''; this.fbo = gl.createFramebuffer();
-      this.hover = 0; this.hoverAmt = 0; this.winAmt = 0; this.video = null; this.videoTex = null;
+      this.fbo = gl.createFramebuffer();
+      this.hover = 0; this.hoverAmt = 0; this.winAmt = 0; this.video = null; this.videoTex = null; this.vidMix = 0;
       this.recent = [];                                   // views whose passes are on the GPU, most recent last
     }
 
@@ -249,7 +250,10 @@
         const list = PASSES.filter(p => scales[FILES[p]]);
         const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
         if (imgs.every(Boolean)) {
-          list.forEach((p, i) => { v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i]; });
+          for (let i = 0; i < list.length; i++) {      // a background load uploads one pass per idle moment
+            if (!activate) await this.idle();
+            const p = list[i]; v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
+          }
           v.size = [imgs[0].naturalWidth, imgs[0].naturalHeight]; v.mode = 'passes';
           v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = 1;
           v.list = list; v.base = base; v.tier = lo ? 'lo' : 'full';
@@ -276,15 +280,18 @@
       if (activate) { this.view = v; this.mode = v.mode; }
       done();
       if (this.state !== 'day') await this.applyState(v, this.state);
+      // its picture in the current light right away: once its passes are given back (touch), it still shows at once
+      if (!activate && v.mode === 'passes' && this.lastState) this.mix(this.lastState, v);
       this.touch(v);
       return v.mode;
     }
 
     /* GPU memory: only the views used last keep their pass textures (A.config.gpuViews, 2); the others give them back
-       and upload them again from their images (and their time-of-day patches) when they are needed. */
+       but keep their mixed picture (v.lit), so a change of view never waits for uploads: the passes come back in idle
+       time (restoreSoon) and the picture is mixed again when the light has moved meanwhile. */
     touch(v) {
       if (!this.gl || v.mode !== 'passes') return;
-      if (v.evicted) this.restore(v);
+      if (v.evicted) { if (v.lit) this.restoreSoon(v); else this.restore(v); }
       this.recent = this.recent.filter(x => x !== v); this.recent.push(v);
       let over = this.recent.length - (A.config.gpuViews || 2);
       for (const old of this.recent.slice()) {                // least recently used first, never the one on screen
@@ -296,15 +303,40 @@
     evict(v) {
       const gl = this.gl;
       PASSES.forEach(p => { if (v.tex[p]) { gl.deleteTexture(v.tex[p]); v.tex[p] = null; } });
-      v.evicted = true;
+      v.evicted = true; v.restoring = null;
     }
     restore(v) {
-      PASSES.forEach(p => { if (v.imgs[p]) v.tex[p] = this.texture(v.imgs[p]); });
+      PASSES.forEach(p => { if (v.imgs[p] && !v.tex[p]) v.tex[p] = this.texture(v.imgs[p]); });
+      this.restored(v);
+    }
+    restored(v) {
       if (v.patched && v.patchImgs) {
         const k = v.texW / ((v.patched.res && v.patched.res[0]) || v.platePx[0]);
         v.patched.passes.forEach((f, j) => { const p = KEY_OF[f]; if (v.tex[p]) v.patched.rects.forEach((r, i) => this.putPatch(v.tex[p], v.patchImgs[j][i], r, k, v)); });
       }
-      v.evicted = false; v.version = (v.version || 0) + 1;
+      v.evicted = false; v.restoring = null; v.version = (v.version || 0) + 1;
+    }
+    /* The same, one pass per idle moment (each upload of a 2400 px plate blocks the page for a frame or more). */
+    restoreSoon(v) {
+      if (v.restoring) return;
+      const run = v.restoring = {};
+      (async () => {
+        for (const p of PASSES) {
+          if (!v.imgs[p] || v.tex[p]) continue;
+          await this.idle();
+          if (v.restoring !== run) return;             // given back again meanwhile
+          await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
+          if (v.restoring !== run) return;
+          v.tex[p] = this.texture(v.imgs[p]);
+        }
+        this.restored(v);
+        this.onChange && this.onChange();
+      })();
+    }
+    /* Resolves in an idle moment, never while a camera move plays (hold). */
+    idle() {
+      const ric = window.requestIdleCallback || (f => setTimeout(f, 32));
+      return new Promise(res => { const go = () => ric(() => (this.hold ? setTimeout(go, 120) : res()), { timeout: 400 }); go(); });
     }
     /* A patch rectangle (plate pixels of the state's render) in the view's texture: scaled to the loaded copy and kept
        inside it. On the 2400 and 1200 copies a rectangle reaching the plate's edge rounded one pixel past the texture,
@@ -345,10 +377,11 @@
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
         if (v.tier !== tier) return;                   // a sharper tier was asked for meanwhile
-        list.forEach((p, i) => {
-          if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); }
+        for (let i = 0; i < list.length; i++) {        // one pass per idle moment; the picture is mixed again at the end
+          const p = list[i];
+          if (v.tex[p]) { await this.idle(); if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); } }
           v.imgs[p] = imgs[i];
-        });
+        }
         v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = (v.version || 0) + 1;
         const st = v.state; v.state = 'day'; v.patched = null; v.patchImgs = null;   // the full plates carry no patches yet
         if (st !== 'day') await this.applyStateNow(v, st);
@@ -493,22 +526,27 @@
 
     /* The passes -> one tone-mapped texture (plate size), again only when the light, the state or the textures changed:
        the clock moves the light slowly, so this runs a few times a minute instead of every frame. */
-    mix(state) {
-      const gl = this.gl, v = this.view, W = state.weights;
+    mix(state, v = this.view) {
+      const gl = this.gl, W = state.weights;
+      this.lastState = state;
+      if (v.evicted) {                  // passes given back: the last picture stays until they are back (idle time)
+        if (v.lit) { this.restoreSoon(v); return; }
+        this.restore(v);
+      }
       const exp = state.exposure;       // one exposure for every view (round 6: it was set per view, the light jumped)
       const q = x => Math.round(x * 400) / 400;
       const key = [v.key, v.version || 0, v.texW, q(exp), q(state.contrast || 1), q(state.saturation || 1), A.config.neonGlow, A.config.neonCore,
         ...PASSES.map(p => (W[p] || [0, 0, 0]).map(q).join(','))].join('|');
-      if (key === this.litKey && this.lit) return;
+      if (key === v.litKey && v.lit) return;
       const w = v.texW, h = v.texH || v.size[1];
-      if (!this.lit || this.litW !== w || this.litH !== h) {
-        if (this.lit) gl.deleteTexture(this.lit);
-        this.lit = this.texture(null); gl.bindTexture(gl.TEXTURE_2D, this.lit);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); this.litW = w; this.litH = h;
+      if (!v.lit || v.litW !== w || v.litH !== h) {
+        if (v.lit) gl.deleteTexture(v.lit);
+        v.lit = this.texture(null); gl.bindTexture(gl.TEXTURE_2D, v.lit);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); v.litW = w; v.litH = h;
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lit, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, v.lit, 0);
       gl.viewport(0, 0, w, h);
       const P = this.mixP, u = P.u; gl.useProgram(P.p);
       PASSES.forEach((p, i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, v.tex[p] || this.blank); });
@@ -524,28 +562,30 @@
       gl.uniform1f(u.uExposure, exp); gl.uniform1f(u.uContrast, state.contrast || 1); gl.uniform1f(u.uSat, state.saturation || 1);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.useProgram(this.drawP.p);
-      gl.bindTexture(gl.TEXTURE_2D, this.lit); gl.generateMipmap(gl.TEXTURE_2D);    // smaller screens: filtered levels
-      this.litKey = key;
+      gl.bindTexture(gl.TEXTURE_2D, v.lit); gl.generateMipmap(gl.TEXTURE_2D);    // smaller screens: filtered levels
+      v.litKey = key;
     }
 
     /* A view's picture at this light, averaged as displayed (0..1 per channel): the camera flights grade their frames
        to it at both ends, so changing the view never changes the light. null when the view's passes are not on the GPU. */
     meanColor(key, state) {
       const gl = this.gl, v = this.cache[key];
-      if (!gl || !v || v.mode !== 'passes' || v.evicted || !PASSES.some(p => v.tex[p])) return null;
-      const keep = this.view;
-      this.view = v; this.litKey = null; this.mix(state);
+      if (!gl || !v || v.mode !== 'passes') return null;
+      const now = performance.now();
+      if (v.mean && v.mean.version === v.version && now - v.mean.at < 60000) return v.mean.rgb;   // reading back stalls the GPU
+      this.mix(state, v);
+      if (!v.lit) return null;
       // a mip level about 400 px wide: small enough to read, fine enough that averaging sRGB-encoded texels (which
       // pulls the mean down where light and shade meet) stays small; the flights average their frames alike
-      let lv = 0; while ((this.litW >> (lv + 1)) >= 320) lv++;
-      const lw = Math.max(1, this.litW >> lv), lh = Math.max(1, this.litH >> lv), px = new Uint8Array(lw * lh * 4);
+      let lv = 0; while ((v.litW >> (lv + 1)) >= 320) lv++;
+      const lw = Math.max(1, v.litW >> lv), lh = Math.max(1, v.litH >> lv), px = new Uint8Array(lw * lh * 4);
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lit, lv);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, v.lit, lv);
       gl.readPixels(0, 0, lw, lh, gl.RGBA, gl.UNSIGNED_BYTE, px);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      this.view = keep; this.litKey = null;
-      if (keep && keep.mode === 'passes' && !keep.evicted) this.mix(state);
-      return Compositor.meanDisplay(px);
+      const rgb = Compositor.meanDisplay(px);
+      v.mean = { rgb, at: now, version: v.version };
+      return rgb;
     }
     /* Average of RGBA bytes as displayed. The eye judges a jump in light by this, not by linear light: a flight frame
        with a hard noon sun patch and a view with soft light can have the same linear mean and still read darker. */
@@ -558,23 +598,27 @@
     render(state) {
       const gl = this.gl; if (!gl || !this.view) return;
       const v = this.view, u = this.u;
-      if (v.mode === 'passes') { if (v.evicted) this.restore(v); this.mix(state); }
+      if (v.mode === 'passes') this.mix(state);
       gl.useProgram(this.drawP.p);
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);
       const bind = (unit, tex) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex || this.blank); };
-      bind(0, v.mode === 'passes' ? this.lit : null); bind(1, v.depth); bind(2, v.tex.beauty); bind(3, v.ids); bind(4, v.win);
+      bind(0, v.mode === 'passes' ? v.lit : null); bind(1, v.depth); bind(2, v.tex.beauty); bind(3, v.ids); bind(4, v.win);
       bind(6, v.glow); bind(7, v.swayA); bind(8, v.swayB);
-      // outdoor clip: upload the current frame while it plays (a paused clip keeps its last upload)
-      const vid = this.video, vidOk = vid && vid.readyState >= 2 && v.win && this.winAmt > 0.001;
+      // outdoor clip: upload the current frame while it plays (a paused clip keeps its last upload). While the clip seeks
+      // (back to its start, when it plays or ends) it has no frame for a moment: the last upload stays, because the
+      // plate's own glass is hazy and showing it for those frames flashed the window white. A clip that comes after
+      // the room (first visit, a view whose clip is still loading) fades in over the plate (vidMix, eased by the app).
+      const vid = this.video, ready = vid && vid.readyState >= 2;
+      const vidOk = vid && v.win && this.winAmt > 0.001 && (ready || this.videoUp);
       if (vidOk) {
         if (!this.videoTex) this.videoTex = this.texture(null);
         gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, this.videoTex);
         const t = vid.currentTime;
-        if (t !== this.videoAt || !this.videoUp) {
+        if (ready && (t !== this.videoAt || !this.videoUp)) {
           try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, vid); this.videoAt = t; this.videoUp = true; } catch (e) { }
         }
-      } else bind(5, null);
-      gl.uniform1f(u.uHasWin, vidOk ? 1 : 0); gl.uniform1f(u.uWinAmt, this.winAmt);
+      } else { bind(5, null); if (v.win) this.vidMix = 0; }
+      gl.uniform1f(u.uHasWin, vidOk ? 1 : 0); gl.uniform1f(u.uWinAmt, this.winAmt * this.vidMix);
       if (vidOk) {
         const b = v.winBox, vw = vid.videoWidth, vh = vid.videoHeight;
         if (this.clipBox) { gl.uniform4fv(u.uWinBox, this.clipBox); gl.uniform4fv(u.uVidMap, [0, 0, 1, 1]); }   // rendered for this window

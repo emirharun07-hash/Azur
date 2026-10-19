@@ -60,6 +60,10 @@
             <button type="button" data-view="room">Zimmer</button><button type="button" data-view="rail">Ständer</button>
             <button type="button" data-view="bed">Bett</button><button type="button" data-view="rail_m">Handy-Ständer</button>
           </div>
+          <h3>Ortswechsel</h3>
+          <div class="azur-panel__presets" id="azp-flights">
+            <button type="button" data-flights="blend">Überblendung (Licht wie im Zimmer)</button><button type="button" data-flights="video">Gerenderte Fahrt (Video)</button>
+          </div>
           <label class="azur-panel__row azur-panel__check"><input type="checkbox" id="azp-reduced"> Reduzierte Bewegung testen</label>
           <p class="azur-panel__info" id="azp-info"></p>
         </section>
@@ -94,6 +98,9 @@
       }));
       el.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { app.select(-1); app.go(b.dataset.view); }));
       el.querySelector('#azp-reduced').addEventListener('change', e => { app.reduced = e.target.checked || app.reducedQuery.matches; });
+      // round 9: compare the two changes of view (the rendered flights load when first chosen)
+      const fl = el.querySelectorAll('[data-flights]'), mark = () => fl.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.flights === A.config.flights)));
+      fl.forEach(b => b.addEventListener('click', () => { A.config.flights = b.dataset.flights; mark(); app.preloadMoves(); })); mark();
       el.querySelector('#azp-reset').addEventListener('click', () => {
         Object.assign(o, { timeHours: null, exposure: 0, sky: 1, sun: 1, neon: 1, lamp: 1, ceiling: 1, street: 1, spot: 1, warmth: 0, contrast: 1, saturation: 1, window: 1 });
         el.querySelectorAll('input[data-k]').forEach(inp => {

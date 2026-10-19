@@ -357,6 +357,7 @@ html.azur-pdp-open { overflow: hidden; }
 .azur-panel select { width: 100%; background: #1d1f22; color: #eee; border: 1px solid #333; padding: 6px; border-radius: 3px; }
 .azur-panel__presets { display: flex; flex-wrap: wrap; gap: 5px; }
 .azur-panel__presets button, .azur-panel footer button { background: #1f2124; border: 1px solid #34373b; border-radius: 3px; padding: 5px 8px; cursor: pointer; font-size: 11px; color: #ddd; }
+.azur-panel__presets button[aria-pressed="true"] { background: #e9eef1; border-color: #e9eef1; color: #111; }
 .azur-panel__phase, .azur-panel__info { margin: 4px 0; color: #9aa; font-size: 11px; }
 .azur-panel footer { margin-top: 12px; }
 

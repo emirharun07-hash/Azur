@@ -31,6 +31,12 @@
   .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]) .header--overlay.is-solid { transition: opacity .35s ease; }
   .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero])
     .section-header:has(.header--overlay:not(.is-solid)) { pointer-events: none; }   /* :has() cannot nest */
+  /* Runde 9: der Shop schiebt sich beim Scrollen wie ein Blatt über das Zimmer (das Zimmer bleibt zurück und wird
+     dunkler: azur-room.js, bindScrollAway) */
+  #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) + .shopify-section {
+    position: relative; z-index: 1; box-shadow: 0 -1.5rem 3rem rgb(0 0 0 / 0.4); }
+  .azur-shade { position: absolute; inset: 0; z-index: 90; background: #050505; opacity: 0; pointer-events: none; }
+  .azur-stage { transform-origin: 50% 35%; }
 </style>
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
 
@@ -91,6 +97,7 @@
     var files = {{ files_base | json }};
     var brand = { 'azur-logo-paper.webp': {{ 'azur-logo-paper.webp' | asset_url | json }}, 'azur-logo-ink.webp': {{ 'azur-logo-ink.webp' | asset_url | json }} };
     A.config.shopify = true;
+    A.config.flights = {{ section.settings.flights | default: 'blend' | json }};
     A.config.inline = {% render 'azur-room-data' %};
     A.config.urlMap = function (p) {
       var m = p.match(/^assets\/brand\/(.+)$/);
@@ -176,6 +183,10 @@
     { "type": "text", "id": "drop_title", "label": "Titel", "default": "Nächster Drop" },
     { "type": "text", "id": "drop_text", "label": "Text", "default": "Noch unter Verschluss." },
     { "type": "text", "id": "drop_tags", "label": "Tags für die Anmeldung", "default": "newsletter, drops" },
+    { "type": "header", "content": "Ortswechsel (Bett, Ständer)" },
+    { "type": "select", "id": "flights", "label": "Übergang", "default": "blend",
+      "options": [{ "value": "blend", "label": "Überblendung (Licht immer wie im Zimmer)" }, { "value": "video", "label": "Gerenderte Kamerafahrt (Video)" }],
+      "info": "Die gerenderte Fahrt hat ihr eigenes Licht; je nach Uhrzeit springt es beim Ankommen." },
     { "type": "header", "content": "Produktansicht im Zimmer" },
     { "type": "text", "id": "care", "label": "Pflegehinweis", "default": "Material- und Pflegehinweise auf der Produktseite." },
     { "type": "number", "id": "free_shipping_from", "label": "Kostenloser Versand ab (€)", "default": 90, "info": "Nach dem Hinzufügen zeigt die Produktansicht, wie viel noch fehlt. 0 = ausblenden." },

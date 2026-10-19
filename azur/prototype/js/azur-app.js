@@ -53,6 +53,7 @@
       this.pan = 0.5; this.panVel = 0;
       this.light = A.light.current();
       this.buildChrome();
+      if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
       window.addEventListener('resize', () => this.resize());
       if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => {
@@ -183,8 +184,7 @@
 
     /* The camera move itself (go() keeps one at a time). */
     async fly(to, opts) {
-      const m = A.config.motion.pan, from = this.viewKey;
-      const back = to === 'room';
+      const from = this.viewKey, back = to === 'room';
       const focus = opts.focus || [this.stage.clientWidth / 2, this.stage.clientHeight / 2];
       const slow = setTimeout(() => this.root.classList.add('is-loading'), 250);   // a view not loaded yet (phones load on demand)
       await this.comp.load(to, this.passes, false);
@@ -202,31 +202,38 @@
       } else if (this.reduced) {
         await this.enterView(to);
         this.world.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
-      } else {
-        this.comp.render(this.light);
-        this.comp.snapshotInto(this.snapCtx);
-        this.snap.hidden = false;
-        const W = this.stage.clientWidth, H = this.stage.clientHeight;
-        const ox = (focus[0] / W * 100).toFixed(1) + '% ' + (focus[1] / H * 100).toFixed(1) + '%';
-        this.snap.style.transformOrigin = ox;
-        const z = back ? 1 / m.zoom : m.zoom;
-        const drift = (back ? -1 : 1) * m.drift * W * (focus[0] / W - 0.5);
-        const out = this.snap.animate([
-          { transform: 'none', filter: 'blur(0px)', opacity: 1 },
-          { transform: `translate3d(${-drift}px,0,0) scale(${z})`, filter: `blur(${m.blurPx}px)`, opacity: 1, offset: 0.75 },
-          { transform: `translate3d(${-drift * 1.2}px,0,0) scale(${z * (back ? 0.96 : 1.04)})`, filter: `blur(${m.blurPx * 1.4}px)`, opacity: 0 }
-        ], { duration: m.outMs + m.inMs * 0.45, easing: 'cubic-bezier(.55,0,.6,1)', fill: 'forwards' });
-        this.layer.classList.add('is-moving');
-        await new Promise(r => setTimeout(r, m.outMs * 0.55));
-        await this.enterView(to);
-        const zin = back ? 1.22 : 0.86;
-        await this.world.animate([
-          { transform: `scale(${zin}) translate3d(${drift * 0.6}px,0,0)`, filter: `blur(${m.blurPx}px)`, opacity: 0 },
-          { transform: 'none', filter: 'blur(0px)', opacity: 1 }
-        ], { duration: m.inMs, easing: 'cubic-bezier(.16,.8,.25,1)' }).finished.catch(() => { });
-        out.cancel(); this.snap.hidden = true;
-        this.layer.classList.remove('is-moving');
-      }
+      } else await this.blendMove(to, back, focus, from.split('@')[0]);
+    }
+
+    /* Change of view without rendered frames (round 9, the default): the room's own picture carries the move, so the
+       light never changes with the view. The next view gets ready under a still copy of this one (all the work done
+       while nothing moves), then only transform and opacity animate: the copy zooms toward the target and fades, the
+       new view settles from a little closer (forward) or further in (back). Nothing scales below the stage, no blur. */
+    async blendMove(to, back, focus, fromBase) {
+      const m = A.config.motion.pan, W = this.stage.clientWidth;
+      this.comp.render(this.light); this.comp.snapshotInto(this.snapCtx);
+      Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1', transformOrigin: `${focus[0]}px ${focus[1]}px` });
+      this.snap.hidden = false; this.layer.classList.add('is-moving'); this.root.classList.add('is-flying');   // labels wait for the landing
+      await this.enterView(to); this.comp.render(this.light);
+      // back in the room: it pulls back from where the view we come from sits in it (its dot)
+      const dot = back && this.dots && this.dots[fromBase === 'rail_m' ? 'rail' : fromBase];
+      const at = dot && !dot.hidden ? [parseFloat(dot.style.left), parseFloat(dot.style.top)] : focus;
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // the new view is on screen under the copy
+      this.comp.hold = true;
+      // forward the copy accelerates toward the target (ease-in) and dissolves while it moves fastest; back it drifts
+      // a little and dissolves early, while the room pulls back from the spot we come from (ease-out)
+      const dx = (back ? 1 : -1) * m.drift * (focus[0] - W / 2), opt = e => ({ duration: m.ms, easing: e, fill: 'forwards' });
+      const anims = [
+        this.snap.animate([{ transform: 'none' }, { transform: `translate3d(${dx.toFixed(1)}px,0,0) scale(${back ? m.settle : m.zoom})` }],
+          opt(back ? 'cubic-bezier(.2,.6,.3,1)' : 'cubic-bezier(.55,0,.85,.45)')),
+        this.snap.animate(back ? [{ opacity: 1 }, { opacity: 1, offset: 0.12, easing: 'ease-in-out' }, { opacity: 0, offset: 0.6 }, { opacity: 0 }]
+          : [{ opacity: 1 }, { opacity: 1, offset: 0.32, easing: 'ease-in-out' }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], opt('linear'))];
+      this.world.style.transformOrigin = `${at[0]}px ${at[1]}px`;
+      anims.push(this.world.animate([{ transform: `scale(${back ? m.back : m.settle})` }, { transform: 'none' }], opt('cubic-bezier(.2,.6,.25,1)')));
+      await Promise.all(anims.map(x => x.finished)).catch(() => { });
+      anims.forEach(x => x.cancel());
+      this.snap.hidden = true; this.world.style.transformOrigin = '';
+      this.comp.hold = false; this.layer.classList.remove('is-moving'); this.root.classList.remove('is-flying');
     }
 
     /* ---------------------------------------------------------------- pre-rendered camera moves (scene/render_moves.py)
@@ -297,7 +304,7 @@
       return this.flightBox;
     }
     preloadMoves() {
-      if (A.config.realMoves === false) return;
+      if (A.config.flights !== 'video') return;
       const mix = this.moveMix(), base = A.config.assetBase;
       Object.keys(this.moves || {}).forEach(name => {
         if (this.isMobile !== name.startsWith('rail_m-')) return;
@@ -311,7 +318,7 @@
       });
     }
     findMove(from, to) {
-      if (A.config.realMoves === false) return null;             // the flights show an older room: blend instead
+      if (A.config.flights !== 'video') return null;
       const mix = this.moveMix();
       const ready = name => {
         const m = this.moves && this.moves[name]; if (!m) return false;
@@ -356,7 +363,7 @@
       try { vid.pause(); if (vid.currentTime > 0.001) vid.currentTime = 0; } catch (e) { }
       box.hidden = false;
       await box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
-      this.covered = true;                                // the room under the video needs no drawing meanwhile
+      this.covered = true; this.comp.hold = true;         // the room under the video needs no drawing meanwhile
       const dur = Math.max(200, ((vid.duration && isFinite(vid.duration)) ? vid.duration : m.frames / (m.fps || 60)) * 1000);
       let anims = [];
       const ended = new Promise(res => { vid.onended = res; setTimeout(res, dur + 2000); });
@@ -366,7 +373,7 @@
                  tint.animate([{ backgroundColor: t0 }, { backgroundColor: t1 }], { duration: dur, fill: 'forwards' })];
         await ended;
       } catch (e) { }                                     // no playback (a blocked autoplay): land without the flight
-      this.covered = false;
+      this.covered = false; this.comp.hold = false;
       await this.enterView(to);
       this.comp.render(this.light);
       await box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
@@ -781,6 +788,25 @@
       this.kidTrack.addEventListener('animationend', e => { if (e.target === this.kidTrack) this.kidTrack.classList.remove('is-run', 'is-back'); });
       this.scheduleKid(5000 + Math.random() * 5000);
     }
+    /* Shopify (round 9): scrolling from the room down into the shop. The shop slides over the room like a sheet (its
+       shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
+       and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
+       and once the room is out of the window the IntersectionObserver stops its drawing as before. */
+    bindScrollAway() {
+      const shade = document.createElement('div'); shade.className = 'azur-shade'; shade.setAttribute('aria-hidden', 'true');
+      this.stage.after(shade);
+      let queued = false;
+      const update = () => {
+        queued = false;
+        const r = this.root.getBoundingClientRect(), H = r.height || 1, y = Math.min(H, Math.max(0, -r.top)), p = y / H;
+        const on = y > 0 && !this.reduced;
+        this.stage.style.transform = on ? `translate3d(0,${(y * 0.45).toFixed(1)}px,0) scale(${(1 - 0.05 * p).toFixed(4)})` : '';
+        shade.style.opacity = on ? (p * 0.7).toFixed(3) : '0';
+      };
+      const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', queue, { passive: true }); window.addEventListener('resize', queue); update();
+    }
+
     /* ---------------------------------------------------------------- outside the window (round 4) */
     useClip(key) {        // the clip made for this view's window (none for the phones' rail and the bed)
       if (!this.clips) return;
@@ -1168,6 +1194,7 @@
       const vid = this.video, hasWin = c.view && c.view.win;
       const wa = hasWin ? Math.max(0, Math.min(1, (this.light.window - 0.35) / 0.5)) : 0;
       if (Math.abs(wa - c.winAmt) > 1e-3) { c.winAmt += (wa - c.winAmt) * Math.min(1, dt * 3); this.dirty = true; }
+      if (c.videoUp && c.vidMix < 1) { c.vidMix = this.reduced ? 1 : Math.min(1, c.vidMix + dt * 2.5); this.dirty = true; }   // a late clip fades in
       if (!vid) return;
       const resting = (this.mag && this.mag.isOpen) || this.shop.pdp.classList.contains('is-on');   // the room rests behind the magazine and the product view
       if (!vid.loop) {                                          // round 4: the boy's clip plays when scheduled (playClip)

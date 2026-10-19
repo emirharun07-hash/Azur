@@ -11,8 +11,8 @@ AZUR.config = {
   outsideBase: 'assets/scene2/outside/', // footage of the Bolzplatz behind the window (shared by every scene set)
   neonGlow: 1.4,            // round 4: strength of the sign's soft glow (neon_glow.webp, added with the neon light)
   neonCore: 4.0,            // the tubes' cores this much brighter (the stored neon pass stops below them: white-hot core)
-  realMoves: true,          // the rendered camera flights; false blends the views into each other instead (round 4 in
-                            // the cloud used that while the flights still showed the round 3 room)
+  flights: 'blend',         // change of view: 'blend' zooms the room's own picture into the next view (round 9: always the
+                            // room's light); 'video' plays the rendered flights (round 7: their light can differ from the room's)
   gpuViews: 2,              // views that keep their light passes on the GPU (the others upload again when needed)
   modelExt: 'glb',                       // jersey models for the product view ('glb.json' where .glb is not served)
 
@@ -74,7 +74,8 @@ AZUR.config = {
     /* round 7: calmer, no jelly: no cloth ripple, no idle breathing (it ran at 30 fps), a smaller swing that settles
        quickly; the jerseys only move when touched */
     sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, idleDeg: 0, ripple: 0, neighbour: 0.3 },
-    pan: { outMs: 520, inMs: 820, zoom: 1.32, blurPx: 14, drift: 0.04 },   // fake camera move between views
+    // change of view ('blend'): this view zooms toward the next one and fades; the next settles from a little closer
+    pan: { ms: 950, zoom: 1.6, drift: 0.05, settle: 1.06, back: 1.2 },
     parallaxEase: 3.5         // how fast the room follows the pointer (per second; round 7: by time, not per frame)
   },
   interactionStrength: 1.0,
@@ -452,7 +453,8 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     return new Promise((res) => {
       const im = new Image();
       im.decoding = 'async';
-      im.onload = () => res(im); im.onerror = () => res(null);
+      im.onload = () => (im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
+      im.onerror = () => res(null);
       im.src = A.url(src);
     });
   }
@@ -498,8 +500,8 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       this.blank = this.texture(null);
-      this.lit = null; this.litKey = ''; this.fbo = gl.createFramebuffer();
-      this.hover = 0; this.hoverAmt = 0; this.winAmt = 0; this.video = null; this.videoTex = null;
+      this.fbo = gl.createFramebuffer();
+      this.hover = 0; this.hoverAmt = 0; this.winAmt = 0; this.video = null; this.videoTex = null; this.vidMix = 0;
       this.recent = [];                                   // views whose passes are on the GPU, most recent last
     }
 
@@ -552,7 +554,10 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const list = PASSES.filter(p => scales[FILES[p]]);
         const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
         if (imgs.every(Boolean)) {
-          list.forEach((p, i) => { v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i]; });
+          for (let i = 0; i < list.length; i++) {      // a background load uploads one pass per idle moment
+            if (!activate) await this.idle();
+            const p = list[i]; v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
+          }
           v.size = [imgs[0].naturalWidth, imgs[0].naturalHeight]; v.mode = 'passes';
           v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = 1;
           v.list = list; v.base = base; v.tier = lo ? 'lo' : 'full';
@@ -579,15 +584,18 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       if (activate) { this.view = v; this.mode = v.mode; }
       done();
       if (this.state !== 'day') await this.applyState(v, this.state);
+      // its picture in the current light right away: once its passes are given back (touch), it still shows at once
+      if (!activate && v.mode === 'passes' && this.lastState) this.mix(this.lastState, v);
       this.touch(v);
       return v.mode;
     }
 
     /* GPU memory: only the views used last keep their pass textures (A.config.gpuViews, 2); the others give them back
-       and upload them again from their images (and their time-of-day patches) when they are needed. */
+       but keep their mixed picture (v.lit), so a change of view never waits for uploads: the passes come back in idle
+       time (restoreSoon) and the picture is mixed again when the light has moved meanwhile. */
     touch(v) {
       if (!this.gl || v.mode !== 'passes') return;
-      if (v.evicted) this.restore(v);
+      if (v.evicted) { if (v.lit) this.restoreSoon(v); else this.restore(v); }
       this.recent = this.recent.filter(x => x !== v); this.recent.push(v);
       let over = this.recent.length - (A.config.gpuViews || 2);
       for (const old of this.recent.slice()) {                // least recently used first, never the one on screen
@@ -599,15 +607,40 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     evict(v) {
       const gl = this.gl;
       PASSES.forEach(p => { if (v.tex[p]) { gl.deleteTexture(v.tex[p]); v.tex[p] = null; } });
-      v.evicted = true;
+      v.evicted = true; v.restoring = null;
     }
     restore(v) {
-      PASSES.forEach(p => { if (v.imgs[p]) v.tex[p] = this.texture(v.imgs[p]); });
+      PASSES.forEach(p => { if (v.imgs[p] && !v.tex[p]) v.tex[p] = this.texture(v.imgs[p]); });
+      this.restored(v);
+    }
+    restored(v) {
       if (v.patched && v.patchImgs) {
         const k = v.texW / ((v.patched.res && v.patched.res[0]) || v.platePx[0]);
         v.patched.passes.forEach((f, j) => { const p = KEY_OF[f]; if (v.tex[p]) v.patched.rects.forEach((r, i) => this.putPatch(v.tex[p], v.patchImgs[j][i], r, k, v)); });
       }
-      v.evicted = false; v.version = (v.version || 0) + 1;
+      v.evicted = false; v.restoring = null; v.version = (v.version || 0) + 1;
+    }
+    /* The same, one pass per idle moment (each upload of a 2400 px plate blocks the page for a frame or more). */
+    restoreSoon(v) {
+      if (v.restoring) return;
+      const run = v.restoring = {};
+      (async () => {
+        for (const p of PASSES) {
+          if (!v.imgs[p] || v.tex[p]) continue;
+          await this.idle();
+          if (v.restoring !== run) return;             // given back again meanwhile
+          await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
+          if (v.restoring !== run) return;
+          v.tex[p] = this.texture(v.imgs[p]);
+        }
+        this.restored(v);
+        this.onChange && this.onChange();
+      })();
+    }
+    /* Resolves in an idle moment, never while a camera move plays (hold). */
+    idle() {
+      const ric = window.requestIdleCallback || (f => setTimeout(f, 32));
+      return new Promise(res => { const go = () => ric(() => (this.hold ? setTimeout(go, 120) : res()), { timeout: 400 }); go(); });
     }
     /* A patch rectangle (plate pixels of the state's render) in the view's texture: scaled to the loaded copy and kept
        inside it. On the 2400 and 1200 copies a rectangle reaching the plate's edge rounded one pixel past the texture,
@@ -648,10 +681,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
         if (v.tier !== tier) return;                   // a sharper tier was asked for meanwhile
-        list.forEach((p, i) => {
-          if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); }
+        for (let i = 0; i < list.length; i++) {        // one pass per idle moment; the picture is mixed again at the end
+          const p = list[i];
+          if (v.tex[p]) { await this.idle(); if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); } }
           v.imgs[p] = imgs[i];
-        });
+        }
         v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = (v.version || 0) + 1;
         const st = v.state; v.state = 'day'; v.patched = null; v.patchImgs = null;   // the full plates carry no patches yet
         if (st !== 'day') await this.applyStateNow(v, st);
@@ -796,22 +830,27 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
 
     /* The passes -> one tone-mapped texture (plate size), again only when the light, the state or the textures changed:
        the clock moves the light slowly, so this runs a few times a minute instead of every frame. */
-    mix(state) {
-      const gl = this.gl, v = this.view, W = state.weights;
+    mix(state, v = this.view) {
+      const gl = this.gl, W = state.weights;
+      this.lastState = state;
+      if (v.evicted) {                  // passes given back: the last picture stays until they are back (idle time)
+        if (v.lit) { this.restoreSoon(v); return; }
+        this.restore(v);
+      }
       const exp = state.exposure;       // one exposure for every view (round 6: it was set per view, the light jumped)
       const q = x => Math.round(x * 400) / 400;
       const key = [v.key, v.version || 0, v.texW, q(exp), q(state.contrast || 1), q(state.saturation || 1), A.config.neonGlow, A.config.neonCore,
         ...PASSES.map(p => (W[p] || [0, 0, 0]).map(q).join(','))].join('|');
-      if (key === this.litKey && this.lit) return;
+      if (key === v.litKey && v.lit) return;
       const w = v.texW, h = v.texH || v.size[1];
-      if (!this.lit || this.litW !== w || this.litH !== h) {
-        if (this.lit) gl.deleteTexture(this.lit);
-        this.lit = this.texture(null); gl.bindTexture(gl.TEXTURE_2D, this.lit);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); this.litW = w; this.litH = h;
+      if (!v.lit || v.litW !== w || v.litH !== h) {
+        if (v.lit) gl.deleteTexture(v.lit);
+        v.lit = this.texture(null); gl.bindTexture(gl.TEXTURE_2D, v.lit);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); v.litW = w; v.litH = h;
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
       }
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lit, 0);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, v.lit, 0);
       gl.viewport(0, 0, w, h);
       const P = this.mixP, u = P.u; gl.useProgram(P.p);
       PASSES.forEach((p, i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, v.tex[p] || this.blank); });
@@ -827,28 +866,30 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       gl.uniform1f(u.uExposure, exp); gl.uniform1f(u.uContrast, state.contrast || 1); gl.uniform1f(u.uSat, state.saturation || 1);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.useProgram(this.drawP.p);
-      gl.bindTexture(gl.TEXTURE_2D, this.lit); gl.generateMipmap(gl.TEXTURE_2D);    // smaller screens: filtered levels
-      this.litKey = key;
+      gl.bindTexture(gl.TEXTURE_2D, v.lit); gl.generateMipmap(gl.TEXTURE_2D);    // smaller screens: filtered levels
+      v.litKey = key;
     }
 
     /* A view's picture at this light, averaged as displayed (0..1 per channel): the camera flights grade their frames
        to it at both ends, so changing the view never changes the light. null when the view's passes are not on the GPU. */
     meanColor(key, state) {
       const gl = this.gl, v = this.cache[key];
-      if (!gl || !v || v.mode !== 'passes' || v.evicted || !PASSES.some(p => v.tex[p])) return null;
-      const keep = this.view;
-      this.view = v; this.litKey = null; this.mix(state);
+      if (!gl || !v || v.mode !== 'passes') return null;
+      const now = performance.now();
+      if (v.mean && v.mean.version === v.version && now - v.mean.at < 60000) return v.mean.rgb;   // reading back stalls the GPU
+      this.mix(state, v);
+      if (!v.lit) return null;
       // a mip level about 400 px wide: small enough to read, fine enough that averaging sRGB-encoded texels (which
       // pulls the mean down where light and shade meet) stays small; the flights average their frames alike
-      let lv = 0; while ((this.litW >> (lv + 1)) >= 320) lv++;
-      const lw = Math.max(1, this.litW >> lv), lh = Math.max(1, this.litH >> lv), px = new Uint8Array(lw * lh * 4);
+      let lv = 0; while ((v.litW >> (lv + 1)) >= 320) lv++;
+      const lw = Math.max(1, v.litW >> lv), lh = Math.max(1, v.litH >> lv), px = new Uint8Array(lw * lh * 4);
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lit, lv);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, v.lit, lv);
       gl.readPixels(0, 0, lw, lh, gl.RGBA, gl.UNSIGNED_BYTE, px);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      this.view = keep; this.litKey = null;
-      if (keep && keep.mode === 'passes' && !keep.evicted) this.mix(state);
-      return Compositor.meanDisplay(px);
+      const rgb = Compositor.meanDisplay(px);
+      v.mean = { rgb, at: now, version: v.version };
+      return rgb;
     }
     /* Average of RGBA bytes as displayed. The eye judges a jump in light by this, not by linear light: a flight frame
        with a hard noon sun patch and a view with soft light can have the same linear mean and still read darker. */
@@ -861,23 +902,27 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     render(state) {
       const gl = this.gl; if (!gl || !this.view) return;
       const v = this.view, u = this.u;
-      if (v.mode === 'passes') { if (v.evicted) this.restore(v); this.mix(state); }
+      if (v.mode === 'passes') this.mix(state);
       gl.useProgram(this.drawP.p);
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);
       const bind = (unit, tex) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex || this.blank); };
-      bind(0, v.mode === 'passes' ? this.lit : null); bind(1, v.depth); bind(2, v.tex.beauty); bind(3, v.ids); bind(4, v.win);
+      bind(0, v.mode === 'passes' ? v.lit : null); bind(1, v.depth); bind(2, v.tex.beauty); bind(3, v.ids); bind(4, v.win);
       bind(6, v.glow); bind(7, v.swayA); bind(8, v.swayB);
-      // outdoor clip: upload the current frame while it plays (a paused clip keeps its last upload)
-      const vid = this.video, vidOk = vid && vid.readyState >= 2 && v.win && this.winAmt > 0.001;
+      // outdoor clip: upload the current frame while it plays (a paused clip keeps its last upload). While the clip seeks
+      // (back to its start, when it plays or ends) it has no frame for a moment: the last upload stays, because the
+      // plate's own glass is hazy and showing it for those frames flashed the window white. A clip that comes after
+      // the room (first visit, a view whose clip is still loading) fades in over the plate (vidMix, eased by the app).
+      const vid = this.video, ready = vid && vid.readyState >= 2;
+      const vidOk = vid && v.win && this.winAmt > 0.001 && (ready || this.videoUp);
       if (vidOk) {
         if (!this.videoTex) this.videoTex = this.texture(null);
         gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, this.videoTex);
         const t = vid.currentTime;
-        if (t !== this.videoAt || !this.videoUp) {
+        if (ready && (t !== this.videoAt || !this.videoUp)) {
           try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, vid); this.videoAt = t; this.videoUp = true; } catch (e) { }
         }
-      } else bind(5, null);
-      gl.uniform1f(u.uHasWin, vidOk ? 1 : 0); gl.uniform1f(u.uWinAmt, this.winAmt);
+      } else { bind(5, null); if (v.win) this.vidMix = 0; }
+      gl.uniform1f(u.uHasWin, vidOk ? 1 : 0); gl.uniform1f(u.uWinAmt, this.winAmt * this.vidMix);
       if (vidOk) {
         const b = v.winBox, vw = vid.videoWidth, vh = vid.videoHeight;
         if (this.clipBox) { gl.uniform4fv(u.uWinBox, this.clipBox); gl.uniform4fv(u.uVidMap, [0, 0, 1, 1]); }   // rendered for this window
@@ -2349,6 +2394,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.pan = 0.5; this.panVel = 0;
       this.light = A.light.current();
       this.buildChrome();
+      if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
       window.addEventListener('resize', () => this.resize());
       if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => {
@@ -2479,8 +2525,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
 
     /* The camera move itself (go() keeps one at a time). */
     async fly(to, opts) {
-      const m = A.config.motion.pan, from = this.viewKey;
-      const back = to === 'room';
+      const from = this.viewKey, back = to === 'room';
       const focus = opts.focus || [this.stage.clientWidth / 2, this.stage.clientHeight / 2];
       const slow = setTimeout(() => this.root.classList.add('is-loading'), 250);   // a view not loaded yet (phones load on demand)
       await this.comp.load(to, this.passes, false);
@@ -2498,31 +2543,38 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       } else if (this.reduced) {
         await this.enterView(to);
         this.world.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
-      } else {
-        this.comp.render(this.light);
-        this.comp.snapshotInto(this.snapCtx);
-        this.snap.hidden = false;
-        const W = this.stage.clientWidth, H = this.stage.clientHeight;
-        const ox = (focus[0] / W * 100).toFixed(1) + '% ' + (focus[1] / H * 100).toFixed(1) + '%';
-        this.snap.style.transformOrigin = ox;
-        const z = back ? 1 / m.zoom : m.zoom;
-        const drift = (back ? -1 : 1) * m.drift * W * (focus[0] / W - 0.5);
-        const out = this.snap.animate([
-          { transform: 'none', filter: 'blur(0px)', opacity: 1 },
-          { transform: `translate3d(${-drift}px,0,0) scale(${z})`, filter: `blur(${m.blurPx}px)`, opacity: 1, offset: 0.75 },
-          { transform: `translate3d(${-drift * 1.2}px,0,0) scale(${z * (back ? 0.96 : 1.04)})`, filter: `blur(${m.blurPx * 1.4}px)`, opacity: 0 }
-        ], { duration: m.outMs + m.inMs * 0.45, easing: 'cubic-bezier(.55,0,.6,1)', fill: 'forwards' });
-        this.layer.classList.add('is-moving');
-        await new Promise(r => setTimeout(r, m.outMs * 0.55));
-        await this.enterView(to);
-        const zin = back ? 1.22 : 0.86;
-        await this.world.animate([
-          { transform: `scale(${zin}) translate3d(${drift * 0.6}px,0,0)`, filter: `blur(${m.blurPx}px)`, opacity: 0 },
-          { transform: 'none', filter: 'blur(0px)', opacity: 1 }
-        ], { duration: m.inMs, easing: 'cubic-bezier(.16,.8,.25,1)' }).finished.catch(() => { });
-        out.cancel(); this.snap.hidden = true;
-        this.layer.classList.remove('is-moving');
-      }
+      } else await this.blendMove(to, back, focus, from.split('@')[0]);
+    }
+
+    /* Change of view without rendered frames (round 9, the default): the room's own picture carries the move, so the
+       light never changes with the view. The next view gets ready under a still copy of this one (all the work done
+       while nothing moves), then only transform and opacity animate: the copy zooms toward the target and fades, the
+       new view settles from a little closer (forward) or further in (back). Nothing scales below the stage, no blur. */
+    async blendMove(to, back, focus, fromBase) {
+      const m = A.config.motion.pan, W = this.stage.clientWidth;
+      this.comp.render(this.light); this.comp.snapshotInto(this.snapCtx);
+      Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1', transformOrigin: `${focus[0]}px ${focus[1]}px` });
+      this.snap.hidden = false; this.layer.classList.add('is-moving'); this.root.classList.add('is-flying');   // labels wait for the landing
+      await this.enterView(to); this.comp.render(this.light);
+      // back in the room: it pulls back from where the view we come from sits in it (its dot)
+      const dot = back && this.dots && this.dots[fromBase === 'rail_m' ? 'rail' : fromBase];
+      const at = dot && !dot.hidden ? [parseFloat(dot.style.left), parseFloat(dot.style.top)] : focus;
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // the new view is on screen under the copy
+      this.comp.hold = true;
+      // forward the copy accelerates toward the target (ease-in) and dissolves while it moves fastest; back it drifts
+      // a little and dissolves early, while the room pulls back from the spot we come from (ease-out)
+      const dx = (back ? 1 : -1) * m.drift * (focus[0] - W / 2), opt = e => ({ duration: m.ms, easing: e, fill: 'forwards' });
+      const anims = [
+        this.snap.animate([{ transform: 'none' }, { transform: `translate3d(${dx.toFixed(1)}px,0,0) scale(${back ? m.settle : m.zoom})` }],
+          opt(back ? 'cubic-bezier(.2,.6,.3,1)' : 'cubic-bezier(.55,0,.85,.45)')),
+        this.snap.animate(back ? [{ opacity: 1 }, { opacity: 1, offset: 0.12, easing: 'ease-in-out' }, { opacity: 0, offset: 0.6 }, { opacity: 0 }]
+          : [{ opacity: 1 }, { opacity: 1, offset: 0.32, easing: 'ease-in-out' }, { opacity: 0, offset: 0.78 }, { opacity: 0 }], opt('linear'))];
+      this.world.style.transformOrigin = `${at[0]}px ${at[1]}px`;
+      anims.push(this.world.animate([{ transform: `scale(${back ? m.back : m.settle})` }, { transform: 'none' }], opt('cubic-bezier(.2,.6,.25,1)')));
+      await Promise.all(anims.map(x => x.finished)).catch(() => { });
+      anims.forEach(x => x.cancel());
+      this.snap.hidden = true; this.world.style.transformOrigin = '';
+      this.comp.hold = false; this.layer.classList.remove('is-moving'); this.root.classList.remove('is-flying');
     }
 
     /* ---------------------------------------------------------------- pre-rendered camera moves (scene/render_moves.py)
@@ -2593,7 +2645,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       return this.flightBox;
     }
     preloadMoves() {
-      if (A.config.realMoves === false) return;
+      if (A.config.flights !== 'video') return;
       const mix = this.moveMix(), base = A.config.assetBase;
       Object.keys(this.moves || {}).forEach(name => {
         if (this.isMobile !== name.startsWith('rail_m-')) return;
@@ -2607,7 +2659,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       });
     }
     findMove(from, to) {
-      if (A.config.realMoves === false) return null;             // the flights show an older room: blend instead
+      if (A.config.flights !== 'video') return null;
       const mix = this.moveMix();
       const ready = name => {
         const m = this.moves && this.moves[name]; if (!m) return false;
@@ -2652,7 +2704,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       try { vid.pause(); if (vid.currentTime > 0.001) vid.currentTime = 0; } catch (e) { }
       box.hidden = false;
       await box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
-      this.covered = true;                                // the room under the video needs no drawing meanwhile
+      this.covered = true; this.comp.hold = true;         // the room under the video needs no drawing meanwhile
       const dur = Math.max(200, ((vid.duration && isFinite(vid.duration)) ? vid.duration : m.frames / (m.fps || 60)) * 1000);
       let anims = [];
       const ended = new Promise(res => { vid.onended = res; setTimeout(res, dur + 2000); });
@@ -2662,7 +2714,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
                  tint.animate([{ backgroundColor: t0 }, { backgroundColor: t1 }], { duration: dur, fill: 'forwards' })];
         await ended;
       } catch (e) { }                                     // no playback (a blocked autoplay): land without the flight
-      this.covered = false;
+      this.covered = false; this.comp.hold = false;
       await this.enterView(to);
       this.comp.render(this.light);
       await box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-out', fill: 'forwards' }).finished.catch(() => { });
@@ -3077,6 +3129,25 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.kidTrack.addEventListener('animationend', e => { if (e.target === this.kidTrack) this.kidTrack.classList.remove('is-run', 'is-back'); });
       this.scheduleKid(5000 + Math.random() * 5000);
     }
+    /* Shopify (round 9): scrolling from the room down into the shop. The shop slides over the room like a sheet (its
+       shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
+       and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
+       and once the room is out of the window the IntersectionObserver stops its drawing as before. */
+    bindScrollAway() {
+      const shade = document.createElement('div'); shade.className = 'azur-shade'; shade.setAttribute('aria-hidden', 'true');
+      this.stage.after(shade);
+      let queued = false;
+      const update = () => {
+        queued = false;
+        const r = this.root.getBoundingClientRect(), H = r.height || 1, y = Math.min(H, Math.max(0, -r.top)), p = y / H;
+        const on = y > 0 && !this.reduced;
+        this.stage.style.transform = on ? `translate3d(0,${(y * 0.45).toFixed(1)}px,0) scale(${(1 - 0.05 * p).toFixed(4)})` : '';
+        shade.style.opacity = on ? (p * 0.7).toFixed(3) : '0';
+      };
+      const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+      window.addEventListener('scroll', queue, { passive: true }); window.addEventListener('resize', queue); update();
+    }
+
     /* ---------------------------------------------------------------- outside the window (round 4) */
     useClip(key) {        // the clip made for this view's window (none for the phones' rail and the bed)
       if (!this.clips) return;
@@ -3464,6 +3535,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const vid = this.video, hasWin = c.view && c.view.win;
       const wa = hasWin ? Math.max(0, Math.min(1, (this.light.window - 0.35) / 0.5)) : 0;
       if (Math.abs(wa - c.winAmt) > 1e-3) { c.winAmt += (wa - c.winAmt) * Math.min(1, dt * 3); this.dirty = true; }
+      if (c.videoUp && c.vidMix < 1) { c.vidMix = this.reduced ? 1 : Math.min(1, c.vidMix + dt * 2.5); this.dirty = true; }   // a late clip fades in
       if (!vid) return;
       const resting = (this.mag && this.mag.isOpen) || this.shop.pdp.classList.contains('is-on');   // the room rests behind the magazine and the product view
       if (!vid.loop) {                                          // round 4: the boy's clip plays when scheduled (playClip)
