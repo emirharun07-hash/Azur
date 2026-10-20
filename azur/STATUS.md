@@ -510,6 +510,35 @@ on every device without losing quality.
   https://azurclothing.com/?preview_theme_id=209608147283 · editor:
   https://admin.shopify.com/store/5vpchz-hd/themes/209608147283/editor. Publishing it is the owner's step.
 
+## Round 10 (the winners of the design final, partner's tie-break 2026-10-20)
+
+- Winners: product view "Modemagazin + Aufstellung" (mlineup), shop "Spielerkarten mit Rückseite" (cardflip), colour
+  "Kunstrasen-Neon" (turf), animations lift, flap (split-flap headings), lpick (player steps up), check (button to
+  tick), drawer (cart slides in), ball (ball rolls along the free-shipping bar).
+- The owner had published Runde 9 meanwhile (MAIN = 209608147283). New draft **"Azur Zimmer Runde 10 (Entwurf)"
+  `gid://shopify/OnlineStoreTheme/209757995347`** (themeDuplicate of MAIN), files upserted from commit d1ef3db, checksums
+  match: assets/azur.css, azur.js, azur-room.css, azur-room.js, sections/azur-cards.liquid (new), cart-drawer.liquid
+  and footer.liquid (imported unchanged from MAIN first, md5 checked, then changed), templates/index.json (section
+  "cards" after the room, the old "products" section disabled, not deleted). Preview:
+  https://azurclothing.com/?preview_theme_id=209757995347 · editor:
+  https://admin.shopify.com/store/5vpchz-hd/themes/209757995347/editor. Publishing it is the owner's step.
+- Colour: tokens in azur.css (paper #0a0f0b, surface #121a14, plate #19231b, ink #eef5ee, grey text #9fb1a2, line
+  #233026, accent #39ff88 on #062b14); solid buttons, the free-shipping bar and the done state use the accent; the
+  formerly black areas (password page, dark drops, campaign dark) use `--c-deep`; header and footer show the light
+  signature; `color-scheme: dark`.
+- Room product view (prototype/js/azur-shop.js + css, rebuilt with build_theme.build_js/build_css only): the name
+  (city or country alone) huge across the top, the 3D jersey in front, story left, sizes as players on a pitch right
+  (a row of players on phones, under the jersey), a buy bar at the bottom; after the bag the button turns to a tick,
+  the theme's drawer slides in over the view (z-index 120; the after box's opener carries data-cart-open so focus
+  returns into the view), the after box shows the ball on the free-shipping bar.
+- Player cards (sections/azur-cards.liquid, azur.js "Spielerkarten"): front is a link (no JS) / flip button (JS);
+  back: sizes as radios, add to cart via the drawer's Section Rendering, tick, then the drawer slides in; one card
+  open at a time; Escape flips back; reduced motion swaps without 3D. The heading flaps letter by letter on first
+  view (data-flap, aria-label keeps the text).
+- Tested in the local harness (azur/tools/theme_harness.py now renders the cards, the real drawer and azur.js):
+  desktop 1440 and phone 390, add from the room and from a card, no errors.
+- Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
+
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
 - Preview render 960×540: about 1.5 min (incl. cloth simulation)
