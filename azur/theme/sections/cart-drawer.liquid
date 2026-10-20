@@ -1,0 +1,114 @@
+{%- comment -%}
+  Warenkorb als Seitenleiste (Dialog). Der Inhalt wird serverseitig gerendert; azur.js holt ihn nach
+  jeder Änderung über die Section Rendering API neu (?sections=cart-drawer), es gibt also nur eine Vorlage.
+  Ohne JavaScript führt der Warenkorb-Link im Header zur normalen Warenkorbseite.
+{%- endcomment -%}
+{%- liquid
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+  capture ship
+    render 'shipping-line'
+  endcapture
+  capture payments
+    render 'payment-types'
+  endcapture
+-%}
+<div class="drawer" id="cart" role="dialog" aria-modal="true" aria-labelledby="cart-title" data-drawer hidden>
+  <div class="drawer__scrim" data-cart-close></div>
+  <div class="drawer__panel">
+    <header class="drawer__head">
+      <h2 class="drawer__title" id="cart-title">Warenkorb <span class="drawer__count" data-cart-count>{{ cart.item_count }}</span></h2>
+      <button class="drawer__close" type="button" data-cart-close>Schließen</button>
+    </header>
+
+    <p class="drawer__status" role="status" data-cart-status></p>
+    <p class="drawer__error" role="alert" data-cart-error hidden></p>
+
+    <div class="drawer__content" data-cart-content data-count="{{ cart.item_count }}">
+      {%- if cart.item_count > 0 -%}
+        {%- liquid
+          # Kostenloser Versand in Deutschland: echte Rechnung aus dem Warenkorb, keine Zeitgrenzen
+          assign threshold = settings.free_shipping_threshold | times: 100
+          assign rest = threshold | minus: cart.total_price
+          assign pct = 100
+          if threshold > 0 and rest > 0
+            assign pct = cart.total_price | times: 100 | divided_by: threshold
+          endif
+        -%}
+        {%- if threshold > 0 -%}
+          <div class="freeship">
+            <p class="freeship__text">
+              {%- if rest > 0 -%}
+                Noch <b>{% render 'price', amount: rest %}</b> bis zum kostenlosen Versand in Deutschland
+              {%- else -%}
+                Kostenloser Versand in Deutschland
+              {%- endif -%}
+            </p>
+            <span class="freeship__bar" aria-hidden="true"><span style="width: {{ pct }}%"></span></span>
+          </div>
+        {%- endif -%}
+        <ul class="lines">
+          {%- for item in cart.items -%}
+            {%- capture label -%}{% render 'product-field', product: item.product, field: 'label' %}{%- endcapture -%}
+            <li class="line" data-line="{{ item.key }}">
+              <a class="line__img" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+                {%- if item.image -%}
+                  {{ item.image | image_url: width: 240 | image_tag: widths: '120, 240', sizes: '6rem', alt: '', loading: 'lazy' }}
+                {%- endif -%}
+              </a>
+              <div class="line__info">
+                <p class="line__name"><a href="{{ item.url }}">{{ label }}</a></p>
+                <p class="line__meta">{{ item.product.options.first | default: 'Größe' }} {{ item.variant.option1 }}</p>
+                <div class="qty" role="group" aria-label="Menge {{ label }}, {{ item.variant.option1 }}">
+                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | minus: 1 }}" aria-label="Eins weniger"{% if item.quantity <= 1 %} disabled{% endif %}>−</button>
+                  <span class="qty__n">{{ item.quantity }}</span>
+                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | plus: 1 }}" aria-label="Eins mehr">+</button>
+                </div>
+              </div>
+              <div class="line__side">
+                <p class="line__price">{% render 'price', amount: item.final_line_price %}</p>
+                <button class="line__remove link" type="button" data-qty="0">Entfernen<span class="sr-only">: {{ label }}, {{ item.variant.option1 }}</span></button>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        <form class="drawer__foot" action="{{ routes.cart_url }}" method="post">
+          <p class="drawer__total">
+            <span>Zwischensumme</span>
+            <span class="drawer__sum">{% render 'price', amount: cart.total_price %}</span>
+          </p>
+          <p class="drawer__note">
+            {{- settings.tax_note -}}
+            {%- if ship != blank %}<br>{{ ship }}{% endif -%}
+            {%- if payments != blank %}<br>Zahlung mit {{ payments }}{% endif -%}
+          </p>
+          <button class="btn btn--solid btn--block" type="submit" name="checkout">Zur Kasse <span class="arrow" aria-hidden="true">→</span></button>
+          {%- if additional_checkout_buttons -%}
+            <div class="drawer__express">{{ content_for_additional_checkout_buttons }}</div>
+          {%- endif -%}
+        </form>
+      {%- else -%}
+        <div class="drawer__empty">
+          <p class="drawer__empty-title">Dein Warenkorb ist leer.</p>
+          {%- assign p1 = settings.feature_product_1 -%}
+          {%- assign p2 = settings.feature_product_2 -%}
+          <ul class="drawer__empty-links">
+            {%- if p1 -%}<li><a class="btn btn--line btn--block" href="{{ p1.url }}">{% render 'product-field', product: p1, field: 'label' %} <span class="arrow" aria-hidden="true">→</span></a></li>{%- endif -%}
+            {%- if p2 -%}<li><a class="btn btn--line btn--block" href="{{ p2.url }}">{% render 'product-field', product: p2, field: 'label' %} <span class="arrow" aria-hidden="true">→</span></a></li>{%- endif -%}
+            <li><a class="btn btn--solid btn--block" href="{{ shop_coll.url }}">Zum Shop <span class="arrow" aria-hidden="true">→</span></a></li>
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Warenkorb (Seitenleiste)",
+  "settings": []
+}
+{% endschema %}
