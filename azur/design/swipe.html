@@ -193,7 +193,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 <script>
 /* ---------------------------------------------------------------- data */
 const ROUND = 'r4';
-const PARTNER_ONLY = true; /* the final: only the partner votes, the owner (artifact owner) watches */
+const PARTNER_ONLY = true; /* the final: only the partner votes, so no one sees anyone else's votes */
 const PRODUCTS = [
   { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
   { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
@@ -246,7 +246,7 @@ function mountMock(view, c, width, maxH) {
 
 /* ---------------------------------------------------------------- votes: db per person, localStorage fallback */
 const VOTE = { '-1': 'Nein', '1': 'Ja', '2': 'Super' };
-const state = { deck: 'pdp', mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false, readonly: false };
+const state = { deck: 'pdp', mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false };
 const LKEY = 'azur-design-votes';
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || '{}'); } catch (e) { return {}; } }
 function saveLocal() { try { localStorage.setItem(LKEY, JSON.stringify(state.all)); } catch (e) { /* storage blocked */ } }
@@ -273,8 +273,7 @@ async function initStore() {
     state.db = await claude.use('db');
   } catch (e) { /* not in a viewer */ }
   if (state.user) state.uid = await state.user.id();
-  if (state.user && PARTNER_ONLY) state.readonly = await state.user.isOwner();
-  const viewOnly = state.user && !state.readonly && (await state.user.can('data.write')) === false;
+  const viewOnly = state.user && (await state.user.can('data.write')) === false;
   if (state.db && state.uid) {
     try {
       const snap = await state.db.doc('votes/' + state.uid).get();
@@ -287,10 +286,9 @@ async function initStore() {
     state.db.collection('votes').onSnapshot(s => {
       const o = {};
       s.docs.forEach(d => { if (d.id !== state.uid) o[d.id] = (d.data() || {})[ROUND] || {}; });
-      state.others = o; renderWho(); setProgress(); if (['done', 'result', 'browse'].includes(state.view)) render();
+      state.others = o; renderWho(); setProgress(); if (state.view === 'done' || state.view === 'result') render();
     }, () => {});
-    showNote(state.readonly ? 'In dieser Runde stimmt nur dein Partner ab. Du siehst hier alle Karten und, sobald abgestimmt ist, seine Stimmen.'
-      : viewOnly ? 'Du kannst die Seite gerade nur ansehen. Bitte darum, dass sie dir mit Mitmach-Rechten freigegeben wird, dann zählen deine Stimmen.' : '');
+    showNote(viewOnly ? 'Du kannst die Seite gerade nur ansehen. Bitte darum, dass sie dir mit Mitmach-Rechten freigegeben wird, dann zählen deine Stimmen.' : '');
   } else {
     state.local = true;
     showNote('Deine Stimmen werden nur in diesem Browser gespeichert, weil die gemeinsame Ablage hier nicht verfügbar ist. Öffne die Seite angemeldet in Claude, damit Claude sie lesen kann.');
@@ -300,15 +298,15 @@ async function initStore() {
 async function renderWho() {
   const el = document.getElementById('who');
   const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
-  let txt = state.readonly ? '' : `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
-  const ids = PARTNER_ONLY && !state.readonly ? [] : Object.keys(state.others);
+  let txt = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
+  const ids = PARTNER_ONLY ? [] : Object.keys(state.others);
   if (ids.length && state.user) {
     const ps = await state.user.profiles(ids);
     ids.forEach(id => {
       const v = state.others[id], cnt = d => DECKS[d].filter(c => v[c.id] !== undefined).length;
-      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>${state.readonly ? ' ' + KINDS[k].label : ''}`).join(' · ')}</span>`;
+      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>`).join(' · ')}</span>`;
     });
-  } else if (state.readonly || !PARTNER_ONLY) txt += `<span>Partner: noch keine Stimmen</span>`;
+  } else if (!PARTNER_ONLY) txt += `<span>Partner: noch keine Stimmen</span>`;
   el.innerHTML = txt;
 }
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -318,15 +316,13 @@ const main = document.getElementById('main');
 function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
 function nextIndex(deck) { const d = DECKS[deck]; const i = d.findIndex(c => state.mine[c.id] === undefined); return i; }
 function setProgress() {
-  const src = state.readonly ? (Object.values(state.others)[0] || {}) : state.mine;
-  const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => src[c.id] !== undefined).length;
+  const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => state.mine[c.id] !== undefined).length;
   document.getElementById('progress').style.width = (done / d.length * 100) + '%';
 }
 function render() {
   [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
   setProgress();
   if (state.deck === 'result') return renderResult();
-  if (state.readonly) return renderBrowse();
   const i = nextIndex(state.deck);
   if (i < 0) return renderDone();
   renderCard(DECKS[state.deck][i], i);
@@ -420,8 +416,8 @@ function voteChip(v, who) {
 }
 function tiles(list) {
   return list.map(c => {
-    const ov = PARTNER_ONLY && !state.readonly ? '' : Object.values(state.others).map(o => voteChip(o[c.id], state.readonly ? '' : 'P')).join('');
-    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${state.readonly ? '' : voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
+    const ov = PARTNER_ONLY ? '' : Object.values(state.others).map(o => voteChip(o[c.id], 'P')).join('');
+    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
   }).join('');
 }
 function mountTiles() {
@@ -446,12 +442,6 @@ function renderDone() {
 function score(c) {
   const vs = [state.mine[c.id], ...Object.values(state.others).map(o => o[c.id])].filter(v => v !== undefined);
   return vs.reduce((a, v) => a + (v === 2 ? 3 : v), 0);
-}
-function renderBrowse() {
-  state.view = 'browse';
-  const d = DECKS[state.deck];
-  main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: alle ${d.length} Entwürfe</h2><p>Nur zum Ansehen: in dieser Runde stimmt dein Partner ab. Tippe auf eine Kachel, um sie groß zu sehen.</p><div class="grid">${tiles(d)}</div></section>`;
-  mountTiles();
 }
 function renderResult() {
   state.view = 'result';

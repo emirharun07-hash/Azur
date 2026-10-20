@@ -456,8 +456,9 @@ on every device without losing quality.
   `barInk`, `barStar` (top bar), `cd1a/cd1b/cd1i`, `cd2a/cd2b/cd2i` (player card colours), `bgimg`; all 41 pass the
   contrast check (text and muted text AA, button text AA, button edge 3:1).
 - Owner: if round 4 is the last round, only the partner votes. Round 4 is now the final (artifact v5, `PARTNER_ONLY`):
-  the owner (artifact owner, `user.isOwner()`) only browses all cards with the partner's votes, no voting; the
-  partner votes alone and sees no other votes. The nine liked animations are back as a deck for the partner; card
+  the partner votes alone and sees no other votes. (v5 showed the owner only a grid without voting; the owner wanted
+  the swipe cards back for everyone, so v6 swipes for every viewer again. The owner does not vote this round, so any
+  r4 votes, also under the owner's account, count as the partner's.) The nine liked animations are back as a deck for the partner; card
   texts are neutral (no "your yes from round 3"). The partner needs the page shared with a role that may take part
   (not view or comment only), otherwise the page says so.
 - Open, owner asked to be reminded: the room transition (Überblendung vs. rendered camera flight) and the 30-minute
