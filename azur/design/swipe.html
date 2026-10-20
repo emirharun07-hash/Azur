@@ -171,7 +171,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-<span id="roundLabel">Finale</span></h1>
+    <h1>Azur Design-<span id="roundLabel">Stechen</span></h1>
     <div class="tabs" role="group" aria-label="Bereich">
       <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
       <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
@@ -181,7 +181,7 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
     </div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Finale: die Vorauswahl aus vier Abstimmungsrunden, und in dieser Runde entscheidest nur du. Rechts wischen heißt Ja, links Nein, nach oben Stern. Gib pro Bereich 1–2 Sterne für deine klaren Favoriten. Animationen lassen sich kombinieren: sag Ja zu allen, die auf die Seite sollen. Farbe: dieselben Entwürfe in 41 Paletten.</p>
+  <p class="note">Stechen: nur noch die Karten, zu denen du im Finale Ja gesagt hast. Wische wie gewohnt: Nein fliegt raus, Ja bleibt im Rennen. Nach jedem Durchgang kommen nur die Ja-Karten noch einmal, bis pro Bereich eine übrig ist. Ein Stern macht eine Karte sofort zum Gewinner. Die Animationen stehen fest, deine sechs Ja passen alle zusammen.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
@@ -190,10 +190,12 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 <script src="r2.js"></script>
 <script src="r3.js"></script>
 <script src="r4.js"></script>
+<script src="r5.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r4';
+const ROUND = 'r5';
 const PARTNER_ONLY = true; /* the final: only the partner votes, so no one sees anyone else's votes */
+const STECHEN = true; /* tie-break: passes until one card per area is left (see stechen helpers below) */
 const PRODUCTS = [
   { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
   { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
@@ -224,7 +226,7 @@ const KINDS = { pdp: { id: 'P', cls: 'L', label: 'Produktansicht', h: 800 }, sho
 function buildDeck(kind, layouts) {
   return layouts.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
 }
-const DECKS = { pdp: buildDeck('pdp', PDP4), shop: buildDeck('shop', SHOP4), anim: buildDeck('anim', ANIM4), color: buildDeck('color', COLOR4) };
+const DECKS = { pdp: buildDeck('pdp', PDP5), shop: buildDeck('shop', SHOP5), anim: buildDeck('anim', ANIM5), color: buildDeck('color', COLOR5) };
 const ORDER = Object.keys(KINDS).filter(k => DECKS[k].length);
 Object.keys(KINDS).forEach(k => { if (!DECKS[k].length) document.getElementById('tab-' + k).hidden = true; });
 const ALL = ORDER.flatMap(k => DECKS[k]);
@@ -298,7 +300,8 @@ async function initStore() {
 async function renderWho() {
   const el = document.getElementById('who');
   const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
-  let txt = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
+  let txt = STECHEN ? `<span>${ORDER.map(k => `${KINDS[k].label}: <b>${alive(k).length === 1 ? 'entschieden' : 'noch ' + alive(k).length}</b>`).join(' · ')}</span>`
+    : `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
   const ids = PARTNER_ONLY ? [] : Object.keys(state.others);
   if (ids.length && state.user) {
     const ps = await state.user.profiles(ids);
@@ -314,13 +317,30 @@ const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;'
 /* ---------------------------------------------------------------- views */
 const main = document.getElementById('main');
 function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
-function nextIndex(deck) { const d = DECKS[deck]; const i = d.findIndex(c => state.mine[c.id] === undefined); return i; }
+/* stechen: a card's vote is -1 out, 1 still in after this pass, 2 winner, none = not yet shown in this pass */
+const alive = deck => DECKS[deck].filter(c => state.mine[c.id] !== -1);
+const winner = deck => DECKS[deck].find(c => state.mine[c.id] === 2);
+function settle(deck) {
+  if (winner(deck)) return false;
+  const a = alive(deck);
+  if (a.length === 1) { state.mine[a[0].id] = 2; return true; }
+  if (a.length && a.every(c => state.mine[c.id] === 1)) {
+    a.forEach(c => delete state.mine[c.id]); state.mine['pass_' + deck] = (state.mine['pass_' + deck] || 1) + 1; return true;
+  }
+  return false;
+}
+function nextIndex(deck) {
+  if (STECHEN) { while (settle(deck)) persist(); if (winner(deck)) return -1; }
+  return DECKS[deck].findIndex(c => state.mine[c.id] === undefined);
+}
 function setProgress() {
-  const d = DECKS[state.deck] || DECKS.pdp, done = d.filter(c => state.mine[c.id] !== undefined).length;
-  document.getElementById('progress').style.width = (done / d.length * 100) + '%';
+  const k = DECKS[state.deck] ? state.deck : ORDER[0], d = DECKS[k];
+  const p = STECHEN ? (d.length - alive(k).length) / Math.max(1, d.length - 1) : d.filter(c => state.mine[c.id] !== undefined).length / d.length;
+  document.getElementById('progress').style.width = (p * 100) + '%';
 }
 function render() {
   [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
+  if (DECKS[state.deck]) nextIndex(state.deck); /* settles a finished pass before the bar is drawn */
   setProgress();
   if (state.deck === 'result') return renderResult();
   const i = nextIndex(state.deck);
@@ -334,7 +354,7 @@ function renderCard(c, i) {
   main.innerHTML = `<div class="stage"><article class="card" id="card" aria-label="Entwurf ${c.id}">
       <span class="stamp yes">Ja</span><span class="stamp no">Nein</span><span class="stamp star">Super</span>
       <div class="view" id="cardView"></div>
-      <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length}${c.L.fam ? ' · Familie: ' + c.L.fam : ''}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
+      <div class="meta"><span class="id">${STECHEN ? `Stechen · Durchgang ${state.mine['pass_' + state.deck] || 1} · noch ${alive(state.deck).length} im Rennen` : `${c.id} · ${i + 1} von ${d.length}${c.L.fam ? ' · Familie: ' + c.L.fam : ''}`}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
       <div class="tags">${c.L.tags.map(t => `<span>${t}</span>`).join('')}</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="zoomBtn">Groß ansehen</button>${c.kind === 'anim' ? '<button type="button" class="link" id="replayBtn">Neu abspielen</button>' : ''}</div></div></article></div>
     <div class="ctl"><button type="button" class="small" id="undo" ${state.history.length ? '' : 'disabled'}>Zurück</button>
@@ -353,7 +373,10 @@ function renderCard(c, i) {
 }
 function vote(c, v) {
   const card = document.getElementById('card');
-  state.mine[c.id] = v; state.history.push(c.id); persist(); renderWho();
+  state.history.push({ deck: c.kind, snap: JSON.stringify(state.mine) });
+  state.mine[c.id] = v;
+  if (STECHEN && v === 2) DECKS[c.kind].forEach(o => { if (o !== c) state.mine[o.id] = -1; });
+  persist(); renderWho();
   if (card && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     card.style.transform = v === 2 ? 'translateY(-120%) rotate(0)' : `translateX(${v > 0 ? 130 : -130}%) rotate(${v > 0 ? 14 : -14}deg)`;
     card.style.opacity = '0';
@@ -361,8 +384,8 @@ function vote(c, v) {
   } else render();
 }
 function undo() {
-  const id = state.history.pop(); if (!id) return;
-  delete state.mine[id]; state.deck = BY_ID[id].kind; persist(); renderWho(); render();
+  const h = state.history.pop(); if (!h) return;
+  state.mine = JSON.parse(h.snap); state.deck = h.deck; persist(); renderWho(); render();
 }
 function bindCard(c) {
   const card = document.getElementById('card');
@@ -431,6 +454,15 @@ function renderDone() {
   state.view = 'done';
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
   const i0 = ORDER.indexOf(state.deck), other = [...ORDER.slice(i0 + 1), ...ORDER.slice(0, i0)].find(k => nextIndex(k) >= 0), rest = !!other;
+  if (STECHEN) {
+    const w = winner(state.deck);
+    main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: Gewinner</h2><p>${esc(w.L.name)} hat das Stechen gewonnen. ${rest ? '' : 'Alle Bereiche sind entschieden. Danke, Claude baut daraus jetzt die fertige Seite.'}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Alle Gewinner ansehen</button>${state.history.length ? '<button type="button" class="link" id="undoDone">Letzte Wahl zurücknehmen</button>' : ''}</div><div class="grid">${tiles([w])}</div></section>`;
+    if (state.history.length) document.getElementById('undoDone').onclick = undo;
+    if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
+    document.getElementById('goRes').onclick = () => { state.deck = 'result'; render(); };
+    return mountTiles();
+  }
   main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: fertig</h2>
     <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch.'} ${PARTNER_ONLY ? 'Danke! Claude liest die Stimmen aus und baut daraus die fertige Seite.' : 'Claude liest eure Stimmen aus und baut daraus die nächste Runde.'}</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
@@ -445,12 +477,12 @@ function score(c) {
 }
 function renderResult() {
   state.view = 'result';
-  const sect = (kind, label) => {
+  const sect = STECHEN ? (kind, label) => { const w = winner(kind); return `<h2>${label}: ${w ? 'Gewinner' : 'noch im Rennen'}</h2><div class="grid">${tiles(w ? [w] : alive(kind))}</div>`; } : (kind, label) => {
     const list = DECKS[kind].filter(c => state.mine[c.id] !== undefined || Object.values(state.others).some(o => o[c.id] !== undefined))
       .sort((a, b) => score(b) - score(a)).slice(0, 12);
     return `<h2>${label}: eure Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Stimmen.</p>'}`;
   };
-  main.innerHTML = `<section class="done"><p>Punkte: Stern 3, Ja 1, Nein −1${PARTNER_ONLY ? '' : ', von euch beiden zusammengezählt'}. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
+  main.innerHTML = `<section class="done"><p>${STECHEN ? 'Pro Bereich der Gewinner oder, solange noch nicht entschieden, die Karten im Rennen.' : `Punkte: Stern 3, Ja 1, Nein −1${PARTNER_ONLY ? '' : ', von euch beiden zusammengezählt'}.`} Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
   mountTiles();
 }
 [...ORDER, 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));

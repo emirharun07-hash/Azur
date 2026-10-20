@@ -461,6 +461,14 @@ on every device without losing quality.
   r4 votes, also under the owner's account, count as the partner's.) The nine liked animations are back as a deck for the partner; card
   texts are neutral (no "your yes from round 3"). The partner needs the page shared with a role that may take part
   (not view or comment only), otherwise the page says so.
+- Final results (r4, voted by the partner on the owner's account, all 67 cards, no stars): product view yes mlineup,
+  glineup; shop yes cardsize, cardflip, classiccardsize, classiccards, quicksize, phoneshop; animation yes lift, flap,
+  lpick, check, drawer, ball (no: stagger, spick, tear) = the animation set; colour yes floodneon, floodamber, floodbar,
+  floodcone, floodlight, turf, whiteyellow.
+- Tie-break "Stechen" (artifact v7, `azur/design/r5.js`, votes `r5`, the partner again): only those yes cards (the
+  phone card left out); swipe as before, no = out, yes = stays, passes repeat with the yes cards until one is left,
+  a star wins at once, undo also on the winner screen. Vote values in r5: -1 out, 1 in this pass, 2 winner,
+  `pass_<deck>` = pass number.
 - Open, owner asked to be reminded: the room transition (Überblendung vs. rendered camera flight) and the 30-minute
   admin setup (`azur/admin/ANLEITUNG.md`).
 - Live theme files now in the repo (`azur/theme/layout/theme.liquid`, `sections/announcement.liquid`, `sections/header.liquid`,
