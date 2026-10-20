@@ -175,7 +175,7 @@
         const ripT = (i === this.hover ? sw.ripple : 0) + Math.min(sw.ripple * 1.5, Math.abs(g.omega) * 0.5);
         g.rip += (ripT * mi - g.rip) * Math.min(1, dt * 3);
         this.swayAng[i] = (g.theta + idle) * Math.PI / 180; this.swayRip[i] = g.rip;
-        if (Math.abs(g.omega) > 0.02 || Math.abs(g.theta) > 0.01 || g.rip > 0.05) moving = true;
+        if (Math.abs(g.omega) > 0.05 || Math.abs(g.theta) > 0.02 || g.rip > 0.05) moving = true;   // below that the cloth moves less than a pixel
       });
       this.positionOverlays();
       return moving;

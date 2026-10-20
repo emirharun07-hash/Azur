@@ -539,6 +539,21 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Round 11 (smoother, bar only in the shop, ideas from basement.studio, 2026-10-20)
+- Marquee bar: on the homepage with the room it no longer sits above the room (the room fills the whole screen). It slides
+  down under the header once the header turns solid (the shop starts) and only runs then (CSS in sections/azur-room.liquid,
+  keyed on `.header--overlay.is-solid`; without JS it stays in the flow as before). Restyled dark with a hairline and
+  accent text.
+- Smoothness (azur-app.js): the light check once a second only redraws when a quantized light signature changes; no more
+  idle drift on phones (the room swayed by itself and redrew ~16x a second); the room counts as offscreen below 15%
+  visible (it kept drawing as a strip behind the header); phones draw at 1.5x pixel ratio at most (`dpr()`); the rail's
+  pendulums count as resting below sub-pixel motion. Measured in the harness (swiftshader): phone idle renders 82 -> 17
+  per 5 s, phone scroll p95 frame 483 -> 67 ms, renders behind the shop 60 -> 0 per 3 s; desktop scroll p95 483 -> 300 ms.
+- Player cards: hairline grid cells with a number (01..10), superscript count after the heading, hover shadow as its own
+  layer that only fades (no filter: drop-shadow repaint).
+- Dead code: room JS/CSS scan found nothing unused (azur-dot--* are built by string); the duplicate .freeship__bar rule
+  was merged.
+
 ## Rough timings (this machine: 4 CPU cores, no GPU)
 
 - Preview render 960×540: about 1.5 min (incl. cloth simulation)

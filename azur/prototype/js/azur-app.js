@@ -46,13 +46,14 @@
       if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
       window.addEventListener('resize', () => this.resize());
+      // the room counts as gone once less than a sixth of it shows (a strip behind the header is not worth drawing)
       if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => {
-        this.offscreen = !en.isIntersecting;
+        this.offscreen = !en.isIntersecting || en.intersectionRatio < 0.15;
         if (this.video && this.offscreen && !this.video.paused) {
           this.clipEnded(this.video);                                  // never leave the boy frozen mid-run
         }
         if (!this.offscreen) this.kick();
-      }).observe(this.root);
+      }, { threshold: [0, 0.15] }).observe(this.root);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) this.kick(); });
       this.reducedQuery.addEventListener && this.reducedQuery.addEventListener('change', e => { this.reduced = e.matches; });
       if (A.Panel) this.panel = new A.Panel(this);
@@ -839,28 +840,30 @@
 
     /* ---------------------------------------------------------------- loop */
     resize() {
-      const w = this.stage.clientWidth, h = this.stage.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
       this.comp.pan = this.pan;
-      this.comp.layout(w, h, dpr);
+      this.comp.layout(this.stage.clientWidth, this.stage.clientHeight, this.dpr());
       this.rail.place(); this.placeChrome();
       this.dirty = true; this.kick();
     }
     kick() { this.dirty = true; }
+    // phones draw at 1.5x at most: sharp enough for photos, a third fewer pixels than 2x
+    dpr() { return Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.5 : 2); }
 
     frame(t) {
       const dt = Math.min(0.05, (t - this.lastT) / 1000); this.lastT = t;
       if (document.hidden || this.offscreen) { requestAnimationFrame(tt => this.frame(tt)); return; }
       const cfg = A.config;
-      // light: follow the clock (cheap, once a second) or the design panel
+      // light: follow the clock once a second (or the design panel), but only redraw when it visibly changed
       if (t - this.lightAt > 1000 || this.lightDirty) {
         this.lightAt = t; this.lightDirty = false;
-        this.light = A.light.current(); this.rail.applyLight(this.light); this.applyAmbient(); this.dirty = true;
+        const l = A.light.current(), sig = [l.exposure, l.window, l.night, ...l.sky].map(v => v.toFixed(3)).join();
+        this.light = l;
+        if (sig !== this.lightSig) { this.lightSig = sig; this.rail.applyLight(l); this.applyAmbient(); this.dirty = true; }
         const st = this.stateNow(); if (st !== this.dayState) this.changeState(st);
       }
-      // parallax eases toward the pointer; phones drift very slowly so the room still feels spatial
+      // parallax eases toward the pointer (phones have none: a room that sways on its own costs battery and feels laggy)
       const vc = cfg.views[this.viewKey] || {}, k = this.reduced ? 0 : (vc.parallax || 0.01) * cfg.motion.intensity;
-      let tx = this.parallaxTarget[0], ty = this.parallaxTarget[1];
-      if (this.isMobile && !this.reduced) { const s = t / 1000; tx = Math.sin(s * 0.21) * 0.6; ty = Math.sin(s * 0.17) * 0.3; }
+      const tx = this.parallaxTarget[0], ty = this.parallaxTarget[1];
       const e = 1 - Math.exp(-dt * cfg.motion.parallaxEase);      // the same glide at 60, 120 or 144 Hz
       const nx = this.parallax[0] + (-tx * k - this.parallax[0]) * e, ny = this.parallax[1] + (-ty * k * 0.6 - this.parallax[1]) * e;
       const pmove = Math.abs(nx - this.parallax[0]) + Math.abs(ny - this.parallax[1]) > 1e-6;
@@ -883,18 +886,15 @@
           }
         }
       }
-      if (this.comp.pan !== this.pan) { this.comp.pan = this.pan; this.comp.layout(this.stage.clientWidth, this.stage.clientHeight, Math.min(window.devicePixelRatio || 1, 2)); this.dirty = true; }
+      if (this.comp.pan !== this.pan) { this.comp.pan = this.pan; this.comp.layout(this.stage.clientWidth, this.stage.clientHeight, this.dpr()); this.dirty = true; }
       // selection dims the room smoothly
       const dT = this.dimTarget == null ? 1 : this.dimTarget;
       if (Math.abs(this.comp.dim - dT) > 0.002) { this.comp.dim += (dT - this.comp.dim) * Math.min(1, dt * 6); this.dirty = true; }
       this.stepRoom(dt);
-      // phones drift all the time: 30 pictures a second are plenty for that slow sway (and kinder to the battery)
-      const drift = pmove && (!this.isMobile || t - (this.driftAt || 0) > 31);
-      if (drift) this.driftAt = t;
-      if (drift || this.dirty) { this.rail.place(); this.placeChrome(); }
+      if (pmove || this.dirty) { this.rail.place(); this.placeChrome(); }
       const swaying = this.rail.step(dt, this.reduced);
       this.applySway(t, swaying);
-      if ((this.dirty || drift) && !this.covered) { this.comp.render(this.light); this.dirty = false; }
+      if ((this.dirty || pmove) && !this.covered) { this.comp.render(this.light); this.dirty = false; }
       requestAnimationFrame(tt => this.frame(tt));
     }
 

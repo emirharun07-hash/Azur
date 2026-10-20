@@ -35,6 +35,15 @@
      dunkler: azur-room.js, bindScrollAway) */
   #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) + .shopify-section {
     position: relative; z-index: 1; box-shadow: 0 -1.5rem 3rem rgb(0 0 0 / 0.4); }
+  /* Runde 11: das Laufband liegt nicht über dem Zimmer. Es fährt erst unter dem Header herunter, sobald der Shop
+     beginnt (Header fest), und läuft nur dann; das Zimmer füllt dafür den ganzen Bildschirm. */
+  .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]) > .shopify-section:has(> .bar) {
+    position: fixed; inset: var(--header-bottom, var(--header-h)) 0 auto; z-index: calc(var(--z-header) - 1);
+    transform: translateY(-100%); visibility: hidden; transition: transform .45s var(--ease), visibility 0s linear .45s; }
+  .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]):has(.header--overlay.is-solid) > .shopify-section:has(> .bar) {
+    transform: none; visibility: visible; transition: transform .45s var(--ease); }
+  .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]):not(:has(.header--overlay.is-solid)) .bar__run { animation-play-state: paused; }
+  .js .azur[data-hero] { --bar-h: 0px; }
   .azur-shade { position: absolute; inset: 0; z-index: 90; background: #050505; opacity: 0; pointer-events: none; }
   .azur-stage { transform-origin: 50% 35%; }
 </style>

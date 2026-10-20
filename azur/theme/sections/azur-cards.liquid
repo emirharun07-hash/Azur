@@ -3,6 +3,7 @@
   Vorne Code, Bild, Name, Größen und Preis (Städte golden, Länder silbern). Ein Klick oder Tippen dreht die Karte um:
   hinten die Größe wählen und direkt in den Warenkorb, der dann rechts hereingleitet (azur.js, Abschnitt Spielerkarten).
   Die Überschrift klappt wie eine Anzeigetafel auf (data-flap). Ohne JavaScript führt jede Karte zur Produktseite.
+  Runde 11 (nach basement.studio): jede Karte steht in einer Zelle mit Haarlinien und Nummer, die Anzahl hochgestellt.
 {%- endcomment -%}
 {%- liquid
   assign coll = settings.main_collection
@@ -18,7 +19,10 @@
     <header class="pcards__head wrap">
       <div>
         {%- if section.settings.kicker != blank -%}<p class="pcards__kicker">{{ section.settings.kicker }}</p>{%- endif -%}
-        <h2 class="pcards__title" id="pcards-title-{{ section.id }}" data-flap>{{ section.settings.heading }}</h2>
+        <div class="pcards__line">
+          <h2 class="pcards__title" id="pcards-title-{{ section.id }}" data-flap>{{ section.settings.heading }}</h2>
+          <sup class="pcards__count" aria-hidden="true">({{ section.settings.products.size | at_most: 10 }})</sup>
+        </div>
       </div>
       <div class="pcards__aside">
         {%- if ship != blank -%}<p class="pcards__ship">{{ ship }}</p>{%- endif -%}
@@ -26,7 +30,7 @@
       </div>
     </header>
 
-    <ul class="pcards__grid wrap" role="list">
+    <div class="wrap"><ul class="pcards__grid" role="list">
       {%- for p in section.settings.products limit: 10 -%}
         {%- liquid
           capture label
@@ -50,6 +54,7 @@
           assign cid = section.id | append: '-' | append: p.id
         -%}
         <li class="pcard pcard--{{ kind }}" data-pcard>
+          <span class="pcard__no" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
           <div class="pcard__inner">
             <a class="pcard__front" href="{{ p.url }}" data-pcard-flip aria-expanded="false" aria-controls="{{ cid }}-back">
               <span class="pcard__top"><b class="pcard__code">{{ code }}</b><span class="pcard__kind">{% if kind == 'stadt' %}Stadt{% else %}Land{% endif %}</span></span>
@@ -88,7 +93,7 @@
           </div>
         </li>
       {%- endfor -%}
-    </ul>
+    </ul></div>
   </section>
 {%- endif -%}
 
