@@ -1,0 +1,133 @@
+{%- comment -%}
+  Footer: oben die Anmeldung für Drops mit Teaser-Bild (Frankfurt-Trikot; auf der Drops-Seite ausgeblendet, weil sie
+  dort groß steht),
+  darunter Signatur, Kurzzeile, vier Linkspalten (Shop, Support, Azur, Rechtliches), Basiszeile (Steuerhinweis und Zahlungsarten).
+  Rechtliches: nur veröffentlichte Seiten aus settings.legal_pages plus die Shopify-Richtlinien.
+{%- endcomment -%}
+{%- liquid
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+
+  assign about = settings.about_page
+  if about.url == blank
+    assign about = pages['ueber-azur']
+  endif
+
+  assign p1 = settings.feature_product_1
+  assign p2 = settings.feature_product_2
+  assign cat = settings.nav_collection
+  assign legal = settings.legal_pages | split: ','
+  assign contact = pages['contact']
+  capture payments
+    render 'payment-types'
+  endcapture
+  capture support_links
+    render 'support-links', class: 'footer__link'
+  endcapture
+-%}
+<footer class="footer">
+  {%- if section.settings.signup and template.suffix != 'drops' -%}
+    <section class="footer__signup{% if section.settings.signup_teaser %} footer__signup--teaser{% endif %} wrap" id="drops" aria-labelledby="footer-signup-title">
+      {%- if section.settings.signup_teaser -%}
+        {%- render 'teaser', image: section.settings.signup_image, label: section.settings.signup_label, class: 'footer__teaser' -%}
+      {%- endif -%}
+      <div class="footer__signup-body">
+        <div class="footer__signup-text">
+          <h2 class="footer__signup-title" id="footer-signup-title">{{ section.settings.signup_heading }}</h2>
+          {%- if section.settings.signup_text != blank -%}<p class="footer__signup-lead">{{ section.settings.signup_text }}</p>{%- endif -%}
+        </div>
+        {%- render 'signup-form', id: 'footer', button: section.settings.signup_button, success: section.settings.signup_success -%}
+      </div>
+    </section>
+  {%- endif -%}
+  <div class="footer__top wrap">
+    <div class="footer__brand">
+      <a class="footer__logo" href="{{ routes.root_url }}">
+        {%- render 'logo', tone: 'ink' -%}
+        <span class="sr-only">Startseite</span>
+      </a>
+      {%- if section.settings.line != blank -%}
+        <p class="footer__line">{{ section.settings.line }}</p>
+      {%- endif -%}
+    </div>
+
+    <nav class="footer__col" aria-labelledby="footer-shop">
+      <h2 class="footer__head" id="footer-shop">Shop</h2>
+      <ul>
+        <li><a href="{{ shop_coll.url }}">Alle Trikots</a></li>
+        {%- if p1 -%}<li><a href="{{ p1.url }}">{% render 'product-field', product: p1, field: 'label' %}</a></li>{%- endif -%}
+        {%- if p2 -%}<li><a href="{{ p2.url }}">{% render 'product-field', product: p2, field: 'label' %}</a></li>{%- endif -%}
+        {%- if cat.url != blank -%}<li><a href="{{ cat.url }}">{{ cat.title }}</a></li>{%- endif -%}
+      </ul>
+    </nav>
+
+    {%- if support_links != blank -%}
+      <nav class="footer__col" aria-labelledby="footer-support">
+        <h2 class="footer__head" id="footer-support">Support</h2>
+        <ul>{{ support_links }}</ul>
+      </nav>
+    {%- endif -%}
+
+    <nav class="footer__col" aria-labelledby="footer-brand">
+      <h2 class="footer__head" id="footer-brand">{{ shop.name }}</h2>
+      <ul>
+        {%- if about.url != blank -%}<li><a href="{{ about.url }}">Über Azur</a></li>{%- endif -%}
+        {%- if support_links == blank and contact.url != blank -%}<li><a href="{{ contact.url }}">{{ contact.title }}</a></li>{%- endif -%}
+        {%- if section.settings.instagram != blank -%}
+          <li><a href="{{ section.settings.instagram }}" target="_blank" rel="noopener">Instagram<span class="sr-only"> (neues Fenster)</span></a></li>
+        {%- endif -%}
+      </ul>
+    </nav>
+
+    <nav class="footer__col" aria-labelledby="footer-legal">
+      <h2 class="footer__head" id="footer-legal">Rechtliches</h2>
+      <ul>
+        {%- assign listed = '|' -%}
+        {%- for handle in legal -%}
+          {%- assign h = handle | strip -%}
+          {%- if h == 'contact' -%}{%- continue -%}{%- endif -%}
+          {%- assign lp = pages[h] -%}
+          {%- if lp.url != blank -%}
+            <li><a href="{{ lp.url }}">{{ lp.title }}</a></li>
+            {%- assign listed = listed | append: lp.title | append: '|' -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- comment -%} Shopify-Richtlinien, außer es gibt schon eine Seite mit demselben Titel {%- endcomment -%}
+        {%- for policy in shop.policies -%}
+          {%- assign key = '|' | append: policy.title | append: '|' -%}
+          {%- unless listed contains key -%}<li><a href="{{ policy.url }}">{{ policy.title }}</a></li>{%- endunless -%}
+        {%- endfor -%}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="footer__base wrap">
+    <p>© {{ 'now' | date: '%Y' }} {{ shop.name }}, Berlin</p>
+    <p>
+      {{- settings.tax_note -}}
+      {%- if settings.tax_note != blank and payments != blank %} · {% endif -%}
+      {%- if payments != blank %}Zahlung mit {{ payments }}{% endif -%}
+    </p>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "line", "label": "Zeile unter dem Logo", "default": "Fußballinspirierte Streetwear, entworfen in Berlin.", "info": "Leer = keine Zeile." },
+    { "type": "url", "id": "instagram", "label": "Instagram-Profil", "info": "Leer = kein Link." },
+    { "type": "header", "content": "Drops per Mail" },
+    { "type": "checkbox", "id": "signup", "label": "Anmeldung zeigen", "default": true, "info": "Eingetragene Kontakte stehen unter Kunden mit den Tags newsletter und drops." },
+    { "type": "text", "id": "signup_heading", "label": "Überschrift", "default": "Neue Drops zuerst." },
+    { "type": "text", "id": "signup_text", "label": "Text", "default": "Trag deine Mail ein. Wir sagen dir Bescheid, sobald ein neues Trikot rauskommt." },
+    { "type": "text", "id": "signup_button", "label": "Button", "default": "Eintragen" },
+    { "type": "text", "id": "signup_success", "label": "Text nach dem Eintragen", "default": "Danke, du bist dabei. Kommt eine Bestätigungsmail, klick bitte auf den Link darin." },
+    { "type": "checkbox", "id": "signup_teaser", "label": "Teaser-Bild zeigen", "default": true },
+    { "type": "image_picker", "id": "signup_image", "label": "Teaser-Bild", "info": "Leer = Frankfurt-Trikot von vorne, groß angeschnitten." },
+    { "type": "text", "id": "signup_label", "label": "Zeile auf dem Bild", "default": "Frankfurt 069", "info": "Leer = keine." }
+  ]
+}
+{% endschema %}
