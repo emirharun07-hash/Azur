@@ -3,7 +3,8 @@
    1. Tokens   2. Basis   3. Schrift   4. Bausteine   5. Header, Menü   6. Warenkorb
    7. Footer   8. Karten, Raster   9. Startseite   10. Shop, Produkt   11. Übrige Seiten
 
-   Grundpalette: Off-White, Schwarz, wenige Grautöne. Farbe kommt nur aus den Produktbildern.
+   Grundpalette (Runde 10, Wahl im Design-Finale: „Kunstrasen-Neon“): fast schwarzes Grün, helle Schrift, Neongrün nur für
+   Kaufen-Knöpfe, Fortschritt und kleine Hinweise. Sonst kommt Farbe aus den Produktbildern.
    Keine Rundungen, keine Schatten, keine Verläufe. Große Schrift nur im Einstieg.
    Shop-Aufbau wie bei Streetwear-Marken: schwarze Leiste oben, Logo in der Mitte, Symbole rechts,
    Produkte auf ruhigen Flächen im Hochformat, Namen in kleinen Versalien.
@@ -11,13 +12,17 @@
 
 /* 1. Tokens ================================================================ */
 :root {
-  --c-paper: #f3f0ea;        /* Off-White, Grundfläche */
-  --c-plate: #e6e2da;        /* ruhige Bildfläche hinter Produkten */
-  --c-ink: #121212;          /* Schwarz */
-  --c-grey-line: #d2cdc3;    /* feine Linien */
-  --c-grey-text: #5e5a53;    /* Sekundärtext (6:1 auf Papier) */
-  --c-grey-soft: #8d887f;    /* nur Flächen und Symbole, nicht für Text (3:1) */
-  --c-error: #8c1d1d;        /* nur für Fehlermeldungen */
+  --c-paper: #0a0f0b;        /* Grundfläche: Kunstrasen bei Nacht */
+  --c-surface: #121a14;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten) */
+  --c-plate: #19231b;        /* ruhige Bildfläche hinter Produkten */
+  --c-deep: #040705;         /* noch dunkler, für die früher schwarzen Bereiche (Passwortseite, Drops dunkel) */
+  --c-ink: #eef5ee;          /* Schrift (16:1 auf dem Grund) */
+  --c-grey-line: #233026;    /* feine Linien */
+  --c-grey-text: #9fb1a2;    /* Sekundärtext (8:1 auf dem Grund) */
+  --c-grey-soft: #66796a;    /* nur Flächen und Symbole, nicht für Text (3:1) */
+  --c-acc: #39ff88;          /* Neongrün: Kaufen, Fortschritt, Hinweise */
+  --c-acc-ink: #062b14;      /* Schrift auf Neongrün (8:1) */
+  --c-error: #ff8a80;        /* nur für Fehlermeldungen */
 
   --f-sans: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --w-narrow: 62%;
@@ -71,6 +76,7 @@
   border-radius: 0 !important;
 }
 html {
+  color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: calc(var(--header-h) + var(--s-4));
@@ -222,19 +228,19 @@ button:disabled { cursor: not-allowed; }
   gap: var(--s-3);
   min-height: 3.25rem;
   padding: 0 var(--s-5);
-  border: var(--bw) solid var(--c-ink);
+  border: var(--bw) solid var(--btn-line, var(--c-ink));
   background: var(--btn-bg);
   color: var(--btn-fg);
   text-align: left;
   transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.btn--solid { --btn-bg: var(--c-ink); --btn-fg: var(--c-paper); }
+.btn--solid { --btn-bg: var(--c-acc); --btn-fg: var(--c-acc-ink); --btn-line: var(--c-acc); font-weight: 700; }
 .btn--line { --btn-bg: transparent; --btn-fg: var(--c-ink); }
 .btn--block { width: 100%; }
 .btn--big { min-height: 3.75rem; }
 .btn .arrow { transition: transform var(--dur) var(--ease); }
 @media (hover: hover) {
-  .btn--solid:hover { --btn-bg: transparent; --btn-fg: var(--c-ink); }
+  .btn--solid:hover { --btn-bg: transparent; --btn-fg: var(--c-acc); }
   .btn--line:hover { --btn-bg: var(--c-ink); --btn-fg: var(--c-paper); }
   .btn:hover .arrow { transform: translateX(0.25rem); }
 }
@@ -404,7 +410,7 @@ textarea.form__input { resize: vertical; }
 .header__menu-btn[aria-expanded="true"] .icon--close { display: block; }
 .header__logo { display: flex; align-items: center; justify-content: center; height: 100%; padding-inline: var(--s-3); }
 .header__logo .logo { height: 1.75rem; width: auto; transition: height var(--dur-panel) var(--ease); }
-.header__logo .logo--paper { display: none; }
+.header__logo .logo--ink { display: none; }   /* dunkler Grund: immer die helle Signatur */
 .header__nav,
 .header__search-end,
 .header__account { display: none; }
@@ -509,15 +515,15 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 
 /* 6. Warenkorb ============================================================= */
 .drawer { position: fixed; inset: 0; z-index: var(--z-drawer); display: flex; justify-content: flex-end; }
-.drawer__scrim { position: absolute; inset: 0; background: rgb(18 18 18 / 0.4); opacity: 0; transition: opacity var(--dur-panel) var(--ease); }
+.drawer__scrim { position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); opacity: 0; transition: opacity var(--dur-panel) var(--ease); }
 .drawer__panel {
   position: relative;
   display: flex;
   flex-direction: column;
   width: min(100%, 30rem);
   height: 100%;
-  background: var(--c-paper);
-  border-left: var(--bw) solid var(--c-ink);
+  background: var(--c-surface);
+  border-left: var(--bw) solid var(--c-grey-line);
   transform: translateX(100%);
   transition: transform var(--dur-panel) var(--ease);
 }
@@ -714,7 +720,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
    Hell: ruhige Bildfläche wie hinter den Produkten; dunkel: Schwarz. Der Header liegt durchsichtig darüber,
    deshalb beginnt das Motiv erst unter dem Header. */
 .campaign { position: relative; overflow: hidden; background: var(--c-plate); }
-.campaign--dark { background: var(--c-ink); color: var(--c-paper); --focus: var(--c-paper); }
+.campaign--dark { background: var(--c-deep); color: var(--c-ink); }
 .campaign__media { position: relative; display: block; height: calc(min(122vw, 72svh) + var(--header-h)); min-height: 24rem; overflow: hidden; }
 .campaign__cutout {
   position: absolute;
@@ -818,7 +824,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 /* Detail mit einem Satz */
 .detail { display: grid; gap: var(--s-5) var(--gap); padding-top: var(--s-8); }
 @media (min-width: 64em) { .detail { padding-top: var(--s-9); } }
-.detail__media { margin-inline: calc(var(--gutter) * -1); background: var(--c-ink); }
+.detail__media { margin-inline: calc(var(--gutter) * -1); background: var(--c-deep); }
 .detail__img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .detail__text { display: grid; gap: var(--s-4); justify-items: start; }
 .detail__copy { font-size: 1.25rem; line-height: 1.4; max-width: 26ch; }
@@ -955,7 +961,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .sizes.is-invalid .size:not([data-soldout]) { border-color: var(--c-error); }
 .pdp__error { padding-left: var(--s-3); border-left: 2px solid var(--c-error); color: var(--c-error); font-size: var(--t-small); font-weight: 600; }
 .pdp__status { font-size: var(--t-small); min-height: 1.4em; }
-.pdp__add.is-done { --btn-bg: var(--c-paper); --btn-fg: var(--c-ink); }
+.pdp__add.is-done { --btn-bg: var(--c-acc); --btn-fg: var(--c-acc-ink); }
 .pdp__motto { font-size: var(--t-small); color: var(--c-grey-text); }
 .pdp__more { margin-top: var(--s-2); }
 
@@ -971,7 +977,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .about__title { font-size: var(--t-title); }
 .about__lead { font-size: 1.25rem; line-height: 1.4; max-width: 30ch; }
 .about__body { color: var(--c-grey-text); max-width: var(--measure); }
-.about__img { background: var(--c-ink); }
+.about__img { background: var(--c-deep); }
 .about__img img { width: 100%; height: auto; }
 .facts { border-top: var(--bw) solid var(--c-ink); }
 .facts__row { display: grid; grid-template-columns: minmax(7rem, 1fr) 2fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: var(--bw) solid var(--c-grey-line); }
@@ -1014,10 +1020,8 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .notfound__num { font-size: clamp(6rem, 22vw, 14rem); line-height: 0.8; }
 
 /* Passwortseite, Geschenkkarte */
-.template-password { background: var(--c-ink); color: var(--c-paper); --focus: var(--c-paper); }
-.template-password .btn { --btn-fg: var(--c-ink); --btn-bg: var(--c-paper); border-color: var(--c-paper); }
-.template-password .btn--line { --btn-bg: transparent; --btn-fg: var(--c-paper); }
-.template-password .form__input { border-color: var(--c-paper); }
+.template-password { background: var(--c-deep); color: var(--c-ink); }
+.template-password .form__input { border-color: var(--c-ink); }
 .gate { min-height: 100vh; min-height: 100dvh; display: flex; align-items: stretch; }
 .gate__inner { display: grid; grid-template-rows: auto 1fr auto; gap: var(--s-7); padding-block: var(--s-6); }
 /* Mit Teaser-Bild: Handy unter dem Logo (flach), ab 1024 px rechts über die volle Höhe */
@@ -1035,7 +1039,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .gate__text { display: grid; gap: var(--s-4); align-content: center; }
 .gate__kicker,
 .gate__msg,
-.template-password .form__label { color: #aca79e; }
+.template-password .form__label { color: var(--c-grey-text); }
 .gate__title { font-size: clamp(4.5rem, 20vw, 13rem); line-height: 0.82; }
 .gate__msg { max-width: var(--measure); }
 .gate__form { display: grid; gap: var(--s-2); max-width: 30rem; }
@@ -1089,7 +1093,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 
 /* Abschnitt „Drops per Mail“ (Seite Drops, optional Startseite) */
 .drops { padding-block: var(--s-8); }
-.drops--dark { background: var(--c-ink); color: var(--c-paper); --focus: var(--c-paper); }
+.drops--dark { background: var(--c-deep); color: var(--c-ink); }
 .drops__inner { display: grid; gap: var(--s-6); }
 .drops__main { display: grid; gap: var(--s-6); align-content: end; }
 .drops__head { display: grid; gap: var(--s-3); align-content: end; }
@@ -1098,12 +1102,11 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .drops__body { display: grid; gap: var(--s-5); align-content: end; }
 .drops__text { max-width: 30rem; font-size: 1.125rem; line-height: 1.45; }
 .drops--dark .drops__kicker,
-.drops--dark .signup__legal { color: #aca79e; }
-.drops--dark .btn--solid { --btn-bg: var(--c-paper); --btn-fg: var(--c-ink); border-color: var(--c-paper); }
-.drops--dark .form__input { border-color: var(--c-paper); color: var(--c-paper); }
-.drops--dark .signup__email::placeholder { color: #aca79e; }
-.drops--dark .signup__ok { background: #1f1e1c; }
-.drops--dark .signup__error { color: #f08a80; border-color: #f08a80; }
+.drops--dark .signup__legal { color: var(--c-grey-text); }
+.drops--dark .form__input { border-color: var(--c-ink); color: var(--c-ink); }
+.drops--dark .signup__email::placeholder { color: var(--c-grey-text); }
+.drops--dark .signup__ok { background: var(--c-surface); }
+.drops--dark .signup__error { color: var(--c-error); border-color: var(--c-error); }
 @media (min-width: 64em) {
   .drops { padding-block: var(--s-9); }
   .drops__inner:not(.drops__inner--teaser) .drops__main { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--s-8); align-items: end; }
@@ -1116,18 +1119,18 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 
 /* Passwortseite: Anmeldung zuerst, Passwort aufklappbar */
 .gate__signup { display: grid; gap: var(--s-4); max-width: 34rem; margin-top: var(--s-4); }
-.template-password .signup__email { border-color: var(--c-paper); color: var(--c-paper); }
+.template-password .signup__email { border-color: var(--c-ink); color: var(--c-ink); }
 .template-password .signup__email::placeholder,
-.template-password .signup__legal { color: #aca79e; }
-.template-password .signup__ok { background: #1f1e1c; }
-.template-password .signup__error { color: #f08a80; border-color: #f08a80; }
-.gate__pw { border-top: var(--bw) solid #3a3833; max-width: 30rem; }
+.template-password .signup__legal { color: var(--c-grey-text); }
+.template-password .signup__ok { background: var(--c-surface); }
+.template-password .signup__error { color: var(--c-error); border-color: var(--c-error); }
+.gate__pw { border-top: var(--bw) solid var(--c-grey-line); max-width: 30rem; }
 .gate__pw-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: var(--tap);
-  color: #aca79e;
+  color: var(--c-grey-text);
   font-size: var(--t-label);
   font-weight: 600;
   letter-spacing: var(--ls-label);
@@ -1221,5 +1224,137 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 /* Warenkorb: kostenloser Versand, Express-Kasse */
 .freeship { display: grid; gap: var(--s-2); padding: var(--s-3) var(--gutter); border-bottom: var(--bw) solid var(--c-grey-line); font-size: var(--t-small); }
 .freeship__bar { display: block; height: 3px; background: var(--c-grey-line); }
-.freeship__bar span { display: block; height: 100%; background: var(--c-ink); }
+.freeship__bar span { display: block; height: 100%; background: var(--c-acc); }
 .drawer__express { min-height: 0; }
+
+/* 14. Runde 10: Spielerkarten, Anzeigetafel, Animationen ===================== */
+/* Spielerkarten (sections/azur-cards.liquid): vorne Sammelkarte, ein Klick dreht sie um (hinten Größe und Kaufen) */
+.pcards { padding-block: var(--s-7) var(--s-8); }
+.pcards__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--s-4) var(--s-6); margin-bottom: var(--s-6); }
+.pcards__kicker { color: var(--c-grey-text); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; margin-bottom: var(--s-2); }
+.pcards__title { font-size: clamp(2.6rem, 7vw, 5.5rem); font-stretch: var(--w-narrow); font-weight: 800; line-height: 0.92; text-transform: uppercase; }
+.pcards__aside { display: grid; gap: var(--s-2); justify-items: start; font-size: var(--t-small); color: var(--c-grey-text); }
+.pcards__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5) var(--gap); margin: 0 auto; list-style: none; }
+@media (min-width: 48em) { .pcards__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 75em) { .pcards__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+.pcard { --cd-a: #e9d9a8; --cd-b: #b8954a; --cd-i: #2a2010; perspective: 1400px; }
+.pcard--land { --cd-a: #eceef2; --cd-b: #9aa1ad; }
+.pcard__inner { position: relative; display: grid; aspect-ratio: 5 / 8; transform-style: preserve-3d; transition: transform 0.6s var(--ease); }
+.pcard.is-flipped .pcard__inner { transform: rotateY(180deg); }
+.pcard__front,
+.pcard__back { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; clip-path: polygon(50% 0, 100% 6%, 100% 94%, 50% 100%, 0 94%, 0 6%); }
+.pcard__front {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 11% 9% 13%;
+  background: linear-gradient(160deg, var(--cd-a), var(--cd-b));
+  color: var(--cd-i);
+  text-align: center;
+}
+.pcard__top { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
+.pcard__code { font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-stretch: 62%; font-weight: 900; }
+.pcard__kind { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.pcard__img { position: relative; width: 100%; min-height: 0; }
+.pcard__pic { position: absolute; inset: 0; margin: auto; width: 92%; height: 100%; object-fit: contain; filter: drop-shadow(0 0.6rem 0.8rem rgb(0 0 0 / 0.25)); }
+.pcard__name { font-size: clamp(1rem, 1.6vw, 1.35rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.pcard__meta { font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.pcard__price { font-size: 0.875rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pcard__turn { margin-top: 0.15rem; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0; transition: opacity var(--dur) var(--ease); }
+.pcard__back {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: 14% 10%;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-grey-line);
+  transform: rotateY(180deg);
+  text-align: center;
+}
+.pcard__back-kicker { color: var(--c-grey-text); font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.pcard__back-name { font-size: clamp(1.15rem, 1.8vw, 1.5rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.pcard__back-price { font-variant-numeric: tabular-nums; font-weight: 700; }
+.pcard__form { display: grid; gap: var(--s-2); }
+.pcard__sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.3rem; margin: 0; padding: 0; border: 0; }
+.pcard__sizes .size { min-height: 2.5rem; padding: 0; font-size: 0.8125rem; }
+.pcard__add { min-height: 2.75rem; padding: 0 var(--s-2); justify-content: center; font-size: 0.75rem; letter-spacing: 0.04em; text-align: center; }
+.pcard__msg { min-height: 1.2em; font-size: 0.75rem; color: var(--c-grey-text); }
+.pcard__msg.is-error { color: var(--c-error); }
+.pcard__back-foot { display: flex; justify-content: space-between; gap: var(--s-2); font-size: 0.75rem; }
+.pcard__back-foot .link { min-height: var(--tap); display: inline-flex; align-items: center; }
+.pcard.is-flipped .pcard__front { pointer-events: none; }
+
+/* Animation „leicht anheben“: Karten heben sich beim Drüberfahren, mit Schatten (nur Maus, nicht bei reduzierter Bewegung) */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pcard { transition: filter var(--dur-panel) var(--ease); }
+  .pcard:not(.is-flipped):hover { filter: drop-shadow(0 1.2rem 1.4rem rgb(0 0 0 / 0.5)); }
+  .pcard:not(.is-flipped):hover .pcard__inner { transform: translateY(-0.4rem); }
+  .pcard:not(.is-flipped):hover .pcard__turn { opacity: 0.85; }
+  .card__media { transition: transform var(--dur-panel) var(--ease), box-shadow var(--dur-panel) var(--ease); }
+  .card:hover .card__media { transform: translateY(-0.35rem); box-shadow: 0 1.2rem 2rem rgb(0 0 0 / 0.45); }
+}
+.pcard__front:focus-visible .pcard__turn { opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) {
+  .pcard__inner { transition: none; }
+  .pcard.is-flipped .pcard__inner { transform: none; }
+  .pcard__front, .pcard__back { backface-visibility: visible; }
+  .pcard__back { transform: none; visibility: hidden; }
+  .pcard.is-flipped .pcard__back { visibility: visible; }
+  .pcard.is-flipped .pcard__front { visibility: hidden; }
+}
+
+/* Animation „Anzeigetafel“: Überschriften mit data-flap klappen beim Hinscrollen Buchstabe für Buchstabe auf (azur.js) */
+.flap { display: inline-flex; flex-wrap: wrap; gap: 0.06em; }
+.flap__word { display: inline-flex; gap: 0.06em; margin-right: 0.22em; }
+.flap__ch {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 0.7em;
+  padding: 0.06em 0.05em 0.02em;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-grey-line);
+}
+.flap__ch::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--c-paper); opacity: 0.8; }
+.flap__ch.is-turning { color: var(--c-acc); }
+
+/* Animation „Knopf wird zum Haken“: der Kaufen-Knopf füllt sich von links und zeigt den Haken */
+.btn.is-done {
+  --btn-fg: var(--c-paper);
+  --btn-line: var(--c-ink);
+  background-image: linear-gradient(var(--c-ink), var(--c-ink));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  animation: btn-fill 0.38s var(--ease) both;
+}
+.btn.is-done::before { content: "✓"; font-weight: 800; animation: btn-tick 0.38s var(--ease) both; }
+@keyframes btn-fill { from { background-size: 0% 100%; } }
+@keyframes btn-tick { from { transform: scale(0); } 70% { transform: scale(1.3); } }
+
+/* Animation „Ball rollt zum Gratis-Versand“: im Warenkorb rollt ein Ball bis zum aktuellen Stand */
+.freeship__bar { position: relative; height: 6px; margin-block: 0.4rem 0.2rem; border-radius: 3px !important; overflow: visible; }
+.freeship__bar > span { border-radius: 3px !important; animation: fs-grow 0.9s var(--ease) both; }
+.freeship__ball {
+  position: absolute;
+  top: 50%;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50% !important;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 50% 50%, #111 0 22%, transparent 24%),
+    radial-gradient(circle at 50% 0, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 0 62%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 100% 62%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 24% 100%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 76% 100%, #111 0 16%, transparent 18%),
+    #fff;
+  box-shadow: 0 0 0 1px #111;
+  animation: fs-roll 0.9s var(--ease) both;
+}
+@keyframes fs-grow { from { width: var(--from, 0%); } }
+@keyframes fs-roll { from { left: var(--from, 0%); transform: translate(-50%, -50%) rotate(-540deg); } }
+@media (prefers-reduced-motion: reduce) { .freeship__bar > span, .freeship__ball { animation: none; } }

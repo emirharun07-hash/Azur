@@ -35,18 +35,35 @@
         "large": 2,
         "label": "Trikots",
         "link_label": "Alle ansehen"
-      }
+      },
+      "disabled": true
     },
     "service": {
       "type": "service-line",
       "settings": {
         "note": "14 Tage Rückgabe, kostenloser Rückversand"
       }
+    },
+    "cards": {
+      "type": "azur-cards",
+      "settings": {
+        "products": [
+          "frankfurt-trikot-azur-collection",
+          "berlin-trikot-azur-collection",
+          "brasilien-trikot-azur-collection",
+          "deutschland-trikot-azur-collection",
+          "turkei-trikot-azur-collection"
+        ],
+        "kicker": "Die Kollektion",
+        "heading": "Sammel deine Stadt",
+        "link_label": "Alle ansehen"
+      }
     }
   },
   "order": [
     "room",
     "campaign",
+    "cards",
     "products",
     "service"
   ]

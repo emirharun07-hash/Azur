@@ -6,47 +6,55 @@
 (function () {
   const A = window.AZUR = window.AZUR || {};
 
+  /* where each size stands on the pitch (percent of width, height): the liked line-up for S, M, L, XL, a spread otherwise */
+  const FORMATION = { 3: [[24, 68], [76, 68], [50, 26]], 4: [[22, 72], [50, 61], [78, 72], [50, 25]], 5: [[18, 74], [40, 60], [60, 60], [82, 74], [50, 24]],
+    6: [[16, 76], [38, 62], [62, 62], [84, 76], [32, 26], [68, 26]] };
+  const pitchSpot = (n, i) => (FORMATION[n] || [])[i] || [12 + (i % 4) * 25, i < 4 ? 70 : 28];
+
   class Shop {
     constructor(app) {
       this.app = app; this.live = !!A.config.shopify; this.cart = this.live ? [] : this.load();
       const c = A.config.copy;
       this.pdp = document.createElement('section');
       this.pdp.className = 'azur-pdp'; this.pdp.setAttribute('role', 'dialog'); this.pdp.setAttribute('aria-modal', 'true'); this.pdp.setAttribute('aria-labelledby', 'azur-pdp-title');
+      // Runde 10 (Design-Finale): „Modemagazin + Aufstellung“. Der Name riesig quer über die Seite, das Trikot davor,
+      // links die Geschichte, rechts die Größen als Spieler auf einem kleinen Feld, unten eine feste Kaufleiste.
       this.pdp.innerHTML = `
         <button class="azur-pdp__x" type="button" data-act="close" aria-label="${c.backToRoom}"><span aria-hidden="true">×</span></button>
+        <h1 class="azur-pdp__title" id="azur-pdp-title"></h1>
         <div class="azur-pdp__stage">
           <div class="azur-pdp__light" aria-hidden="true"></div>
           <img class="azur-pdp__img" alt="">
           <canvas class="azur-pdp__canvas" tabindex="0" aria-label="3D-Ansicht des Trikots: ziehen zum Drehen, scrollen zum Zoomen, Doppelklick setzt zurück"></canvas>
           <p class="azur-pdp__hint" aria-hidden="true"></p>
         </div>
-        <div class="azur-pdp__info">
+        <div class="azur-pdp__story">
           <nav class="azur-pdp__crumbs" aria-label="Pfad"><button type="button" data-act="close">${c.room}</button><span aria-hidden="true">/</span><span>Trikots</span></nav>
-          <h1 class="azur-pdp__title" id="azur-pdp-title"></h1>
-          <p class="azur-pdp__price"></p>
           <p class="azur-pdp__fit"></p>
           <p class="azur-pdp__desc"></p>
-          <fieldset class="azur-pdp__sizes">
-            <legend>${c.chooseSize}</legend>
-            <div class="azur-pdp__sizerow"></div>
-          </fieldset>
+          <p class="azur-pdp__hand" aria-hidden="true">tipp auf deine Größe</p>
+          <ul class="azur-pdp__facts"><li>${A.store.care}</li></ul>
+          <a class="azur-pdp__shop" target="_blank" rel="noopener">${c.openInShop || c.toProductPage || 'Im Shop öffnen'} <span aria-hidden="true">↗</span></a>
+          <button class="azur-pdp__back" type="button" data-act="close"><span aria-hidden="true">←</span> ${c.backToRoom}</button>
+        </div>
+        <fieldset class="azur-pdp__sizes">
+          <legend>Deine Größe</legend>
+          <div class="azur-pdp__sizerow azur-pitch"><span class="azur-pitch__box is-top"></span><span class="azur-pitch__box is-bottom"></span></div>
+          <p class="azur-pdp__picked" aria-hidden="true">Noch niemand aufgestellt</p>
+        </fieldset>
+        <div class="azur-pdp__buy">
+          <p class="azur-pdp__name"><b></b><span class="azur-pdp__price"></span></p>
+          <p class="azur-pdp__ship">${A.store.shipping}</p>
           <button class="azur-pdp__add" type="button" data-act="add" disabled>${c.chooseSize}</button>
           <p class="azur-pdp__error" role="alert" hidden></p>
-          <div class="azur-pdp__after" role="status" hidden>
-            <p class="azur-pdp__ship"></p>
-            <div class="azur-pdp__bar" aria-hidden="true"><i></i></div>
-            <div class="azur-pdp__acts2">
-              <button type="button" data-act="more">${c.keepLooking}</button>
-              <button type="button" data-act="cart">${c.toCart}</button>
-            </div>
+        </div>
+        <div class="azur-pdp__after" role="status" hidden>
+          <p class="azur-pdp__shipnow"></p>
+          <div class="azur-pdp__bar" aria-hidden="true"><i></i><b></b></div>
+          <div class="azur-pdp__acts2">
+            <button type="button" data-act="more">${c.keepLooking}</button>
+            <button type="button" ${this.live ? 'data-cart-open' : 'data-act="cart"'}>${c.toCart}</button>
           </div>
-          <ul class="azur-pdp__facts">
-            <li>${A.store.shipping}</li>
-            <li>${A.store.care}</li>
-          </ul>
-          ${this.live ? `<a class="azur-pdp__shop" target="_blank" rel="noopener">${c.openInShop || c.toProductPage || 'Im Shop öffnen'} <span aria-hidden="true">↗</span></a>`
-            : `<a class="azur-pdp__shop" target="_blank" rel="noopener">${c.openInShop || 'Im Shop öffnen'} <span aria-hidden="true">↗</span></a>`}
-          <button class="azur-pdp__back" type="button" data-act="close"><span aria-hidden="true">←</span> ${c.backToRoom}</button>
         </div>`;
       document.body.appendChild(this.pdp);
       this.canvas = this.pdp.querySelector('.azur-pdp__canvas');
@@ -82,6 +90,7 @@
       this.pdp.addEventListener('change', e => {
         if (e.target.name === 'azur-size') {
           this.size = e.target.value;
+          this.pdp.querySelector('.azur-pdp__picked').textContent = 'Aufgestellt: ' + e.target.dataset.size;
           const b = this.pdp.querySelector('.azur-pdp__add');
           b.disabled = false; b.textContent = A.config.copy.addToCart; b.classList.remove('is-done');
           this.pdp.querySelector('.azur-pdp__after').hidden = true;
@@ -114,8 +123,12 @@
       if (!this.pdp.classList.contains('is-on')) this.returnFocus = document.activeElement;   // back there on close
       this.product = product; this.size = null;
       const q = s => this.pdp.querySelector(s);
-      q('.azur-pdp__title').textContent = product.name;
+      // the giant name is the city or country alone ("Frankfurt"), the bar carries the full name ("Frankfurt 069")
+      const short = product.name.replace(/\s*Trikot$/i, ''), giant = short.replace(/\s+\d{2,4}$/, '');
+      q('.azur-pdp__title').textContent = giant; q('.azur-pdp__title').style.setProperty('--len', Math.max(5, giant.length));
+      q('.azur-pdp__name b').textContent = short;
       q('.azur-pdp__price').textContent = A.formatPrice(product.price) + ' · inkl. MwSt.';
+      q('.azur-pdp__picked').textContent = 'Noch niemand aufgestellt';
       q('.azur-pdp__fit').textContent = product.fit || '';
       q('.azur-pdp__desc').textContent = product.description;
       q('.azur-pdp__shop').href = product.productUrl;      // Shopify: the real product page
@@ -127,8 +140,13 @@
         const url = A.url(A.config.assetBase.replace(/views\/$/, 'models/') + product.key + '.' + (A.config.modelExt || 'glb'));
         this.viewer.show(url).then(ok => { if (ok && this.product === product && this.pdp.classList.contains('is-on')) this.pdp.classList.add('has-model'); });
       }
-      q('.azur-pdp__sizerow').innerHTML = product.variants.map((v, i) => `
-        <label class="azur-size"><input type="radio" name="azur-size" value="${v.id}" ${v.available ? '' : 'disabled'}><span>${v.title}</span></label>`).join('');
+      // die Größen als Spieler: Aufstellung auf dem Feld (breit), auf dem Handy in einer Reihe (--hx)
+      const n = product.variants.length;
+      q('.azur-pdp__sizerow').querySelectorAll('.azur-pl').forEach(el => el.remove());
+      q('.azur-pdp__sizerow').insertAdjacentHTML('beforeend', product.variants.map((v, i) => {
+        const [x, y] = pitchSpot(n, i), hx = n > 1 ? 12 + i * 76 / (n - 1) : 50;
+        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${v.id}" data-size="${v.title}" ${v.available ? '' : 'disabled'}><span>${v.title}</span></label>`;
+      }).join(''));
       q('.azur-pdp__error').hidden = true;
       const add = q('.azur-pdp__add'); add.disabled = true; add.textContent = A.config.copy.chooseSize; add.classList.remove('is-done');
       this.pdp.style.setProperty('--accent', product.accent || '#333');
@@ -171,15 +189,16 @@
       const line = this.cart.find(l => l.variant === v.id);
       if (line) line.qty += 1; else this.cart.push({ variant: v.id, key: this.product.key, name: this.product.name, size: v.title, price: this.product.price, image: this.product.image, qty: 1 });
       this.save(); this.renderCart();
-      const b = this.pdp.querySelector('.azur-pdp__add'); b.textContent = A.config.copy.added + ' ✓'; b.classList.add('is-done');
+      const b = this.pdp.querySelector('.azur-pdp__add'); b.textContent = A.config.copy.added; b.classList.add('is-done');
       this.app.bumpCart();
       this.showAfter(this.cart.reduce((s, l) => s + l.price * l.qty, 0));
+      setTimeout(() => this.toggleCart(true), this.app.reduced ? 0 : 500);     // „Warenkorb gleitet herein“
     }
 
     /* After the bag: how far to free shipping (A.store.freeShippingFrom, euros), keep looking or go to the bag. */
     showAfter(total) {
       const c = A.config.copy, from = Number(A.store && A.store.freeShippingFrom) || 0, box = this.pdp.querySelector('.azur-pdp__after');
-      const ship = box.querySelector('.azur-pdp__ship'), bar = box.querySelector('.azur-pdp__bar');
+      const ship = box.querySelector('.azur-pdp__shipnow'), bar = box.querySelector('.azur-pdp__bar');
       if (from > 0) {
         const left = Math.max(0, from - total);
         ship.textContent = left > 0.004 ? c.shipTo.replace('{x}', A.formatPrice(left)) : c.shipFree + ' ✓';
@@ -198,12 +217,14 @@
           body: JSON.stringify({ items: [{ id: Number(v.id), quantity: 1 }] }) });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || data.status >= 400) throw new Error(data.description || data.message || 'Das hat nicht geklappt.');
-        b.textContent = c.added + ' ✓'; b.classList.add('is-done');
+        b.textContent = c.added; b.classList.add('is-done');
         const cart = await fetch(root + 'cart.js', { headers: { Accept: 'application/json' } }).then(r => r.json()).catch(() => null);
         if (cart) { this.app.setCartCount(cart.item_count); this.showAfter(cart.total_price / 100); }
         else this.showAfter(0);
         this.app.bumpCart();
         document.dispatchEvent(new CustomEvent('azur:cart-changed', { detail: cart }));   // themes can refresh their own count
+        // „Warenkorb gleitet herein“: the theme's drawer (its opener in the after box loads it fresh and keeps the focus here)
+        setTimeout(() => { const o = this.pdp.querySelector('.azur-pdp__after [data-cart-open]'); if (o && this.pdp.classList.contains('is-on')) o.click(); }, this.app.reduced ? 0 : 500);
       } catch (e) {
         err.textContent = e.message; err.hidden = false;
         b.textContent = c.addToCart;

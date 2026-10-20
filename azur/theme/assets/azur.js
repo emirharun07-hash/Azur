@@ -96,6 +96,10 @@
     const fresh = $('[data-cart-content]', doc);
     const current = $('[data-cart-content]', drawer);
     if (!fresh || !current) return;
+    // Ball und Balken rollen vom bisherigen Stand aus weiter (azur.css, „Ball rollt zum Gratis-Versand“)
+    const before = $('.freeship__bar > span', current);
+    const bar = $('.freeship__bar', fresh);
+    if (before && bar) bar.style.setProperty('--from', before.style.width);
     current.replaceWith(fresh);
     const count = fresh.dataset.count || '0';
     $$('[data-cart-count]').forEach((el) => (el.textContent = count));
@@ -538,4 +542,126 @@
     $('[data-zoom-close]', zoom).addEventListener('click', () => zoom.close());
     zoom.addEventListener('click', (e) => { if (e.target === zoom) zoom.close(); });
   }
+  /* ---- Spielerkarten (Runde 10): umdrehen, hinten Größe wählen, direkt in den Warenkorb ---- */
+  // Vorne ist ein Link zur Produktseite (ohne Skript); mit Skript dreht ein Klick die Karte um. Immer nur eine offen.
+  let openCard = null;
+  function flipCard(card, on) {
+    const front = $('.pcard__front', card);
+    const back = $('.pcard__back', card);
+    card.classList.toggle('is-flipped', on);
+    front.setAttribute('aria-expanded', String(on));
+    back.inert = !on;
+    if (on) {
+      if (openCard && openCard !== card) flipCard(openCard, false);
+      openCard = card;
+      const first = $('input:not([disabled])', back) || $('button', back);
+      window.setTimeout(() => first.focus({ preventScroll: true }), calm.matches ? 0 : 320);
+    } else if (openCard === card) {
+      openCard = null;
+    }
+  }
+  $$('[data-pcard]').forEach((card) => {
+    const front = $('.pcard__front', card);
+    const form = $('[data-pcard-form]', card);
+    front.setAttribute('role', 'button');
+    card.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-pcard-flip]');
+      if (!t) return;
+      e.preventDefault();
+      const on = !card.classList.contains('is-flipped');
+      flipCard(card, on);
+      if (!on) front.focus({ preventScroll: true });
+    });
+    front.addEventListener('keydown', (e) => {
+      if (e.key === ' ') { e.preventDefault(); front.click(); }
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && card.classList.contains('is-flipped')) { e.stopPropagation(); flipCard(card, false); front.focus(); }
+    });
+    if (!form) return;
+    const msg = $('[data-pcard-msg]', form);
+    const btn = $('button[type="submit"]', form);
+    const label = $('[data-pcard-label]', form);
+    const base = label.textContent;
+    const say = (text, bad) => { msg.textContent = text; msg.classList.toggle('is-error', Boolean(bad)); };
+    form.addEventListener('change', () => say(''));
+    form.addEventListener('submit', async (e) => {
+      const radio = $$('input[name="id"]', form).find((r) => r.checked);
+      if (!radio) {
+        e.preventDefault();
+        say('Bitte wähle zuerst eine Größe.', true);
+        const first = $('input:not([disabled])', form);
+        if (first) first.focus();
+        return;
+      }
+      if (!drawer) return; // ohne Seitenleiste normal an /cart/add senden
+      e.preventDefault();
+      const name = form.dataset.label + ', Größe ' + radio.dataset.size;
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+      label.textContent = 'Wird hinzugefügt …';
+      say('');
+      try {
+        await addToCart(radio.value, name);
+        // „Knopf wird zum Haken“, dann gleitet der Warenkorb herein
+        label.textContent = 'Im Warenkorb';
+        btn.classList.add('is-done');
+        say(name + ' liegt im Warenkorb.');
+        window.setTimeout(() => openDrawer(btn), calm.matches ? 0 : 450);
+        window.setTimeout(() => { label.textContent = base; btn.classList.remove('is-done'); }, 2600);
+      } catch (err) {
+        label.textContent = base;
+        say(err.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+      }
+    });
+  });
+
+  /* ---- Anzeigetafel (Runde 10): Überschriften mit data-flap klappen beim ersten Hinscrollen auf ---- */
+  const FLAP = 'ABCDEFGHIJKLMNOPRSTUVWXYZ0123456789';
+  const randomChar = () => FLAP[Math.floor(Math.random() * FLAP.length)];
+  $$('[data-flap]').forEach((el) => {
+    const text = el.textContent.trim();
+    if (!text) return;
+    el.setAttribute('aria-label', text);
+    const board = document.createElement('span');
+    board.className = 'flap';
+    board.setAttribute('aria-hidden', 'true');
+    const chars = [];
+    text.split(/\s+/).forEach((word) => {
+      const w = document.createElement('span');
+      w.className = 'flap__word';
+      Array.from(word).forEach((ch) => {
+        const c = document.createElement('span');
+        c.className = 'flap__ch';
+        c.textContent = ch;
+        w.appendChild(c);
+        chars.push([c, ch]);
+      });
+      board.appendChild(w);
+    });
+    el.replaceChildren(board);
+    if (calm.matches || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      chars.forEach(([c, ch], i) => {
+        let turns = 3 + (i % 3);
+        const step = () => {
+          if (turns-- > 0) {
+            c.textContent = randomChar();
+            c.classList.add('is-turning');
+            window.setTimeout(step, 70);
+          } else {
+            c.textContent = ch;
+            c.classList.remove('is-turning');
+          }
+        };
+        window.setTimeout(step, i * 45);
+      });
+    }, { threshold: 0.6 });
+    io.observe(el);
+  });
 })();

@@ -5,6 +5,8 @@
 Renders sections/azur-room.liquid with python-liquid (Shopify filters stubbed), wraps it in the live theme's page
 structure (the real announcement bar, overlay header, #inhalt, cart drawer) with the theme's CSS (azur/theme/assets/azur.css), serves the renders under /files/ with their Shopify Files names, and answers
 POST /cart/add.js and POST /contact like Shopify does (enough for the room's cart and drop sign-up).
+Round 10: below the room the player cards (sections/azur-cards.liquid), the real cart drawer (sections/cart-drawer.liquid,
+also via ?sections=cart-drawer and the sections field of /cart/add.js) and the theme's own azur.js.
 """
 import http.server, json, os, re, socketserver, sys
 from liquid import Environment, DictLoader
@@ -52,6 +54,66 @@ def render_section():
     return env.from_string(src).render(**ctx)
 
 
+FREE_FROM = 90
+
+
+def snippet_env():
+    """python-liquid with stand-ins for the theme snippets and Shopify filters the cards and the drawer use."""
+    by_handle = {p[1]: p for p in PRODUCTS}
+    codes = {'frankfurt': '069', 'berlin': '030', 'brasilien': 'BRA', 'deutschland': 'GER', 'tuerkei': 'TUR'}
+
+    def label(handle):
+        p = by_handle[handle]; name = p[2].replace(' Trikot', ''); return name
+    snippets = {
+        'product-field': "{% if field == 'code' %}{{ product.code }}{% else %}{{ product.label }}{% endif %}",
+        'product-image': '<img class="{{ class }}" src="{{ product.featured_image.url }}" alt="" loading="lazy">',
+        'price': '{{ amount | money }}',
+        'shipping-line': 'Versand in Deutschland 1,99 €, ab 90 € kostenlos',
+        'payment-types': 'PayPal, Karte',
+    }
+    env = Environment(loader=DictLoader(snippets))
+    env.filters['money'] = lambda v: ('%.2f' % (int(v or 0) / 100)).replace('.', ',') + ' €'
+    env.filters['image_url'] = lambda v, width=None: (v or {}).get('url', '') if isinstance(v, dict) else str(v or '')
+    env.filters['image_tag'] = lambda v, **kw: f'<img src="{v}" alt="">'
+    return env, label, codes
+
+
+def cards_product(p):
+    pid, handle, title, price, img, vids = p
+    d = product(*p); d['label'] = title.replace(' Trikot', ''); d['code'] = {'frankfurt': '069', 'berlin': '030', 'brasilien': 'BRA', 'deutschland': 'GER', 'tuerkei': 'TUR'}[img]
+    d['options'] = ['Größe']
+    d['variants'] = [{'id': v, 'title': s, 'option1': s, 'available': s != 'XL'} for v, s in zip(vids, ['S', 'M', 'L', 'XL'])]
+    return d
+
+
+def render_cards():
+    src = open(os.path.join(THEME, 'sections', 'azur-cards.liquid')).read()
+    schema = json.loads(re.search(r'{% schema %}(.*?){% endschema %}', src, re.S).group(1))
+    src = re.sub(r'{% schema %}.*?{% endschema %}', '', src, flags=re.S)
+    env, _, _ = snippet_env()
+    settings = {s['id']: s.get('default') for s in schema['settings'] if 'id' in s}
+    settings['products'] = [cards_product(p) for p in PRODUCTS]
+    return env.from_string(src).render(section={'settings': settings, 'id': 'cards'}, settings={'main_collection': {'url': '/collections/trikots'}},
+                                       routes={'cart_add_url': '/cart/add'}, collections={'all': {'url': '/collections/all'}})
+
+
+def render_drawer():
+    src = open(os.path.join(THEME, 'sections', 'cart-drawer.liquid')).read()
+    src = re.sub(r'{% schema %}.*?{% endschema %}', '', src, flags=re.S)
+    env, _, _ = snippet_env()
+    by_vid = {v: p for p in PRODUCTS for v in p[5]}
+    items, total = [], 0
+    for it in Handler.cart:
+        p = by_vid.get(int(it['id'])); q = int(it.get('quantity', 1))
+        if not p: continue
+        cp = cards_product(p); size = next(v['title'] for v in cp['variants'] if v['id'] == int(it['id']))
+        items.append({'key': f"{it['id']}:x", 'url': cp['url'], 'image': cp['featured_image']['url'], 'product': cp, 'variant': {'option1': size}, 'quantity': q, 'final_line_price': p[3] * q})
+        total += p[3] * q
+    cart = {'item_count': sum(i['quantity'] for i in items), 'items': items, 'total_price': total}
+    return env.from_string(src).render(cart=cart, settings={'free_shipping_threshold': FREE_FROM, 'tax_note': 'inkl. MwSt.', 'main_collection': {'url': '/collections/trikots'}},
+                                       routes={'cart_url': '/cart'}, collections={'all': {'url': '/collections/all'}})
+
+
 def render_bar():
     src = open(os.path.join(THEME, 'sections', 'announcement.liquid')).read()
     schema = json.loads(re.search(r'{% schema %}(.*?){% endschema %}', src, re.S).group(1))
@@ -64,6 +126,7 @@ def render_bar():
 
 PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Martian+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = { routes: { root: '/' } };</script>
 </head><body class="template-index">
@@ -76,18 +139,11 @@ PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
   </div></header></div>
 <main id="inhalt" tabindex="-1">
   <div class="shopify-section section-azur-room">__SECTION__</div>
-  <div class="shopify-section"><section style="padding:4rem 2rem;min-height:70vh"><h2>Trikots</h2><p>Die bisherigen Startseiten-Bereiche folgen hier.</p></section></div>
+  <div class="shopify-section section-azur-cards">__CARDS__</div>
+  <div class="shopify-section"><section style="padding:4rem 2rem;min-height:40vh"><p>Die übrigen Startseiten-Bereiche folgen hier.</p></section></div>
 </main>
-<div class="drawer" id="cart" data-drawer hidden><div class="drawer__scrim" data-cart-close></div>
-  <div class="drawer__panel" style="background:#f3f0ea;padding:2rem;width:min(26rem,100vw);margin-left:auto;height:100%"><h2>Warenkorb</h2><p data-cart-lines></p><button data-cart-close>Schließen</button></div></div>
-<script>
-  // stand-in for the theme's azur.js: the header cart link opens the drawer and shows what /cart/add.js received
-  document.addEventListener('click', e => {
-    const o = e.target.closest('[data-cart-open]'), c = e.target.closest('[data-cart-close]'), d = document.querySelector('[data-drawer]');
-    if (o) { e.preventDefault(); d.hidden = false; d.classList.add('is-open'); document.querySelector('[data-cart-lines]').textContent = JSON.stringify(window.__cart || []); }
-    if (c) { d.hidden = true; d.classList.remove('is-open'); }
-  });
-</script>
+<div class="shopify-section section-cart-drawer" id="shopify-section-cart-drawer">__DRAWER__</div>
+<script src="/theme/assets/azur.js" defer></script>
 </body></html>"""
 
 
@@ -111,8 +167,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = json.dumps({'item_count': sum(int(i.get('quantity', 1)) for i in Handler.cart), 'total_price': total}).encode()
             self.send_response(200); self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
+        if self.path.split('?')[0] == '/' and 'sections=cart-drawer' in self.path:     # Section Rendering API
+            body = json.dumps({'cart-drawer': render_drawer()}).encode()
+            self.send_response(200); self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(body))); self.end_headers()
+            self.wfile.write(body); return
         if self.path.split('?')[0] in ('/', '/index.html'):
-            body = PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section()).encode()
+            body = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
+                    .replace('__CARDS__', render_cards()).replace('__DRAWER__', render_drawer())).encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
         return super().do_GET()
@@ -120,9 +181,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get('Content-Length') or 0); raw = self.rfile.read(n)
         if self.path.startswith('/cart/add.js'):
-            items = json.loads(raw or b'{}').get('items', [])
+            req = json.loads(raw or b'{}'); items = req.get('items', [])
             Handler.cart += items
-            body = json.dumps({'items': items}).encode(); self.send_response(200); self.send_header('Content-Type', 'application/json')
+            out = {'items': items}
+            if 'cart-drawer' in str(req.get('sections', '')): out['sections'] = {'cart-drawer': render_drawer()}
+            body = json.dumps(out).encode(); self.send_response(200); self.send_header('Content-Type', 'application/json')
         elif self.path.startswith('/contact'):
             open(os.path.join(LIVE, 'last_contact_post.txt'), 'wb').write(raw)
             body = b'<html>ok</html>'; self.send_response(200); self.send_header('Content-Type', 'text/html')

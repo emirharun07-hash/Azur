@@ -1,0 +1,108 @@
+{%- comment -%}
+  Runde 10 (Design-Finale: „Spielerkarten mit Rückseite“): die Trikots unter dem Zimmer als Sammelkarten.
+  Vorne Code, Bild, Name, Größen und Preis (Städte golden, Länder silbern). Ein Klick oder Tippen dreht die Karte um:
+  hinten die Größe wählen und direkt in den Warenkorb, der dann rechts hereingleitet (azur.js, Abschnitt Spielerkarten).
+  Die Überschrift klappt wie eine Anzeigetafel auf (data-flap). Ohne JavaScript führt jede Karte zur Produktseite.
+{%- endcomment -%}
+{%- liquid
+  assign coll = settings.main_collection
+  if coll.url == blank
+    assign coll = collections.all
+  endif
+  capture ship
+    render 'shipping-line'
+  endcapture
+-%}
+{%- if section.settings.products.size > 0 -%}
+  <section class="pcards" aria-labelledby="pcards-title-{{ section.id }}" data-pcards>
+    <header class="pcards__head wrap">
+      <div>
+        {%- if section.settings.kicker != blank -%}<p class="pcards__kicker">{{ section.settings.kicker }}</p>{%- endif -%}
+        <h2 class="pcards__title" id="pcards-title-{{ section.id }}" data-flap>{{ section.settings.heading }}</h2>
+      </div>
+      <div class="pcards__aside">
+        {%- if ship != blank -%}<p class="pcards__ship">{{ ship }}</p>{%- endif -%}
+        {%- if section.settings.link_label != blank -%}<a class="link" href="{{ coll.url }}">{{ section.settings.link_label }}</a>{%- endif -%}
+      </div>
+    </header>
+
+    <ul class="pcards__grid wrap" role="list">
+      {%- for p in section.settings.products limit: 10 -%}
+        {%- liquid
+          capture label
+            render 'product-field', product: p, field: 'label'
+          endcapture
+          capture code
+            render 'product-field', product: p, field: 'code'
+          endcapture
+          assign n = code | plus: 0
+          assign kind = 'land'
+          if n > 0
+            assign kind = 'stadt'
+          endif
+          assign sizes = ''
+          for v in p.variants
+            if v.available
+              assign sizes = sizes | append: v.option1 | append: ' '
+            endif
+          endfor
+          assign sizes = sizes | strip | split: ' '
+          assign cid = section.id | append: '-' | append: p.id
+        -%}
+        <li class="pcard pcard--{{ kind }}" data-pcard>
+          <div class="pcard__inner">
+            <a class="pcard__front" href="{{ p.url }}" data-pcard-flip aria-expanded="false" aria-controls="{{ cid }}-back">
+              <span class="pcard__top"><b class="pcard__code">{{ code }}</b><span class="pcard__kind">{% if kind == 'stadt' %}Stadt{% else %}Land{% endif %}</span></span>
+              <span class="pcard__img">
+                {%- render 'product-image', product: p, view: 'front', sizes: '(min-width: 1200px) 18vw, (min-width: 768px) 30vw, 46vw', widths: '300, 450, 600', class: 'pcard__pic', decorative: true -%}
+              </span>
+              <span class="pcard__name">{{ label }}</span>
+              <span class="pcard__meta">
+                {%- if sizes.size > 0 -%}Größen {{ sizes.first }}–{{ sizes.last }}{%- else -%}Ausverkauft{%- endif -%}
+              </span>
+              <span class="pcard__price">{% render 'price', amount: p.price %}</span>
+              <span class="pcard__turn" aria-hidden="true">Umdrehen ↻</span>
+              <span class="sr-only">: Karte umdrehen, Größe wählen</span>
+            </a>
+
+            <div class="pcard__back" id="{{ cid }}-back" inert>
+              <p class="pcard__back-kicker">Rückseite</p>
+              <h3 class="pcard__back-name">{{ label }}</h3>
+              <p class="pcard__back-price">{% render 'price', amount: p.price %}</p>
+              <form class="pcard__form" action="{{ routes.cart_add_url }}" method="post" data-pcard-form data-label="{{ label | escape }}">
+                <fieldset class="pcard__sizes">
+                  <legend class="sr-only">{{ p.options.first | default: 'Größe' }} für {{ label }}</legend>
+                  {%- for v in p.variants -%}
+                    <input class="sr-only" type="radio" name="id" id="{{ cid }}-{{ v.id }}" value="{{ v.id }}" data-size="{{ v.option1 | escape }}"{% unless v.available %} disabled{% endunless %}>
+                    <label class="size" for="{{ cid }}-{{ v.id }}"{% unless v.available %} data-soldout{% endunless %}>{{ v.option1 }}</label>
+                  {%- endfor -%}
+                </fieldset>
+                <button class="btn btn--solid btn--block pcard__add" type="submit"><span data-pcard-label>In den Warenkorb</span></button>
+                <p class="pcard__msg" role="status" data-pcard-msg></p>
+              </form>
+              <div class="pcard__back-foot">
+                <a class="link" href="{{ p.url }}">Details</a>
+                <button class="link" type="button" data-pcard-flip>↺ Vorderseite</button>
+              </div>
+            </div>
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Spielerkarten",
+  "settings": [
+    { "type": "product_list", "id": "products", "label": "Produkte", "limit": 10 },
+    { "type": "text", "id": "kicker", "label": "Zeile oben", "default": "Die Kollektion" },
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Sammel deine Stadt", "info": "Klappt beim Hinscrollen wie eine Anzeigetafel auf." },
+    { "type": "text", "id": "link_label", "label": "Link zum Shop", "default": "Alle ansehen" }
+  ],
+  "presets": [
+    { "name": "Spielerkarten" }
+  ]
+}
+{% endschema %}

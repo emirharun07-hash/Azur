@@ -2,6 +2,7 @@
   Warenkorb als Seitenleiste (Dialog). Der Inhalt wird serverseitig gerendert; azur.js holt ihn nach
   jeder Änderung über die Section Rendering API neu (?sections=cart-drawer), es gibt also nur eine Vorlage.
   Ohne JavaScript führt der Warenkorb-Link im Header zur normalen Warenkorbseite.
+  Runde 10: im Balken zum kostenlosen Versand rollt ein Ball bis zum aktuellen Stand (azur.css, azur.js applyDrawer).
 {%- endcomment -%}
 {%- liquid
   assign shop_coll = settings.main_collection
@@ -43,10 +44,10 @@
               {%- if rest > 0 -%}
                 Noch <b>{% render 'price', amount: rest %}</b> bis zum kostenlosen Versand in Deutschland
               {%- else -%}
-                Kostenloser Versand in Deutschland
+                Kostenloser Versand in Deutschland ✓
               {%- endif -%}
             </p>
-            <span class="freeship__bar" aria-hidden="true"><span style="width: {{ pct }}%"></span></span>
+            <span class="freeship__bar" aria-hidden="true"><span style="width: {{ pct }}%"></span><i class="freeship__ball" style="left: {{ pct }}%"></i></span>
           </div>
         {%- endif -%}
         <ul class="lines">
