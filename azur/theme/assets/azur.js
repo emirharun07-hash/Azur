@@ -102,7 +102,17 @@
     if (before && bar) bar.style.setProperty('--from', before.style.width);
     current.replaceWith(fresh);
     const count = fresh.dataset.count || '0';
-    $$('[data-cart-count]').forEach((el) => (el.textContent = count));
+    const more = Number(count) > Number(($('[data-cart-count]') || {}).textContent || 0);
+    $$('[data-cart-count]').forEach((el) => {
+      el.textContent = count;
+      if (el.dataset.count !== undefined) el.dataset.count = count;
+    });
+    // die Sporttasche wackelt kurz, wenn etwas dazukommt (wie früher im Zimmer)
+    const bag = $('.header__cart .sportbag');
+    if (more && bag && bag.animate && !calm.matches) {
+      bag.animate([{ transform: 'none' }, { transform: 'translateY(-4px) rotate(-8deg)', offset: 0.35 },
+        { transform: 'translateY(0) rotate(4deg)', offset: 0.7 }, { transform: 'none' }], { duration: 620, easing: 'ease-out' });
+    }
   }
 
   function setStatus(text) {
@@ -562,7 +572,7 @@
     if (on) {
       if (openCard && openCard !== card) flipCard(openCard, false);
       openCard = card;
-      const first = $('input:not([disabled])', back) || $('button', back);
+      const first = $('input:not([disabled]):not([type="hidden"])', back) || $('button', back);
       window.setTimeout(() => first.focus({ preventScroll: true }), calm.matches ? 0 : 320);
     } else if (openCard === card) {
       openCard = null;
@@ -589,6 +599,11 @@
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && card.classList.contains('is-flipped')) { e.stopPropagation(); flipCard(card, false); front.focus(); }
     });
+    // nach dem Absenden der Drop-Anmeldung lädt Shopify die Seite neu: die Karte zeigt dann gleich ihre Rückseite
+    if ($('.signup__ok, .signup__error:not([hidden])', card)) {
+      flipCard(card, true);
+      card.scrollIntoView({ block: 'center' });
+    }
     if (!form) return;
     const msg = $('[data-pcard-msg]', form);
     const btn = $('button[type="submit"]', form);

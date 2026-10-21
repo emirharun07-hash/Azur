@@ -4,7 +4,7 @@
   hinten die Größe wählen und direkt in den Warenkorb, der dann rechts hereingleitet (azur.js, Abschnitt Spielerkarten).
   Die Überschrift klappt wie eine Anzeigetafel auf (data-flap). Ohne JavaScript führt jede Karte zur Produktseite.
   Runde 11 (nach basement.studio): jede Karte steht in einer Zelle mit Haarlinien und Nummer, die Anzahl hochgestellt.
-  Runde 12: größer (Desktop 3, iPad 2, Handy 1 pro Reihe), ein Klick auf die Rückseite dreht zurück, „Groß ansehen“ öffnet
+  Runde 12: größer (Desktop 3, iPad 2, Handy 1 pro Reihe), als sechste Karte der nächste Drop mit Anmeldung, ein Klick auf die Rückseite dreht zurück, „Groß ansehen“ öffnet
   das Trikot groß (Vorder- und Rückseite; schließen mit ×, Esc oder Klick daneben), die gewendete Karte trägt einen Hauch
   der Trikotfarbe (data-tone).
 {%- endcomment -%}
@@ -119,6 +119,35 @@
           </div>
         </li>
       {%- endfor -%}
+      {%- if section.settings.drop_card -%}
+        {%- comment -%} Runde 12: die sechste Karte ist der nächste Drop (wie die Hülle am Ständer im Zimmer); hinten die Anmeldung {%- endcomment -%}
+        {%- assign n = section.settings.products.size | at_most: 10 | plus: 1 -%}
+        <li class="pcard pcard--drop" data-pcard>
+          <span class="pcard__no" aria-hidden="true">{{ n | prepend: '0' | slice: -2, 2 }}</span>
+          <div class="pcard__inner">
+            <a class="pcard__front" href="#drops-pcard-drop" data-pcard-flip aria-expanded="false" aria-controls="{{ section.id }}-drop-back">
+              <span class="pcard__top"><b class="pcard__code">???</b><span class="pcard__kind">Bald</span></span>
+              <span class="pcard__img pcard__mystery" aria-hidden="true">
+                <svg viewBox="0 0 100 100"><path d="M31 14 L43 9 Q50 17 57 9 L69 14 L88 28 L79 41 L71 36 L71 91 L29 91 L29 36 L21 41 L12 28 Z"/><text x="50" y="68" text-anchor="middle">?</text></svg>
+              </span>
+              <span class="pcard__name">{{ section.settings.drop_title }}</span>
+              <span class="pcard__meta">{{ section.settings.drop_text }}</span>
+              <span class="pcard__price">Als Erstes erfahren</span>
+              <span class="pcard__turn" aria-hidden="true">Umdrehen ↻</span>
+              <span class="sr-only">: Karte umdrehen und für den nächsten Drop eintragen</span>
+            </a>
+            <div class="pcard__back pcard__back--drop" id="{{ section.id }}-drop-back" inert>
+              <p class="pcard__back-kicker">{{ section.settings.drop_title }}</p>
+              <h3 class="pcard__back-name">Als Erstes wissen</h3>
+              {%- if section.settings.drop_signup_text != blank -%}<p class="pcard__drop-text">{{ section.settings.drop_signup_text }}</p>{%- endif -%}
+              {%- render 'signup-form', id: 'pcard-drop', tags: section.settings.drop_tags, button: 'Eintragen' -%}
+              <div class="pcard__back-foot pcard__back-foot--end">
+                <button class="link" type="button" data-pcard-flip>↺ Vorderseite</button>
+              </div>
+            </div>
+          </div>
+        </li>
+      {%- endif -%}
     </ul></div>
 
     <dialog class="jbox" data-jbox aria-labelledby="jbox-name-{{ section.id }}">
@@ -146,7 +175,13 @@
     { "type": "product_list", "id": "products", "label": "Produkte", "limit": 10 },
     { "type": "text", "id": "kicker", "label": "Zeile oben", "default": "Die Kollektion" },
     { "type": "text", "id": "heading", "label": "Überschrift", "default": "Sammel deine Stadt", "info": "Klappt beim Hinscrollen wie eine Anzeigetafel auf." },
-    { "type": "text", "id": "link_label", "label": "Link zum Shop", "default": "Alle ansehen" }
+    { "type": "text", "id": "link_label", "label": "Link zum Shop", "default": "Alle ansehen" },
+    { "type": "header", "content": "Karte „Nächster Drop“" },
+    { "type": "checkbox", "id": "drop_card", "label": "Nach den Trikots eine Karte für den nächsten Drop zeigen", "default": true, "info": "Hinten die Anmeldung per Mail (Kunden mit den Tags unten)." },
+    { "type": "text", "id": "drop_title", "label": "Titel", "default": "Nächster Drop" },
+    { "type": "text", "id": "drop_text", "label": "Zeile vorne", "default": "Noch unter Verschluss" },
+    { "type": "text", "id": "drop_signup_text", "label": "Text hinten", "default": "Trag deine Mail ein. Wir sagen dir zuerst Bescheid, wenn das nächste Trikot kommt." },
+    { "type": "text", "id": "drop_tags", "label": "Tags für die Anmeldung", "default": "newsletter, drops" }
   ],
   "presets": [
     { "name": "Spielerkarten" }

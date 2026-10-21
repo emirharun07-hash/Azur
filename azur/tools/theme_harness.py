@@ -90,15 +90,9 @@ def cards_product(p):
     return d
 
 
-def render_cards():
-    src = open(os.path.join(THEME, 'sections', 'azur-cards.liquid')).read()
-    schema = json.loads(re.search(r'{% schema %}(.*?){% endschema %}', src, re.S).group(1))
-    src = re.sub(r'{% schema %}.*?{% endschema %}', '', src, flags=re.S)
-    env, _, _ = snippet_env()
-    settings = {s['id']: s.get('default') for s in schema['settings'] if 'id' in s}
-    settings['products'] = [cards_product(p) for p in PRODUCTS]
-    return env.from_string(src).render(section={'settings': settings, 'id': 'cards'}, settings={'main_collection': {'url': '/collections/trikots'}},
-                                       routes={'cart_add_url': '/cart/add'}, collections={'all': {'url': '/collections/all'}})
+def render_cards(query=''):
+    # the real snippets (product-field, product-image, price, signup-form) via theme_pages
+    return pages.section('azur-cards', {'products': pages.PRODUCTS}, form=pages.signup_state(query))
 
 
 def render_drawer():
@@ -183,7 +177,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 page = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
                         .replace('__HEADER__', pages.section('header', template=t, cart=cart, product=None))
                         .replace('__FOOTER__', pages.section('footer', template=t, form=pages.signup_state(query)))
-                        .replace('__CARDS__', render_cards()).replace('__DRAWER__', render_drawer()))
+                        .replace('__CARDS__', render_cards(query)).replace('__DRAWER__', render_drawer()))
             body = page.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return

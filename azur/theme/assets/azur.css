@@ -1241,7 +1241,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 @media (min-width: 30em) { .pcards__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 75em) { .pcards__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-.pcard { --cd-a: #e9d9a8; --cd-b: #b8954a; --cd-i: #2a2010; position: relative; padding: var(--s-6) clamp(0.6rem, 2vw, var(--s-5)) var(--s-5); border-right: 1px solid var(--c-grey-line); border-bottom: 1px solid var(--c-grey-line); perspective: 1400px; transition: background-color var(--dur-panel) var(--ease); }
+.pcard { --cd-a: #e9d9a8; --cd-b: #b8954a; --cd-i: #2a2010; position: relative; padding: var(--s-6) clamp(0.5rem, 1.6vw, var(--s-5)) var(--s-5); border-right: 1px solid var(--c-grey-line); border-bottom: 1px solid var(--c-grey-line); perspective: 1400px; transition: background-color var(--dur-panel) var(--ease); }
 .pcard__no { position: absolute; top: var(--s-2); left: var(--s-3); color: var(--c-grey-soft); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); font-variant-numeric: tabular-nums; transition: color var(--dur-panel) var(--ease); }
 .pcard:is(:hover, :focus-within, .is-flipped) { background: var(--c-surface); }
 .pcard:is(:hover, :focus-within, .is-flipped) .pcard__no { color: var(--c-acc); }
@@ -1261,14 +1261,14 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   text-align: center;
 }
 .pcard__top { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
-.pcard__code { font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-stretch: 62%; font-weight: 900; }
-.pcard__kind { font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.pcard__code { font-size: clamp(1.6rem, 2.6vw, 2.25rem); font-stretch: 62%; font-weight: 900; }
+.pcard__kind { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
 .pcard__img { position: relative; width: 100%; min-height: 0; }
-.pcard__pic { position: absolute; inset: 0; margin: auto; width: 92%; height: 100%; object-fit: contain; filter: drop-shadow(0 0.6rem 0.8rem rgb(0 0 0 / 0.25)); }
-.pcard__name { font-size: clamp(1rem, 1.6vw, 1.35rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
-.pcard__meta { font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
-.pcard__price { font-size: 0.875rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pcard__turn { margin-top: 0.15rem; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0; transition: opacity var(--dur) var(--ease); }
+.pcard__pic { position: absolute; inset: 0; margin: auto; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0.6rem 0.8rem rgb(0 0 0 / 0.25)); }
+.pcard__name { font-size: clamp(1.4rem, 2.3vw, 1.95rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.pcard__meta { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.pcard__price { font-size: 1.0625rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pcard__turn { margin-top: 0.15rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0; transition: opacity var(--dur) var(--ease); }
 .pcard__back {
   display: flex;
   flex-direction: column;
@@ -1280,16 +1280,16 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   transform: rotateY(180deg);
   text-align: center;
 }
-.pcard__back-kicker { color: var(--c-grey-text); font-size: 0.625rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.pcard__back-name { font-size: clamp(1.15rem, 1.8vw, 1.5rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.pcard__back-kicker { color: var(--c-grey-text); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+.pcard__back-name { font-size: clamp(1.45rem, 2.3vw, 2rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
 .pcard__back-price { font-variant-numeric: tabular-nums; font-weight: 700; }
 .pcard__form { display: grid; gap: var(--s-2); }
 .pcard__sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.3rem; margin: 0; padding: 0; border: 0; }
-.pcard__sizes .size { min-height: 2.5rem; padding: 0; font-size: 0.8125rem; }
-.pcard__add { min-height: 2.75rem; padding: 0 var(--s-2); justify-content: center; font-size: 0.75rem; letter-spacing: 0.04em; text-align: center; }
-.pcard__msg { min-height: 1.2em; font-size: 0.75rem; color: var(--c-grey-text); }
+.pcard__sizes .size { min-height: 2.75rem; padding: 0; font-size: 0.9375rem; }
+.pcard__add { min-height: 3rem; padding: 0 var(--s-2); justify-content: center; font-size: 0.875rem; letter-spacing: 0.04em; text-align: center; }
+.pcard__msg { min-height: 1.2em; font-size: 0.8125rem; color: var(--c-grey-text); }
 .pcard__msg.is-error { color: var(--c-error); }
-.pcard__back-foot { display: flex; justify-content: space-between; gap: var(--s-2); font-size: 0.75rem; }
+.pcard__back-foot { display: flex; justify-content: space-between; gap: var(--s-2); font-size: 0.875rem; }
 .pcard__back-foot .link { min-height: var(--tap); display: inline-flex; align-items: center; }
 .pcard.is-flipped .pcard__front { pointer-events: none; }
 
@@ -1383,8 +1383,8 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; }
 .back-home:hover { text-decoration: underline; text-underline-offset: 0.25em; }
 
-/* Spielerkarten größer: die Karte bleibt im Format 5:8, höchstens 22 rem breit, mittig in der Zelle */
-.pcard__inner { width: 100%; max-width: 22rem; margin-inline: auto; }
+/* Spielerkarten größer: die Karte bleibt im Format 5:8, höchstens 26 rem breit, mittig in der Zelle */
+.pcard__inner { width: 100%; max-width: 26rem; margin-inline: auto; }
 .pcard.is-flipped .pcard__back { cursor: pointer; }
 .pcard.is-flipped .pcard__back :is(form, .pcard__back-foot) { cursor: auto; }
 .pcard__back-foot button.link { padding: 0; background: none; border: 0; }
@@ -1419,3 +1419,34 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   .jbox__side { align-content: center; padding: var(--s-7) var(--s-6); }
 }
 @media (prefers-reduced-motion: reduce) { .jbox[open] { animation: none; } }
+
+/* Warenkorb-Symbol: die Sporttasche (früher im Zimmer), auf jeder Seite im Header; die Zahl als kleiner Punkt daran */
+.header__cart { position: relative; }
+.sportbag { width: 2.25rem; height: auto; overflow: visible; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sportbag__body { fill: color-mix(in srgb, currentColor 10%, transparent); }
+.sportbag__stripe { stroke-width: 1.4; opacity: 0.7; }
+.sportbag__ball { fill: currentColor; stroke: none; }
+.sportbag__lines { fill: var(--c-paper); stroke: none; }
+.header__icon:hover .sportbag { stroke-width: 2.6; }
+.header__cart .header__count { position: absolute; top: 0.2rem; right: 0; display: grid; place-items: center; min-width: 1.1rem; height: 1.1rem; padding: 0 0.25rem;
+  border-radius: 999px !important; background: var(--c-acc); color: var(--c-acc-ink); font-size: 0.6875rem; font-weight: 700;
+  transition: transform var(--dur-panel) var(--ease), opacity var(--dur-panel) var(--ease); }
+.header__cart .header__count[data-count="0"] { opacity: 0; transform: scale(0.4); }   /* leer: kein Punkt (Vorleser lesen die 0 trotzdem) */
+.header.is-compact .sportbag { width: 2rem; }
+
+/* Sechste Karte: der nächste Drop. Vorne dunkles Material mit einem Trikot als Umriss und Fragezeichen, hinten die Anmeldung */
+.pcard--drop { --cd-a: #3b3e43; --cd-b: #141517; --cd-i: #f1eee8; }
+.pcard__mystery svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pcard__mystery path { fill: rgb(255 255 255 / 0.04); stroke: var(--c-acc); stroke-width: 1.2; stroke-dasharray: 3 2.4; stroke-linejoin: round; }
+.pcard__mystery text { fill: var(--c-acc); font-size: 34px; font-weight: 900; font-family: var(--f-sans); }
+.pcard--drop .pcard__price { color: var(--c-acc); font-size: 0.875rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.pcard__back--drop { justify-content: center; gap: var(--s-2); padding: 12% 9%; text-align: left; }
+.pcard__back--drop .pcard__back-name { margin-bottom: var(--s-1); }
+.pcard__drop-text { font-size: 0.875rem; line-height: 1.45; color: var(--c-grey-text); }
+.pcard__back--drop .signup { gap: 0.4rem; }
+.pcard__back--drop .signup__row { grid-template-columns: 1fr; gap: 0.4rem; }
+.pcard__back--drop .signup__email { border-right: var(--bw) solid var(--c-grey-text); height: 3rem; }
+.pcard__back--drop .signup__btn { height: 3rem; justify-content: center; }
+.pcard__back--drop .signup__legal { font-size: 0.6875rem; }
+.pcard__back--drop .signup__ok { padding: var(--s-3); }
+.pcard__back-foot--end { justify-content: flex-end; }
