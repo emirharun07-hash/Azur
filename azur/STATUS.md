@@ -542,9 +542,9 @@ on every device without losing quality.
 ## Round 12 (one site, neutral colour vote, static bar, bed fix, bigger cards, 2026-10-21)
 Draft theme "Azur Zimmer Runde 12 (Entwurf)" `gid://shopify/OnlineStoreTheme/209835884883` (copy of MAIN = Runde 10, which the
 owner published). Preview: https://azurclothing.com/?preview_theme_id=209835884883
-- Colour vote: https://claude.ai/artifact/DBdK1jxGqTNSAcKNWyFduy (azur/design/farbwahl.html, 8 neutral palettes, swipe; votes in
-  the artifact db `votes/<uid>` {votes: {id: 1|-1}}). After the owner's pick: put the palette's values into the one token block at
-  the top of assets/azur.css (incl. --c-scheme, --logo-ink/--logo-paper, the dark set --c-deep/--d-*), then delete the vote page.
+- Colour vote (8 neutral palettes, swipe page, now deleted): the owner liked only "Anthrazit & Neon" (paper #1c1d1f, surface
+  #242628, plate #2c2e31, ink #f1eee8, accent stays #39ff88). It is the one token block at the top of assets/azur.css
+  (incl. --c-scheme, --logo-ink/--logo-paper, the dark set --c-deep/--d-*); theme-color meta #1c1d1f.
 - Tokens: every colour of shop and room comes from that block; dark areas (password page, dark sections, the room) remap the
   tokens to the dark set (`:is(.campaign--dark, .template-password, .drops--dark)`); the room's overlays use --u-* = theme tokens.
 - One site: the shop's header lies over the room (transparent, light text; solid while the room's product view is open, which

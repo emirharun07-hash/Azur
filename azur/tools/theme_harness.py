@@ -8,7 +8,7 @@ POST /cart/add.js and POST /contact like Shopify does (enough for the room's car
 Round 10: below the room the player cards (sections/azur-cards.liquid), the real cart drawer (sections/cart-drawer.liquid,
 also via ?sections=cart-drawer and the sections field of /cart/add.js) and the theme's own azur.js.
 Round 12: the real header and footer (with the sign-up), and /collections/trikots and /products/<handle> as whole pages
-(theme_pages.py). ?signup=ok|error shows the sign-up after sending, ?palette=creme|anthrazit a candidate palette.
+(theme_pages.py). ?signup=ok|error shows the sign-up after sending.
 """
 import http.server, json, os, re, socketserver, sys
 from liquid import Environment, DictLoader
@@ -132,7 +132,7 @@ def render_bar():
 PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Martian+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="/theme/assets/azur.css">__PALETTE__
+<link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = { routes: { root: '/' } };</script>
 </head><body class="template-index">
 <div class="shopify-section section-bar">__BAR__</div>
@@ -183,7 +183,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 page = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
                         .replace('__HEADER__', pages.section('header', template=t, cart=cart, product=None))
                         .replace('__FOOTER__', pages.section('footer', template=t, form=pages.signup_state(query)))
-                        .replace('__PALETTE__', pages.palette_style(query))
                         .replace('__CARDS__', render_cards()).replace('__DRAWER__', render_drawer()))
             body = page.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers()

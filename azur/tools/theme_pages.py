@@ -174,7 +174,7 @@ def chrome(template, body, query='', cart_count=0, drawer=''):
     return f"""<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness {template}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&display=swap">
-<link rel="stylesheet" href="/theme/assets/azur.css">__PALETTE__
+<link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = {{ routes: {{ root: '/' }} }};</script>
 </head><body class="template-{template}">
 <div class="shopify-section section-bar" id="shopify-section-announcement">{bar}</div>
@@ -183,33 +183,11 @@ def chrome(template, body, query='', cart_count=0, drawer=''):
 <div class="shopify-section" id="shopify-section-footer">{footer}</div>
 <div class="shopify-section section-cart-drawer" id="shopify-section-cart-drawer">{drawer}</div>
 <script src="/theme/assets/azur.js" defer></script>
-</body></html>""".replace('__PALETTE__', palette_style(query))
+</body></html>"""
 
 
 def extra_product(template):
     return None
-
-
-# two of the candidate palettes from the colour vote (azur/design/farbwahl.html), to check the tokens on a light and a
-# dark ground: ?palette=creme | ?palette=anthrazit
-TEST_PALETTES = {
-    'creme': dict(paper='#f1ece2', surface='#e8e2d5', plate='#dfd8c9', ink='#16201a', line='#d3cbbb', text='#5a5b50', soft='#a09a89',
-                  acc='#1f5a37', accink='#f1ece2', scheme='light', logo_ink='block', logo_paper='none',
-                  deep='#16201a', d_ink='#f1ece2', d_text='#b9b8ac', d_line='#33403a', d_surface='#1f2a23', d_acc='#f1ece2', d_accink='#16201a'),
-    'anthrazit': dict(paper='#1c1d1f', surface='#242628', plate='#2c2e31', ink='#f1eee8', line='#35383b', text='#a9aaa9', soft='#707275',
-                      acc='#ece5d6', accink='#1c1d1f', scheme='dark', logo_ink='none', logo_paper='block',
-                      deep='#111214', d_ink='#f1eee8', d_text='#a9aaa9', d_line='#35383b', d_surface='#242628', d_acc='#ece5d6', d_accink='#1c1d1f'),
-}
-
-
-def palette_style(query):
-    m = re.search(r'palette=(\w+)', query or '')
-    p = TEST_PALETTES.get(m.group(1)) if m else None
-    if not p: return ''
-    return ('<style>:root{' + f"--c-paper:{p['paper']};--c-surface:{p['surface']};--c-plate:{p['plate']};--c-ink:{p['ink']};"
-            f"--c-grey-line:{p['line']};--c-grey-text:{p['text']};--c-grey-soft:{p['soft']};--c-acc:{p['acc']};--c-acc-ink:{p['accink']};"
-            f"--c-scheme:{p['scheme']};--logo-ink:{p['logo_ink']};--logo-paper:{p['logo_paper']};--c-deep:{p['deep']};--d-ink:{p['d_ink']};"
-            f"--d-text:{p['d_text']};--d-line:{p['d_line']};--d-surface:{p['d_surface']};--d-acc:{p['d_acc']};--d-acc-ink:{p['d_accink']}" + '}</style>')
 
 
 def collection_page(query='', drawer='', cart_count=0):

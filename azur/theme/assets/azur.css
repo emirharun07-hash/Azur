@@ -3,7 +3,7 @@
    1. Tokens   2. Basis   3. Schrift   4. Bausteine   5. Header, Menü   6. Warenkorb
    7. Footer   8. Karten, Raster   9. Startseite   10. Shop, Produkt   11. Übrige Seiten
 
-   Grundpalette (Runde 10, Wahl im Design-Finale: „Kunstrasen-Neon“): fast schwarzes Grün, helle Schrift, Neongrün nur für
+   Grundpalette (Runde 12, Farbwahl: „Anthrazit & Neon“): Anthrazit, kreideweiße Schrift, Neongrün nur für
    Kaufen-Knöpfe, Fortschritt und kleine Hinweise. Sonst kommt Farbe aus den Produktbildern.
    Keine Rundungen, keine Schatten, keine Verläufe. Große Schrift nur im Einstieg.
    Shop-Aufbau wie bei Streetwear-Marken: schwarze Leiste oben, Logo in der Mitte, Symbole rechts,
@@ -11,28 +11,29 @@
    ========================================================================== */
 
 /* 1. Tokens ================================================================ */
-/* Farbpalette: ALLE Farben des Shops und des Zimmers kommen aus diesem einen Block (Runde 12). Für eine andere
-   Grundfarbe nur hier die Werte tauschen; Zimmer, Produktansicht, Karten, Warenkorb und Passwortseite folgen. */
+/* Farbpalette (Runde 12, Wahl in der Farbwahl: „Anthrazit & Neon“): ALLE Farben des Shops und des Zimmers kommen aus
+   diesem einen Block. Für eine andere Grundfarbe nur hier die Werte tauschen; Zimmer, Produktansicht, Karten, Warenkorb
+   und Passwortseite folgen. Kontraste: Schrift 14,6:1, Sekundärtext 7,2:1 auf dem Grund, Kaufknopf 11,6:1. */
 :root {
-  --c-paper: #0a0f0b;        /* Grundfläche */
-  --c-surface: #121a14;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten, Leiste) */
-  --c-plate: #19231b;        /* ruhige Bildfläche hinter Produkten */
-  --c-ink: #eef5ee;          /* Schrift */
-  --c-grey-line: #233026;    /* feine Linien */
-  --c-grey-text: #9fb1a2;    /* Sekundärtext (mind. 4,5:1 auf Grund und Fläche) */
-  --c-grey-soft: #66796a;    /* nur Flächen und Symbole, nicht für Text */
-  --c-acc: #39ff88;          /* Kaufen, Fortschritt, kleine Hinweise */
+  --c-paper: #1c1d1f;        /* Grundfläche: Anthrazit */
+  --c-surface: #242628;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten, Leiste) */
+  --c-plate: #2c2e31;        /* ruhige Bildfläche hinter Produkten */
+  --c-ink: #f1eee8;          /* Schrift: Kreideweiß */
+  --c-grey-line: #35383b;    /* feine Linien */
+  --c-grey-text: #a9aaa9;    /* Sekundärtext (mind. 4,5:1 auf Grund und Fläche) */
+  --c-grey-soft: #707275;    /* nur Flächen und Symbole, nicht für Text */
+  --c-acc: #39ff88;          /* Neongrün: Kaufen, Fortschritt, kleine Hinweise */
   --c-acc-ink: #062b14;      /* Schrift auf dem Kaufknopf */
   --c-error: #ff8a80;        /* nur für Fehlermeldungen */
   --c-scheme: dark;          /* dark bei dunklem Grund, light bei hellem (Formularfelder, Scrollbalken) */
   --logo-ink: none;          /* welches Logo auf dem Grund steht: dunkles (ink) bei hellem Grund, helles (paper) bei dunklem */
   --logo-paper: block;
-  /* dunkle Bereiche (Passwortseite, dunkle Abschnitte, Bildflächen): bleiben bei jeder Palette dunkel */
-  --c-deep: #040705;
-  --d-ink: #eef5ee;
-  --d-text: #9fb1a2;
-  --d-line: #233026;
-  --d-surface: #121a14;
+  /* dunkle Bereiche (Passwortseite, dunkle Abschnitte, das Zimmer): bleiben bei jeder Palette dunkel */
+  --c-deep: #111214;
+  --d-ink: #f1eee8;
+  --d-text: #a9aaa9;
+  --d-line: #35383b;
+  --d-surface: #242628;
   --d-acc: #39ff88;
   --d-acc-ink: #062b14;
   --c-on-photo: #f3eee6;     /* Schrift über dem Zimmer und über Fotos */
