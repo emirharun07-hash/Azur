@@ -1,6 +1,5 @@
 {%- comment -%}
-  Footer: oben die Anmeldung für Drops mit Teaser-Bild (Frankfurt-Trikot; auf der Drops-Seite ausgeblendet, weil sie
-  dort groß steht),
+  Footer: oben die Anmeldung für Drops (auf der Drops-Seite ausgeblendet, weil sie dort groß steht; Teaser-Bild wahlweise),
   darunter Signatur, Kurzzeile, vier Linkspalten (Shop, Support, Azur, Rechtliches), Basiszeile (Steuerhinweis und Zahlungsarten).
   Rechtliches: nur veröffentlichte Seiten aus settings.legal_pages plus die Shopify-Richtlinien.
 {%- endcomment -%}
@@ -45,7 +44,8 @@
   <div class="footer__top wrap">
     <div class="footer__brand">
       <a class="footer__logo" href="{{ routes.root_url }}">
-        {%- render 'logo', tone: 'paper' -%}
+        {%- render 'logo', tone: 'ink', class: 'logo--ink' -%}
+        {%- render 'logo', tone: 'paper', class: 'logo--paper' -%}
         <span class="sr-only">Startseite</span>
       </a>
       {%- if section.settings.line != blank -%}
@@ -125,7 +125,7 @@
     { "type": "text", "id": "signup_text", "label": "Text", "default": "Trag deine Mail ein. Wir sagen dir Bescheid, sobald ein neues Trikot rauskommt." },
     { "type": "text", "id": "signup_button", "label": "Button", "default": "Eintragen" },
     { "type": "text", "id": "signup_success", "label": "Text nach dem Eintragen", "default": "Danke, du bist dabei. Kommt eine Bestätigungsmail, klick bitte auf den Link darin." },
-    { "type": "checkbox", "id": "signup_teaser", "label": "Teaser-Bild zeigen", "default": true },
+    { "type": "checkbox", "id": "signup_teaser", "label": "Teaser-Bild zeigen", "default": false, "info": "Runde 12: aus, die Anmeldung steht schlicht neben der Überschrift." },
     { "type": "image_picker", "id": "signup_image", "label": "Teaser-Bild", "info": "Leer = Frankfurt-Trikot von vorne, groß angeschnitten." },
     { "type": "text", "id": "signup_label", "label": "Zeile auf dem Bild", "default": "Frankfurt 069", "info": "Leer = keine." }
   ]

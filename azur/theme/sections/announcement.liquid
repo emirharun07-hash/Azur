@@ -1,9 +1,10 @@
 {%- comment -%}
-  Schwarze Leiste über dem Header. Scrollt mit der Seite weg, der Header bleibt stehen.
-  Laufband: eine Meldung pro Zeile im Feld „Meldungen“; sie laufen endlos von rechts nach links, halten bei Maus darüber,
-  Fokus oder dem Pause-Knopf an. Bei „Bewegung reduzieren“ steht nur die erste Meldung still in der Mitte.
-  Ohne Meldungen: „Versand …“ aus Theme-Einstellungen → Azur (Versandkosten). Beides leer = keine Leiste.
+  Leiste über dem Header, schlicht und ruhig (Runde 12: kein Laufband, keine Animation). Die Meldungen stehen
+  nebeneinander, getrennt durch einen Punkt; auf schmalen Bildschirmen umbrechen sie mittig.
+  Eine Meldung pro Zeile im Feld „Meldungen“. Ohne Meldungen: „Versand …“ aus Theme-Einstellungen → Azur. Beides leer = keine Leiste.
   Vorrang hat das Shop-Metafeld azur.announcement: das setzt die Admin-Bearbeitung direkt auf der Website (azur/admin).
+  Startseite mit dem Zimmer: die Leiste liegt nicht über dem Zimmer, sie kommt unter dem Header dazu, sobald der Shop beginnt
+  (sections/azur-room.liquid).
 {%- endcomment -%}
 {%- liquid
   assign source = section.settings.messages
@@ -29,14 +30,10 @@
   endif
 -%}
 {%- if items != blank -%}
-  <div class="bar bar--run" data-marquee="{{ section.settings.speed }}" data-azur-bar="{{ source | strip | escape }}">
-    <{{ tag }} class="bar__run"{% if tag == 'a' %} href="{{ section.settings.link }}"{% endif %}>
+  <div class="bar" data-azur-bar="{{ source | strip | escape }}">
+    <{{ tag }} class="bar__inner wrap"{% if tag == 'a' %} href="{{ section.settings.link }}"{% endif %}>
       <ul class="bar__group" role="list">{{ items }}</ul>
     </{{ tag }}>
-    <button class="bar__pause" type="button" aria-pressed="false" data-marquee-pause hidden>
-      <span class="sr-only">Laufband anhalten</span>
-      <svg viewBox="0 0 12 12" aria-hidden="true"><path class="bar__icon-pause" d="M3 2h2v8H3zM7 2h2v8H7z"/><path class="bar__icon-play" d="M3 2l7 4-7 4z"/></svg>
-    </button>
   </div>
 {%- endif -%}
 
@@ -48,12 +45,11 @@
     {
       "type": "textarea",
       "id": "messages",
-      "label": "Meldungen (Laufband)",
-      "default": "Versand in Deutschland ca. 3 Werktage\nVersand in die EU ca. 5 Werktage\nAb 90 € versandkostenfrei in Deutschland\n14 Tage Rückgabe, kostenloser Rückversand\nDrop 01: Frankfurt 069 und Berlin 030",
+      "label": "Meldungen",
+      "default": "14 Tage kostenlose Rückgabe\nVersand ab 90 € kostenlos",
       "info": "Eine Meldung pro Zeile. Nur Angaben, die im Shop so eingestellt sind. Leer = „Versand …“ aus Theme-Einstellungen → Azur."
     },
-    { "type": "url", "id": "link", "label": "Link", "info": "Optional, z. B. die Versandseite. Gilt für die ganze Leiste." },
-    { "type": "range", "id": "speed", "label": "Tempo", "min": 20, "max": 80, "step": 5, "unit": "px", "default": 40, "info": "Pixel pro Sekunde." }
+    { "type": "url", "id": "link", "label": "Link", "info": "Optional, z. B. die Versandseite. Gilt für die ganze Leiste." }
   ]
 }
 {% endschema %}

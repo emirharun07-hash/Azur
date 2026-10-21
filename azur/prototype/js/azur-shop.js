@@ -127,7 +127,10 @@
       const short = product.name.replace(/\s*Trikot$/i, ''), giant = short.replace(/\s+\d{2,4}$/, '');
       q('.azur-pdp__title').textContent = giant; q('.azur-pdp__title').style.setProperty('--len', Math.max(5, giant.length));
       q('.azur-pdp__name b').textContent = short;
-      q('.azur-pdp__price').textContent = A.formatPrice(product.price) + ' · inkl. MwSt.';
+      q('.azur-pdp__price').textContent = A.formatPrice(product.price);   // Runde 12: no tax note next to the price (footer, cart, checkout)
+      // a faint hint of the jersey's main colour in the background (the colours are tokens in the theme's azur.css)
+      const tone = { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
+      if (tone) this.pdp.dataset.tone = tone; else delete this.pdp.dataset.tone;
       q('.azur-pdp__picked').textContent = 'Noch niemand aufgestellt';
       q('.azur-pdp__fit').textContent = product.fit || '';
       q('.azur-pdp__desc').textContent = product.description;

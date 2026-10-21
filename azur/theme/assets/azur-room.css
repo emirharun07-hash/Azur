@@ -6,9 +6,13 @@
   --paper: #F3EEE6; --paper-2: #E9E2D6; --char: #15130F; --muted: #6E665A; --line: rgba(21, 19, 15, .14);
   --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
   --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --mono: var(--body);   /* Runde 12: one type family with the shop (labels are small spaced capitals, as in the theme) */
   --ease: cubic-bezier(.2, .8, .2, 1);
   --night-amt: 0;
+  /* Runde 12: the room's own controls (labels, chips, the drop card, the product view) take the shop's colour tokens,
+     so the room and the shop below read as one site. The fallbacks are the shop's values for the prototype. */
+  --u-bg: var(--c-surface, #242628); --u-ink: var(--c-ink, #f1eee8); --u-mut: var(--c-grey-text, #a9aaa9); --u-line: var(--c-grey-line, #35383b);
+  --u-acc: var(--c-acc, #39ff88); --u-acc-ink: var(--c-acc-ink, #062b14); --u-paper: var(--c-paper, #1c1d1f);
   color-scheme: dark;
 }
 :where(.azur, .azur-mag, .azur-pdp, .azur-holo, .azur-ghost) [hidden] { display: none !important; }
@@ -19,8 +23,9 @@
 .azur { position: relative; isolation: isolate; height: calc(100vh - var(--bar-h, 0px)); height: calc(100svh - var(--bar-h, 0px));
   min-height: 30rem; overflow: hidden; background: #0b0b0c; color: var(--paper); font-family: var(--body); -webkit-font-smoothing: antialiased; line-height: normal; }
 
-/* ------------------------------------------------------------------ header: only the bag (once it holds something) and three glowing dots */
-.azur-head { position: absolute; z-index: 80; top: 0; right: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) clamp(12px, 2.6vw, 30px) 12px; pointer-events: none; }
+/* ------------------------------------------------------------------ head: Runde 12 only the sound switch (the shop's header lies over the room:
+   one header, one cart). It sits under the header on the right. */
+.azur-head { position: absolute; z-index: 80; top: var(--azur-top, 0px); right: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) clamp(12px, 2.6vw, 30px) 12px; pointer-events: none; }
 .azur-head > * { pointer-events: auto; }
 .azur-head__right { display: flex; align-items: center; gap: 10px; }
 .azur-head__dots { width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; background: none; border: 0; border-radius: 50% !important; cursor: pointer; }
@@ -53,8 +58,8 @@
 .azur-ghost { position: fixed; z-index: 160; left: clamp(16px, 3vw, 36px); top: calc(16px + env(safe-area-inset-top, 0px)); width: 78px; line-height: 0; opacity: 0; pointer-events: none;
   visibility: hidden; transition: opacity .5s ease, visibility 0s linear .5s; filter: drop-shadow(0 1px 8px rgb(0 0 0 / .5)); }   /* hidden: no Tab stop */
 .azur-ghost img { width: 100%; height: auto; }
-html.azur-pdp-open .azur-ghost, html.azur-mag-open .azur-ghost { opacity: .36; pointer-events: auto; visibility: visible; transition-delay: 0s; }
-html.azur-pdp-open .azur-ghost:hover, html.azur-mag-open .azur-ghost:hover { opacity: .75; }
+html.azur-mag-open .azur-ghost { opacity: .36; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+html.azur-mag-open .azur-ghost:hover { opacity: .75; }
 html.azur-pdp-open .azur-head, html.azur-mag-open .azur-head { opacity: 0; pointer-events: none; }
 
 /* ------------------------------------------------------------------ stage + world */
@@ -80,58 +85,49 @@ html.azur-pdp-open .azur-head, html.azur-mag-open .azur-head { opacity: 0; point
 
 /* hover label: a small piece of translucent material, not a product card */
 .azur-label { position: absolute; left: 0; top: 0; z-index: 70; display: grid; gap: 2px; padding: 9px 12px 10px; min-width: 150px; pointer-events: none;
-  background: rgb(246 241 233 / .74); color: var(--char); border: 1px solid rgb(255 255 255 / .5); border-radius: 3px !important;
-  -webkit-backdrop-filter: blur(12px) saturate(1.2); backdrop-filter: blur(12px) saturate(1.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .6);
+  background: color-mix(in srgb, var(--u-bg) 90%, transparent); color: var(--u-ink); border: 1px solid var(--u-line);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
   opacity: 0; translate: 0 6px; transition: opacity .22s ease, translate .32s var(--ease); }
 .azur-label.is-on { opacity: 1; translate: 0 0; }
 .azur-label__name { font-family: var(--display); font-variation-settings: "wdth" 72; font-weight: 750; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; }
-.azur-label__meta { font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; color: #3a352d; }
-.azur-label__cta { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 7px; margin-top: 3px; }
-.azur-label__cta::before { content: ""; width: 6px; height: 6px; border-radius: 50% !important; background: var(--glow); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent); }
-.is-night .azur-label { background: rgb(7 19 29 / .68); color: #E7F3F8; border-color: color-mix(in srgb, var(--glow) 45%, transparent);
-  box-shadow: 0 0 26px color-mix(in srgb, var(--glow) 22%, transparent); }
-.is-night .azur-label__meta { color: #b9cad3; }
-.is-night .azur-label__cta { color: var(--highlight); }
-.is-night .azur-label__cta::before { box-shadow: 0 0 8px var(--glow); }
+.azur-label__meta { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--u-mut); }
+.azur-label__cta { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--u-ink); display: flex; align-items: center; gap: 7px; margin-top: 3px; }
+.azur-label__cta::before { content: ""; width: 6px; height: 6px; background: var(--u-acc); }
 .is-room .azur-label { min-width: 0; padding: 7px 10px 8px; }
 
 /* the one quiet line under a chosen jersey */
 .azur-info { position: absolute; left: 0; top: 0; z-index: 72; display: flex; align-items: baseline; gap: 14px; white-space: nowrap; padding: 10px 16px;
-  background: rgb(246 241 233 / .8); color: var(--char); border: 1px solid rgb(255 255 255 / .55); border-radius: 3px !important;
+  background: color-mix(in srgb, var(--u-bg) 92%, transparent); color: var(--u-ink); border: 1px solid var(--u-line);
   -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 14px 40px rgba(0, 0, 0, .28);
   opacity: 0; pointer-events: none; translate: 0 8px; transition: opacity .28s ease .12s, translate .45s var(--ease) .12s; }
 .azur-info.is-on { opacity: 1; pointer-events: auto; translate: 0 0; }
-.azur-info__n { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.azur-info__n { font-family: var(--mono); font-size: 12px; color: var(--u-mut); }
 .azur-info__name { font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 19px; text-transform: uppercase; letter-spacing: .01em; }
 .azur-info__price { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
-.azur-info__cta { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--glow) 70%, transparent); padding-bottom: 2px; }
-.azur-info__cta:hover { color: #000; border-bottom-color: var(--glow); }
-.azur-info__back { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; background: none; border: 0; padding: 0; color: var(--muted); cursor: pointer; }
-.azur-info__back:hover { color: var(--char); }
-.is-night .azur-info { background: rgb(7 19 29 / .74); color: #E7F3F8; border-color: color-mix(in srgb, var(--glow) 40%, transparent); }
-.is-night .azur-info__cta { color: var(--highlight); }
-.is-night .azur-info__n, .is-night .azur-info__back { color: #8ea3ad; }
+.azur-info__cta { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--u-ink); text-decoration: none;
+  border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+.azur-info__cta:hover { border-bottom-width: 2px; }
+.azur-info__back { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; background: none; border: 0; padding: 0; color: var(--u-mut); cursor: pointer; }
+.azur-info__back:hover { color: var(--u-ink); }
 
 /* ------------------------------------------------------------------ drop sign-up + holographic confirmation */
-.azur-drop { position: absolute; left: 0; top: 0; z-index: 74; width: 320px; padding: 18px 18px 16px; color: #E9EEF1;
-  background: rgb(9 12 16 / .78); border: 1px solid color-mix(in srgb, var(--glow) 38%, transparent); border-radius: 4px !important;
-  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 0 40px color-mix(in srgb, var(--glow) 16%, transparent), 0 20px 50px rgba(0, 0, 0, .45);
+.azur-drop { position: absolute; left: 0; top: 0; z-index: 74; width: 320px; padding: 18px 18px 16px; color: var(--u-ink);
+  background: color-mix(in srgb, var(--u-bg) 94%, transparent); border: 1px solid var(--u-line);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
   opacity: 0; pointer-events: none; translate: 0 10px; transition: opacity .3s ease .15s, translate .5s var(--ease) .15s; }
 .azur-drop.is-on { opacity: 1; pointer-events: auto; translate: 0 0; }
 .azur-drop__kicker { margin: 0; font-family: var(--display); font-variation-settings: "wdth" 66; font-weight: 800; font-size: 26px; letter-spacing: .01em; text-transform: uppercase; line-height: 1; }
-.azur-drop__text { margin: 6px 0 14px; font-size: 14px; color: #b9c6cd; }
+.azur-drop__text { margin: 6px 0 14px; font-size: 14px; color: var(--u-mut); }
 .azur-drop__form { display: grid; gap: 8px; }
-.azur-drop__input { font: 15px/1.2 var(--body); padding: 11px 12px; background: rgba(255, 255, 255, .06); color: #fff; border: 1px solid rgba(255, 255, 255, .18); border-radius: 3px !important; }
-.azur-drop__input::placeholder { color: #8b979e; }
-.azur-drop__input:focus { outline: none; border-color: var(--glow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--glow) 25%, transparent); }
-.azur-drop__btn { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; padding: 12px; border: 0; border-radius: 3px !important; cursor: pointer;
-  background: var(--glow); color: var(--night); font-weight: 600; }
-.azur-drop__btn:hover { background: var(--highlight); }
-.azur-drop__error { margin: 0; font-size: 12.5px; color: #FFB3A3; }
-.azur-drop__legal { margin: 12px 0 0; font-size: 11.5px; line-height: 1.45; color: #8e9aa1; }
-.azur-drop__close { position: absolute; top: 8px; right: 10px; background: none; border: 0; font-size: 20px; color: #8e9aa1; cursor: pointer; }
+.azur-drop__input { font: 16px/1.2 var(--body); height: 48px; padding: 0 12px; background: var(--u-paper); color: var(--u-ink); border: 1px solid var(--u-mut); }
+.azur-drop__input::placeholder { color: var(--u-mut); }
+.azur-drop__input:focus { outline: 2px solid var(--u-ink); outline-offset: 1px; }
+.azur-drop__btn { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; height: 48px; padding: 0 12px; border: 0; cursor: pointer;
+  background: var(--u-acc); color: var(--u-acc-ink); font-weight: 600; }
+.azur-drop__btn:hover { filter: brightness(1.08); }
+.azur-drop__error { margin: 0; font-size: 13px; color: var(--c-error, #ff8a80); }
+.azur-drop__legal { margin: 12px 0 0; font-size: 12px; line-height: 1.45; color: var(--u-mut); }
+.azur-drop__close { position: absolute; top: 8px; right: 10px; background: none; border: 0; font-size: 20px; color: var(--u-mut); cursor: pointer; }
 
 .azur-holo { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; align-content: center; gap: 22px; pointer-events: none; opacity: 0;
   background: radial-gradient(60% 50% at 50% 46%, color-mix(in srgb, var(--glow) 16%, transparent), rgba(4, 7, 10, .5) 70%); transition: opacity .45s ease; }
@@ -160,23 +156,23 @@ html.azur-pdp-open .azur-head, html.azur-mag-open .azur-head { opacity: 0; point
   border-bottom: 1px solid color-mix(in srgb, var(--glow) 60%, transparent); padding: 4px 0; }
 
 /* ------------------------------------------------------------------ view chips, hint, tease, bed hotspot, window */
-.azur-views { position: absolute; z-index: 60; left: clamp(16px, 3vw, 36px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 4px;
-  padding: 4px; border-radius: 99px !important; background: rgb(12 12 12 / .42); border: 1px solid rgb(255 255 255 / .14); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-.azur-views button { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(243, 238, 230, .78);
-  background: none; border: 0; border-radius: 99px !important; padding: 7px 12px; cursor: pointer; display: flex; align-items: center; gap: 7px; }
-.azur-views button[aria-current="true"] { color: #fff; background: rgb(255 255 255 / .1); }
-.azur-views button[aria-current="true"]::before { content: ""; width: 5px; height: 5px; border-radius: 50% !important; background: var(--glow); box-shadow: 0 0 8px var(--glow); }
-.azur-hint { position: absolute; left: 0; top: 0; z-index: 65; margin: 0; padding: 8px 14px; border-radius: 99px !important; pointer-events: none;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: #fff; background: rgb(10 10 10 / .5);
-  border: 1px solid color-mix(in srgb, var(--glow) 40%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+.azur-views { position: absolute; z-index: 60; left: clamp(16px, 3vw, 36px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex;
+  background: color-mix(in srgb, var(--u-bg) 88%, transparent); border: 1px solid var(--u-line); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.azur-views button { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--u-mut);
+  background: none; border: 0; border-bottom: 2px solid transparent; min-height: 40px; padding: 0 14px; cursor: pointer; display: flex; align-items: center; }
+.azur-views button:hover { color: var(--u-ink); }
+.azur-views button[aria-current="true"] { color: var(--u-ink); border-bottom-color: var(--u-ink); }
+.azur-hint { position: absolute; left: 0; top: 0; z-index: 65; margin: 0; padding: 9px 14px; pointer-events: none;
+  font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--u-ink); background: color-mix(in srgb, var(--u-bg) 88%, transparent);
+  border: 1px solid var(--u-line); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   opacity: 0; transition: opacity .6s ease; }
 .azur-hint.is-on { opacity: 1; animation: azur-breathe 2.8s ease-in-out infinite; }
-@keyframes azur-breathe { 50% { box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 35%, transparent); } }
+@keyframes azur-breathe { 50% { border-color: var(--u-ink); } }
 .azur-tease { position: absolute; z-index: 60; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; margin: 0; pointer-events: none;
-  font-family: "Caveat", "Segoe Print", cursive; font-size: 24px; color: rgba(255, 246, 230, .88); text-shadow: 0 2px 12px rgba(0, 0, 0, .6); opacity: 0; transition: opacity .8s ease .5s; }
+  font-family: var(--body); font-size: 15px; font-weight: 500; color: rgba(255, 246, 230, .9); text-shadow: 0 2px 12px rgba(0, 0, 0, .6); opacity: 0; transition: opacity .8s ease .5s; }
 .azur-tease.is-on { opacity: 1; }
-.azur-bedlabel { position: absolute; z-index: 66; left: 0; top: 0; pointer-events: none; padding: 6px 11px; border-radius: 99px !important; font-family: var(--mono); font-size: 10px;
-  letter-spacing: .16em; text-transform: uppercase; color: #fff; background: rgb(10 10 10 / .5); border: 1px solid color-mix(in srgb, var(--glow) 40%, transparent);
+.azur-bedlabel { position: absolute; z-index: 66; left: 0; top: 0; pointer-events: none; padding: 7px 11px; font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--u-ink); background: color-mix(in srgb, var(--u-bg) 88%, transparent); border: 1px solid var(--u-line);
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); opacity: 0; translate: -50% 6px; transition: opacity .25s, translate .35s var(--ease); }
 .azur-bedlabel.is-on { opacity: 1; translate: -50% 0; }
  0%, 100% { transform: translate(0, 0); } 45% { transform: translate(14px, -10px); } 55% { transform: translate(16px, -8px); } }
@@ -212,27 +208,27 @@ html.azur-pdp-open .azur-info, html.azur-pdp-open .azur-regie { opacity: 0 !impo
 .is-mobile .azur-missing { bottom: auto; top: calc(64px + env(safe-area-inset-top, 0px)); white-space: nowrap; font-size: 9.5px; }
 .has-selection .azur-missing { opacity: 0; }
 
-/* ------------------------------------------------------------------ product page: Runde 10 „Modemagazin + Aufstellung“ in Kunstrasen-Neon
+/* ------------------------------------------------------------------ product page: Runde 10 „Modemagazin + Aufstellung“
    The name runs huge across the top, the jersey (3D model, the photo until it is loaded) stands in front of it, the story
-   on the left, the sizes as players on a small pitch on the right („Spieler wird aufgestellt“), a buy bar along the bottom.
-   Colours: the theme's tokens where they exist (Shopify), the same values otherwise (prototype). */
-.azur-pdp { --t-bg: var(--c-paper, #0a0f0b); --t-surf: var(--c-surface, #121a14); --t-plate: var(--c-plate, #19231b); --t-ink: var(--c-ink, #eef5ee);
-  --t-mut: var(--c-grey-text, #9fb1a2); --t-line: var(--c-grey-line, #233026); --t-acc: var(--c-acc, #39ff88); --t-acc-ink: var(--c-acc-ink, #062b14);
-  position: fixed; inset: 0; z-index: 110; display: grid; overflow: hidden;
-  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr) minmax(240px, 1fr); grid-template-rows: minmax(0, 24vh) minmax(0, 1fr) auto;
-  column-gap: clamp(16px, 2.6vw, 44px); padding: 0 clamp(20px, 4vw, 64px);
-  background: color-mix(in srgb, var(--t-bg) 97%, transparent); color: var(--t-ink); font-family: var(--body);
-  pointer-events: none; visibility: hidden; opacity: 0; transition: opacity .45s var(--ease), visibility 0s linear .45s; }
-.azur-pdp.is-on { pointer-events: auto; visibility: visible; opacity: 1; transition: opacity .45s var(--ease); }
+   on the left, the sizes as players on a pitch right next to the jersey („Spieler wird aufgestellt“), a buy bar along the bottom.
+   Runde 12: colours are the shop's tokens (--u-*); it opens under the shop's header (one header, one cart), and its
+   background takes a faint, greyed hint of the jersey's main colour (--tint, set per jersey in the theme's azur.css). */
+.azur-pdp { --t-bg: var(--u-paper); --t-surf: var(--u-bg); --t-plate: var(--c-plate, #2c2e31); --t-ink: var(--u-ink);
+  --t-mut: var(--u-mut); --t-line: var(--u-line); --t-acc: var(--u-acc); --t-acc-ink: var(--u-acc-ink);
+  position: fixed; inset: var(--header-bottom, 0px) 0 0; z-index: 45; display: grid; overflow: hidden;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.45fr) minmax(280px, 1fr); grid-template-rows: minmax(0, 22vh) minmax(0, 1fr) auto;
+  column-gap: clamp(12px, 1.8vw, 32px); padding: 0 clamp(20px, 4vw, 64px);
+  background-color: var(--t-bg); color: var(--t-ink); font-family: var(--body);
+  pointer-events: none; visibility: hidden; opacity: 0; transition: opacity .45s var(--ease), visibility 0s linear .45s, background-color .9s ease; }
+.azur-pdp[data-tone] { background-color: var(--tint-bg, var(--t-bg)); }
+.azur-pdp.is-on { pointer-events: auto; visibility: visible; opacity: 1; transition: opacity .45s var(--ease), background-color .9s ease; }
 html.azur-pdp-open { overflow: hidden; }
-html.azur-pdp-open .drawer { z-index: 120; }          /* the theme's cart drawer slides in over the product view */
-html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
-.azur-pdp__x { position: absolute; z-index: 6; top: calc(16px + env(safe-area-inset-top, 0px)); right: clamp(14px, 2.4vw, 28px); width: 44px; height: 44px; border-radius: 50% !important;
+.azur-pdp__x { position: absolute; z-index: 6; top: 16px; right: clamp(14px, 2.4vw, 28px); width: 44px; height: 44px;
   display: grid; place-items: center; padding: 0; cursor: pointer; border: 1px solid var(--t-line); background: var(--t-surf); color: var(--t-ink); font-size: 26px; line-height: 1; }
-.azur-pdp__x:hover, .azur-pdp__x:focus-visible { border-color: var(--t-acc); }
+.azur-pdp__x:hover, .azur-pdp__x:focus-visible { border-color: var(--t-ink); }
 .azur-pdp__x span { translate: 0 -1px; }
 .azur-pdp :focus-visible { outline: 2px solid var(--t-acc); outline-offset: 3px; }
-.azur-pdp__title { grid-area: 1 / 1 / 3 / 4; align-self: start; z-index: 0; margin: 0; padding-top: calc(30px + env(safe-area-inset-top, 0px)); text-align: center; white-space: nowrap;
+.azur-pdp__title { grid-area: 1 / 1 / 3 / 4; align-self: start; z-index: 0; margin: 0; padding-top: 46px; text-align: center; white-space: nowrap;
   font-family: var(--display); font-variation-settings: "wdth" 62; font-stretch: 62%; font-weight: 900; font-size: min(16.5vw, calc(200vw / var(--len, 9)), 260px); line-height: .84; text-transform: uppercase;
   pointer-events: none; translate: 0 26px; transition: translate .7s var(--ease); }
 .azur-pdp.is-on .azur-pdp__title { translate: 0 0; }
@@ -246,22 +242,22 @@ html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
 .azur-pdp__canvas:active { cursor: grabbing; }
 .azur-pdp.has-model .azur-pdp__canvas { opacity: 1; }
 .azur-pdp.has-model .azur-pdp__img { opacity: 0 !important; transition-duration: .5s; }
-.azur-pdp__hint { position: absolute; left: 50%; bottom: 4px; translate: -50% 0; margin: 0; white-space: nowrap; pointer-events: none; font-family: var(--mono); font-size: 10px;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--t-mut); opacity: 0; transition: opacity .6s ease .5s; }
+.azur-pdp__hint { position: absolute; left: 50%; bottom: 4px; translate: -50% 0; margin: 0; white-space: nowrap; pointer-events: none; font-family: var(--mono); font-size: 11px;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); opacity: 0; transition: opacity .6s ease .5s; }
 .azur-pdp.has-model .azur-pdp__hint { opacity: 1; }
 .azur-pdp.has-model.is-touched .azur-pdp__hint { opacity: 0; transition-delay: 0s; }
 .azur-pdp__story { grid-area: 2 / 1 / 3 / 2; z-index: 2; align-self: center; display: grid; gap: 12px; max-width: 36ch; padding-block: 12px; }
-.azur-pdp__crumbs { display: flex; gap: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--t-mut); }
-.azur-pdp__crumbs button { background: none; border: 0; padding: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; color: var(--t-acc); }
-.azur-pdp__fit { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--t-mut); }
+.azur-pdp__crumbs { display: flex; gap: 8px; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
+.azur-pdp__crumbs button { background: none; border: 0; padding: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; color: var(--t-ink); text-decoration: underline; text-underline-offset: .25em; }
+.azur-pdp__fit { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 .azur-pdp__desc { margin: 0; font-size: 16px; line-height: 1.55; color: var(--t-ink); }
-.azur-pdp__hand { margin: 0; font-family: "Caveat", cursive; font-weight: 500; font-size: 28px; line-height: 1; color: var(--t-acc); rotate: -3deg; }
+.azur-pdp__hand { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-ink); }
 .azur-pdp__facts { list-style: none; margin: 4px 0 0; padding: 12px 0 0; border-top: 1px solid var(--t-line); display: grid; gap: 6px; font-size: 13px; color: var(--t-mut); }
-.azur-pdp__shop { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--t-acc); text-decoration: none; justify-self: start; }
-.azur-pdp__back { justify-self: start; background: none; border: 0; padding: 4px 0 0; cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--t-ink); }
+.azur-pdp__shop { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-ink); text-decoration: underline; text-underline-offset: .25em; justify-self: start; }
+.azur-pdp__back { justify-self: start; background: none; border: 0; padding: 4px 0 0; cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 /* sizes as players: tap one and he steps up („Spieler wird aufgestellt“) */
-.azur-pdp__sizes { grid-area: 2 / 3 / 3 / 4; z-index: 2; align-self: center; justify-self: end; width: min(100%, 290px); display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.azur-pdp__sizes legend { float: left; width: 100%; margin-bottom: 10px; padding: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--t-mut); }
+.azur-pdp__sizes { grid-area: 2 / 3 / 3 / 4; z-index: 2; align-self: center; justify-self: start; width: min(100%, 360px); display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.azur-pdp__sizes legend { float: left; width: 100%; margin-bottom: 10px; padding: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 .azur-pitch { position: relative; aspect-ratio: 26 / 28; border: 2px solid var(--t-ink); }
 .azur-pitch::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid var(--t-ink); }
 .azur-pitch::after { content: ""; position: absolute; left: 50%; top: 50%; width: 26%; aspect-ratio: 1; translate: -50% -50%; border: 2px solid var(--t-ink); border-radius: 50% !important; }
@@ -269,26 +265,26 @@ html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
 .azur-pitch__box.is-top { top: -2px; border-top: 0; } .azur-pitch__box.is-bottom { bottom: -2px; border-bottom: 0; }
 .azur-pl { position: absolute; z-index: 1; left: var(--x); top: var(--y); translate: -50% -50%; }
 .azur-pl input { position: absolute; opacity: 0; pointer-events: none; }
-.azur-pl span { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50% !important; border: 2px solid var(--t-ink); background: var(--t-bg); color: var(--t-ink); cursor: pointer;
-  font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 900; font-size: 17px; transition: background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
+.azur-pl span { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50% !important; border: 2px solid var(--t-ink); background: var(--t-bg); color: var(--t-ink); cursor: pointer;
+  font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 900; font-size: 20px; transition: background-color .2s, border-color .2s, color .2s, box-shadow .2s; }
 .azur-pl span:hover { border-color: var(--t-acc); }
 .azur-pl input:checked + span { background: var(--t-acc); border-color: var(--t-acc); color: var(--t-acc-ink); box-shadow: 0 0 0 6px color-mix(in srgb, var(--t-acc) 28%, transparent);
   animation: azur-pl-pop .38s var(--ease); }
 .azur-pl input:focus-visible + span { outline: 2px solid var(--t-acc); outline-offset: 4px; }
 .azur-pl input:disabled + span { opacity: .35; text-decoration: line-through; cursor: not-allowed; }
 @keyframes azur-pl-pop { 40% { scale: 1.22; } }
-.azur-pdp__picked { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--t-mut); }
+.azur-pdp__picked { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 /* the buy bar along the bottom */
 .azur-pdp__buy { grid-area: 3 / 1 / 4 / 4; z-index: 3; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr) minmax(250px, 1fr); align-items: center; gap: 8px 26px;
-  margin: 0 0 calc(22px + env(safe-area-inset-bottom, 0px)); padding: 14px 18px 14px 24px; background: var(--t-surf); border: 1px solid var(--t-line); border-radius: 4px !important;
+  margin: 0 0 calc(22px + env(safe-area-inset-bottom, 0px)); padding: 14px 18px 14px 24px; background: var(--t-surf); border: 1px solid var(--t-line);
   box-shadow: 0 -10px 40px rgb(0 0 0 / .35); translate: 0 130%; transition: translate .6s var(--ease) .08s; }
 .azur-pdp.is-on .azur-pdp__buy { translate: 0 0; }
 .azur-pdp__name { margin: 0; display: grid; gap: 2px; }
 .azur-pdp__name b { font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 900; font-size: 26px; line-height: 1; text-transform: uppercase; }
-.azur-pdp__price { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--t-mut); }
+.azur-pdp__price { font-family: var(--mono); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--t-ink); }
 .azur-pdp__ship { margin: 0; font-size: 13px; color: var(--t-mut); }
-.azur-pdp__add { position: relative; height: 54px; border: 0; border-radius: 3px !important; cursor: pointer; background: var(--t-acc); color: var(--t-acc-ink);
-  font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.azur-pdp__add { position: relative; height: 54px; border: 0; cursor: pointer; background: var(--t-acc); color: var(--t-acc-ink);
+  font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .azur-pdp__add:disabled { background: var(--t-plate); color: var(--t-mut); cursor: not-allowed; }
 .azur-pdp__add:not(:disabled):hover { filter: brightness(1.08); }
 /* „Knopf wird zum Haken“ */
@@ -298,7 +294,7 @@ html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
 .azur-pdp__error { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--c-error, #ff8a80); }
 /* after the bag: how far to free shipping (a ball rolls along), and two ways on */
 .azur-pdp__after { position: absolute; z-index: 4; right: clamp(20px, 4vw, 64px); bottom: calc(118px + env(safe-area-inset-bottom, 0px)); width: min(380px, 40vw); display: grid; gap: 10px;
-  padding: 14px 16px 16px; border-radius: 4px !important; background: var(--t-surf); border: 1px solid var(--t-line); color: var(--t-ink); animation: azur-menuin .45s var(--ease); }
+  padding: 14px 16px 16px; background: var(--t-surf); border: 1px solid var(--t-line); color: var(--t-ink); animation: azur-menuin .45s var(--ease); }
 .azur-pdp__shipnow { margin: 0; font-size: 14px; font-weight: 650; }
 .azur-pdp__bar { position: relative; height: 6px; margin: 6px 0; border-radius: 3px !important; background: var(--t-line); }
 .azur-pdp__bar i { display: block; height: 100%; width: calc(var(--p, 0) * 100%); border-radius: 3px !important; background: var(--t-acc); transition: width 1s var(--ease); }
@@ -307,8 +303,8 @@ html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
     radial-gradient(circle at 100% 62%, #111 0 16%, transparent 18%), radial-gradient(circle at 24% 100%, #111 0 16%, transparent 18%), radial-gradient(circle at 76% 100%, #111 0 16%, transparent 18%), #fff;
   box-shadow: 0 0 0 1px #111; transition: left 1s var(--ease), rotate 1s var(--ease); }
 .azur-pdp__acts2 { display: flex; gap: 8px; flex-wrap: wrap; }
-.azur-pdp__acts2 button { flex: 1 1 140px; height: 44px; border-radius: 3px !important; cursor: pointer; border: 1px solid var(--t-ink); background: transparent; color: var(--t-ink);
-  font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.azur-pdp__acts2 button { flex: 1 1 140px; height: 44px; cursor: pointer; border: 1px solid var(--t-ink); background: transparent; color: var(--t-ink);
+  font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .azur-pdp__acts2 button[data-act="more"] { background: var(--t-ink); color: var(--t-bg); }
 @media (prefers-reduced-motion: reduce) {
   .azur-pdp, .azur-pdp__title, .azur-pdp__buy { transition: none; }
@@ -373,21 +369,21 @@ html.azur-pdp-open:has(.drawer.is-open) .azur-ghost { visibility: hidden; }
   .azur-pdp > * { flex: none; }
   .azur-pdp__sizes { order: 1; }                       /* on the phone the size comes right under the jersey */
   .azur-pdp__story { order: 2; }
-  .azur-pdp__title { position: relative; display: block; padding: calc(72px + env(safe-area-inset-top, 0px)) 16px 0; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; font-size: min(15vw, calc(180vw / var(--len, 9)), 110px); }
-  .azur-pdp__stage { height: 46vh; padding: 0; margin-top: -5vh; }
+  .azur-pdp__title { position: relative; display: block; padding: 64px 16px 0; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; font-size: min(15vw, calc(180vw / var(--len, 9)), 110px); }
+  .azur-pdp__stage { height: 42vh; padding: 0; margin-top: -5vh; }
   .azur-pdp__img { max-height: 42vh; width: auto; max-width: 86vw; }
   .azur-pdp__canvas { inset: 0; height: 100%; }
-  .azur-pdp__sizes { width: auto; margin: 6px 16px 0; align-self: stretch; justify-self: stretch; }
-  .azur-pitch { aspect-ratio: auto; height: 92px; }
+  .azur-pdp__sizes { width: auto; margin: 0 16px; align-self: stretch; justify-self: stretch; }
+  .azur-pitch { aspect-ratio: auto; height: 112px; }
   .azur-pitch::before { left: 50%; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 2px solid var(--t-ink); }
   .azur-pitch::after { width: auto; height: 38%; }
   .azur-pitch__box { left: auto; right: auto; top: 24%; bottom: 24%; height: auto; width: 8%; }
   .azur-pitch__box.is-top { left: -2px; top: 24%; border: 2px solid var(--t-ink); border-left: 0; }
   .azur-pitch__box.is-bottom { right: -2px; bottom: 24%; border: 2px solid var(--t-ink); border-right: 0; }
   .azur-pl { left: var(--hx); top: 50%; }
-  .azur-pl span { width: 46px; height: 46px; font-size: 15px; }
-  .azur-pdp__story { max-width: none; margin: 18px 16px 0; }
-  .azur-pdp__buy { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; border-radius: 0 !important; border-width: 1px 0 0; grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
+  .azur-pl span { width: 56px; height: 56px; font-size: 18px; }
+  .azur-pdp__story { max-width: none; margin: 18px 16px 0; align-self: stretch; }
+  .azur-pdp__buy { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; border-width: 1px 0 0; grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
     gap: 4px 14px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
   .azur-pdp__name b { font-size: 20px; }
   .azur-pdp__price { font-size: 12px; }

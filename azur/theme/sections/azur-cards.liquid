@@ -4,6 +4,9 @@
   hinten die Größe wählen und direkt in den Warenkorb, der dann rechts hereingleitet (azur.js, Abschnitt Spielerkarten).
   Die Überschrift klappt wie eine Anzeigetafel auf (data-flap). Ohne JavaScript führt jede Karte zur Produktseite.
   Runde 11 (nach basement.studio): jede Karte steht in einer Zelle mit Haarlinien und Nummer, die Anzahl hochgestellt.
+  Runde 12: größer (Desktop 3, iPad 2, Handy 1 pro Reihe), ein Klick auf die Rückseite dreht zurück, „Groß ansehen“ öffnet
+  das Trikot groß (Vorder- und Rückseite; schließen mit ×, Esc oder Klick daneben), die gewendete Karte trägt einen Hauch
+  der Trikotfarbe (data-tone).
 {%- endcomment -%}
 {%- liquid
   assign coll = settings.main_collection
@@ -52,9 +55,32 @@
           endfor
           assign sizes = sizes | strip | split: ' '
           assign cid = section.id | append: '-' | append: p.id
+          capture tone
+            render 'product-field', product: p, field: 'tone'
+          endcapture
+          assign big = ''
+          if p.featured_media
+            assign big = p.featured_media | image_url: width: 1600
+          endif
+          assign big_back = ''
+          for m in p.media
+            assign a = m.alt | downcase
+            if a contains 'rückseite' or a contains 'hinten'
+              assign big_back = m | image_url: width: 1600
+              break
+            endif
+          endfor
         -%}
-        <li class="pcard pcard--{{ kind }}" data-pcard>
+        <li class="pcard pcard--{{ kind }}" data-pcard{% if tone != blank %} data-tone="{{ tone | strip }}"{% endif %}>
           <span class="pcard__no" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+          {%- capture zoom_attrs -%}
+            data-jbox-open data-jbox-front="{{ big }}" data-jbox-back="{{ big_back }}" data-jbox-name="{{ label | escape }}"
+            data-jbox-price="{% render 'price', amount: p.price %}" data-jbox-url="{{ p.url }}"
+          {%- endcapture -%}
+          <button class="pcard__zoom" type="button" {{ zoom_attrs }}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/></svg>
+            <span class="sr-only">{{ label }} groß ansehen</span>
+          </button>
           <div class="pcard__inner">
             <a class="pcard__front" href="{{ p.url }}" data-pcard-flip aria-expanded="false" aria-controls="{{ cid }}-back">
               <span class="pcard__top"><b class="pcard__code">{{ code }}</b><span class="pcard__kind">{% if kind == 'stadt' %}Stadt{% else %}Land{% endif %}</span></span>
@@ -86,7 +112,7 @@
                 <p class="pcard__msg" role="status" data-pcard-msg></p>
               </form>
               <div class="pcard__back-foot">
-                <a class="link" href="{{ p.url }}">Details</a>
+                <button class="link" type="button" {{ zoom_attrs }}>Groß ansehen</button>
                 <button class="link" type="button" data-pcard-flip>↺ Vorderseite</button>
               </div>
             </div>
@@ -94,6 +120,22 @@
         </li>
       {%- endfor -%}
     </ul></div>
+
+    <dialog class="jbox" data-jbox aria-labelledby="jbox-name-{{ section.id }}">
+      <div class="jbox__panel">
+        <button class="jbox__x" type="button" data-jbox-close><span aria-hidden="true">×</span><span class="sr-only">Schließen</span></button>
+        <figure class="jbox__fig"><img class="jbox__img" alt="" width="1600" height="1600" data-jbox-img></figure>
+        <div class="jbox__side">
+          <h2 class="jbox__name" id="jbox-name-{{ section.id }}" data-jbox-name></h2>
+          <p class="jbox__price" data-jbox-price></p>
+          <div class="jbox__views" role="group" aria-label="Ansicht" data-jbox-views>
+            <button class="size" type="button" data-jbox-view="front" aria-pressed="true">Vorne</button>
+            <button class="size" type="button" data-jbox-view="back" aria-pressed="false">Hinten</button>
+          </div>
+          <a class="btn btn--line jbox__link" href="#" data-jbox-link>Zur Produktseite <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </dialog>
   </section>
 {%- endif -%}
 

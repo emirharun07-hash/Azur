@@ -1,0 +1,59 @@
+{%- comment -%}
+  Produktkarte: Bild auf ruhiger Fläche (Hochformat 4:5), darunter Name in Versalien, Farben (grau) und Preis.
+  Die Farben entfallen auf kleinen Karten unter 768 px (zu schmal).
+  Mit Maus: beim Überfahren die Rückseite, wenn es ein Bild „…Rückseite“ gibt.
+  Name und Preis sind ein Link (Tippfläche mindestens 44 px), das Bild führt per Maus ebenfalls zum Produkt.
+  Parameter:
+    product   Produkt
+    size      large | small (halbe oder drittel Breite im Raster, Standard small)
+    eager     true = Bild sofort laden
+{%- endcomment -%}
+{%- liquid
+  capture label
+    render 'product-field', product: product, field: 'label'
+  endcapture
+  capture colorway
+    render 'product-field', product: product, field: 'colorway'
+  endcapture
+
+  assign img_sizes = '(min-width: 1024px) 33vw, 50vw'
+  if size == 'large'
+    assign img_sizes = '50vw'
+  endif
+  assign img_loading = 'lazy'
+  if eager
+    assign img_loading = 'eager'
+  endif
+
+  capture back
+    render 'product-image', product: product, view: 'back', sizes: img_sizes, class: 'card__img', decorative: true
+  endcapture
+
+  assign available_sizes = ''
+  for variant in product.variants
+    if variant.available
+      assign available_sizes = available_sizes | append: variant.option1 | append: ','
+    endif
+  endfor
+-%}
+<article class="card card--{{ size | default: 'small' }}" data-sizes="{{ available_sizes }}">
+  <div class="card__media">
+    <a class="card__link" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+      <span class="card__view card__view--front">
+        {%- render 'product-image', product: product, view: 'front', sizes: img_sizes, class: 'card__img', loading: img_loading, decorative: true -%}
+      </span>
+      {%- if back != blank -%}
+        <span class="card__view card__view--back">{{ back }}</span>
+      {%- endif -%}
+    </a>
+    {%- unless product.available -%}
+      <p class="card__flag">Ausverkauft</p>
+    {%- endunless -%}
+  </div>
+
+  <a class="card__info" href="{{ product.url }}">
+    <h3 class="card__name">{{ label }}</h3>
+    {%- if colorway != blank -%}<p class="card__colors"><span class="sr-only">Farben: </span>{{ colorway }}</p>{%- endif -%}
+    <p class="card__price">{% render 'price', amount: product.price %}</p>
+  </a>
+</article>

@@ -1,7 +1,7 @@
 # Texte direkt auf der Website ändern: einmal einrichten
 
 Danach könnt ihr beide auf der Website selbst (ohne Shopify-Admin) ändern:
-- das **Laufband oben** (eine Meldung pro Zeile)
+- die **Leiste oben** (eine Meldung pro Zeile)
 - auf jeder Produktseite die **Beschreibung**
 
 So funktioniert es: Ein kleiner Server bei Cloudflare (kostenlos) hält den Shopify-Zugang. Die Website kennt ihn nicht,
@@ -89,8 +89,8 @@ Shopify → Onlineshop → Themes → Code bearbeiten → `snippets/azur-admin.l
    z. B. `https://azurclothing.com/#admin`.
 2. Unten links erscheint **AZUR Admin**. Dort mit Name und Passwort anmelden. Das Login gilt 12 Stunden in diesem Browser.
    Danach erscheint der Knopf auch ohne `#admin`.
-3. **Laufband:** Im Panel eine Meldung pro Zeile eintragen und „Laufband speichern“ klicken. Nach dem Neuladen läuft der
-   neue Text. Wird das Feld geleert und gespeichert, gilt wieder der Text aus dem Theme-Editor.
+3. **Leiste oben:** Im Panel eine Meldung pro Zeile eintragen und „Leiste speichern“ klicken. Nach dem Neuladen steht der
+   neue Text da. Wird das Feld geleert und gespeichert, gilt wieder der Text aus dem Theme-Editor.
 4. **Produktbeschreibung:** Auf einer Produktseite „Beschreibung bearbeiten“ klicken, im Text schreiben (Strg+B fett,
    Strg+I kursiv), dann „Beschreibung speichern“. Eingefügtes wird zu reinem Text. Erlaubt sind nur Absätze, fett,
    kursiv, Listen und Links.

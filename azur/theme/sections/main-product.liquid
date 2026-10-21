@@ -1,7 +1,9 @@
 {%- comment -%}
   Produktseite: Galerie (alle Produktbilder in Shopify-Reihenfolge, Klick vergrößert) und Kaufbereich (Name, Farben,
-  Preis mit Steuerhinweis, Größe mit Größentabelle, Warenkorb, Versand/Lieferung/Rückgabe offen, Fit/Model/Material/Pflege
+  Preis, Größe mit Größentabelle, Warenkorb, Versand/Lieferung/Rückgabe offen, Fit/Model/Material/Pflege
   aus den Metafeldern custom.*, Beschreibung, Aufklapper).
+  Runde 12: kein Steuerhinweis neben dem Preis (er steht im Footer, im Warenkorb und im Checkout); Brotkrumen beginnen
+  mit der Startseite; der Hintergrund trägt einen Hauch der Trikotfarbe (data-tone, azur.css).
   Ab 1024 px: alle Bilder groß untereinander (erstes über die volle Breite, dann zu zweit), der Kaufbereich läuft mit.
   Darunter: wischen mit Zähler; auf dem Handy erscheint unten eine feste Kaufleiste, sobald der Kaufknopf aus dem Bild ist.
   Ansichtsnamen kommen aus den Alt-Texten: "…Vorderseite" → Vorne, "…Rückseite" → Hinten, "Detail…" → Detail,
@@ -16,6 +18,9 @@
   endcapture
   capture motto
     render 'product-field', product: product, field: 'motto'
+  endcapture
+  capture tone
+    render 'product-field', product: product, field: 'tone'
   endcapture
 
   assign shipping_page = pages[settings.shipping_page_handle]
@@ -37,9 +42,10 @@
   assign images = product.media | where: 'media_type', 'image'
 -%}
 
-<article class="pdp" data-product data-product-label="{{ label | strip | escape }}">
+<article class="pdp" data-product data-product-label="{{ label | strip | escape }}"{% if tone != blank %} data-tone="{{ tone | strip }}"{% endif %}>
   <nav class="crumbs wrap" aria-label="Brotkrumen">
     <ol>
+      <li><a class="link" href="{{ routes.root_url }}">Startseite</a></li>
       <li><a class="link" href="{{ shop_coll.url }}">Shop</a></li>
       {%- if crumb.handle != shop_coll.handle -%}
         <li><a class="link" href="{{ crumb.url }}">{{ crumb.title }}</a></li>
@@ -145,7 +151,6 @@
 
       <div class="pdp__price-row">
         <p class="pdp__price" data-price>{% render 'price', amount: product.selected_or_first_available_variant.price %}</p>
-        {%- if settings.tax_note != blank -%}<p class="pdp__tax">{{ settings.tax_note }}</p>{%- endif -%}
       </div>
 
       {%- form 'product', product, id: form_id, class: 'pdp__buy', data-buy: '' -%}

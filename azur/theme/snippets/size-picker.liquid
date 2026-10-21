@@ -1,0 +1,62 @@
+{%- comment -%}
+  Rechteckige Größenauswahl als Radiogruppe (Formularfeld "id" = Varianten-ID).
+  Ausverkaufte Größen sind sichtbar, durchgestrichen und nicht wählbar.
+  Größentabelle aus der Theme-Einstellung "Größentabelle" (Größe | Brustbreite | Länge): Link rechts neben der
+  Legende, öffnet ein Popover (ohne JavaScript, schließt mit Esc oder Klick daneben). Leer = kein Link (Hinweis nur im Theme-Editor).
+  Parameter: product, form_id
+{%- endcomment -%}
+{%- liquid
+  assign option_name = product.options.first | default: 'Größe'
+  assign chart_id = form_id | append: '-chart'
+  assign chart_rows = settings.size_chart | strip | newline_to_br | split: '<br />'
+-%}
+<fieldset class="sizes" data-sizes-picker>
+  <legend class="sizes__legend">
+    <span>{{ option_name }}</span>
+    <span class="sizes__picked" data-size-picked aria-hidden="true"></span>
+  </legend>
+  {%- if settings.size_chart != blank -%}
+    <button class="sizes__chart link" type="button" popovertarget="{{ chart_id }}">Größentabelle</button>
+  {%- elsif request.design_mode -%}
+    <span class="sizes__chart">{% render 'placeholder', text: 'Größentabelle fehlt' %}</span>
+  {%- endif -%}
+  <div class="sizes__row" style="--n: {{ product.variants.size | at_most: 6 }}">
+    {%- for variant in product.variants -%}
+      {%- assign vid = form_id | append: '-' | append: variant.id -%}
+      <input class="sizes__input sr-only" type="radio" name="id" id="{{ vid }}" value="{{ variant.id }}"
+        data-size="{{ variant.option1 | escape }}" data-price="{{ variant.price }}"
+        {%- if forloop.first %} required{% endif -%}
+        {%- unless variant.available %} disabled{% endunless -%}
+        {%- if product.selected_variant and variant.id == product.selected_variant.id and variant.available %} checked{% endif %}>
+      <label class="size" for="{{ vid }}"{% unless variant.available %} data-soldout{% endunless %}>
+        {{- variant.option1 -}}
+        {%- unless variant.available %}<span class="sr-only"> – ausverkauft</span>{% endunless -%}
+      </label>
+    {%- endfor -%}
+  </div>
+</fieldset>
+
+{%- if settings.size_chart != blank -%}
+  <div class="chart" id="{{ chart_id }}" popover role="dialog" aria-labelledby="{{ chart_id }}-title">
+    <div class="chart__head">
+      <h2 class="chart__title" id="{{ chart_id }}-title">Größentabelle</h2>
+      <button class="chart__close" type="button" popovertarget="{{ chart_id }}" popovertargetaction="hide">Schließen</button>
+    </div>
+    <table class="chart__table">
+      <thead>
+        <tr><th scope="col">{{ option_name }}</th><th scope="col">Brustbreite (cm)</th><th scope="col">Länge (cm)</th></tr>
+      </thead>
+      <tbody>
+        {%- for row in chart_rows -%}
+          {%- assign cells = row | strip | split: '|' -%}
+          {%- if cells.size < 2 -%}{%- continue -%}{%- endif -%}
+          <tr>
+            <th scope="row">{{ cells[0] | strip }}</th>
+            <td>{{ cells[1] | remove: 'cm' | strip }}</td>
+            <td>{{ cells[2] | remove: 'cm' | strip }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+{%- endif -%}

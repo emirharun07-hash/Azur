@@ -1,0 +1,60 @@
+{%- comment -%}
+  Ein Produktbild nach Ansicht. Die Ansicht wird über den Alt-Text erkannt:
+    front   erstes Produktbild
+    back    Alt-Text enthält "Rückseite" (oder "hinten")
+    detail  Alt-Text beginnt mit "Detail"
+  Gibt nichts aus, wenn es die Ansicht nicht gibt.
+
+  Parameter: product, view, sizes, widths, class, loading ('lazy' | 'eager'), priority (true = fetchpriority high),
+             decorative (true = alt="")
+{%- endcomment -%}
+{%- liquid
+  assign pick = nil
+  if view == 'back' or view == 'detail'
+    for m in product.media
+      if m.media_type != 'image'
+        continue
+      endif
+      assign a = m.alt | downcase
+      if view == 'back'
+        if a contains 'rückseite' or a contains 'hinten'
+          assign pick = m
+          break
+        endif
+      else
+        assign head = a | slice: 0, 6
+        if head == 'detail'
+          assign pick = m
+          break
+        endif
+      endif
+    endfor
+  else
+    assign pick = product.featured_media
+  endif
+
+  assign img_widths = widths | default: '360, 540, 720, 900'
+  assign img_sizes = sizes | default: '100vw'
+  assign img_loading = loading | default: 'lazy'
+  assign img_alt = pick.alt | default: product.title
+  if decorative
+    assign img_alt = ''
+  endif
+  assign img_priority = 'auto'
+  if priority
+    assign img_priority = 'high'
+  endif
+-%}
+{%- if pick -%}
+  {{
+    pick
+    | image_url: width: 1600
+    | image_tag:
+      widths: img_widths,
+      sizes: img_sizes,
+      loading: img_loading,
+      fetchpriority: img_priority,
+      class: class,
+      alt: img_alt
+  }}
+{%- endif -%}

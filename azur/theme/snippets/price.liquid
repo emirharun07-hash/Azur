@@ -1,0 +1,2 @@
+{%- comment -%} Preis im Format "54,99 €". Aufruf: {% render 'price', amount: product.price %} {%- endcomment -%}
+{{- amount | money_without_currency }}&nbsp;{{ cart.currency.symbol -}}

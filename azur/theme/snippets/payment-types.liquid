@@ -1,0 +1,44 @@
+{%- comment -%}
+  Zahlungsarten, die im Checkout aktiv sind (shop.enabled_payment_types), als lesbare Liste: "Visa, Mastercard, PayPal".
+  Die Liste kommt direkt aus Einstellungen → Zahlungen. Gibt nichts aus, wenn Shopify keine meldet.
+{%- endcomment -%}
+{%- liquid
+  assign list = ''
+  for type in shop.enabled_payment_types
+    case type
+      when 'american_express'
+        assign name = 'American Express'
+      when 'apple_pay'
+        assign name = 'Apple Pay'
+      when 'google_pay'
+        assign name = 'Google Pay'
+      when 'shopify_pay'
+        assign name = 'Shop Pay'
+      when 'master'
+        assign name = 'Mastercard'
+      when 'paypal'
+        assign name = 'PayPal'
+      when 'diners_club'
+        assign name = 'Diners Club'
+      when 'ideal'
+        assign name = 'iDEAL'
+      when 'jcb'
+        assign name = 'JCB'
+      when 'unionpay'
+        assign name = 'UnionPay'
+      when 'twint'
+        assign name = 'TWINT'
+      when 'blik'
+        assign name = 'BLIK'
+      when 'eps'
+        assign name = 'eps'
+      else
+        assign name = type | replace: '_', ' ' | capitalize
+    endcase
+    if list != ''
+      assign list = list | append: ', '
+    endif
+    assign list = list | append: name
+  endfor
+  echo list
+-%}

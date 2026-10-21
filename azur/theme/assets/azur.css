@@ -11,18 +11,37 @@
    ========================================================================== */
 
 /* 1. Tokens ================================================================ */
+/* Farbpalette: ALLE Farben des Shops und des Zimmers kommen aus diesem einen Block (Runde 12). Für eine andere
+   Grundfarbe nur hier die Werte tauschen; Zimmer, Produktansicht, Karten, Warenkorb und Passwortseite folgen. */
 :root {
-  --c-paper: #0a0f0b;        /* Grundfläche: Kunstrasen bei Nacht */
-  --c-surface: #121a14;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten) */
+  --c-paper: #0a0f0b;        /* Grundfläche */
+  --c-surface: #121a14;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten, Leiste) */
   --c-plate: #19231b;        /* ruhige Bildfläche hinter Produkten */
-  --c-deep: #040705;         /* noch dunkler, für die früher schwarzen Bereiche (Passwortseite, Drops dunkel) */
-  --c-ink: #eef5ee;          /* Schrift (16:1 auf dem Grund) */
+  --c-ink: #eef5ee;          /* Schrift */
   --c-grey-line: #233026;    /* feine Linien */
-  --c-grey-text: #9fb1a2;    /* Sekundärtext (8:1 auf dem Grund) */
-  --c-grey-soft: #66796a;    /* nur Flächen und Symbole, nicht für Text (3:1) */
-  --c-acc: #39ff88;          /* Neongrün: Kaufen, Fortschritt, Hinweise */
-  --c-acc-ink: #062b14;      /* Schrift auf Neongrün (8:1) */
+  --c-grey-text: #9fb1a2;    /* Sekundärtext (mind. 4,5:1 auf Grund und Fläche) */
+  --c-grey-soft: #66796a;    /* nur Flächen und Symbole, nicht für Text */
+  --c-acc: #39ff88;          /* Kaufen, Fortschritt, kleine Hinweise */
+  --c-acc-ink: #062b14;      /* Schrift auf dem Kaufknopf */
   --c-error: #ff8a80;        /* nur für Fehlermeldungen */
+  --c-scheme: dark;          /* dark bei dunklem Grund, light bei hellem (Formularfelder, Scrollbalken) */
+  --logo-ink: none;          /* welches Logo auf dem Grund steht: dunkles (ink) bei hellem Grund, helles (paper) bei dunklem */
+  --logo-paper: block;
+  /* dunkle Bereiche (Passwortseite, dunkle Abschnitte, Bildflächen): bleiben bei jeder Palette dunkel */
+  --c-deep: #040705;
+  --d-ink: #eef5ee;
+  --d-text: #9fb1a2;
+  --d-line: #233026;
+  --d-surface: #121a14;
+  --d-acc: #39ff88;
+  --d-acc-ink: #062b14;
+  --c-on-photo: #f3eee6;     /* Schrift über dem Zimmer und über Fotos */
+  /* Trikotfarben: ein Hauch davon färbt den Hintergrund, wenn ein Trikot gewählt ist (stark vergraut, ca. 12 %) */
+  --tint-ffm: #1f6b45;
+  --tint-ber: #7a1f2e;
+  --tint-bra: #e2b714;
+  --tint-ger: #6f6f6f;
+  --tint-tur: #c41e26;
 
   --f-sans: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --w-narrow: 62%;
@@ -76,7 +95,7 @@
   border-radius: 0 !important;
 }
 html {
-  color-scheme: dark;
+  color-scheme: var(--c-scheme);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: calc(var(--header-h) + var(--s-4));
@@ -327,49 +346,13 @@ textarea.form__input { resize: vertical; }
 .acc__link { display: inline-flex; align-items: center; min-height: var(--tap); }
 
 /* 5. Leiste, Header, Menü ================================================= */
-/* Runde 11 (nach basement.studio): dunkle Leiste mit Haarlinie, Text in der Akzentfarbe */
-.bar { background: var(--c-surface); color: var(--c-acc); border-bottom: 1px solid var(--c-grey-line); --focus: var(--c-acc); }
-/* Laufband: die Meldungen stehen einmal im HTML; azur.js kopiert die Gruppe, bis sie die Leiste füllt, und lässt das
-   Band genau eine Gruppenbreite weit laufen (--bar-shift, --bar-dur), dann nahtlos von vorn. Ohne Skript: stehende Zeile. */
-.bar--run { position: relative; display: flex; align-items: center; height: var(--bar-h); overflow: hidden; }
-.bar__run { display: flex; flex: none; align-items: center; height: 100%; padding-left: var(--gutter); }
-.bar__group { display: flex; flex: none; align-items: center; margin: 0; padding: 0; list-style: none; }
-.bar__item {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.bar__item::after { content: ""; flex: none; width: 4px; height: 4px; margin-inline: 1.75rem; background: currentColor; opacity: 0.45; transform: rotate(45deg); }
-@keyframes bar-run { to { transform: translate3d(var(--bar-shift, 0), 0, 0); } }
-.bar.is-running .bar__run { animation: bar-run var(--bar-dur, 30s) linear infinite; will-change: transform; }
-.bar.is-running:is(:hover, :focus-within, .is-paused, .is-off) .bar__run { animation-play-state: paused; }
-.bar__pause {
-  position: absolute;
-  inset: 0 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: var(--bar-h);
-  background: var(--c-surface);
-  box-shadow: -1rem 0 1rem var(--c-surface);
-}
-.bar__pause svg { width: 0.625rem; height: 0.625rem; fill: currentColor; opacity: 0.7; }
-.bar__pause:hover svg { opacity: 1; }
-.bar__pause[aria-pressed="true"] .bar__icon-pause,
-.bar__pause[aria-pressed="false"] .bar__icon-play { display: none; }
-/* Bewegung reduzieren: nur die erste Meldung, still und mittig */
-@media (prefers-reduced-motion: reduce) {
-  .bar--run { justify-content: center; }
-  .bar__run { padding-left: 0; }
-  .bar__group + .bar__group,
-  .bar__item + .bar__item,
-  .bar__pause { display: none; }
-  .bar__item::after { content: none; }
-}
+/* Leiste oben (Runde 12): ruhig und statisch, Sekundärschrift auf der Fläche, eine Haarlinie darunter */
+.bar { background: var(--c-surface); color: var(--c-grey-text); border-bottom: 1px solid var(--c-grey-line); }
+.bar__inner { display: flex; align-items: center; justify-content: center; min-height: var(--bar-h); padding-block: 0.35rem; text-align: center; }
+.bar__group { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.15rem 0; margin: 0; padding: 0; list-style: none; }
+.bar__item { display: flex; align-items: center; font-size: 0.75rem; font-weight: 500; line-height: 1.3; letter-spacing: 0.02em; }
+.bar__item + .bar__item::before { content: ""; flex: none; width: 3px; height: 3px; margin-inline: 0.85rem; border-radius: 50% !important; background: currentColor; opacity: 0.6; }
+a.bar__inner:hover .bar__item { color: var(--c-ink); }
 
 .section-header { position: sticky; top: 0; z-index: var(--z-header); }
 .header {
@@ -411,7 +394,8 @@ textarea.form__input { resize: vertical; }
 .header__menu-btn[aria-expanded="true"] .icon--close { display: block; }
 .header__logo { display: flex; align-items: center; justify-content: center; height: 100%; padding-inline: var(--s-3); }
 .header__logo .logo { height: 1.75rem; width: auto; transition: height var(--dur-panel) var(--ease); }
-.header__logo .logo--ink { display: none; }   /* dunkler Grund: immer die helle Signatur */
+.header__logo .logo--ink, .footer__logo .logo--ink { display: var(--logo-ink); }   /* das Logo, das auf dem Grund steht (Palette oben) */
+.header__logo .logo--paper, .footer__logo .logo--paper { display: var(--logo-paper); }
 .header__nav,
 .header__search-end,
 .header__account { display: none; }
@@ -450,19 +434,19 @@ textarea.form__input { resize: vertical; }
 body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   margin-top: calc(var(--header-h) * -1);
 }
-.js body:has(#inhalt > .shopify-section:first-child > [data-hero])
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero])
   .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) {
   background: transparent;
   border-bottom-color: transparent;
 }
-.js body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
   .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) {
-  color: var(--c-paper);
-  --focus: var(--c-paper);
+  color: var(--c-on-photo);
+  --focus: var(--c-on-photo);
 }
-.js body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
   .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) .logo--ink { display: none; }
-.js body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
   .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) .logo--paper { display: block; }
 
 .menu {
@@ -721,7 +705,12 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
    Hell: ruhige Bildfläche wie hinter den Produkten; dunkel: Schwarz. Der Header liegt durchsichtig darüber,
    deshalb beginnt das Motiv erst unter dem Header. */
 .campaign { position: relative; overflow: hidden; background: var(--c-plate); }
-.campaign--dark { background: var(--c-deep); color: var(--c-ink); }
+/* dunkle Bereiche: dieselben Bausteine, mit dem dunklen Satz der Palette */
+:is(.campaign--dark, .template-password, .drops--dark) {
+  --c-paper: var(--c-deep); --c-surface: var(--d-surface); --c-plate: var(--d-surface); --c-ink: var(--d-ink); --c-grey-text: var(--d-text);
+  --c-grey-line: var(--d-line); --c-acc: var(--d-acc); --c-acc-ink: var(--d-acc-ink); --logo-ink: none; --logo-paper: block;
+  background: var(--c-deep); color: var(--c-ink); color-scheme: dark;
+}
 .campaign__media { position: relative; display: block; height: calc(min(122vw, 72svh) + var(--header-h)); min-height: 24rem; overflow: hidden; }
 .campaign__cutout {
   position: absolute;
@@ -781,7 +770,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .campaign--photo .campaign__media { height: min(125vw, 78svh); }
 @media (min-width: 64em) {
   .campaign--photo .campaign__media { height: auto; }
-  .campaign--photo .campaign__text { color: var(--c-paper); --focus: var(--c-paper); }
+  .campaign--photo .campaign__text { color: var(--c-on-photo); --focus: var(--c-on-photo); }
 }
 
 /* Produkte: Zeile und Link oben, darunter sechs Spuren auf jeder Breite (große Karten halb, übrige zu dritt) */
@@ -1021,7 +1010,6 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .notfound__num { font-size: clamp(6rem, 22vw, 14rem); line-height: 0.8; }
 
 /* Passwortseite, Geschenkkarte */
-.template-password { background: var(--c-deep); color: var(--c-ink); }
 .template-password .form__input { border-color: var(--c-ink); }
 .gate { min-height: 100vh; min-height: 100dvh; display: flex; align-items: stretch; }
 .gate__inner { display: grid; grid-template-rows: auto 1fr auto; gap: var(--s-7); padding-block: var(--s-6); }
@@ -1049,15 +1037,27 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .gate__error { padding-left: var(--s-3); border-left: 2px solid currentColor; }
 
 /* 12. Drops per Mail ======================================================= */
-/* Formular: E-Mail-Feld und Button in einer Zeile, darunter die Einwilligungszeile */
-.signup { display: grid; gap: var(--s-3); width: 100%; max-width: 34rem; }
-.signup__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
-.signup__email { min-height: 3.25rem; border-right: 0; }
-.signup__email::placeholder { color: var(--c-grey-text); opacity: 1; }
-.signup__btn { min-height: 3.25rem; }
-.signup__legal { font-size: 0.75rem; line-height: 1.45; color: var(--c-grey-text); }
-.signup__ok { padding: var(--s-4); border-left: 3px solid currentColor; background: var(--c-plate); font-weight: 600; }
-.signup__error { padding-left: var(--s-3); border-left: 2px solid var(--c-error); color: var(--c-error); font-size: var(--t-small); font-weight: 600; }
+/* Formular (Runde 12): Beschriftung über dem Feld, Feld und Knopf gleich hoch in einer Zeile (Handy: der Knopf darunter
+   über die volle Breite), Fehler direkt unter dem Feld, Erfolg als Kasten mit Haken, darunter die Einwilligungszeile */
+.signup { display: grid; gap: var(--s-2); width: 100%; max-width: 34rem; }
+.signup__label { font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-ink); }
+.signup__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; }
+.signup__email { height: 3.25rem; min-height: 0; border: var(--bw) solid var(--c-grey-text); border-right: 0; background: var(--c-paper); }
+.signup__email:focus { border-color: var(--c-ink); }
+.signup__email::placeholder { color: var(--c-grey-soft); opacity: 1; }
+.signup__email[aria-invalid="true"] { border-color: var(--c-error); }
+.signup__btn { height: 3.25rem; min-height: 0; padding-inline: var(--s-5); }
+@media (max-width: 25em) {
+  .signup__row { grid-template-columns: 1fr; gap: var(--s-2); }
+  .signup__email { border-right: var(--bw) solid var(--c-grey-text); }
+}
+.signup__error { display: flex; align-items: center; gap: var(--s-2); margin: 0; color: var(--c-error); font-size: var(--t-small); font-weight: 600; }
+.signup__error::before { content: "!"; flex: none; display: grid; place-items: center; width: 1.25rem; height: 1.25rem; border: 1.5px solid currentColor; border-radius: 50% !important; font-size: 0.75rem; line-height: 1; }
+.signup__legal { margin-top: var(--s-1); font-size: 0.75rem; line-height: 1.45; color: var(--c-grey-text); }
+.signup__ok { display: flex; align-items: flex-start; gap: var(--s-3); padding: var(--s-4); border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); }
+.signup__ok p { margin: 0; color: var(--c-grey-text); }
+.signup__ok strong { display: block; margin-bottom: var(--s-1); color: var(--c-ink); }
+.signup__tick { flex: none; display: grid; place-items: center; width: 1.75rem; height: 1.75rem; background: var(--c-acc); color: var(--c-acc-ink); font-weight: 700; }
 
 /* Teaser-Bild neben der Anmeldung: Frankfurt-Trikot freigestellt auf der Bildfläche, groß und unten angeschnitten
    (Kragen, Adler, Signatur, FRANKFURT-Band); eigenes Foto füllt die Fläche */
@@ -1094,7 +1094,6 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 
 /* Abschnitt „Drops per Mail“ (Seite Drops, optional Startseite) */
 .drops { padding-block: var(--s-8); }
-.drops--dark { background: var(--c-deep); color: var(--c-ink); }
 .drops__inner { display: grid; gap: var(--s-6); }
 .drops__main { display: grid; gap: var(--s-6); align-content: end; }
 .drops__head { display: grid; gap: var(--s-3); align-content: end; }
@@ -1104,10 +1103,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .drops__text { max-width: 30rem; font-size: 1.125rem; line-height: 1.45; }
 .drops--dark .drops__kicker,
 .drops--dark .signup__legal { color: var(--c-grey-text); }
-.drops--dark .form__input { border-color: var(--c-ink); color: var(--c-ink); }
-.drops--dark .signup__email::placeholder { color: var(--c-grey-text); }
-.drops--dark .signup__ok { background: var(--c-surface); }
-.drops--dark .signup__error { color: var(--c-error); border-color: var(--c-error); }
+.drops--dark .form__input { color: var(--c-ink); }
 @media (min-width: 64em) {
   .drops { padding-block: var(--s-9); }
   .drops__inner:not(.drops__inner--teaser) .drops__main { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--s-8); align-items: end; }
@@ -1239,9 +1235,10 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 /* Anzahl hochgestellt wie bei basement.studio: „Sammel deine Stadt ⁽⁵⁾“ */
 .pcards__count { position: static; padding-top: 0.3em; color: var(--c-acc); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); line-height: 1; font-variant-numeric: tabular-nums; }
 /* Raster aus Haarlinien: jede Karte steht in ihrer Zelle, mit Nummer oben links */
-.pcards__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--c-grey-line); border-left: 1px solid var(--c-grey-line); }
-@media (min-width: 48em) { .pcards__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 75em) { .pcards__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+/* Runde 12: deutlich größer: Handy eine Karte pro Reihe, ab 480 px (iPad hoch und quer) zwei, ab 1200 px drei */
+.pcards__grid { display: grid; grid-template-columns: minmax(0, 1fr); margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--c-grey-line); border-left: 1px solid var(--c-grey-line); }
+@media (min-width: 30em) { .pcards__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 75em) { .pcards__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .pcard { --cd-a: #e9d9a8; --cd-b: #b8954a; --cd-i: #2a2010; position: relative; padding: var(--s-6) clamp(0.6rem, 2vw, var(--s-5)) var(--s-5); border-right: 1px solid var(--c-grey-line); border-bottom: 1px solid var(--c-grey-line); perspective: 1400px; transition: background-color var(--dur-panel) var(--ease); }
 .pcard__no { position: absolute; top: var(--s-2); left: var(--s-3); color: var(--c-grey-soft); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); font-variant-numeric: tabular-nums; transition: color var(--dur-panel) var(--ease); }
@@ -1365,3 +1362,59 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 @keyframes fs-grow { from { width: var(--from, 0%); } }
 @keyframes fs-roll { from { left: var(--from, 0%); transform: translate(-50%, -50%) rotate(-540deg); } }
 @media (prefers-reduced-motion: reduce) { .freeship__bar > span, .freeship__ball { animation: none; } }
+
+/* 15. Runde 12: eine Website, Trikotfarbe, Trikot groß ===================== */
+/* Ein Hauch der Trikotfarbe im Hintergrund, wenn ein Trikot gewählt ist: Produktseite, gewendete Karte, Produktansicht
+   im Zimmer. Die Farbe wird stark vergraut (55 % Farbe, 45 % Grau) und nur zu 12 % in den Grund gemischt. */
+[data-tone="ffm"] { --tint: var(--tint-ffm); }
+[data-tone="ber"] { --tint: var(--tint-ber); }
+[data-tone="bra"] { --tint: var(--tint-bra); }
+[data-tone="ger"] { --tint: var(--tint-ger); }
+[data-tone="tur"] { --tint: var(--tint-tur); }
+:is([data-tone="ffm"], [data-tone="ber"], [data-tone="bra"], [data-tone="ger"], [data-tone="tur"]) {
+  --tint-bg: color-mix(in oklab, var(--c-paper) 88%, color-mix(in oklab, var(--tint) 55%, #808080));
+}
+.pdp[data-tone] { background: var(--tint-bg, transparent); transition: background-color 0.9s ease; }
+.pcard.is-flipped[data-tone] { background: var(--tint-bg, var(--c-surface)); }
+
+/* Zurück zur Startseite (Shop) */
+.back-home { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); margin-bottom: var(--s-2);
+  font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; }
+.back-home:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+
+/* Spielerkarten größer: die Karte bleibt im Format 5:8, höchstens 22 rem breit, mittig in der Zelle */
+.pcard__inner { width: 100%; max-width: 22rem; margin-inline: auto; }
+.pcard.is-flipped .pcard__back { cursor: pointer; }
+.pcard.is-flipped .pcard__back :is(form, .pcard__back-foot) { cursor: auto; }
+.pcard__back-foot button.link { padding: 0; background: none; border: 0; }
+/* Lupe oben rechts in der Zelle: öffnet das Trikot groß */
+.pcard__zoom { position: absolute; z-index: 2; top: var(--s-1); right: var(--s-1); display: grid; place-items: center; width: var(--tap); height: var(--tap);
+  color: var(--c-grey-text); transition: color var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.pcard__zoom svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.pcard__zoom:hover, .pcard__zoom:focus-visible { color: var(--c-ink); }
+.pcard.is-flipped .pcard__zoom { opacity: 0; pointer-events: none; }
+
+/* Trikot groß: Fenster in der Mitte, Bild links groß, rechts Name, Preis, Vorne/Hinten, Link zur Produktseite */
+.jbox { width: min(72rem, calc(100vw - 2 * var(--gutter))); max-width: none; max-height: calc(100dvh - 2 * var(--gutter)); margin: auto; padding: 0;
+  border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); color: var(--c-ink); overflow: auto; }
+.jbox::backdrop { background: rgb(0 0 0 / 0.72); }
+.jbox[open] { animation: jbox-in var(--dur-panel) var(--ease); }
+@keyframes jbox-in { from { opacity: 0; transform: translateY(0.75rem) scale(0.98); } }
+.jbox__panel { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); }
+.jbox__x { position: absolute; z-index: 2; top: var(--s-2); right: var(--s-2); display: grid; place-items: center; width: var(--tap); height: var(--tap);
+  border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); font-size: 1.75rem; line-height: 1; }
+.jbox__x:hover { border-color: var(--c-ink); }
+.jbox__fig { margin: 0; display: grid; place-items: center; background: var(--c-plate); aspect-ratio: 1; max-height: 78dvh; }
+.jbox__img { width: 100%; height: 100%; max-height: 78dvh; object-fit: contain; }
+.jbox__side { display: grid; gap: var(--s-3); align-content: start; padding: var(--s-5) var(--gutter) var(--s-6); }
+.jbox__name { font-size: clamp(1.75rem, 4vw, 2.75rem); font-stretch: var(--w-narrow); font-weight: 800; line-height: 0.95; text-transform: uppercase; }
+.jbox__price { font-weight: 600; }
+.jbox__views { display: flex; gap: var(--s-2); }
+.jbox__views .size { min-width: 5rem; }
+.jbox__views .size[aria-pressed="true"] { background: var(--c-ink); color: var(--c-paper); }
+.jbox__link { justify-self: start; }
+@media (min-width: 48em) {
+  .jbox__panel { grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr); }
+  .jbox__side { align-content: center; padding: var(--s-7) var(--s-6); }
+}
+@media (prefers-reduced-motion: reduce) { .jbox[open] { animation: none; } }

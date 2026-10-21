@@ -539,6 +539,33 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Round 12 (one site, neutral colour vote, static bar, bed fix, bigger cards, 2026-10-21)
+Draft theme "Azur Zimmer Runde 12 (Entwurf)" `gid://shopify/OnlineStoreTheme/209835884883` (copy of MAIN = Runde 10, which the
+owner published). Preview: https://azurclothing.com/?preview_theme_id=209835884883
+- Colour vote: https://claude.ai/artifact/DBdK1jxGqTNSAcKNWyFduy (azur/design/farbwahl.html, 8 neutral palettes, swipe; votes in
+  the artifact db `votes/<uid>` {votes: {id: 1|-1}}). After the owner's pick: put the palette's values into the one token block at
+  the top of assets/azur.css (incl. --c-scheme, --logo-ink/--logo-paper, the dark set --c-deep/--d-*), then delete the vote page.
+- Tokens: every colour of shop and room comes from that block; dark areas (password page, dark sections, the room) remap the
+  tokens to the dark set (`:is(.campaign--dark, .template-password, .drops--dark)`); the room's overlays use --u-* = theme tokens.
+- One site: the shop's header lies over the room (transparent, light text; solid while the room's product view is open, which
+  now opens under the header, z 45); the room's bag, dots and menu are gone (only the sound switch, under the header); one type
+  family (Martian Mono dropped, Caveat only for the signature inside ANSTOSS); square buttons and label type as in the shop.
+- Logo: header and footer render both signatures, the palette shows one (it was invisible on shop and product pages: no way
+  home). Shop page: "← Zurück zur Startseite"; product crumbs start with "Startseite".
+- Bar: static, "14 Tage kostenlose Rückgabe · Versand ab 90 € kostenlos" (section default; marquee JS/CSS removed).
+- §19 note: gone next to the price (product page, room product view, which wrongly said "inkl. MwSt."); stays in footer and cart.
+  Checkout and order mail: admin steps (no API), see the chat of 2026-10-21.
+- Sign-up (snippets/signup-form.liquid, used in footer, password page, drops page): visible label, field and button the same
+  height, error under the field (client check in azur.js + Shopify's), success box with a tick; footer teaser image off.
+- Bed: in the bed view the bed is a target again (glow, pointer, click opens ANSTOSS; no dot there, the label shows at the
+  magazine's dot). Cause: config.targets.bed lacked 'bed'.
+- Jersey tint: --tint-ffm/ber/bra/ger/tur; [data-tone] mixes 12 % of the greyed colour into the background (room product view,
+  product page, turned card).
+- Cards: 1 per row on phones, 2 from 480 px (iPad), 3 from 1200 px, card max 22 rem; a click on an empty spot of the back turns
+  it over; magnifier + "Groß ansehen" open a dialog (front/back, ×, Esc, click beside). Pitch next to the jersey, 360 px, 64 px players.
+- Harness: real header/footer, /collections/trikots, /products/<handle>, ?signup=ok|error, ?palette=creme|anthrazit
+  (azur/tools/theme_pages.py); the live snippets the pages need are now in azur/theme/snippets (unchanged copies).
+
 ## Round 11 (smoother, bar only in the shop, ideas from basement.studio, 2026-10-20)
 - Marquee bar: on the homepage with the room it no longer sits above the room (the room fills the whole screen). It slides
   down under the header once the header turns solid (the shop starts) and only runs then (CSS in sections/azur-room.liquid,

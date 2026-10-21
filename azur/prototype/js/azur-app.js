@@ -713,9 +713,11 @@
       this.region = t;
       this.stage.classList.toggle('is-going', !!t);
       const el = this.goLabel; if (!el) return;
-      const c = A.config.copy, dot = t && this.dots[t];
-      if (t && dot && !dot.hidden) {
-        el.textContent = t === 'bed' ? c.goBed : t === 'rail' ? c.goRail : c.magSpot;
+      // at the bed, the bed means ANSTOSS (the magazine on it): its label shows at the magazine's dot
+      const lt = t === 'bed' && this.viewKey.split('@')[0] === 'bed' ? 'mag' : t;
+      const c = A.config.copy, dot = lt && this.dots[lt];
+      if (lt && dot && !dot.hidden) {
+        el.textContent = lt === 'bed' ? c.goBed : lt === 'rail' ? c.goRail : c.magSpot;
         el.style.left = dot.style.left; el.style.top = (parseFloat(dot.style.top) - 18) + 'px';
         el.classList.add('is-on');
       } else el.classList.remove('is-on');
@@ -724,7 +726,8 @@
     goTarget(t) {
       this.setRegion(null);
       const dot = this.dots[t], r = dot && dot.getBoundingClientRect(), focus = r && r.width ? [r.left + r.width / 2, r.top + r.height / 2] : null;
-      if (t === 'bed') this.go('bed', { focus });
+      if (t === 'bed' && this.viewKey.split('@')[0] === 'bed') this.openMag();
+      else if (t === 'bed') this.go('bed', { focus });
       else if (t === 'rail') this.go(this.isMobile ? 'rail_m' : 'rail', { focus });
       else if (t === 'mag') this.openMag();
     }
@@ -732,7 +735,8 @@
       if (!this.dots) return;
       const cv = this.comp.view, t = this.targets(), d = cv && cv.masksImg ? this.masksData(cv) : null;
       Object.entries(this.dots).forEach(([k, b]) => {
-        const a = d && t.includes(k) && d.anchors[k];
+        // no dot for the place you are already at (the bed in the bed view): it still glows and answers a click
+        const a = d && t.includes(k) && k !== this.viewKey.split('@')[0] && d.anchors[k];
         b.hidden = !a; if (!a) return;
         const p = this.comp.toScreen(a[0], a[1], this.depthAt(a[0], a[1]));
         const W = this.stage.clientWidth, H = this.stage.clientHeight;

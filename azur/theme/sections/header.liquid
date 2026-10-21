@@ -2,7 +2,8 @@
   Header in drei Spalten: Navigation links, Logo in der Mitte, Suche / Konto / Warenkorb rechts.
   Navigation: die zwei Stadt-Trikots, Kategorie Nationaltrikots, Shop, Support. „Über Azur“ steht im Menü und im Footer.
   „Support“ klappt eine Leiste unter dem Header auf (Popover, ohne JavaScript; schließt mit Esc oder Klick daneben).
-  Startseite: liegt durchsichtig mit hellem Logo über dem dunklen Einstieg, bis der Einstieg nach oben weggescrollt ist.
+  Startseite: liegt durchsichtig mit hellem Logo über dem dunklen Einstieg (dem Zimmer), bis der Einstieg nach oben weggescrollt ist.
+  Das Logo führt auf jeder Seite zur Startseite (Runde 12: vorher war es auf Shop- und Produktseiten unsichtbar).
   Unter 1200 px: Menü-Knopf und Suche links, das Menü öffnet unter der Kopfleiste (dort auch Über Azur, Support, Konto).
 {%- endcomment -%}
 {%- liquid
@@ -84,10 +85,9 @@
     </div>
 
     <a class="header__logo" href="{{ routes.root_url }}">
+      {%- comment -%} beide Signaturen; welche sichtbar ist, entscheidet die Palette (azur.css, --logo-ink / --logo-paper) {%- endcomment -%}
       {%- render 'logo', tone: 'ink', eager: true, class: 'logo--ink' -%}
-      {%- if overlay -%}
-        {%- render 'logo', tone: 'paper', eager: true, class: 'logo--paper' -%}
-      {%- endif -%}
+      {%- render 'logo', tone: 'paper', eager: true, class: 'logo--paper' -%}
       <span class="sr-only">Startseite</span>
     </a>
 

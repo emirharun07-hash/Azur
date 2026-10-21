@@ -39,7 +39,7 @@ AZUR.config = {
   targets: {
     room: ['bed', 'rail'],
     rail: ['bed'],
-    bed: ['mag', 'rail'],
+    bed: ['mag', 'bed', 'rail'],   // Runde 12: the bed glows and answers a click here too (it opens ANSTOSS, which lies on it)
     rail_m: []
   },
   outline: { strength: 0.95, ease: 9 },

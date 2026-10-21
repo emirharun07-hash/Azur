@@ -254,52 +254,60 @@
     header.addEventListener('transitionend', queue); // Unterkante nach dem Schrumpfen neu messen
   }
 
-  /* ---- Leiste oben: Laufband ----------------------------------------------- */
-  // Kopiert die Gruppe der Meldungen, bis das Band die Leiste mehr als füllt, und lässt es genau eine Gruppenbreite weit
-  // laufen (danach steht die nächste Kopie an derselben Stelle: nahtlos). Tempo in px/s aus den Einstellungen.
-  // Hält bei Maus darüber, Fokus, Pause-Knopf und außerhalb des Bildes; bei „Bewegung reduzieren“ gar nicht erst an.
-  $$('[data-marquee]').forEach((bar) => {
-    const group = $('.bar__group', bar);
-    const run = group.parentElement;
-    const pause = $('[data-marquee-pause]', bar);
-    const speed = Number(bar.dataset.marquee) || 40;
-    let width = 0;
-
-    const fit = () => {
-      const w = group.getBoundingClientRect().width;
-      if (calm.matches || !w) {
-        bar.classList.remove('is-running');
-        pause.hidden = true;
-        return;
-      }
-      while (run.children.length < Math.ceil(bar.clientWidth / w) + 1) {
-        const copy = group.cloneNode(true);
-        copy.setAttribute('aria-hidden', 'true');
-        run.appendChild(copy);
-      }
-      if (w !== width) {
-        width = w;
-        bar.style.setProperty('--bar-shift', -w + 'px');
-        bar.style.setProperty('--bar-dur', (w / speed).toFixed(2) + 's');
-      }
-      bar.classList.add('is-running');
-      pause.hidden = false;
+  /* ---- Trikot groß (Runde 12): Vorder- und Rückseite in einem Fenster; schließen mit ×, Esc oder Klick daneben ---- */
+  const jbox = $('[data-jbox]');
+  if (jbox && typeof jbox.showModal === 'function') {
+    const img = $('[data-jbox-img]', jbox);
+    const views = $$('[data-jbox-view]', jbox);
+    let pics = {};
+    const show = (view) => {
+      img.src = pics[view] || pics.front;
+      views.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.jboxView === view)));
     };
-
-    pause.addEventListener('click', () => {
-      const paused = bar.classList.toggle('is-paused');
-      pause.setAttribute('aria-pressed', String(paused));
-      $('.sr-only', pause).textContent = paused ? 'Laufband fortsetzen' : 'Laufband anhalten';
+    document.addEventListener('click', (e) => {
+      const opener = e.target.closest('[data-jbox-open]');
+      if (!opener) return;
+      e.preventDefault();
+      const d = opener.dataset;
+      pics = { front: d.jboxFront, back: d.jboxBack };
+      $('[data-jbox-name]', jbox).textContent = d.jboxName;
+      $('[data-jbox-price]', jbox).textContent = d.jboxPrice;
+      $('[data-jbox-link]', jbox).href = d.jboxUrl;
+      img.alt = d.jboxName;
+      $('[data-jbox-views]', jbox).hidden = !d.jboxBack;
+      show('front');
+      jbox.showModal();
+      document.documentElement.classList.add('is-locked');
     });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(([entry]) => bar.classList.toggle('is-off', !entry.isIntersecting)).observe(bar);
-    }
-    let raf = 0;
-    const refit = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit); };
-    window.addEventListener('resize', refit);
-    calm.addEventListener('change', refit);
-    if (document.fonts) document.fonts.ready.then(refit);
-    fit();
+    views.forEach((b) => b.addEventListener('click', () => show(b.dataset.jboxView)));
+    $('[data-jbox-close]', jbox).addEventListener('click', () => jbox.close());
+    jbox.addEventListener('click', (e) => { if (e.target === jbox) jbox.close(); });   // Klick neben das Fenster
+    jbox.addEventListener('close', () => document.documentElement.classList.remove('is-locked'));
+  }
+
+  /* ---- Anmeldung (Runde 12): Adresse vor dem Absenden prüfen, Fehler direkt unter dem Feld ------------- */
+  $$('form.signup').forEach((form) => {
+    const input = $('[data-signup-email]', form);
+    const error = $('[data-signup-error]', form);
+    if (!input || !error) return;
+    form.noValidate = true;
+    const show = (text) => {
+      error.textContent = text;
+      error.hidden = !text;
+      input.setAttribute('aria-invalid', String(Boolean(text)));
+    };
+    form.addEventListener('submit', (e) => {
+      const value = input.value.trim();
+      let text = '';
+      if (!value) text = 'Bitte gib deine E-Mail-Adresse ein.';
+      else if (!input.checkValidity() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(value)) text = 'Diese Adresse ist nicht vollständig, z. B. name@beispiel.de.';
+      if (text) {
+        e.preventDefault();
+        show(text);
+        input.focus();
+      }
+    });
+    input.addEventListener('input', () => { if (!error.hidden) show(''); });
   });
 
   /* ---- Produktkarte: vorne / hinten ---------------------------------------- */
@@ -565,8 +573,11 @@
     const form = $('[data-pcard-form]', card);
     front.setAttribute('role', 'button');
     card.addEventListener('click', (e) => {
+      // Runde 12: ein Klick auf eine freie Stelle der Rückseite dreht die Karte wieder um (Größen, Knöpfe, Links nicht)
+      const onBack = card.classList.contains('is-flipped') && e.target.closest('.pcard__back')
+        && !e.target.closest('a, button, input, label, select, textarea');
       const t = e.target.closest('[data-pcard-flip]');
-      if (!t) return;
+      if (!t && !onBack) return;
       e.preventDefault();
       const on = !card.classList.contains('is-flipped');
       flipCard(card, on);

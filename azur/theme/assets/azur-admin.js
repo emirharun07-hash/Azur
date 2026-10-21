@@ -1,7 +1,7 @@
 /* AZUR — Texte direkt auf der Website ändern (nur für die zwei Admins). Lädt nur mit #admin in der Adresse oder nach
    einem Login (snippets/azur-admin.liquid). Spricht mit dem Admin-Server (azur/admin/worker.js, Cloudflare Worker), der
    allein den Shopify-Zugang hat; hier liegt nur ein Login-Token (12 h) im Browser.
-   Bearbeitbar: das Laufband oben (eine Meldung pro Zeile) und auf Produktseiten die Beschreibung. */
+   Bearbeitbar: die Leiste oben (eine Meldung pro Zeile) und auf Produktseiten die Beschreibung. */
 (function () {
   'use strict';
   const API = (window.AZUR_ADMIN_API || '').replace(/\/$/, '');
@@ -67,7 +67,7 @@
     session = null; store.set(null); setEditing(false); render(); if (note) say(note, true);
   }
 
-  /* ---- Bearbeiten: Produktbeschreibung direkt im Text, Laufband im Panel ---- */
+  /* ---- Bearbeiten: Produktbeschreibung direkt im Text, Leiste oben im Panel ---- */
   const fields = () => Array.from(document.querySelectorAll('[data-azur-edit]'));
   function setEditing(on) {
     editing = on;
@@ -111,8 +111,8 @@
     const bar = document.querySelector('[data-azur-bar]');
     const product = fields().find(el => el.dataset.azurEdit === 'product');
     panel.innerHTML = `<div class="azad__row"><h2>Angemeldet: ${esc(session.user)}</h2><button class="azad__btn azad__btn--ghost" type="button" data-out>Abmelden</button></div>
-      <label>Laufband oben (eine Meldung pro Zeile)<textarea data-bar>${esc(bar ? bar.dataset.azurBar : '')}</textarea></label>
-      <div class="azad__row"><button class="azad__btn" type="button" data-save-bar>Laufband speichern</button></div>
+      <label>Leiste oben (eine Meldung pro Zeile)<textarea data-bar>${esc(bar ? bar.dataset.azurBar : '')}</textarea></label>
+      <div class="azad__row"><button class="azad__btn" type="button" data-save-bar>Leiste speichern</button></div>
       ${product ? `<div class="azad__row"><button class="azad__btn azad__btn--ghost" type="button" data-edit aria-pressed="${editing}">${editing ? 'Bearbeiten beenden' : 'Beschreibung bearbeiten'}</button>
         <button class="azad__btn" type="button" data-save-product ${editing ? '' : 'disabled'}>Beschreibung speichern</button></div>
         <p class="azad__hint">Im Text klicken und schreiben. Strg+B fett, Strg+I kursiv. Eingefügtes wird zu reinem Text.</p>` : ''}
@@ -123,7 +123,7 @@
       try {
         const r = await call('/bar', { text: $('[data-bar]', panel).value });
         if (bar) bar.dataset.azurBar = r.text;
-        say('Laufband gespeichert. Nach dem Neuladen läuft es so.');
+        say('Leiste gespeichert. Nach dem Neuladen steht sie so da.');
       } catch (err) { if (err.message !== 'login') say(err.message, true); }
       btn.disabled = false;
     });

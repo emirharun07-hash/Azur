@@ -1,0 +1,5 @@
+{%- comment -%}
+  Hinweis auf eine fehlende Angabe, nur im Theme-Editor sichtbar (Kundinnen und Kunden sehen nichts).
+  Parameter: text   z. B. „Material fehlt“
+{%- endcomment -%}
+{%- if request.design_mode -%}<span class="ph-tag">{{ text }}</span>{%- endif -%}

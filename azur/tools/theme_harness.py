@@ -7,9 +7,12 @@ structure (the real announcement bar, overlay header, #inhalt, cart drawer) with
 POST /cart/add.js and POST /contact like Shopify does (enough for the room's cart and drop sign-up).
 Round 10: below the room the player cards (sections/azur-cards.liquid), the real cart drawer (sections/cart-drawer.liquid,
 also via ?sections=cart-drawer and the sections field of /cart/add.js) and the theme's own azur.js.
+Round 12: the real header and footer (with the sign-up), and /collections/trikots and /products/<handle> as whole pages
+(theme_pages.py). ?signup=ok|error shows the sign-up after sending, ?palette=creme|anthrazit a candidate palette.
 """
 import http.server, json, os, re, socketserver, sys
 from liquid import Environment, DictLoader
+import theme_pages as pages
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -31,6 +34,7 @@ def product(pid, handle, title, price, img, vids):
     return {'id': pid, 'handle': handle, 'title': title, 'price': price, 'url': '/products/' + handle,
             'description': f'<p>{title}. Polokragen, Azur-Signatur auf der Brust.</p>',
             'featured_image': {'url': f'/proto/assets/products/{img}.webp', 'aspect_ratio': 0.9},
+            'featured_media': {'url': f'/proto/assets/products/{img}.webp', 'alt': title}, 'media': [{'url': f'/proto/assets/products/{img}.webp', 'alt': title, 'media_type': 'image'}],
             'variants': [{'id': v, 'title': s, 'available': s != 'XL'} for v, s in zip(vids, ['S', 'M', 'L', 'XL'])]}
 
 
@@ -110,7 +114,7 @@ def render_drawer():
         items.append({'key': f"{it['id']}:x", 'url': cp['url'], 'image': cp['featured_image']['url'], 'product': cp, 'variant': {'option1': size}, 'quantity': q, 'final_line_price': p[3] * q})
         total += p[3] * q
     cart = {'item_count': sum(i['quantity'] for i in items), 'items': items, 'total_price': total}
-    return env.from_string(src).render(cart=cart, settings={'free_shipping_threshold': FREE_FROM, 'tax_note': 'inkl. MwSt.', 'main_collection': {'url': '/collections/trikots'}},
+    return env.from_string(src).render(cart=cart, settings={'free_shipping_threshold': FREE_FROM, 'tax_note': pages.SETTINGS['tax_note'], 'main_collection': {'url': '/collections/trikots'}},
                                        routes={'cart_url': '/cart'}, collections={'all': {'url': '/collections/all'}})
 
 
@@ -121,27 +125,23 @@ def render_bar():
     env = Environment()
     env.filters['newline_to_br'] = lambda v: (v or '').replace('\n', '<br />\n')
     settings = {s['id']: s.get('default') or '' for s in schema['settings'] if 'id' in s}
-    return env.from_string(src).render(section={'settings': settings}, settings={'shipping_cost': 'in Deutschland 1,99 €, ab 90 € kostenlos'})
+    return env.from_string(src).render(section={'settings': settings}, settings={'shipping_cost': 'in Deutschland 1,99 €, ab 90 € kostenlos'},
+                                       shop={'metafields': {'azur': {'announcement': {'value': ''}}}})
 
 
 PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Martian+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="/theme/assets/azur.css">
+<link rel="stylesheet" href="/theme/assets/azur.css">__PALETTE__
 <script>window.Shopify = { routes: { root: '/' } };</script>
 </head><body class="template-index">
 <div class="shopify-section section-bar">__BAR__</div>
-<div class="shopify-section section-header"><header class="header header--overlay" data-header>
-  <div class="header__bar wrap" style="display:flex;justify-content:space-between;align-items:center;height:var(--header-h);padding:0 var(--gutter)">
-    <nav><a href="#">Berlin 030</a> &nbsp; <a href="#">Frankfurt 069</a> &nbsp; <a href="#">Shop</a></nav>
-    <a class="header__logo" href="/"><img class="logo--ink" src="/theme_live_assets/azur-logo-ink.webp" alt="AZUR" style="height:28px;width:auto"><img class="logo--paper" src="/theme_live_assets/azur-logo-paper.webp" alt="" style="height:28px;width:auto;display:none"></a>
-    <a class="header__cart" href="/cart" data-cart-open>Warenkorb <span data-cart-count>0</span></a>
-  </div></header></div>
+<div class="shopify-section section-header" id="shopify-section-header">__HEADER__</div>
 <main id="inhalt" tabindex="-1">
   <div class="shopify-section section-azur-room">__SECTION__</div>
   <div class="shopify-section section-azur-cards">__CARDS__</div>
-  <div class="shopify-section"><section style="padding:4rem 2rem;min-height:40vh"><p>Die übrigen Startseiten-Bereiche folgen hier.</p></section></div>
 </main>
+<div class="shopify-section" id="shopify-section-footer">__FOOTER__</div>
 <div class="shopify-section section-cart-drawer" id="shopify-section-cart-drawer">__DRAWER__</div>
 <script src="/theme/assets/azur.js" defer></script>
 </body></html>"""
@@ -171,9 +171,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = json.dumps({'cart-drawer': render_drawer()}).encode()
             self.send_response(200); self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
-        if self.path.split('?')[0] in ('/', '/index.html'):
-            body = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
-                    .replace('__CARDS__', render_cards()).replace('__DRAWER__', render_drawer())).encode()
+        route, _, query = self.path.partition('?')
+        if route in ('/', '/index.html') or route.startswith('/collections/') or route.startswith('/products/'):
+            cart = {'item_count': len(Handler.cart), 'currency': {'symbol': '€', 'iso_code': 'EUR'}}
+            if route.startswith('/collections/'):
+                page = pages.collection_page(query, render_drawer(), len(Handler.cart))
+            elif route.startswith('/products/'):
+                page = pages.product_page(route.split('/')[2], query, render_drawer(), len(Handler.cart))
+            else:
+                t = {'name': 'index', 'suffix': ''}
+                page = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
+                        .replace('__HEADER__', pages.section('header', template=t, cart=cart, product=None))
+                        .replace('__FOOTER__', pages.section('footer', template=t, form=pages.signup_state(query)))
+                        .replace('__PALETTE__', pages.palette_style(query))
+                        .replace('__CARDS__', render_cards()).replace('__DRAWER__', render_drawer()))
+            body = page.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.send_header('Content-Length', str(len(body))); self.end_headers()
             self.wfile.write(body); return
         return super().do_GET()
