@@ -1,41 +1,9 @@
 {%- comment -%}
-  Header (Runde 13, schlicht nach yeezy.com): links klein das Logo (führt zur Startseite), in der Mitte nur zwei Wörter,
-  STADT (Städtetrikots) und LAND (Nationaltrikots), rechts die Sporttasche als Warenkorb. Ist eine der beiden Seiten
-  gewählt (Kollektion oder ein Trikot daraus), steht sie schwarz und die andere hellgrau.
-  Support, Konto und alle Rechtsseiten stehen im Footer.
+  Header (Runde 13, schlicht nach yeezy.com; Runde 15 ohne STADT / LAND): links klein das Logo (führt zur Startseite),
+  rechts die Sporttasche als Warenkorb. Support, Konto und alle Rechtsseiten stehen im Footer.
   Startseite: liegt durchsichtig mit heller Schrift über dem Zimmer, bis das Zimmer nach oben weggescrollt ist.
 {%- endcomment -%}
 {%- liquid
-  assign city = section.settings.city
-  if city.url == blank
-    assign city = collections['staedtetrikots']
-  endif
-  assign land = section.settings.land
-  if land.url == blank
-    assign land = settings.nav_collection
-  endif
-  if land.url == blank
-    assign land = collections['nationaltrikots']
-  endif
-
-  assign on_city = false
-  assign on_land = false
-  if collection.handle != blank
-    if collection.handle == city.handle
-      assign on_city = true
-    elsif collection.handle == land.handle
-      assign on_land = true
-    endif
-  elsif product
-    for c in product.collections
-      if c.handle == city.handle
-        assign on_city = true
-      elsif c.handle == land.handle
-        assign on_land = true
-      endif
-    endfor
-  endif
-
   assign overlay = false
   if template.name == 'index'
     assign overlay = true
@@ -49,15 +17,6 @@
       {%- render 'logo', tone: 'paper', eager: true, class: 'logo--paper' -%}
       <span class="sr-only">Startseite</span>
     </a>
-
-    <nav class="header__cats" aria-label="Trikots">
-      {%- if city.url != blank -%}
-        <a class="header__cat" href="{{ city.url }}"{% if on_city %} aria-current="page"{% endif %}>Stadt</a>
-      {%- endif -%}
-      {%- if land.url != blank -%}
-        <a class="header__cat" href="{{ land.url }}"{% if on_land %} aria-current="page"{% endif %}>Land</a>
-      {%- endif -%}
-    </nav>
 
     <div class="header__end">
       <a class="header__icon header__cart" href="{{ routes.cart_url }}" data-cart-open aria-haspopup="dialog">
@@ -75,9 +34,6 @@
 {
   "name": "Header",
   "class": "section-header",
-  "settings": [
-    { "type": "collection", "id": "city", "label": "STADT führt zu", "info": "Leer = Kollektion „Städtetrikots“." },
-    { "type": "collection", "id": "land", "label": "LAND führt zu", "info": "Leer = Kategorie aus den Theme-Einstellungen (Nationaltrikots)." }
-  ]
+  "settings": []
 }
 {% endschema %}

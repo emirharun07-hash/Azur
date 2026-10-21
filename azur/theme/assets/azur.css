@@ -1154,17 +1154,12 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 /* Weiß, Schwarz, eine Monospace-Schrift, viel Luft. Gilt für den Shop; das Zimmer und seine Produktansicht bleiben dunkel. */
 body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 
-/* Header: links klein das Logo, Mitte STADT / LAND, rechts die Sporttasche; ohne Linie */
+/* Header: links klein das Logo, rechts die Sporttasche; ohne Linie (Runde 15: STADT / LAND weg) */
 .header { border-bottom-color: transparent; }
-.header__bar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.header__bar { grid-template-columns: minmax(0, 1fr) auto; }
 .header__logo { justify-self: start; padding-inline: 0; }
 .header__logo .logo, .header.is-compact .header__logo .logo { height: 1.25rem; }
 @media (min-width: 48em) { .header__logo .logo { height: 1.4rem; } }
-.header__cats { display: flex; gap: clamp(1rem, 2vw, 1.5rem); }
-.header__cat { display: flex; align-items: center; min-height: var(--tap); font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase;
-  transition: color var(--dur) var(--ease); }
-.header__cats:has([aria-current]) .header__cat:not([aria-current]) { color: var(--c-grey-soft); }
-.header__cats .header__cat:hover { color: inherit; }
 .header__end { justify-self: end; margin-right: -0.625rem; }
 .sportbag, .header.is-compact .sportbag { width: 1.65rem; stroke-width: 2.4; }
 .sportbag__body { fill: none; }
@@ -1187,16 +1182,6 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .card__name { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .card__hint { margin-top: calc(var(--s-3) * -1); font-size: 0.75rem; color: var(--c-grey-text); letter-spacing: 0.06em; text-transform: uppercase; }
 .card__link:hover .card__name { text-decoration: underline; text-underline-offset: 0.3em; }
-/* sechstes Feld: der nächste Drop, ein Trikot-Umriss mit Fragezeichen; ein Klick öffnet die Anmeldung darunter */
-.card--drop summary { list-style: none; cursor: pointer; }
-.card--drop summary::-webkit-details-marker { display: none; }
-.card__media--drop { display: grid; place-items: center; }
-.card__media--drop svg { width: 70%; height: 82%; }
-.card__media--drop path { fill: none; stroke: var(--c-ink); stroke-width: 0.9; stroke-dasharray: 2.6 2.2; stroke-linejoin: round; }
-.card__media--drop text { fill: var(--c-ink); font-family: var(--f-sans); font-size: 30px; }
-.card__drop { display: grid; gap: var(--s-3); max-width: 24rem; margin: var(--s-5) auto 0; text-align: left; }
-.card__drop-text { font-size: var(--t-small); color: var(--c-grey-text); }
-
 /* Shop-Seite: nur „← Startseite“ über dem Raster */
 .shop__head { padding-block: var(--s-4) var(--s-6); }
 .back-home { font-weight: 400; color: var(--c-grey-text); }

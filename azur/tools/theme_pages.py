@@ -168,10 +168,7 @@ def signup_state(query):
 
 
 def render_header(**page):
-    # python-liquid does not treat an unset collection setting as blank, so the two header links get their collections here
-    c = ctx()['collections']
-    return section('header', {'city': c['staedtetrikots'], 'land': c['nationaltrikots']},
-                   **dict({'collection': {'handle': ''}, 'product': None}, **page))
+    return section('header', **dict({'collection': {'handle': ''}, 'product': None}, **page))
 
 
 def chrome(template, body, query='', cart_count=0, drawer='', **page):
@@ -200,7 +197,8 @@ def chrome(template, body, query='', cart_count=0, drawer='', **page):
 
 def collection_page(query='', drawer='', cart_count=0, handle='trikots'):
     coll = ctx()['collections'].get(handle) or ctx()['collections']['trikots']
-    body = '<div class="shopify-section">' + section('main-collection', template={'name': 'collection', 'suffix': ''}, collection=coll) + '</div>'
+    # python-liquid does not treat an unset collection setting as blank: an empty handle stands in for Shopify's nil
+    body = '<div class="shopify-section">' + section('main-collection', {'hide': {'handle': ''}}, template={'name': 'collection', 'suffix': ''}, collection=coll) + '</div>'
     return chrome('collection', body, query, cart_count, drawer, collection=coll)
 
 

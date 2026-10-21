@@ -1,7 +1,14 @@
 {%- comment -%}
   Shop / Kollektion (Runde 13, schlicht nach yeezy.com): oben klein „← Startseite“, darunter das Raster wie auf der
-  Startseite (Trikot frei auf Weiß, nur der Name). Welche Kollektion offen ist, zeigt der Header (STADT / LAND schwarz).
+  Startseite (Trikot frei auf Weiß, nur der Name).
+  Runde 15: Trikots aus der Kollektion „Ausblenden“ (leer = Städtetrikots) erscheinen hier nicht.
 {%- endcomment -%}
+{%- liquid
+  assign hide = section.settings.hide
+  if hide.handle == blank
+    assign hide = collections['staedtetrikots']
+  endif
+-%}
 <div class="shop" data-collection>
   <header class="shop__head wrap">
     <a class="back-home" href="{{ routes.root_url }}"><span class="arrow" aria-hidden="true">←</span> Startseite</a>
@@ -10,11 +17,18 @@
 
   {%- paginate collection.products by 24 -%}
     <ul class="yz__grid wrap" role="list">
+      {%- assign shown = 0 -%}
       {%- for p in collection.products -%}
-        <li>{% render 'product-card', product: p, eager: forloop.first %}</li>
-      {%- else -%}
-        <li class="yz__empty">Hier ist gerade nichts.</li>
+        {%- assign hidden = false -%}
+        {%- if hide.handle != blank -%}
+          {%- for c in p.collections -%}{%- if c.handle == hide.handle -%}{%- assign hidden = true -%}{%- endif -%}{%- endfor -%}
+        {%- endif -%}
+        {%- unless hidden -%}
+          <li>{% render 'product-card', product: p, eager: forloop.first %}</li>
+          {%- assign shown = shown | plus: 1 -%}
+        {%- endunless -%}
       {%- endfor -%}
+      {%- if shown == 0 -%}<li class="yz__empty">Hier ist gerade nichts.</li>{%- endif -%}
     </ul>
     {%- if paginate.pages > 1 -%}
       <nav class="pager wrap" aria-label="Seiten">{{ paginate | default_pagination: next: 'Weiter', previous: 'Zurück' }}</nav>
@@ -26,6 +40,7 @@
 {
   "name": "Shop",
   "settings": [
+    { "type": "collection", "id": "hide", "label": "Ausblenden", "info": "Trikots aus dieser Kollektion stehen nicht im Shop. Leer = Städtetrikots." },
     { "type": "text", "id": "kicker", "label": "(ohne Wirkung seit Runde 13)", "default": "Shop" },
     { "type": "checkbox", "id": "feature_large", "label": "(ohne Wirkung seit Runde 13)", "default": true }
   ]

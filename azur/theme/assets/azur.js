@@ -398,16 +398,5 @@
     $('[data-zoom-close]', zoom).addEventListener('click', () => zoom.close());
     zoom.addEventListener('click', (e) => { if (e.target === zoom) zoom.close(); });
   }
-  /* ---- Feld „Nächster Drop“ (Runde 13): nach dem Absenden lädt Shopify die Seite neu, das Feld steht dann offen da ---- */
-  $$('[data-drop-card]').forEach((card) => {
-    if ($('.signup__ok, .signup__error:not([hidden])', card)) {
-      card.open = true;
-      card.scrollIntoView({ block: 'center' });
-    }
-    card.addEventListener('toggle', () => {
-      const field = card.open && $('input[type="email"]', card);
-      if (field) field.focus({ preventScroll: true });
-    });
-  });
 
 })();

@@ -1,7 +1,7 @@
 {%- comment -%}
   Trikots unter dem Zimmer (Runde 13, schlicht nach yeezy.com): ein Raster auf Weiß, jedes Trikot frei stehend, darunter
   nur der Name in Versalien; ein Klick führt zur Produktseite. Desktop 3, iPad 2, Handy 1 pro Reihe.
-  Als sechstes Feld der nächste Drop: ein Trikot-Umriss mit Fragezeichen; ein Klick öffnet darunter die Anmeldung per Mail.
+  (Runde 15: das Feld „Nächster Drop“ ist raus.)
   (Runde 10–12 standen hier Sammelkarten zum Umdrehen; der Section-Name bleibt, damit die Startseite sie behält.)
 {%- endcomment -%}
 {%- if section.settings.products.size > 0 -%}
@@ -11,23 +11,6 @@
       {%- for p in section.settings.products limit: 10 -%}
         <li>{% render 'product-card', product: p %}</li>
       {%- endfor -%}
-      {%- if section.settings.drop_card -%}
-        <li>
-          <details class="card card--drop" data-drop-card>
-            <summary class="card__link">
-              <span class="card__media card__media--drop" aria-hidden="true">
-                <svg viewBox="0 0 100 100"><path d="M31 14 L43 9 Q50 17 57 9 L69 14 L88 28 L79 41 L71 36 L71 91 L29 91 L29 36 L21 41 L12 28 Z"/><text x="50" y="68" text-anchor="middle">?</text></svg>
-              </span>
-              <span class="card__name">{{ section.settings.drop_title }}</span>
-              <span class="card__hint">{{ section.settings.drop_text }}</span>
-            </summary>
-            <div class="card__drop">
-              {%- if section.settings.drop_signup_text != blank -%}<p class="card__drop-text">{{ section.settings.drop_signup_text }}</p>{%- endif -%}
-              {%- render 'signup-form', id: 'drop-grid', tags: section.settings.drop_tags, button: 'Eintragen' -%}
-            </div>
-          </details>
-        </li>
-      {%- endif -%}
     </ul>
   </section>
 {%- endif -%}
@@ -37,13 +20,7 @@
   "name": "Spielerkarten",
   "settings": [
     { "type": "product_list", "id": "products", "label": "Produkte", "limit": 10 },
-    { "type": "text", "id": "heading", "label": "Überschrift (nur für Vorleser)", "default": "Trikots" },
-    { "type": "header", "content": "Feld „Nächster Drop“" },
-    { "type": "checkbox", "id": "drop_card", "label": "Nach den Trikots ein Feld für den nächsten Drop zeigen", "default": true, "info": "Ein Klick darauf öffnet die Anmeldung per Mail (Kunden mit den Tags unten)." },
-    { "type": "text", "id": "drop_title", "label": "Name", "default": "Nächster Drop" },
-    { "type": "text", "id": "drop_text", "label": "Zeile darunter", "default": "Als Erstes erfahren" },
-    { "type": "text", "id": "drop_signup_text", "label": "Text über der Anmeldung", "default": "Trag deine Mail ein. Wir sagen dir zuerst Bescheid, wenn das nächste Trikot kommt." },
-    { "type": "text", "id": "drop_tags", "label": "Tags für die Anmeldung", "default": "newsletter, drops" }
+    { "type": "text", "id": "heading", "label": "Überschrift (nur für Vorleser)", "default": "Trikots" }
   ],
   "presets": [
     { "name": "Trikots (Raster)" }
