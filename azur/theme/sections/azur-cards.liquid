@@ -1,170 +1,34 @@
 {%- comment -%}
-  Runde 10 (Design-Finale: „Spielerkarten mit Rückseite“): die Trikots unter dem Zimmer als Sammelkarten.
-  Vorne Code, Bild, Name, Größen und Preis (Städte golden, Länder silbern). Ein Klick oder Tippen dreht die Karte um:
-  hinten die Größe wählen und direkt in den Warenkorb, der dann rechts hereingleitet (azur.js, Abschnitt Spielerkarten).
-  Die Überschrift klappt wie eine Anzeigetafel auf (data-flap). Ohne JavaScript führt jede Karte zur Produktseite.
-  Runde 11 (nach basement.studio): jede Karte steht in einer Zelle mit Haarlinien und Nummer, die Anzahl hochgestellt.
-  Runde 12: größer (Desktop 3, iPad 2, Handy 1 pro Reihe), als sechste Karte der nächste Drop mit Anmeldung, ein Klick auf die Rückseite dreht zurück, „Groß ansehen“ öffnet
-  das Trikot groß (Vorder- und Rückseite; schließen mit ×, Esc oder Klick daneben), die gewendete Karte trägt einen Hauch
-  der Trikotfarbe (data-tone).
+  Trikots unter dem Zimmer (Runde 13, schlicht nach yeezy.com): ein Raster auf Weiß, jedes Trikot frei stehend, darunter
+  nur der Name in Versalien; ein Klick führt zur Produktseite. Desktop 3, iPad 2, Handy 1 pro Reihe.
+  Als sechstes Feld der nächste Drop: ein Trikot-Umriss mit Fragezeichen; ein Klick öffnet darunter die Anmeldung per Mail.
+  (Runde 10–12 standen hier Sammelkarten zum Umdrehen; der Section-Name bleibt, damit die Startseite sie behält.)
 {%- endcomment -%}
-{%- liquid
-  assign coll = settings.main_collection
-  if coll.url == blank
-    assign coll = collections.all
-  endif
-  capture ship
-    render 'shipping-line'
-  endcapture
--%}
 {%- if section.settings.products.size > 0 -%}
-  <section class="pcards" aria-labelledby="pcards-title-{{ section.id }}" data-pcards>
-    <header class="pcards__head wrap">
-      <div>
-        {%- if section.settings.kicker != blank -%}<p class="pcards__kicker">{{ section.settings.kicker }}</p>{%- endif -%}
-        <div class="pcards__line">
-          <h2 class="pcards__title" id="pcards-title-{{ section.id }}" data-flap>{{ section.settings.heading }}</h2>
-          <sup class="pcards__count" aria-hidden="true">({{ section.settings.products.size | at_most: 10 }})</sup>
-        </div>
-      </div>
-      <div class="pcards__aside">
-        {%- if ship != blank -%}<p class="pcards__ship">{{ ship }}</p>{%- endif -%}
-        {%- if section.settings.link_label != blank -%}<a class="link" href="{{ coll.url }}">{{ section.settings.link_label }}</a>{%- endif -%}
-      </div>
-    </header>
-
-    <div class="wrap"><ul class="pcards__grid" role="list">
+  <section class="yz" aria-labelledby="yz-title-{{ section.id }}">
+    <h2 class="sr-only" id="yz-title-{{ section.id }}">{{ section.settings.heading }}</h2>
+    <ul class="yz__grid wrap" role="list">
       {%- for p in section.settings.products limit: 10 -%}
-        {%- liquid
-          capture label
-            render 'product-field', product: p, field: 'label'
-          endcapture
-          capture code
-            render 'product-field', product: p, field: 'code'
-          endcapture
-          assign n = code | plus: 0
-          assign kind = 'land'
-          if n > 0
-            assign kind = 'stadt'
-          endif
-          assign sizes = ''
-          for v in p.variants
-            if v.available
-              assign sizes = sizes | append: v.option1 | append: ' '
-            endif
-          endfor
-          assign sizes = sizes | strip | split: ' '
-          assign cid = section.id | append: '-' | append: p.id
-          capture tone
-            render 'product-field', product: p, field: 'tone'
-          endcapture
-          assign big = ''
-          if p.featured_media
-            assign big = p.featured_media | image_url: width: 1600
-          endif
-          assign big_back = ''
-          for m in p.media
-            assign a = m.alt | downcase
-            if a contains 'rückseite' or a contains 'hinten'
-              assign big_back = m | image_url: width: 1600
-              break
-            endif
-          endfor
-        -%}
-        <li class="pcard pcard--{{ kind }}" data-pcard{% if tone != blank %} data-tone="{{ tone | strip }}"{% endif %}>
-          <span class="pcard__no" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
-          {%- capture zoom_attrs -%}
-            data-jbox-open data-jbox-front="{{ big }}" data-jbox-back="{{ big_back }}" data-jbox-name="{{ label | escape }}"
-            data-jbox-price="{% render 'price', amount: p.price %}" data-jbox-url="{{ p.url }}"
-          {%- endcapture -%}
-          <button class="pcard__zoom" type="button" {{ zoom_attrs }}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/></svg>
-            <span class="sr-only">{{ label }} groß ansehen</span>
-          </button>
-          <div class="pcard__inner">
-            <a class="pcard__front" href="{{ p.url }}" data-pcard-flip aria-expanded="false" aria-controls="{{ cid }}-back">
-              <span class="pcard__top"><b class="pcard__code">{{ code }}</b><span class="pcard__kind">{% if kind == 'stadt' %}Stadt{% else %}Land{% endif %}</span></span>
-              <span class="pcard__img">
-                {%- render 'product-image', product: p, view: 'front', sizes: '(min-width: 1200px) 18vw, (min-width: 768px) 30vw, 46vw', widths: '300, 450, 600', class: 'pcard__pic', decorative: true -%}
-              </span>
-              <span class="pcard__name">{{ label }}</span>
-              <span class="pcard__meta">
-                {%- if sizes.size > 0 -%}Größen {{ sizes.first }}–{{ sizes.last }}{%- else -%}Ausverkauft{%- endif -%}
-              </span>
-              <span class="pcard__price">{% render 'price', amount: p.price %}</span>
-              <span class="pcard__turn" aria-hidden="true">Umdrehen ↻</span>
-              <span class="sr-only">: Karte umdrehen, Größe wählen</span>
-            </a>
-
-            <div class="pcard__back" id="{{ cid }}-back" inert>
-              <p class="pcard__back-kicker">Rückseite</p>
-              <h3 class="pcard__back-name">{{ label }}</h3>
-              <p class="pcard__back-price">{% render 'price', amount: p.price %}</p>
-              <form class="pcard__form" action="{{ routes.cart_add_url }}" method="post" data-pcard-form data-label="{{ label | escape }}">
-                <fieldset class="pcard__sizes">
-                  <legend class="sr-only">{{ p.options.first | default: 'Größe' }} für {{ label }}</legend>
-                  {%- for v in p.variants -%}
-                    <input class="sr-only" type="radio" name="id" id="{{ cid }}-{{ v.id }}" value="{{ v.id }}" data-size="{{ v.option1 | escape }}"{% unless v.available %} disabled{% endunless %}>
-                    <label class="size" for="{{ cid }}-{{ v.id }}"{% unless v.available %} data-soldout{% endunless %}>{{ v.option1 }}</label>
-                  {%- endfor -%}
-                </fieldset>
-                <button class="btn btn--solid btn--block pcard__add" type="submit"><span data-pcard-label>In den Warenkorb</span></button>
-                <p class="pcard__msg" role="status" data-pcard-msg></p>
-              </form>
-              <div class="pcard__back-foot">
-                <button class="link" type="button" {{ zoom_attrs }}>Groß ansehen</button>
-                <button class="link" type="button" data-pcard-flip>↺ Vorderseite</button>
-              </div>
-            </div>
-          </div>
-        </li>
+        <li>{% render 'product-card', product: p %}</li>
       {%- endfor -%}
       {%- if section.settings.drop_card -%}
-        {%- comment -%} Runde 12: die sechste Karte ist der nächste Drop (wie die Hülle am Ständer im Zimmer); hinten die Anmeldung {%- endcomment -%}
-        {%- assign n = section.settings.products.size | at_most: 10 | plus: 1 -%}
-        <li class="pcard pcard--drop" data-pcard>
-          <span class="pcard__no" aria-hidden="true">{{ n | prepend: '0' | slice: -2, 2 }}</span>
-          <div class="pcard__inner">
-            <a class="pcard__front" href="#drops-pcard-drop" data-pcard-flip aria-expanded="false" aria-controls="{{ section.id }}-drop-back">
-              <span class="pcard__top"><b class="pcard__code">???</b><span class="pcard__kind">Bald</span></span>
-              <span class="pcard__img pcard__mystery" aria-hidden="true">
+        <li>
+          <details class="card card--drop" data-drop-card>
+            <summary class="card__link">
+              <span class="card__media card__media--drop" aria-hidden="true">
                 <svg viewBox="0 0 100 100"><path d="M31 14 L43 9 Q50 17 57 9 L69 14 L88 28 L79 41 L71 36 L71 91 L29 91 L29 36 L21 41 L12 28 Z"/><text x="50" y="68" text-anchor="middle">?</text></svg>
               </span>
-              <span class="pcard__name">{{ section.settings.drop_title }}</span>
-              <span class="pcard__meta">{{ section.settings.drop_text }}</span>
-              <span class="pcard__price">Als Erstes erfahren</span>
-              <span class="pcard__turn" aria-hidden="true">Umdrehen ↻</span>
-              <span class="sr-only">: Karte umdrehen und für den nächsten Drop eintragen</span>
-            </a>
-            <div class="pcard__back pcard__back--drop" id="{{ section.id }}-drop-back" inert>
-              <p class="pcard__back-kicker">{{ section.settings.drop_title }}</p>
-              <h3 class="pcard__back-name">Als Erstes wissen</h3>
-              {%- if section.settings.drop_signup_text != blank -%}<p class="pcard__drop-text">{{ section.settings.drop_signup_text }}</p>{%- endif -%}
-              {%- render 'signup-form', id: 'pcard-drop', tags: section.settings.drop_tags, button: 'Eintragen' -%}
-              <div class="pcard__back-foot pcard__back-foot--end">
-                <button class="link" type="button" data-pcard-flip>↺ Vorderseite</button>
-              </div>
+              <span class="card__name">{{ section.settings.drop_title }}</span>
+              <span class="card__hint">{{ section.settings.drop_text }}</span>
+            </summary>
+            <div class="card__drop">
+              {%- if section.settings.drop_signup_text != blank -%}<p class="card__drop-text">{{ section.settings.drop_signup_text }}</p>{%- endif -%}
+              {%- render 'signup-form', id: 'drop-grid', tags: section.settings.drop_tags, button: 'Eintragen' -%}
             </div>
-          </div>
+          </details>
         </li>
       {%- endif -%}
-    </ul></div>
-
-    <dialog class="jbox" data-jbox aria-labelledby="jbox-name-{{ section.id }}">
-      <div class="jbox__panel">
-        <button class="jbox__x" type="button" data-jbox-close><span aria-hidden="true">×</span><span class="sr-only">Schließen</span></button>
-        <figure class="jbox__fig"><img class="jbox__img" alt="" width="1600" height="1600" data-jbox-img></figure>
-        <div class="jbox__side">
-          <h2 class="jbox__name" id="jbox-name-{{ section.id }}" data-jbox-name></h2>
-          <p class="jbox__price" data-jbox-price></p>
-          <div class="jbox__views" role="group" aria-label="Ansicht" data-jbox-views>
-            <button class="size" type="button" data-jbox-view="front" aria-pressed="true">Vorne</button>
-            <button class="size" type="button" data-jbox-view="back" aria-pressed="false">Hinten</button>
-          </div>
-          <a class="btn btn--line jbox__link" href="#" data-jbox-link>Zur Produktseite <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-      </div>
-    </dialog>
+    </ul>
   </section>
 {%- endif -%}
 
@@ -173,18 +37,16 @@
   "name": "Spielerkarten",
   "settings": [
     { "type": "product_list", "id": "products", "label": "Produkte", "limit": 10 },
-    { "type": "text", "id": "kicker", "label": "Zeile oben", "default": "Die Kollektion" },
-    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Sammel deine Stadt", "info": "Klappt beim Hinscrollen wie eine Anzeigetafel auf." },
-    { "type": "text", "id": "link_label", "label": "Link zum Shop", "default": "Alle ansehen" },
-    { "type": "header", "content": "Karte „Nächster Drop“" },
-    { "type": "checkbox", "id": "drop_card", "label": "Nach den Trikots eine Karte für den nächsten Drop zeigen", "default": true, "info": "Hinten die Anmeldung per Mail (Kunden mit den Tags unten)." },
-    { "type": "text", "id": "drop_title", "label": "Titel", "default": "Nächster Drop" },
-    { "type": "text", "id": "drop_text", "label": "Zeile vorne", "default": "Noch unter Verschluss" },
-    { "type": "text", "id": "drop_signup_text", "label": "Text hinten", "default": "Trag deine Mail ein. Wir sagen dir zuerst Bescheid, wenn das nächste Trikot kommt." },
+    { "type": "text", "id": "heading", "label": "Überschrift (nur für Vorleser)", "default": "Trikots" },
+    { "type": "header", "content": "Feld „Nächster Drop“" },
+    { "type": "checkbox", "id": "drop_card", "label": "Nach den Trikots ein Feld für den nächsten Drop zeigen", "default": true, "info": "Ein Klick darauf öffnet die Anmeldung per Mail (Kunden mit den Tags unten)." },
+    { "type": "text", "id": "drop_title", "label": "Name", "default": "Nächster Drop" },
+    { "type": "text", "id": "drop_text", "label": "Zeile darunter", "default": "Als Erstes erfahren" },
+    { "type": "text", "id": "drop_signup_text", "label": "Text über der Anmeldung", "default": "Trag deine Mail ein. Wir sagen dir zuerst Bescheid, wenn das nächste Trikot kommt." },
     { "type": "text", "id": "drop_tags", "label": "Tags für die Anmeldung", "default": "newsletter, drops" }
   ],
   "presets": [
-    { "name": "Spielerkarten" }
+    { "name": "Trikots (Raster)" }
   ]
 }
 {% endschema %}

@@ -539,6 +539,25 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Round 13 (the shop in the style of yeezy.com, 2026-10-21)
+Draft "Azur Zimmer Runde 13 (Entwurf)" `gid://shopify/OnlineStoreTheme/209841750355`, preview
+https://azurclothing.com/?preview_theme_id=209841750355 (Runde 12 is live). The owner sent two screenshots of yeezy.com (the site
+itself blocks our requests) and asked for it 1:1 on the shop, not in the room. Owner's answers: grid instead of the player cards,
+STADT / LAND in the middle, logo and bar kept small, the sports bag stays (small, black).
+- Palette: white #fff, black text, grey #767676 / #c4c4c4 (unselected menu word), black buy; the dark set (--d-*, --d-paper)
+  keeps the room, its product view (now in the dark-scope list) and the password page Anthrazit & Neon.
+- Type: Martian Mono everywhere in the shop (self-hosted asset, @font-face + preload in layout/theme.liquid), small, quiet
+  capitals; Archivo only in the room.
+- Header: logo left (home), STADT (staedtetrikots) / LAND (nationaltrikots; header settings city/land) centred, the selected one
+  black and the other grey (also on a product of that collection), sports bag right. Menu button, search, account, Support
+  popover gone (all in the footer).
+- Home grid (sections/azur-cards.liquid, name kept so the homepage keeps it) and shop page (main-collection): product-card
+  = jersey free on white + name only, 3 / 2 / 1 per row; sixth field "Nächster Drop" (<details>, dashed jersey, sign-up opens
+  below; opens again after Shopify's reload). Size filter, lineup sizes, player cards, flip, big-view dialog, flap headings removed.
+- Product page: one centred image with ‹ › (wraps) and dots, then name, price, sizes as plain words, "+" (sr label "In den
+  Warenkorb", ✓ when added), shipping/returns small; facts and description below. Sticky phone buy bar removed.
+- Dead code removed: menu/filter/buybar/cards/jbox/flap JS, header/menu/support/card/filter CSS.
+
 ## Round 12 (one site, neutral colour vote, static bar, bed fix, bigger cards, 2026-10-21)
 Draft theme "Azur Zimmer Runde 12 (Entwurf)" `gid://shopify/OnlineStoreTheme/209835884883` (copy of MAIN = Runde 10, which the
 owner published). Preview: https://azurclothing.com/?preview_theme_id=209835884883

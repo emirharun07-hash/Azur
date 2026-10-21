@@ -53,14 +53,17 @@ def media(img, alt):
 def product(handle, title, price, img, vids):
     variants = [{'id': v, 'title': s, 'option1': s, 'available': s != 'XL', 'price': price} for v, s in zip(vids, ['S', 'M', 'L', 'XL'])]
     front = media(img, f'{title} Vorderseite')
+    back = media(img, f'{title} Rückseite')   # stand-in for a second photo (gallery arrows and dots)
     return {'id': vids[0] * 7, 'handle': handle, 'title': title, 'price': price, 'url': '/products/' + handle, 'available': True,
             'description': f'<p>{title}. Polokragen, Azur-Signatur auf der Brust.</p>', 'featured_image': front, 'featured_media': front,
-            'media': [front], 'images': [front], 'options': ['Größe'], 'variants': variants, 'selected_variant': None,
+            'media': [front, back], 'images': [front, back], 'options': ['Größe'], 'variants': variants, 'selected_variant': None,
             'selected_or_first_available_variant': variants[0], 'collections': [{'handle': 'trikots'}],
             'metafields': {'custom': {}}, 'tags': []}
 
 
 PRODUCTS = [product(*j) for j in JERSEYS]
+for i, p in enumerate(PRODUCTS):
+    p['collections'] = [{'handle': 'trikots'}, {'handle': 'staedtetrikots' if i < 2 else 'nationaltrikots'}]
 BY_HANDLE = {p['handle']: p for p in PRODUCTS}
 
 
@@ -124,10 +127,11 @@ def ctx(**extra):
     pages = {h: {'url': f'/pages/{h}', 'title': t} for h, t in (('contact', 'Kontakt'), ('impressum', 'Impressum'), ('agb', 'AGB'),
              ('datenschutzerklarung', 'Datenschutzerklärung'), ('versand-widerrufsrecht', 'Versand und Widerruf'), ('ueber-azur', 'Über Azur'))}
     trikots = {'handle': 'trikots', 'url': '/collections/trikots', 'title': 'Trikots', 'products': PRODUCTS, 'products_count': len(PRODUCTS), 'description': ''}
-    national = {'handle': 'nationaltrikots', 'url': '/collections/nationaltrikots', 'title': 'Nationaltrikots'}
+    national = {'handle': 'nationaltrikots', 'url': '/collections/nationaltrikots', 'title': 'Nationaltrikots', 'products': PRODUCTS[2:], 'products_count': 3}
+    cities = {'handle': 'staedtetrikots', 'url': '/collections/staedtetrikots', 'title': 'Städtetrikots', 'products': PRODUCTS[:2], 'products_count': 2}
     settings = dict(SETTINGS, main_collection=trikots, nav_collection=national, about_page=pages['ueber-azur'],
                     feature_product_1=BY_HANDLE['berlin-trikot-azur-collection'], feature_product_2=BY_HANDLE['frankfurt-trikot-azur-collection'])
-    c = {'settings': settings, 'pages': pages, 'collections': {'all': trikots, 'trikots': trikots},
+    c = {'settings': settings, 'pages': pages, 'collections': {'all': trikots, 'trikots': trikots, 'staedtetrikots': cities, 'nationaltrikots': national},
          'shop': {'name': 'Azur', 'customer_accounts_enabled': True, 'enabled_payment_types': ['paypal', 'visa', 'master'],
                   'privacy_policy': {'url': '/policies/privacy-policy'}, 'policies': [], 'metafields': {'azur': {'announcement': {'value': ''}}}},
          'routes': {'root_url': '/', 'search_url': '/search', 'account_url': '/account', 'cart_url': '/cart', 'cart_add_url': '/cart/add'},
@@ -163,17 +167,25 @@ def signup_state(query):
     return {'ok': False, 'errors': None}
 
 
-def chrome(template, body, query='', cart_count=0, drawer=''):
+def render_header(**page):
+    # python-liquid does not treat an unset collection setting as blank, so the two header links get their collections here
+    c = ctx()['collections']
+    return section('header', {'city': c['staedtetrikots'], 'land': c['nationaltrikots']},
+                   **dict({'collection': {'handle': ''}, 'product': None}, **page))
+
+
+def chrome(template, body, query='', cart_count=0, drawer='', **page):
     """bar, header, page body, footer and cart drawer, like layout/theme.liquid"""
     form = signup_state(query)
     cart = dict(ctx()['cart'], item_count=cart_count)
     t = {'name': template, 'suffix': ''}
     bar = section('announcement', template=t)
-    header = section('header', template=t, cart=cart, product=extra_product(template))
+    header = render_header(template=t, cart=cart, **page)
     footer = section('footer', template=t, form=form)
     return f"""<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness {template}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&display=swap">
+<style>@font-face{{font-family:"Martian Mono";font-style:normal;font-weight:300 600;font-stretch:75% 112.5%;src:url(/theme/assets/azur-martian-mono.woff2) format("woff2")}}</style>
 <link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = {{ routes: {{ root: '/' }} }};</script>
 </head><body class="template-{template}">
@@ -186,17 +198,13 @@ def chrome(template, body, query='', cart_count=0, drawer=''):
 </body></html>"""
 
 
-def extra_product(template):
-    return None
-
-
-def collection_page(query='', drawer='', cart_count=0):
-    body = '<div class="shopify-section">' + section('main-collection', template={'name': 'collection', 'suffix': ''},
-                                                     collection=ctx()['collections']['trikots']) + '</div>'
-    return chrome('collection', body, query, cart_count, drawer)
+def collection_page(query='', drawer='', cart_count=0, handle='trikots'):
+    coll = ctx()['collections'].get(handle) or ctx()['collections']['trikots']
+    body = '<div class="shopify-section">' + section('main-collection', template={'name': 'collection', 'suffix': ''}, collection=coll) + '</div>'
+    return chrome('collection', body, query, cart_count, drawer, collection=coll)
 
 
 def product_page(handle, query='', drawer='', cart_count=0):
     p = BY_HANDLE.get(handle) or PRODUCTS[0]
     body = '<div class="shopify-section">' + section('main-product', template={'name': 'product', 'suffix': ''}, product=p) + '</div>'
-    return chrome('product', body, query, cart_count, drawer)
+    return chrome('product', body, query, cart_count, drawer, product=p)

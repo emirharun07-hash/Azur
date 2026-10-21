@@ -11,25 +11,26 @@
    ========================================================================== */
 
 /* 1. Tokens ================================================================ */
-/* Farbpalette (Runde 12, Wahl in der Farbwahl: „Anthrazit & Neon“): ALLE Farben des Shops und des Zimmers kommen aus
-   diesem einen Block. Für eine andere Grundfarbe nur hier die Werte tauschen; Zimmer, Produktansicht, Karten, Warenkorb
-   und Passwortseite folgen. Kontraste: Schrift 14,6:1, Sekundärtext 7,2:1 auf dem Grund, Kaufknopf 11,6:1. */
+/* Farbpalette: ALLE Farben des Shops und des Zimmers kommen aus diesem einen Block. Für eine andere Grundfarbe nur
+   hier die Werte tauschen. Runde 13 (nach yeezy.com): der Shop ist weiß, Schrift schwarz, nichts Buntes; das Zimmer und
+   seine Produktansicht bleiben dunkel (Anthrazit & Neon, der dunkle Satz --d-* unten). */
 :root {
-  --c-paper: #1c1d1f;        /* Grundfläche: Anthrazit */
-  --c-surface: #242628;      /* Flächen über dem Grund (Warenkorb, Kartenrückseiten, Leiste) */
-  --c-plate: #2c2e31;        /* ruhige Bildfläche hinter Produkten */
-  --c-ink: #f1eee8;          /* Schrift: Kreideweiß */
-  --c-grey-line: #35383b;    /* feine Linien */
-  --c-grey-text: #a9aaa9;    /* Sekundärtext (mind. 4,5:1 auf Grund und Fläche) */
-  --c-grey-soft: #707275;    /* nur Flächen und Symbole, nicht für Text */
-  --c-acc: #39ff88;          /* Neongrün: Kaufen, Fortschritt, kleine Hinweise */
-  --c-acc-ink: #062b14;      /* Schrift auf dem Kaufknopf */
-  --c-error: #ff8a80;        /* nur für Fehlermeldungen */
-  --c-scheme: dark;          /* dark bei dunklem Grund, light bei hellem (Formularfelder, Scrollbalken) */
-  --logo-ink: none;          /* welches Logo auf dem Grund steht: dunkles (ink) bei hellem Grund, helles (paper) bei dunklem */
-  --logo-paper: block;
-  /* dunkle Bereiche (Passwortseite, dunkle Abschnitte, das Zimmer): bleiben bei jeder Palette dunkel */
+  --c-paper: #ffffff;        /* Grundfläche: Weiß */
+  --c-surface: #ffffff;      /* Flächen über dem Grund (Warenkorb, Leiste) */
+  --c-plate: #ffffff;        /* Fläche hinter den Produkten: auch Weiß, die Trikots stehen frei */
+  --c-ink: #000000;          /* Schrift: Schwarz */
+  --c-grey-line: #e6e6e6;    /* feine Linien */
+  --c-grey-text: #767676;    /* Sekundärtext (4,5:1 auf Weiß) */
+  --c-grey-soft: #c4c4c4;    /* nicht gewählter Menüpunkt (wie bei yeezy.com), Flächen, Symbole */
+  --c-acc: #000000;          /* Kaufen: schwarz */
+  --c-acc-ink: #ffffff;      /* Schrift auf dem Kaufknopf */
+  --c-error: #c62828;        /* nur für Fehlermeldungen (5,6:1 auf Weiß) */
+  --c-scheme: light;         /* dark bei dunklem Grund, light bei hellem (Formularfelder, Scrollbalken) */
+  --logo-ink: block;         /* welches Logo auf dem Grund steht: dunkles (ink) bei hellem Grund, helles (paper) bei dunklem */
+  --logo-paper: none;
+  /* dunkle Bereiche (das Zimmer und seine Produktansicht, Passwortseite, dunkle Abschnitte): Anthrazit & Neon */
   --c-deep: #111214;
+  --d-paper: #1c1d1f;
   --d-ink: #f1eee8;
   --d-text: #a9aaa9;
   --d-line: #35383b;
@@ -44,14 +45,15 @@
   --tint-ger: #6f6f6f;
   --tint-tur: #c41e26;
 
-  --f-sans: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Runde 13: eine Schrift im ganzen Shop, schlicht und gleich breit (Martian Mono, selbst gehostet); das Zimmer bleibt bei Archivo */
+  --f-sans: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --w-narrow: 62%;
 
-  --t-body: 1rem;
-  --t-small: 0.875rem;
+  --t-body: 0.875rem;
+  --t-small: 0.8125rem;
   --t-label: 0.75rem;
   --t-title: clamp(2rem, 3.6vw, 3.25rem);   /* Seitentitel */
-  --ls-label: 0.08em;
+  --ls-label: 0.06em;
 
   --s-1: 0.25rem;
   --s-2: 0.5rem;
@@ -79,7 +81,7 @@
   --z-drawer: 100;
 }
 @media (min-width: 48em) {
-  :root { --gutter: var(--s-5); --gap: var(--s-4); --header-h: 4rem; --t-body: 1.0625rem; }
+  :root { --gutter: var(--s-5); --gap: var(--s-4); --header-h: 4rem; --t-body: 0.9375rem; }
 }
 @media (min-width: 90em) {
   :root { --gutter: 2.5rem; --gap: var(--s-5); }
@@ -160,7 +162,7 @@ button:disabled { cursor: not-allowed; }
 .wrap { width: 100%; max-width: 100rem; margin-inline: auto; padding-inline: var(--gutter); }
 
 /* 3. Schrift =============================================================== */
-/* Schmale Versalien: nur Einstieg, Seitentitel, Menü, Drops */
+/* Überschriften (Runde 13): leise Versalien in derselben Schrift, keine fetten Schlagzeilen mehr */
 .campaign__title,
 .footer__signup-title,
 .drops__title,
@@ -168,27 +170,23 @@ button:disabled { cursor: not-allowed; }
 .shop__title,
 .pdp__title,
 .about__title,
-.menu__link,
 .notfound__num,
 .gate__title,
 .drawer__empty-title {
-  font-stretch: var(--w-narrow);
-  font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: 0;
+  font-stretch: 87.5%;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 /* Kleine Versalien mit Laufweite: Navigation, Buttons, Beschriftungen */
-.nav-link,
 .btn,
 .size,
 .campaign__link,
 .lineup__title,
 .lineup__all,
 .rail__all,
-.filter__legend,
-.filter__status,
 .sizes__legend,
 .crumbs,
 .gallery__count,
@@ -199,8 +197,6 @@ button:disabled { cursor: not-allowed; }
 .drawer__title,
 .drawer__close,
 .legal__side-head,
-.support-menu__head,
-.menu__head,
 .page-kicker,
 .shop__kicker,
 .about__kicker,
@@ -215,8 +211,8 @@ button:disabled { cursor: not-allowed; }
 .trust__k,
 .gate__kicker {
   font-size: var(--t-label);
-  font-stretch: 100%;
-  font-weight: 600;
+  font-stretch: 87.5%;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -374,10 +370,8 @@ a.bar__inner:hover .bar__item { color: var(--c-ink); }
    Header schrumpft, kommt als Rand darunter dazu, im selben Takt, damit der Inhalt nicht springt. */
 .section-header { transition: margin-bottom var(--dur-panel) var(--ease); }
 .section-header:has(> .header.is-compact) { margin-bottom: calc(var(--header-h) - var(--header-h-compact)); }
-.header.is-compact .header__bar,
-.header.is-compact .header__links { height: var(--header-h-compact); }
+.header.is-compact .header__bar { height: var(--header-h-compact); }
 /* Symbole haben 44 px Tippfläche; die negativen Ränder setzen das Zeichen selbst auf die Satzkante */
-.header__start { display: flex; align-items: center; height: 100%; margin-left: -0.625rem; }
 .header__end { display: flex; align-items: center; justify-content: flex-end; height: 100%; margin-right: -0.625rem; }
 .header__icon {
   display: inline-flex;
@@ -390,114 +384,30 @@ a.bar__inner:hover .bar__item { color: var(--c-ink); }
 .header__icon .icon { width: 1.375rem; height: 1.375rem; flex: none; }
 .header__icon:hover .icon { stroke-width: 2; }
 .header__count { font-size: 0.75rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-.header__menu-btn .icon--close,
-.header__menu-btn[aria-expanded="true"] .icon--menu { display: none; }
-.header__menu-btn[aria-expanded="true"] .icon--close { display: block; }
 .header__logo { display: flex; align-items: center; justify-content: center; height: 100%; padding-inline: var(--s-3); }
 .header__logo .logo { height: 1.75rem; width: auto; transition: height var(--dur-panel) var(--ease); }
 .header__logo .logo--ink, .footer__logo .logo--ink { display: var(--logo-ink); }   /* das Logo, das auf dem Grund steht (Palette oben) */
 .header__logo .logo--paper, .footer__logo .logo--paper { display: var(--logo-paper); }
-.header__nav,
-.header__search-end,
-.header__account { display: none; }
-.header__links { display: flex; align-items: stretch; gap: var(--s-4); height: var(--header-h); }
-@media (min-width: 90em) { .header__links { gap: var(--s-5); } }
-.header__links li { display: flex; }
-.nav-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--tap);
-  padding-top: 2px;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: border-color var(--dur) var(--ease);
-}
-.nav-link:hover,
-.nav-link[aria-current="page"] { border-bottom-color: currentColor; }
-@media (min-width: 48em) {
-  .header__logo .logo { height: 2.125rem; }
-  .header__account { display: inline-flex; }
-}
 .header.is-compact .header__logo .logo { height: 1.5rem; }
-/* Ab 1200 px ist links Platz für alle Menüpunkte, darunter öffnet das Menü-Symbol die Liste */
-@media (min-width: 75em) {
-  .header__start { margin-left: 0; }
-  .header__nav { display: block; }
-  .header__search-end { display: inline-flex; }
-  .header__menu-btn,
-  .header__search-start { display: none; }
-  .menu { display: none !important; }
-}
-
 /* Startseite mit Einstieg ganz oben: der Einstieg läuft unter den Header, der Header ist durchsichtig, bis der
    Einstieg weggescrollt ist (is-solid) oder Menü / Support offen sind. Auf dunklem Grund oder Foto: helles Logo. */
 body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   margin-top: calc(var(--header-h) * -1);
 }
 .js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero])
-  .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) {
+  .header--overlay:not(.is-solid) {
   background: transparent;
   border-bottom-color: transparent;
 }
 .js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
-  .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) {
+  .header--overlay:not(.is-solid) {
   color: var(--c-on-photo);
   --focus: var(--c-on-photo);
 }
 .js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
-  .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) .logo--ink { display: none; }
+  .header--overlay:not(.is-solid) .logo--ink { display: none; }
 .js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
-  .header--overlay:not(.is-solid, :has(.menu:not([hidden])), :has(.support-menu:popover-open)) .logo--paper { display: block; }
-
-.menu {
-  position: fixed;
-  inset: var(--header-bottom, calc(var(--bar-h) + var(--header-h))) 0 0 0;
-  z-index: var(--z-header);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--c-paper);
-  color: var(--c-ink);
-  border-top: var(--bw) solid var(--c-grey-line);
-  animation: menu-in var(--dur-panel) var(--ease);
-}
-/* nur eine kurze Verschiebung: auch ohne laufende Animation bleibt das Menü sichtbar */
-@keyframes menu-in {
-  from { transform: translateY(-0.75rem); }
-  to { transform: none; }
-}
-.menu__list { padding: var(--s-4) var(--gutter) var(--s-6); }
-.menu__link {
-  display: block;
-  padding-block: var(--s-2);
-  font-size: clamp(2rem, 9vw, 2.75rem);
-}
-.menu__link[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.12em; }
-.menu__support { margin-top: var(--s-5); padding-top: var(--s-4); border-top: var(--bw) solid var(--c-grey-line); }
-.menu__support + .menu__support { margin-top: 0; padding-top: 0; border-top: 0; }
-.menu__head { color: var(--c-grey-text); margin-bottom: var(--s-1); }
-.menu__sublink { display: flex; align-items: center; min-height: var(--tap); }
-
-/* Support: Leiste direkt unter dem Header, volle Breite */
-.support-menu {
-  position: fixed;
-  inset: var(--header-bottom, calc(var(--bar-h) + var(--header-h))) 0 auto;
-  width: auto;
-  max-width: none;
-  height: auto;
-  margin: 0;
-  padding: var(--s-4) 0 var(--s-5);
-  border: 0;
-  border-bottom: var(--bw) solid var(--c-ink);
-  background: var(--c-paper);
-  color: var(--c-ink);
-}
-.support-menu::backdrop { background: transparent; }
-.support-menu__inner { display: grid; gap: var(--s-2); }
-.support-menu__head { color: var(--c-grey-text); }
-.support-menu__link { display: inline-flex; align-items: center; min-height: var(--tap); }
-.support-menu__link:hover { text-decoration: underline; text-underline-offset: 0.22em; }
-.header:has(.support-menu:popover-open) .nav-link--support { border-bottom-color: currentColor; }
+  .header--overlay:not(.is-solid) .logo--paper { display: block; }
 
 /* 6. Warenkorb ============================================================= */
 .drawer { position: fixed; inset: 0; z-index: var(--z-drawer); display: flex; justify-content: flex-end; }
@@ -647,46 +557,8 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .grid--lineup > .card--large { grid-column: span 3; }
 .grid__empty { grid-column: 1 / -1; display: grid; justify-items: start; gap: var(--s-4); padding-block: var(--s-6); }
 
-.card { display: flex; flex-direction: column; min-width: 0; }
-.card__media { position: relative; background: var(--c-plate); }
-.card__link { display: block; position: relative; }
-.card__view { display: block; aspect-ratio: 4 / 5; padding: 9% 7%; }
-.card__view--back { position: absolute; inset: 0; visibility: hidden; background: var(--c-plate); }
+.card { min-width: 0; }   /* Aussehen der Karte: Abschnitt 16 (Runde 13) */
 .card__img { width: 100%; height: 100%; object-fit: contain; }
-@media (hover: hover) and (pointer: fine) {
-  .card__link:hover .card__view--back { visibility: visible; }
-}
-/* große Karten ab 1024 px quer (5:4): so hoch wie die Dreierreihe darunter, nicht höher als der Bildschirm */
-@media (min-width: 64em) {
-  .card--large .card__view { aspect-ratio: 5 / 4; padding: 5% 14%; }
-}
-.card__flag {
-  position: absolute;
-  top: var(--s-2);
-  left: var(--s-2);
-  padding: 0.3rem 0.45rem 0.25rem;
-  background: var(--c-ink);
-  color: var(--c-paper);
-  font-size: 0.6875rem;
-}
-.card__info {
-  display: grid;
-  align-content: start;
-  gap: 0.2rem;
-  min-height: var(--tap);
-  padding-block: var(--s-2) var(--s-1);
-}
-.card__name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-.card__colors { font-size: 0.75rem; line-height: 1.3; color: var(--c-grey-text); }
-@media (max-width: 47.99em) { .card--small .card__colors { display: none; } }
-.card__price { font-size: 0.75rem; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.card__info:hover .card__name { text-decoration: underline; text-underline-offset: 0.22em; }
 
 .rail { padding-top: var(--s-8); }
 .rail__head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); margin-bottom: var(--s-2); }
@@ -706,12 +578,14 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
    Hell: ruhige Bildfläche wie hinter den Produkten; dunkel: Schwarz. Der Header liegt durchsichtig darüber,
    deshalb beginnt das Motiv erst unter dem Header. */
 .campaign { position: relative; overflow: hidden; background: var(--c-plate); }
-/* dunkle Bereiche: dieselben Bausteine, mit dem dunklen Satz der Palette */
-:is(.campaign--dark, .template-password, .drops--dark) {
+/* dunkle Bereiche: dieselben Bausteine, mit dem dunklen Satz der Palette (Runde 13 auch die Produktansicht im Zimmer) */
+:is(.campaign--dark, .template-password, .drops--dark, .azur-pdp) {
   --c-paper: var(--c-deep); --c-surface: var(--d-surface); --c-plate: var(--d-surface); --c-ink: var(--d-ink); --c-grey-text: var(--d-text);
-  --c-grey-line: var(--d-line); --c-acc: var(--d-acc); --c-acc-ink: var(--d-acc-ink); --logo-ink: none; --logo-paper: block;
+  --c-grey-line: var(--d-line); --c-grey-soft: var(--d-line); --c-acc: var(--d-acc); --c-acc-ink: var(--d-acc-ink); --c-error: #ff8a80;
+  --logo-ink: none; --logo-paper: block;
   background: var(--c-deep); color: var(--c-ink); color-scheme: dark;
 }
+.azur-pdp { --c-paper: var(--d-paper); }   /* die Produktansicht im Zimmer: Anthrazit wie vorher */
 .campaign__media { position: relative; display: block; height: calc(min(122vw, 72svh) + var(--header-h)); min-height: 24rem; overflow: hidden; }
 .campaign__cutout {
   position: absolute;
@@ -827,24 +701,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 }
 
 /* 10. Shop, Produkt ======================================================== */
-.shop__head { display: grid; gap: var(--s-3) var(--s-7); padding-block: var(--s-6) var(--s-5); }
-.shop__kicker { color: var(--c-grey-text); }
-.shop__title { font-size: clamp(2.25rem, 4.4vw, 3.75rem); }
-.shop__lead { max-width: var(--measure); color: var(--c-grey-text); }
-.filter { display: grid; gap: var(--s-3); align-content: end; }
-.filter__set { border: 0; margin: 0; padding: 0; min-width: 0; }
-.filter__legend { padding: 0; margin-bottom: var(--s-2); color: var(--c-grey-text); }
-.filter__opts { display: grid; grid-template-columns: 1.4fr repeat(calc(var(--n, 5) - 1), minmax(0, 1fr)); }
-.filter__opts .size { min-height: 2.75rem; margin-left: calc(var(--bw) * -1); }
-.filter__opts .size:first-of-type { margin-left: 0; }
-.filter__status { color: var(--c-grey-text); }
-@media (min-width: 64em) {
-  .shop__head { grid-template-columns: minmax(0, 1fr) 24rem; grid-auto-rows: auto; align-items: end; }
-  .shop__kicker,
-  .shop__title,
-  .shop__lead { grid-column: 1; }
-  .filter { grid-column: 2; grid-row: 1 / span 3; }
-}
+.shop__head { display: grid; justify-items: start; }   /* seit Runde 13 nur „← Startseite“ (Abschnitt 16) */
 
 .crumbs { color: var(--c-grey-text); }
 .crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s-2); }
@@ -1225,109 +1082,7 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .freeship__bar > span { display: block; height: 100%; background: var(--c-acc); border-radius: 3px !important; animation: fs-grow 0.9s var(--ease) both; }
 .drawer__express { min-height: 0; }
 
-/* 14. Runde 10: Spielerkarten, Anzeigetafel, Animationen ===================== */
-/* Spielerkarten (sections/azur-cards.liquid): vorne Sammelkarte, ein Klick dreht sie um (hinten Größe und Kaufen) */
-.pcards { padding-block: var(--s-7) var(--s-8); }
-.pcards__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--s-4) var(--s-6); margin-bottom: var(--s-6); }
-.pcards__kicker { color: var(--c-grey-text); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; margin-bottom: var(--s-2); }
-.pcards__title { font-size: clamp(2.6rem, 7vw, 5.5rem); font-stretch: var(--w-narrow); font-weight: 800; line-height: 0.92; text-transform: uppercase; }
-.pcards__aside { display: grid; gap: var(--s-2); justify-items: start; font-size: var(--t-small); color: var(--c-grey-text); }
-.pcards__line { display: flex; align-items: flex-start; gap: 0.35rem; }
-/* Anzahl hochgestellt wie bei basement.studio: „Sammel deine Stadt ⁽⁵⁾“ */
-.pcards__count { position: static; padding-top: 0.3em; color: var(--c-acc); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); line-height: 1; font-variant-numeric: tabular-nums; }
-/* Raster aus Haarlinien: jede Karte steht in ihrer Zelle, mit Nummer oben links */
-/* Runde 12: deutlich größer: Handy eine Karte pro Reihe, ab 480 px (iPad hoch und quer) zwei, ab 1200 px drei */
-.pcards__grid { display: grid; grid-template-columns: minmax(0, 1fr); margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--c-grey-line); border-left: 1px solid var(--c-grey-line); }
-@media (min-width: 30em) { .pcards__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 75em) { .pcards__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-.pcard { --cd-a: #e9d9a8; --cd-b: #b8954a; --cd-i: #2a2010; position: relative; padding: var(--s-6) clamp(0.5rem, 1.6vw, var(--s-5)) var(--s-5); border-right: 1px solid var(--c-grey-line); border-bottom: 1px solid var(--c-grey-line); perspective: 1400px; transition: background-color var(--dur-panel) var(--ease); }
-.pcard__no { position: absolute; top: var(--s-2); left: var(--s-3); color: var(--c-grey-soft); font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); font-variant-numeric: tabular-nums; transition: color var(--dur-panel) var(--ease); }
-.pcard:is(:hover, :focus-within, .is-flipped) { background: var(--c-surface); }
-.pcard:is(:hover, :focus-within, .is-flipped) .pcard__no { color: var(--c-acc); }
-.pcard--land { --cd-a: #eceef2; --cd-b: #9aa1ad; }
-.pcard__inner { position: relative; display: grid; aspect-ratio: 5 / 8; transform-style: preserve-3d; transition: transform 0.6s var(--ease); }
-.pcard.is-flipped .pcard__inner { transform: rotateY(180deg); }
-.pcard__front,
-.pcard__back { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; clip-path: polygon(50% 0, 100% 6%, 100% 94%, 50% 100%, 0 94%, 0 6%); }
-.pcard__front {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-  justify-items: center;
-  gap: 0.2rem;
-  padding: 11% 9% 13%;
-  background: linear-gradient(160deg, var(--cd-a), var(--cd-b));
-  color: var(--cd-i);
-  text-align: center;
-}
-.pcard__top { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
-.pcard__code { font-size: clamp(1.6rem, 2.6vw, 2.25rem); font-stretch: 62%; font-weight: 900; }
-.pcard__kind { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.pcard__img { position: relative; width: 100%; min-height: 0; }
-.pcard__pic { position: absolute; inset: 0; margin: auto; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0.6rem 0.8rem rgb(0 0 0 / 0.25)); }
-.pcard__name { font-size: clamp(1.4rem, 2.3vw, 1.95rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
-.pcard__meta { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
-.pcard__price { font-size: 1.0625rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.pcard__turn { margin-top: 0.15rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0; transition: opacity var(--dur) var(--ease); }
-.pcard__back {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--s-3);
-  padding: 14% 10%;
-  background: var(--c-surface);
-  box-shadow: inset 0 0 0 1px var(--c-grey-line);
-  transform: rotateY(180deg);
-  text-align: center;
-}
-.pcard__back-kicker { color: var(--c-grey-text); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.pcard__back-name { font-size: clamp(1.45rem, 2.3vw, 2rem); font-stretch: 62%; font-weight: 900; line-height: 1; text-transform: uppercase; }
-.pcard__back-price { font-variant-numeric: tabular-nums; font-weight: 700; }
-.pcard__form { display: grid; gap: var(--s-2); }
-.pcard__sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.3rem; margin: 0; padding: 0; border: 0; }
-.pcard__sizes .size { min-height: 2.75rem; padding: 0; font-size: 0.9375rem; }
-.pcard__add { min-height: 3rem; padding: 0 var(--s-2); justify-content: center; font-size: 0.875rem; letter-spacing: 0.04em; text-align: center; }
-.pcard__msg { min-height: 1.2em; font-size: 0.8125rem; color: var(--c-grey-text); }
-.pcard__msg.is-error { color: var(--c-error); }
-.pcard__back-foot { display: flex; justify-content: space-between; gap: var(--s-2); font-size: 0.875rem; }
-.pcard__back-foot .link { min-height: var(--tap); display: inline-flex; align-items: center; }
-.pcard.is-flipped .pcard__front { pointer-events: none; }
-
-/* Animation „leicht anheben“: Karten heben sich beim Drüberfahren, mit Schatten (nur Maus, nicht bei reduzierter Bewegung) */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  /* Schatten als eigene Ebene, die nur ihre Deckkraft ändert (ein filter: drop-shadow müsste jedes Bild neu zeichnen) */
-  .pcard__inner::after { content: ""; position: absolute; inset: auto 10% -1rem; transform: translateZ(-1px); height: 1.6rem; background: radial-gradient(closest-side, rgb(0 0 0 / 0.65), transparent); opacity: 0; transition: opacity var(--dur-panel) var(--ease); pointer-events: none; }
-  .pcard:not(.is-flipped):hover .pcard__inner::after { opacity: 1; }
-  .pcard:not(.is-flipped):hover .pcard__inner { transform: translateY(-0.4rem); }
-  .pcard:not(.is-flipped):hover .pcard__turn { opacity: 0.85; }
-  .card__media { transition: transform var(--dur-panel) var(--ease), box-shadow var(--dur-panel) var(--ease); }
-  .card:hover .card__media { transform: translateY(-0.35rem); box-shadow: 0 1.2rem 2rem rgb(0 0 0 / 0.45); }
-}
-.pcard__front:focus-visible .pcard__turn { opacity: 0.85; }
-@media (prefers-reduced-motion: reduce) {
-  .pcard__inner { transition: none; }
-  .pcard.is-flipped .pcard__inner { transform: none; }
-  .pcard__front, .pcard__back { backface-visibility: visible; }
-  .pcard__back { transform: none; visibility: hidden; }
-  .pcard.is-flipped .pcard__back { visibility: visible; }
-  .pcard.is-flipped .pcard__front { visibility: hidden; }
-}
-
-/* Animation „Anzeigetafel“: Überschriften mit data-flap klappen beim Hinscrollen Buchstabe für Buchstabe auf (azur.js) */
-.flap { display: inline-flex; flex-wrap: wrap; gap: 0.06em; }
-.flap__word { display: inline-flex; gap: 0.06em; margin-right: 0.22em; }
-.flap__ch {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  min-width: 0.7em;
-  padding: 0.06em 0.05em 0.02em;
-  background: var(--c-surface);
-  box-shadow: inset 0 0 0 1px var(--c-grey-line);
-}
-.flap__ch::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--c-paper); opacity: 0.8; }
-.flap__ch.is-turning { color: var(--c-acc); }
-
+/* 14. Runde 10: Animationen (Knopf wird zum Haken, Ball rollt zum Gratis-Versand) ================= */
 /* Animation „Knopf wird zum Haken“: der Kaufen-Knopf füllt sich von links und zeigt den Haken */
 .btn.is-done {
   --btn-fg: var(--c-paper);
@@ -1364,9 +1119,9 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 @keyframes fs-roll { from { left: var(--from, 0%); transform: translate(-50%, -50%) rotate(-540deg); } }
 @media (prefers-reduced-motion: reduce) { .freeship__bar > span, .freeship__ball { animation: none; } }
 
-/* 15. Runde 12: eine Website, Trikotfarbe, Trikot groß ===================== */
-/* Ein Hauch der Trikotfarbe im Hintergrund, wenn ein Trikot gewählt ist: Produktseite, gewendete Karte, Produktansicht
-   im Zimmer. Die Farbe wird stark vergraut (55 % Farbe, 45 % Grau) und nur zu 12 % in den Grund gemischt. */
+/* 15. Runde 12: eine Website, Trikotfarbe, Warenkorb-Symbol ===================== */
+/* Ein Hauch der Trikotfarbe im Hintergrund, wenn im Zimmer ein Trikot gewählt ist (Produktansicht im Zimmer; die weiße
+   Produktseite des Shops bleibt seit Runde 13 weiß). Die Farbe wird stark vergraut (55 % Farbe, 45 % Grau) und nur zu 12 % in den Grund gemischt. */
 [data-tone="ffm"] { --tint: var(--tint-ffm); }
 [data-tone="ber"] { --tint: var(--tint-ber); }
 [data-tone="bra"] { --tint: var(--tint-bra); }
@@ -1375,50 +1130,11 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 :is([data-tone="ffm"], [data-tone="ber"], [data-tone="bra"], [data-tone="ger"], [data-tone="tur"]) {
   --tint-bg: color-mix(in oklab, var(--c-paper) 88%, color-mix(in oklab, var(--tint) 55%, #808080));
 }
-.pdp[data-tone] { background: var(--tint-bg, transparent); transition: background-color 0.9s ease; }
-.pcard.is-flipped[data-tone] { background: var(--tint-bg, var(--c-surface)); }
 
 /* Zurück zur Startseite (Shop) */
 .back-home { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); margin-bottom: var(--s-2);
   font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; }
 .back-home:hover { text-decoration: underline; text-underline-offset: 0.25em; }
-
-/* Spielerkarten größer: die Karte bleibt im Format 5:8, höchstens 26 rem breit, mittig in der Zelle */
-.pcard__inner { width: 100%; max-width: 26rem; margin-inline: auto; }
-.pcard.is-flipped .pcard__back { cursor: pointer; }
-.pcard.is-flipped .pcard__back :is(form, .pcard__back-foot) { cursor: auto; }
-.pcard__back-foot button.link { padding: 0; background: none; border: 0; }
-/* Lupe oben rechts in der Zelle: öffnet das Trikot groß */
-.pcard__zoom { position: absolute; z-index: 2; top: var(--s-1); right: var(--s-1); display: grid; place-items: center; width: var(--tap); height: var(--tap);
-  color: var(--c-grey-text); transition: color var(--dur) var(--ease), opacity var(--dur) var(--ease); }
-.pcard__zoom svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.6; }
-.pcard__zoom:hover, .pcard__zoom:focus-visible { color: var(--c-ink); }
-.pcard.is-flipped .pcard__zoom { opacity: 0; pointer-events: none; }
-
-/* Trikot groß: Fenster in der Mitte, Bild links groß, rechts Name, Preis, Vorne/Hinten, Link zur Produktseite */
-.jbox { width: min(72rem, calc(100vw - 2 * var(--gutter))); max-width: none; max-height: calc(100dvh - 2 * var(--gutter)); margin: auto; padding: 0;
-  border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); color: var(--c-ink); overflow: auto; }
-.jbox::backdrop { background: rgb(0 0 0 / 0.72); }
-.jbox[open] { animation: jbox-in var(--dur-panel) var(--ease); }
-@keyframes jbox-in { from { opacity: 0; transform: translateY(0.75rem) scale(0.98); } }
-.jbox__panel { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); }
-.jbox__x { position: absolute; z-index: 2; top: var(--s-2); right: var(--s-2); display: grid; place-items: center; width: var(--tap); height: var(--tap);
-  border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); font-size: 1.75rem; line-height: 1; }
-.jbox__x:hover { border-color: var(--c-ink); }
-.jbox__fig { margin: 0; display: grid; place-items: center; background: var(--c-plate); aspect-ratio: 1; max-height: 78dvh; }
-.jbox__img { width: 100%; height: 100%; max-height: 78dvh; object-fit: contain; }
-.jbox__side { display: grid; gap: var(--s-3); align-content: start; padding: var(--s-5) var(--gutter) var(--s-6); }
-.jbox__name { font-size: clamp(1.75rem, 4vw, 2.75rem); font-stretch: var(--w-narrow); font-weight: 800; line-height: 0.95; text-transform: uppercase; }
-.jbox__price { font-weight: 600; }
-.jbox__views { display: flex; gap: var(--s-2); }
-.jbox__views .size { min-width: 5rem; }
-.jbox__views .size[aria-pressed="true"] { background: var(--c-ink); color: var(--c-paper); }
-.jbox__link { justify-self: start; }
-@media (min-width: 48em) {
-  .jbox__panel { grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr); }
-  .jbox__side { align-content: center; padding: var(--s-7) var(--s-6); }
-}
-@media (prefers-reduced-motion: reduce) { .jbox[open] { animation: none; } }
 
 /* Warenkorb-Symbol: die Sporttasche (früher im Zimmer), auf jeder Seite im Header; die Zahl als kleiner Punkt daran */
 .header__cart { position: relative; }
@@ -1434,19 +1150,115 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 .header__cart .header__count[data-count="0"] { opacity: 0; transform: scale(0.4); }   /* leer: kein Punkt (Vorleser lesen die 0 trotzdem) */
 .header.is-compact .sportbag { width: 2rem; }
 
-/* Sechste Karte: der nächste Drop. Vorne dunkles Material mit einem Trikot als Umriss und Fragezeichen, hinten die Anmeldung */
-.pcard--drop { --cd-a: #3b3e43; --cd-b: #141517; --cd-i: #f1eee8; }
-.pcard__mystery svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pcard__mystery path { fill: rgb(255 255 255 / 0.04); stroke: var(--c-acc); stroke-width: 1.2; stroke-dasharray: 3 2.4; stroke-linejoin: round; }
-.pcard__mystery text { fill: var(--c-acc); font-size: 34px; font-weight: 900; font-family: var(--f-sans); }
-.pcard--drop .pcard__price { color: var(--c-acc); font-size: 0.875rem; letter-spacing: 0.06em; text-transform: uppercase; }
-.pcard__back--drop { justify-content: center; gap: var(--s-2); padding: 12% 9%; text-align: left; }
-.pcard__back--drop .pcard__back-name { margin-bottom: var(--s-1); }
-.pcard__drop-text { font-size: 0.875rem; line-height: 1.45; color: var(--c-grey-text); }
-.pcard__back--drop .signup { gap: 0.4rem; }
-.pcard__back--drop .signup__row { grid-template-columns: 1fr; gap: 0.4rem; }
-.pcard__back--drop .signup__email { border-right: var(--bw) solid var(--c-grey-text); height: 3rem; }
-.pcard__back--drop .signup__btn { height: 3rem; justify-content: center; }
-.pcard__back--drop .signup__legal { font-size: 0.6875rem; }
-.pcard__back--drop .signup__ok { padding: var(--s-3); }
-.pcard__back-foot--end { justify-content: flex-end; }
+/* 16. Runde 13: schlicht nach yeezy.com ===================================== */
+/* Weiß, Schwarz, eine Monospace-Schrift, viel Luft. Gilt für den Shop; das Zimmer und seine Produktansicht bleiben dunkel. */
+body { font-stretch: 87.5%; letter-spacing: 0.02em; }
+
+/* Header: links klein das Logo, Mitte STADT / LAND, rechts die Sporttasche; ohne Linie */
+.header { border-bottom-color: transparent; }
+.header__bar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.header__logo { justify-self: start; padding-inline: 0; }
+.header__logo .logo, .header.is-compact .header__logo .logo { height: 1.25rem; }
+@media (min-width: 48em) { .header__logo .logo { height: 1.4rem; } }
+.header__cats { display: flex; gap: clamp(1rem, 2vw, 1.5rem); }
+.header__cat { display: flex; align-items: center; min-height: var(--tap); font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase;
+  transition: color var(--dur) var(--ease); }
+.header__cats:has([aria-current]) .header__cat:not([aria-current]) { color: var(--c-grey-soft); }
+.header__cats .header__cat:hover { color: inherit; }
+.header__end { justify-self: end; margin-right: -0.625rem; }
+.sportbag, .header.is-compact .sportbag { width: 1.65rem; stroke-width: 2.4; }
+.sportbag__body { fill: none; }
+.header__cart .header__count { top: 0.35rem; right: 0.05rem; min-width: 0.95rem; height: 0.95rem; font-size: 0.5625rem; font-weight: 400; }
+
+/* Leiste oben: kaum sichtbar, graue kleine Schrift auf Weiß */
+.bar { background: var(--c-paper); border-bottom: 0; }
+.bar__item { font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Raster (Startseite und Shop): Trikot frei auf Weiß, darunter nur der Name; Desktop 3, iPad 2, Handy 1 */
+.yz { padding-block: var(--s-7) var(--s-8); }
+.yz__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-8) var(--s-6); margin: 0 auto; list-style: none; }
+@media (min-width: 30em) { .yz__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 75em) { .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-9); } }
+.yz__empty { grid-column: 1 / -1; color: var(--c-grey-text); text-align: center; }
+.card { text-align: center; }
+.card__link { display: grid; justify-items: center; gap: var(--s-4); }
+.card__media { display: block; width: 100%; aspect-ratio: 1 / 0.9; background: var(--c-paper); }
+.card__media .card__img { width: 100%; height: 100%; padding: 6%; object-fit: contain; }
+.card__name { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.card__hint { margin-top: calc(var(--s-3) * -1); font-size: 0.75rem; color: var(--c-grey-text); letter-spacing: 0.06em; text-transform: uppercase; }
+.card__link:hover .card__name { text-decoration: underline; text-underline-offset: 0.3em; }
+/* sechstes Feld: der nächste Drop, ein Trikot-Umriss mit Fragezeichen; ein Klick öffnet die Anmeldung darunter */
+.card--drop summary { list-style: none; cursor: pointer; }
+.card--drop summary::-webkit-details-marker { display: none; }
+.card__media--drop { display: grid; place-items: center; }
+.card__media--drop svg { width: 70%; height: 82%; }
+.card__media--drop path { fill: none; stroke: var(--c-ink); stroke-width: 0.9; stroke-dasharray: 2.6 2.2; stroke-linejoin: round; }
+.card__media--drop text { fill: var(--c-ink); font-family: var(--f-sans); font-size: 30px; }
+.card__drop { display: grid; gap: var(--s-3); max-width: 24rem; margin: var(--s-5) auto 0; text-align: left; }
+.card__drop-text { font-size: var(--t-small); color: var(--c-grey-text); }
+
+/* Shop-Seite: nur „← Startseite“ über dem Raster */
+.shop__head { padding-block: var(--s-4) var(--s-6); }
+.back-home { font-weight: 400; color: var(--c-grey-text); }
+.back-home:hover { color: var(--c-ink); }
+
+/* Produktseite: ein Bild in der Mitte mit Pfeilen und Punkten, darunter mittig Name, Preis, Größen und „+“ */
+.pdp--yz { padding-bottom: var(--s-8); }
+.pdp--yz .crumbs { padding-block: var(--s-2) 0; font-size: 0.6875rem; }
+.pdp--yz .crumbs a { min-width: 0; }
+.pdp--yz .gallery { width: min(100%, 52rem); margin: 0 auto; }
+.pdp--yz .gallery__stage { background: none; }
+.pdp--yz .gallery__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; }
+/* das Bild so hoch, dass Name, Preis und „+“ auf dem ersten Bildschirm darunter stehen (wie bei yeezy.com) */
+.pdp--yz .gallery__slide { flex: 0 0 100%; aspect-ratio: auto; height: min(52vh, 30rem); padding: 2% 12%; background: none; grid-column: auto; }
+@media (max-width: 47.99em) { .pdp--yz .gallery__slide { height: auto; aspect-ratio: 1; padding: 6% 10%; } }
+.gallery__arrow { position: absolute; top: 50%; z-index: 2; display: grid; place-items: center; width: var(--tap); height: var(--tap); translate: 0 -50%; color: var(--c-ink); }
+.gallery__arrow svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gallery__arrow--prev { left: 0; }
+.gallery__arrow--next { right: 0; }
+.gallery__arrow:hover svg { stroke-width: 2.4; }
+.gallery__dots { display: flex; justify-content: center; gap: 0.25rem; margin-top: var(--s-2); }
+.gallery__dot { display: grid; place-items: center; width: 1.25rem; height: 1.25rem; }
+.gallery__dot::before { content: ""; width: 5px; height: 5px; border-radius: 50% !important; background: var(--c-grey-soft); }
+.gallery__dot[aria-current="true"]::before { background: var(--c-ink); }
+.pdp--yz .pdp__info { position: static; width: min(100%, 26rem); margin: var(--s-4) auto 0; padding-inline: var(--gutter); gap: var(--s-4); justify-items: center; text-align: center; }
+.pdp--yz .pdp__title { font-size: 0.9375rem; letter-spacing: 0.08em; }
+.pdp--yz .pdp__price { font-size: 0.9375rem; font-weight: 400; }
+.pdp--yz .pdp__buy { justify-items: center; gap: var(--s-2); width: 100%; }
+.pdp--yz .sizes__legend { float: none; width: 100%; justify-content: center; margin-bottom: var(--s-2); color: var(--c-grey-text); font-size: 0.6875rem; }
+.pdp--yz .sizes__chart { position: static; display: block; margin: 0 auto var(--s-2); font-size: 0.6875rem; }
+.pdp--yz .sizes__row { display: flex; justify-content: center; gap: var(--s-2); }
+.pdp--yz .sizes__row .size { min-width: 2.75rem; min-height: 2.75rem; margin: 0; border: 0; background: none; color: var(--c-grey-text); font-size: 0.8125rem; }
+.pdp--yz .sizes__row .size:hover { color: var(--c-ink); }
+.pdp--yz input:checked + .size { background: none; color: var(--c-ink); text-decoration: underline; text-underline-offset: 0.35em; }
+.pdp--yz .size[data-soldout] { color: var(--c-grey-soft); }
+.pdp--yz .sizes.is-invalid .size:not([data-soldout]) { color: var(--c-error); }
+.pdp__add { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; color: var(--c-ink); transition: opacity var(--dur) var(--ease); }
+.pdp__add svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.pdp__add:hover svg { stroke-width: 2.1; }
+.pdp__add:disabled { color: var(--c-grey-soft); }
+.pdp__add.is-done svg { display: none; }
+.pdp__add.is-done::before { content: "✓"; font-size: 1.25rem; animation: btn-tick 0.38s var(--ease) both; }
+.pdp--yz .pdp__error { border: 0; padding: 0; font-weight: 400; }
+.pdp--yz .pdp__status { min-height: 0; color: var(--c-grey-text); }
+.pdp--yz .trust { width: 100%; border-top: 0; font-size: 0.75rem; color: var(--c-grey-text); }
+.pdp--yz .trust__row { display: block; border: 0; padding-block: 0.15rem; text-align: center; }
+.pdp--yz .trust__k { margin-right: 0.6em; font-weight: 400; }
+.pdp--yz .pdp__motto, .pdp--yz .pdp__facts, .pdp--yz .pdp__more { width: 100%; text-align: left; }
+.pdp--yz .facts { border-top-color: var(--c-grey-line); }
+.pdp--yz .acc__head { font-weight: 400; }
+
+/* Warenkorb, Footer, Anmeldung: dieselbe ruhige Sprache */
+.drawer__panel { border-left: var(--bw) solid var(--c-grey-line); }
+.drawer__title, .drawer__close { font-weight: 400; }
+.footer { border-top-color: var(--c-grey-line); }
+.footer__signup { padding-block: var(--s-6); }
+.footer__signup-title { font-size: 0.9375rem; }
+.footer__signup-lead { font-size: var(--t-small); }
+.footer__head { font-weight: 400; color: var(--c-grey-text); }
+.footer__col a { font-size: 0.75rem; }
+.signup__label { font-weight: 400; color: var(--c-grey-text); }
+.signup__email { border-color: var(--c-grey-line); }
+.signup__email:focus { border-color: var(--c-ink); }
+.btn { font-weight: 400; }
+.btn--solid { font-weight: 400; }

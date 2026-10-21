@@ -1,74 +1,21 @@
 {%- comment -%}
-  Shop / Kollektion: Kopf mit Größenfilter, darunter das Raster.
-  Die beiden Hauptprodukte (Theme-Einstellungen) stehen breit, alle anderen dreispaltig.
-  Der Filter arbeitet im Browser über data-sizes (verfügbare Größen je Karte).
-  Runde 12: oben ein deutlicher Link zurück zur Startseite (zusätzlich zum Logo im Header).
+  Shop / Kollektion (Runde 13, schlicht nach yeezy.com): oben klein „← Startseite“, darunter das Raster wie auf der
+  Startseite (Trikot frei auf Weiß, nur der Name). Welche Kollektion offen ist, zeigt der Header (STADT / LAND schwarz).
 {%- endcomment -%}
-{%- liquid
-  assign sizes = settings.filter_sizes | split: ','
-  assign f1 = settings.feature_product_1
-  assign f2 = settings.feature_product_2
--%}
 <div class="shop" data-collection>
   <header class="shop__head wrap">
-    <a class="back-home" href="{{ routes.root_url }}"><span class="arrow" aria-hidden="true">←</span> Zurück zur Startseite</a>
-    <p class="shop__kicker">{{ section.settings.kicker }}</p>
-    <h1 class="shop__title">{{ collection.title }}</h1>
-    {%- if collection.description != blank -%}
-      <div class="shop__lead rte">{{ collection.description }}</div>
-    {%- endif -%}
-
-    <form class="filter" aria-label="Nach Größe filtern" data-filter>
-      <fieldset class="filter__set">
-        <legend class="filter__legend">Größe</legend>
-        <div class="filter__opts" style="--n: {{ sizes.size | plus: 1 }}">
-          <input class="sr-only" type="radio" name="size" id="f-alle-{{ section.id }}" value="" checked>
-          <label class="size" for="f-alle-{{ section.id }}">Alle</label>
-          {%- for s in sizes -%}
-            {%- assign sz = s | strip -%}
-            <input class="sr-only" type="radio" name="size" id="f-{{ sz | handleize }}-{{ section.id }}" value="{{ sz | escape }}">
-            <label class="size" for="f-{{ sz | handleize }}-{{ section.id }}">{{ sz }}</label>
-          {%- endfor -%}
-        </div>
-      </fieldset>
-      <p class="filter__status" data-filter-status aria-live="polite">
-        {{ collection.products_count }} {% if collection.products_count == 1 %}Trikot{% else %}Trikots{% endif %}
-      </p>
-    </form>
+    <a class="back-home" href="{{ routes.root_url }}"><span class="arrow" aria-hidden="true">←</span> Startseite</a>
+    <h1 class="sr-only">{{ collection.title }}</h1>
   </header>
 
-  {%- liquid
-    # Hauptprodukte in der Kollektion: Raster mit großen Karten, auch mobil (zwei halb, übrige zu dritt)
-    assign lineup = false
-    if section.settings.feature_large
-      for p in collection.products
-        if p.id == f1.id or p.id == f2.id
-          assign lineup = true
-          break
-        endif
-      endfor
-    endif
-  -%}
   {%- paginate collection.products by 24 -%}
-    <div class="grid{% if lineup %} grid--lineup{% endif %} wrap" data-filter-grid>
+    <ul class="yz__grid wrap" role="list">
       {%- for p in collection.products -%}
-        {%- liquid
-          assign card_size = 'small'
-          if section.settings.feature_large
-            if p.id == f1.id or p.id == f2.id
-              assign card_size = 'large'
-            endif
-          endif
-        -%}
-        {% render 'product-card', product: p, size: card_size, eager: forloop.first %}
+        <li>{% render 'product-card', product: p, eager: forloop.first %}</li>
       {%- else -%}
-        <p class="grid__empty">Hier ist gerade nichts.</p>
+        <li class="yz__empty">Hier ist gerade nichts.</li>
       {%- endfor -%}
-      <div class="grid__empty" data-filter-empty hidden>
-        <p>In Größe <span data-filter-size></span> ist gerade nichts verfügbar.</p>
-        <button class="btn btn--line" type="button" data-filter-reset>Alle Größen zeigen</button>
-      </div>
-    </div>
+    </ul>
     {%- if paginate.pages > 1 -%}
       <nav class="pager wrap" aria-label="Seiten">{{ paginate | default_pagination: next: 'Weiter', previous: 'Zurück' }}</nav>
     {%- endif -%}
@@ -79,8 +26,8 @@
 {
   "name": "Shop",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Zeile über dem Titel", "default": "Shop" },
-    { "type": "checkbox", "id": "feature_large", "label": "Hauptprodukte groß zeigen", "default": true }
+    { "type": "text", "id": "kicker", "label": "(ohne Wirkung seit Runde 13)", "default": "Shop" },
+    { "type": "checkbox", "id": "feature_large", "label": "(ohne Wirkung seit Runde 13)", "default": true }
   ]
 }
 {% endschema %}

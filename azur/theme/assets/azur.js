@@ -1,7 +1,7 @@
 /* ==========================================================================
    AZUR — Theme-Skript
-   Warenkorb (Shopify Cart API + Section Rendering), Menü, Kartenansicht vorne/hinten,
-   Größenfilter, Produktgalerie, Kaufformular.
+   Warenkorb (Shopify Cart API + Section Rendering), Header, Anmeldung, Produktgalerie (Pfeile, Punkte),
+   Kaufformular, Feld „Nächster Drop“.
    Ohne JavaScript funktionieren alle Links und Formulare normal (Warenkorbseite /cart).
    ========================================================================== */
 (function () {
@@ -128,7 +128,6 @@
 
   function openDrawer(trigger) {
     if (!drawer) return;
-    closeMenu();
     returnFocus = trigger || document.activeElement;
     drawer.hidden = false;
     openLayer = drawer;
@@ -202,43 +201,8 @@
     });
   }
 
-  /* ---- Menü (mobil) -------------------------------------------------------- */
-  const menu = $('[data-menu]');
-  const menuBtn = $('[data-menu-toggle]');
-
-  function openMenu() {
-    if (!menu || !menuBtn) return;
-    menu.hidden = false;
-    menuBtn.setAttribute('aria-expanded', 'true');
-    $('[data-menu-label]', menuBtn).textContent = 'Schließen';
-    document.documentElement.classList.add('is-locked');
-    openLayer = $('.header');
-    returnFocus = menuBtn;
-  }
-  function closeMenu(restore) {
-    if (!menu || !menuBtn || menu.hidden) return;
-    menu.hidden = true;
-    menuBtn.setAttribute('aria-expanded', 'false');
-    $('[data-menu-label]', menuBtn).textContent = 'Menü';
-    document.documentElement.classList.remove('is-locked');
-    openLayer = null;
-    if (restore) menuBtn.focus();
-  }
-  if (menu && menuBtn) {
-    menuBtn.addEventListener('click', () => (menu.hidden ? openMenu() : closeMenu(true)));
-    menu.addEventListener('click', (e) => {
-      if (e.target.closest('a')) closeMenu();
-    });
-    // Beim Wechsel auf Desktop-Breite schließen
-    window.matchMedia('(min-width: 75em)').addEventListener('change', (e) => {
-      if (e.matches) closeMenu();
-    });
-  }
-
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (drawer && !drawer.hidden) closeDrawer();
-    else if (menu && !menu.hidden) closeMenu(true);
+    if (e.key === 'Escape' && drawer && !drawer.hidden) closeDrawer();
   });
 
   /* ---- Header: Unterkante für Menü und Support-Leiste; Startseite durchsichtig über dem Einstieg ---- */
@@ -264,37 +228,6 @@
     header.addEventListener('transitionend', queue); // Unterkante nach dem Schrumpfen neu messen
   }
 
-  /* ---- Trikot groß (Runde 12): Vorder- und Rückseite in einem Fenster; schließen mit ×, Esc oder Klick daneben ---- */
-  const jbox = $('[data-jbox]');
-  if (jbox && typeof jbox.showModal === 'function') {
-    const img = $('[data-jbox-img]', jbox);
-    const views = $$('[data-jbox-view]', jbox);
-    let pics = {};
-    const show = (view) => {
-      img.src = pics[view] || pics.front;
-      views.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.jboxView === view)));
-    };
-    document.addEventListener('click', (e) => {
-      const opener = e.target.closest('[data-jbox-open]');
-      if (!opener) return;
-      e.preventDefault();
-      const d = opener.dataset;
-      pics = { front: d.jboxFront, back: d.jboxBack };
-      $('[data-jbox-name]', jbox).textContent = d.jboxName;
-      $('[data-jbox-price]', jbox).textContent = d.jboxPrice;
-      $('[data-jbox-link]', jbox).href = d.jboxUrl;
-      img.alt = d.jboxName;
-      $('[data-jbox-views]', jbox).hidden = !d.jboxBack;
-      show('front');
-      jbox.showModal();
-      document.documentElement.classList.add('is-locked');
-    });
-    views.forEach((b) => b.addEventListener('click', () => show(b.dataset.jboxView)));
-    $('[data-jbox-close]', jbox).addEventListener('click', () => jbox.close());
-    jbox.addEventListener('click', (e) => { if (e.target === jbox) jbox.close(); });   // Klick neben das Fenster
-    jbox.addEventListener('close', () => document.documentElement.classList.remove('is-locked'));
-  }
-
   /* ---- Anmeldung (Runde 12): Adresse vor dem Absenden prüfen, Fehler direkt unter dem Feld ------------- */
   $$('form.signup').forEach((form) => {
     const input = $('[data-signup-email]', form);
@@ -318,66 +251,6 @@
       }
     });
     input.addEventListener('input', () => { if (!error.hidden) show(''); });
-  });
-
-  /* ---- Produktkarte: vorne / hinten ---------------------------------------- */
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-view-btn]');
-    if (!btn) return;
-    const card = btn.closest('.card');
-    const view = btn.dataset.viewBtn;
-    card.dataset.view = view;
-    $$('[data-view-btn]', card).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === view)));
-  });
-
-  /* ---- Shop: Größenfilter -------------------------------------------------- */
-  $$('[data-collection]').forEach((el) => {
-    const form = $('[data-filter]', el);
-    const grid = $('[data-filter-grid]', el);
-    if (!form || !grid) return;
-    const status = $('[data-filter-status]', el);
-    const empty = $('[data-filter-empty]', el);
-    const cards = $$('.card', grid);
-
-    function apply(value) {
-      let shown = 0;
-      cards.forEach((card) => {
-        const sizes = (card.dataset.sizes || '').split(',');
-        const match = !value || sizes.includes(value);
-        card.hidden = !match;
-        if (match) shown += 1;
-        $$('.card__sizes [data-size]', card).forEach((s) => {
-          if (s.tagName === 'S') return;
-          if (value && s.dataset.size === value) s.dataset.state = 'pick';
-          else delete s.dataset.state;
-        });
-      });
-      status.textContent = (shown === 1 ? '1 Trikot' : shown + ' Trikots') + (value ? ' in Größe ' + value : '');
-      empty.hidden = shown > 0;
-      $('[data-filter-size]', empty).textContent = value;
-    }
-
-    form.addEventListener('submit', (e) => e.preventDefault());
-    form.addEventListener('change', (e) => {
-      if (e.target.name !== 'size') return;
-      memory.set(e.target.value || null);
-      apply(e.target.value);
-    });
-    $('[data-filter-reset]', el).addEventListener('click', () => {
-      $('input[name="size"][value=""]', form).checked = true;
-      memory.set(null);
-      apply('');
-      $('input[name="size"][value=""]', form).focus();
-    });
-
-    withPrivacy(() => {
-      const mine = memory.get();
-      const radio = mine && $$('input[name="size"]', form).find((r) => r.value === mine);
-      if (radio) {
-        radio.checked = true;
-        apply(mine);
-      }
-    });
   });
 
   /* ---- Produktseite: Galerie ----------------------------------------------- */
@@ -409,6 +282,11 @@
       });
     }, { passive: true });
     thumbs.forEach((t) => t.addEventListener('click', () => go(Number(t.dataset.go))));
+    // Runde 13: Pfeile links und rechts (am Ende geht es wieder von vorn los)
+    const prev = $('[data-gallery-prev]', gallery);
+    const next = $('[data-gallery-next]', gallery);
+    if (prev) prev.addEventListener('click', () => go(active === 0 ? slides.length - 1 : active - 1));
+    if (next) next.addEventListener('click', () => go(active === slides.length - 1 ? 0 : active + 1));
     track.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') { e.preventDefault(); go(active + 1); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); go(active - 1); }
@@ -501,46 +379,6 @@
     });
   });
 
-  /* ---- Produktseite: feste Kaufleiste (Handy) ------------------------------ */
-  // Erscheint, sobald der eigentliche Warenkorb-Button nicht im Bild ist. Größe und Preis laufen mit dem Formular mit.
-  $$('[data-buybar]').forEach((bar) => {
-    const scope = bar.closest('[data-product]');
-    const form = scope && $('[data-buy]', scope);
-    const main = form && $('[data-buy-btn]', form);
-    if (!form || !main || !('IntersectionObserver' in window)) return;
-    const select = $('[data-buybar-size]', bar);
-    const add = $('[data-buybar-add]', bar);
-    const price = $('[data-buybar-price]', bar);
-    const mainPrice = $('[data-price]', scope);
-    const radios = $$('input[name="id"]', form);
-    bar.hidden = false;
-
-    const sync = () => {
-      const r = radios.find((x) => x.checked);
-      select.value = r ? r.value : '';
-      if (price && mainPrice) price.textContent = mainPrice.textContent;
-    };
-    form.addEventListener('change', (e) => { if (e.target.name === 'id') sync(); });
-    select.addEventListener('change', () => {
-      const r = radios.find((x) => x.value === select.value);
-      if (!r) return;
-      r.checked = true;
-      r.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    add.addEventListener('click', () => {
-      if (!select.value) {
-        select.focus();
-        try { select.showPicker(); } catch (e) { /* ältere Browser: Fokus reicht */ }
-        return;
-      }
-      if (form.requestSubmit) form.requestSubmit();
-      else main.click();
-    });
-    withPrivacy(() => window.setTimeout(sync, 0));
-    // erst wenn der Kaufknopf ganz zu sehen ist, verschwindet die Leiste (angeschnitten zählt als nicht sichtbar)
-    new IntersectionObserver(([entry]) => bar.classList.toggle('is-shown', entry.intersectionRatio < 0.99), { threshold: [0, 0.99] }).observe(main);
-  });
-
   /* ---- Produktseite: Bild vergrößern --------------------------------------- */
   const zoom = $('[data-zoom-dialog]');
   if (zoom && typeof zoom.showModal === 'function') {
@@ -560,134 +398,16 @@
     $('[data-zoom-close]', zoom).addEventListener('click', () => zoom.close());
     zoom.addEventListener('click', (e) => { if (e.target === zoom) zoom.close(); });
   }
-  /* ---- Spielerkarten (Runde 10): umdrehen, hinten Größe wählen, direkt in den Warenkorb ---- */
-  // Vorne ist ein Link zur Produktseite (ohne Skript); mit Skript dreht ein Klick die Karte um. Immer nur eine offen.
-  let openCard = null;
-  function flipCard(card, on) {
-    const front = $('.pcard__front', card);
-    const back = $('.pcard__back', card);
-    card.classList.toggle('is-flipped', on);
-    front.setAttribute('aria-expanded', String(on));
-    back.inert = !on;
-    if (on) {
-      if (openCard && openCard !== card) flipCard(openCard, false);
-      openCard = card;
-      const first = $('input:not([disabled]):not([type="hidden"])', back) || $('button', back);
-      window.setTimeout(() => first.focus({ preventScroll: true }), calm.matches ? 0 : 320);
-    } else if (openCard === card) {
-      openCard = null;
-    }
-  }
-  $$('[data-pcard]').forEach((card) => {
-    const front = $('.pcard__front', card);
-    const form = $('[data-pcard-form]', card);
-    front.setAttribute('role', 'button');
-    card.addEventListener('click', (e) => {
-      // Runde 12: ein Klick auf eine freie Stelle der Rückseite dreht die Karte wieder um (Größen, Knöpfe, Links nicht)
-      const onBack = card.classList.contains('is-flipped') && e.target.closest('.pcard__back')
-        && !e.target.closest('a, button, input, label, select, textarea');
-      const t = e.target.closest('[data-pcard-flip]');
-      if (!t && !onBack) return;
-      e.preventDefault();
-      const on = !card.classList.contains('is-flipped');
-      flipCard(card, on);
-      if (!on) front.focus({ preventScroll: true });
-    });
-    front.addEventListener('keydown', (e) => {
-      if (e.key === ' ') { e.preventDefault(); front.click(); }
-    });
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && card.classList.contains('is-flipped')) { e.stopPropagation(); flipCard(card, false); front.focus(); }
-    });
-    // nach dem Absenden der Drop-Anmeldung lädt Shopify die Seite neu: die Karte zeigt dann gleich ihre Rückseite
+  /* ---- Feld „Nächster Drop“ (Runde 13): nach dem Absenden lädt Shopify die Seite neu, das Feld steht dann offen da ---- */
+  $$('[data-drop-card]').forEach((card) => {
     if ($('.signup__ok, .signup__error:not([hidden])', card)) {
-      flipCard(card, true);
+      card.open = true;
       card.scrollIntoView({ block: 'center' });
     }
-    if (!form) return;
-    const msg = $('[data-pcard-msg]', form);
-    const btn = $('button[type="submit"]', form);
-    const label = $('[data-pcard-label]', form);
-    const base = label.textContent;
-    const say = (text, bad) => { msg.textContent = text; msg.classList.toggle('is-error', Boolean(bad)); };
-    form.addEventListener('change', () => say(''));
-    form.addEventListener('submit', async (e) => {
-      const radio = $$('input[name="id"]', form).find((r) => r.checked);
-      if (!radio) {
-        e.preventDefault();
-        say('Bitte wähle zuerst eine Größe.', true);
-        const first = $('input:not([disabled])', form);
-        if (first) first.focus();
-        return;
-      }
-      if (!drawer) return; // ohne Seitenleiste normal an /cart/add senden
-      e.preventDefault();
-      const name = form.dataset.label + ', Größe ' + radio.dataset.size;
-      btn.disabled = true;
-      btn.setAttribute('aria-busy', 'true');
-      label.textContent = 'Wird hinzugefügt …';
-      say('');
-      try {
-        await addToCart(radio.value, name);
-        // „Knopf wird zum Haken“, dann gleitet der Warenkorb herein
-        label.textContent = 'Im Warenkorb';
-        btn.classList.add('is-done');
-        say(name + ' liegt im Warenkorb.');
-        window.setTimeout(() => openDrawer(btn), calm.matches ? 0 : 450);
-        window.setTimeout(() => { label.textContent = base; btn.classList.remove('is-done'); }, 2600);
-      } catch (err) {
-        label.textContent = base;
-        say(err.message, true);
-      } finally {
-        btn.disabled = false;
-        btn.removeAttribute('aria-busy');
-      }
+    card.addEventListener('toggle', () => {
+      const field = card.open && $('input[type="email"]', card);
+      if (field) field.focus({ preventScroll: true });
     });
   });
 
-  /* ---- Anzeigetafel (Runde 10): Überschriften mit data-flap klappen beim ersten Hinscrollen auf ---- */
-  const FLAP = 'ABCDEFGHIJKLMNOPRSTUVWXYZ0123456789';
-  const randomChar = () => FLAP[Math.floor(Math.random() * FLAP.length)];
-  $$('[data-flap]').forEach((el) => {
-    const text = el.textContent.trim();
-    if (!text) return;
-    el.setAttribute('aria-label', text);
-    const board = document.createElement('span');
-    board.className = 'flap';
-    board.setAttribute('aria-hidden', 'true');
-    const chars = [];
-    text.split(/\s+/).forEach((word) => {
-      const w = document.createElement('span');
-      w.className = 'flap__word';
-      Array.from(word).forEach((ch) => {
-        const c = document.createElement('span');
-        c.className = 'flap__ch';
-        c.textContent = ch;
-        w.appendChild(c);
-        chars.push([c, ch]);
-      });
-      board.appendChild(w);
-    });
-    el.replaceChildren(board);
-    if (calm.matches || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      io.disconnect();
-      chars.forEach(([c, ch], i) => {
-        let turns = 3 + (i % 3);
-        const step = () => {
-          if (turns-- > 0) {
-            c.textContent = randomChar();
-            c.classList.add('is-turning');
-            window.setTimeout(step, 70);
-          } else {
-            c.textContent = ch;
-            c.classList.remove('is-turning');
-          }
-        };
-        window.setTimeout(step, i * 45);
-      });
-    }, { threshold: 0.6 });
-    io.observe(el);
-  });
 })();

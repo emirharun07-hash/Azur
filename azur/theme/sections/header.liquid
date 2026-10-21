@@ -1,50 +1,39 @@
 {%- comment -%}
-  Header in drei Spalten: Navigation links, Logo in der Mitte, Suche / Konto / Warenkorb rechts.
-  Navigation: die zwei Stadt-Trikots, Kategorie Nationaltrikots, Shop, Support. „Über Azur“ steht im Menü und im Footer.
-  „Support“ klappt eine Leiste unter dem Header auf (Popover, ohne JavaScript; schließt mit Esc oder Klick daneben).
-  Startseite: liegt durchsichtig mit hellem Logo über dem dunklen Einstieg (dem Zimmer), bis der Einstieg nach oben weggescrollt ist.
-  Das Logo führt auf jeder Seite zur Startseite (Runde 12: vorher war es auf Shop- und Produktseiten unsichtbar).
-  Unter 1200 px: Menü-Knopf und Suche links, das Menü öffnet unter der Kopfleiste (dort auch Über Azur, Support, Konto).
+  Header (Runde 13, schlicht nach yeezy.com): links klein das Logo (führt zur Startseite), in der Mitte nur zwei Wörter,
+  STADT (Städtetrikots) und LAND (Nationaltrikots), rechts die Sporttasche als Warenkorb. Ist eine der beiden Seiten
+  gewählt (Kollektion oder ein Trikot daraus), steht sie schwarz und die andere hellgrau.
+  Support, Konto und alle Rechtsseiten stehen im Footer.
+  Startseite: liegt durchsichtig mit heller Schrift über dem Zimmer, bis das Zimmer nach oben weggescrollt ist.
 {%- endcomment -%}
 {%- liquid
-  assign shop_coll = settings.main_collection
-  if shop_coll.url == blank
-    assign shop_coll = collections.all
+  assign city = section.settings.city
+  if city.url == blank
+    assign city = collections['staedtetrikots']
+  endif
+  assign land = section.settings.land
+  if land.url == blank
+    assign land = settings.nav_collection
+  endif
+  if land.url == blank
+    assign land = collections['nationaltrikots']
   endif
 
-  assign about = settings.about_page
-  if about.url == blank
-    assign about = pages['ueber-azur']
-  endif
-
-  assign p1 = settings.feature_product_1
-  assign p2 = settings.feature_product_2
-  capture p1_label
-    if p1
-      render 'product-field', product: p1, field: 'label'
+  assign on_city = false
+  assign on_land = false
+  if collection.handle != blank
+    if collection.handle == city.handle
+      assign on_city = true
+    elsif collection.handle == land.handle
+      assign on_land = true
     endif
-  endcapture
-  capture p2_label
-    if p2
-      render 'product-field', product: p2, field: 'label'
-    endif
-  endcapture
-
-  assign cat = settings.nav_collection
-  capture support_links
-    render 'support-links', class: 'support-menu__link'
-  endcapture
-  capture menu_support
-    render 'support-links', class: 'menu__sublink'
-  endcapture
-
-  assign on_shop = false
-  if template.name == 'list-collections' or collection.handle == shop_coll.handle
-    assign on_shop = true
-  endif
-  assign on_cat = false
-  if cat.url != blank and collection.handle == cat.handle
-    assign on_cat = true
+  elsif product
+    for c in product.collections
+      if c.handle == city.handle
+        assign on_city = true
+      elsif c.handle == land.handle
+        assign on_land = true
+      endif
+    endfor
   endif
 
   assign overlay = false
@@ -54,36 +43,6 @@
 -%}
 <header class="header{% if overlay %} header--overlay{% endif %}" data-header>
   <div class="header__bar wrap">
-    <div class="header__start">
-      <button class="header__icon header__menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-toggle>
-        {%- render 'icon', name: 'menu' -%}
-        {%- render 'icon', name: 'close' -%}
-        <span class="sr-only" data-menu-label>Menü</span>
-      </button>
-      <a class="header__icon header__search-start" href="{{ routes.search_url }}">
-        {%- render 'icon', name: 'search' -%}
-        <span class="sr-only">Suche</span>
-      </a>
-
-      <nav class="header__nav" aria-label="Hauptnavigation">
-        <ul class="header__links">
-          {%- if p1 -%}
-            <li><a class="nav-link" href="{{ p1.url }}"{% if product.id == p1.id %} aria-current="page"{% endif %}>{{ p1_label }}</a></li>
-          {%- endif -%}
-          {%- if p2 -%}
-            <li><a class="nav-link" href="{{ p2.url }}"{% if product.id == p2.id %} aria-current="page"{% endif %}>{{ p2_label }}</a></li>
-          {%- endif -%}
-          {%- if cat.url != blank -%}
-            <li><a class="nav-link" href="{{ cat.url }}"{% if on_cat %} aria-current="page"{% endif %}>{{ cat.title }}</a></li>
-          {%- endif -%}
-          <li><a class="nav-link" href="{{ shop_coll.url }}"{% if on_shop %} aria-current="page"{% endif %}>Shop</a></li>
-          {%- if support_links != blank -%}
-            <li><button class="nav-link nav-link--support" type="button" popovertarget="support-menu">Support</button></li>
-          {%- endif -%}
-        </ul>
-      </nav>
-    </div>
-
     <a class="header__logo" href="{{ routes.root_url }}">
       {%- comment -%} beide Signaturen; welche sichtbar ist, entscheidet die Palette (azur.css, --logo-ink / --logo-paper) {%- endcomment -%}
       {%- render 'logo', tone: 'ink', eager: true, class: 'logo--ink' -%}
@@ -91,19 +50,18 @@
       <span class="sr-only">Startseite</span>
     </a>
 
-    <div class="header__end">
-      <a class="header__icon header__search-end" href="{{ routes.search_url }}">
-        {%- render 'icon', name: 'search' -%}
-        <span class="sr-only">Suche</span>
-      </a>
-      {%- if shop.customer_accounts_enabled -%}
-        <a class="header__icon header__account" href="{{ routes.account_url }}">
-          {%- render 'icon', name: 'account' -%}
-          <span class="sr-only">Konto</span>
-        </a>
+    <nav class="header__cats" aria-label="Trikots">
+      {%- if city.url != blank -%}
+        <a class="header__cat" href="{{ city.url }}"{% if on_city %} aria-current="page"{% endif %}>Stadt</a>
       {%- endif -%}
+      {%- if land.url != blank -%}
+        <a class="header__cat" href="{{ land.url }}"{% if on_land %} aria-current="page"{% endif %}>Land</a>
+      {%- endif -%}
+    </nav>
+
+    <div class="header__end">
       <a class="header__icon header__cart" href="{{ routes.cart_url }}" data-cart-open aria-haspopup="dialog">
-        {%- comment -%} Runde 12: die Sporttasche aus dem Zimmer ist das eine Warenkorb-Symbol auf allen Seiten {%- endcomment -%}
+        {%- comment -%} die Sporttasche aus dem Zimmer ist das eine Warenkorb-Symbol auf allen Seiten {%- endcomment -%}
         <svg class="sportbag" viewBox="0 0 48 40" width="48" height="40" aria-hidden="true" focusable="false"><path class="sportbag__strap" d="M15 14 C15 5 33 5 33 14"/><rect class="sportbag__body" x="4" y="13" width="40" height="22" rx="10"/><path class="sportbag__stripe" d="M5 24 H43"/><circle class="sportbag__ball" cx="35" cy="24" r="5.2"/><path class="sportbag__lines" d="M35 19.6 l3 2.4 -1.2 3.6 h-3.6 l-1.2-3.6z"/></svg>
         <span class="sr-only">Warenkorb,</span>
         <span class="header__count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
@@ -111,52 +69,15 @@
       </a>
     </div>
   </div>
-
-  {%- if support_links != blank -%}
-    <div class="support-menu" id="support-menu" popover>
-      <nav class="support-menu__inner wrap" aria-label="Support">
-        <p class="support-menu__head">Support</p>
-        <ul class="support-menu__list">{{ support_links }}</ul>
-      </nav>
-    </div>
-  {%- endif -%}
-
-  <div class="menu" id="menu" data-menu hidden>
-    <nav class="menu__inner" aria-label="Menü">
-      <ul class="menu__list">
-        {%- if p1 -%}
-          <li><a class="menu__link" href="{{ p1.url }}"{% if product.id == p1.id %} aria-current="page"{% endif %}>{{ p1_label }}</a></li>
-        {%- endif -%}
-        {%- if p2 -%}
-          <li><a class="menu__link" href="{{ p2.url }}"{% if product.id == p2.id %} aria-current="page"{% endif %}>{{ p2_label }}</a></li>
-        {%- endif -%}
-        {%- if cat.url != blank -%}
-          <li><a class="menu__link" href="{{ cat.url }}"{% if on_cat %} aria-current="page"{% endif %}>{{ cat.title }}</a></li>
-        {%- endif -%}
-        <li><a class="menu__link" href="{{ shop_coll.url }}"{% if on_shop %} aria-current="page"{% endif %}>Shop</a></li>
-        {%- if about.url != blank -%}
-          <li><a class="menu__link" href="{{ about.url }}"{% if page.id == about.id %} aria-current="page"{% endif %}>Über Azur</a></li>
-        {%- endif -%}
-        {%- if menu_support != blank -%}
-          <li class="menu__support">
-            <p class="menu__head" id="menu-support">Support</p>
-            <ul aria-labelledby="menu-support">{{ menu_support }}</ul>
-          </li>
-        {%- endif -%}
-        {%- if shop.customer_accounts_enabled -%}
-          <li class="menu__support">
-            <a class="menu__sublink" href="{{ routes.account_url }}">Konto</a>
-          </li>
-        {%- endif -%}
-      </ul>
-    </nav>
-  </div>
 </header>
 
 {% schema %}
 {
   "name": "Header",
   "class": "section-header",
-  "settings": []
+  "settings": [
+    { "type": "collection", "id": "city", "label": "STADT führt zu", "info": "Leer = Kollektion „Städtetrikots“." },
+    { "type": "collection", "id": "land", "label": "LAND führt zu", "info": "Leer = Kategorie aus den Theme-Einstellungen (Nationaltrikots)." }
+  ]
 }
 {% endschema %}

@@ -126,6 +126,7 @@ def render_bar():
 PAGE = """<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Martian+Mono:wght@400;600&display=swap">
+<style>@font-face{font-family:"Martian Mono";font-style:normal;font-weight:300 600;font-stretch:75% 112.5%;src:url(/theme/assets/azur-martian-mono.woff2) format("woff2")}</style>
 <link rel="stylesheet" href="/theme/assets/azur.css">
 <script>window.Shopify = { routes: { root: '/' } };</script>
 </head><body class="template-index">
@@ -169,13 +170,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if route in ('/', '/index.html') or route.startswith('/collections/') or route.startswith('/products/'):
             cart = {'item_count': len(Handler.cart), 'currency': {'symbol': '€', 'iso_code': 'EUR'}}
             if route.startswith('/collections/'):
-                page = pages.collection_page(query, render_drawer(), len(Handler.cart))
+                page = pages.collection_page(query, render_drawer(), len(Handler.cart), route.split('/')[2])
             elif route.startswith('/products/'):
                 page = pages.product_page(route.split('/')[2], query, render_drawer(), len(Handler.cart))
             else:
                 t = {'name': 'index', 'suffix': ''}
                 page = (PAGE.replace('__BAR__', render_bar()).replace('__SECTION__', render_section())
-                        .replace('__HEADER__', pages.section('header', template=t, cart=cart, product=None))
+                        .replace('__HEADER__', pages.render_header(template=t, cart=cart))
                         .replace('__FOOTER__', pages.section('footer', template=t, form=pages.signup_state(query)))
                         .replace('__CARDS__', render_cards(query)).replace('__DRAWER__', render_drawer()))
             body = page.encode()
