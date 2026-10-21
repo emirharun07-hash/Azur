@@ -563,6 +563,9 @@ owner published). Preview: https://azurclothing.com/?preview_theme_id=2098358848
   product page, turned card).
 - Cards: 1 per row on phones, 2 from 480 px (iPad), 3 from 1200 px, card max 22 rem; a click on an empty spot of the back turns
   it over; magnifier + "Groß ansehen" open a dialog (front/back, ×, Esc, click beside). Pitch next to the jersey, 360 px, 64 px players.
+- The owner published Runde 12 (now MAIN) and deleted old drafts (rounds 4-8). The follow-up below is in the new draft
+  "Azur Zimmer Runde 13 (Entwurf)" `gid://shopify/OnlineStoreTheme/209841750355`
+  (preview https://azurclothing.com/?preview_theme_id=209841750355), md5 checked.
 - Follow-up (owner): cart icon = the room's old sports bag, in the header on every page (count as a neon dot, bump on add);
   sixth card "Nächster Drop" (dark card, dashed jersey with "?", back = sign-up; opens on its back after Shopify's reload),
   so desktop shows 3+3; cards up to 26 rem, larger type (name ~31 px on desktop, code, meta, price, back).
