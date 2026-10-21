@@ -540,8 +540,9 @@ on every device without losing quality.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
 ## Round 13 (the shop in the style of yeezy.com, 2026-10-21)
-Draft "Azur Zimmer Runde 13 (Entwurf)" `gid://shopify/OnlineStoreTheme/209841750355`, preview
-https://azurclothing.com/?preview_theme_id=209841750355 (Runde 12 is live). The owner sent two screenshots of yeezy.com (the site
+Draft "Azur Zimmer Runde 14 (Entwurf)" `gid://shopify/OnlineStoreTheme/209876386131`, preview
+https://azurclothing.com/?preview_theme_id=209876386131 (the owner published Runde 13 = sports bag + drop card; this is the
+copy of it with the changes below, md5 checked). The owner sent two screenshots of yeezy.com (the site
 itself blocks our requests) and asked for it 1:1 on the shop, not in the room. Owner's answers: grid instead of the player cards,
 STADT / LAND in the middle, logo and bar kept small, the sports bag stays (small, black).
 - Palette: white #fff, black text, grey #767676 / #c4c4c4 (unselected menu word), black buy; the dark set (--d-*, --d-paper)
