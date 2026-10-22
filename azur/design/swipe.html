@@ -89,6 +89,8 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 @media (prefers-reduced-motion: reduce) { .card { transition: none; }
   .m.anim:not(.play) *, .m.anim:not(.play) *::before, .m.anim:not(.play) *::after { animation-play-state: paused !important; } }
 .view > .scaler { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.tabs { flex: 1 1 300px; min-width: 0; justify-content: flex-end; }
+@media (max-width: 760px) { .tabs { justify-content: flex-start; } .tabs button { padding: 8px 10px; font-size: 12px; } }
 .scrub { display: flex; align-items: center; gap: 10px; font: 600 12px/1.4 var(--f-mono); color: var(--muted); }
 .scrub input { flex: 1; min-width: 120px; accent-color: var(--accent); }
 .card .view.wheel { cursor: ns-resize; }
@@ -407,7 +409,7 @@ const QS = new URLSearchParams(location.search);
 if (QS.get('sheet') && DECKS[QS.get('sheet')]) {
   const p = QS.get('p') || '.5', w = +(QS.get('w') || 400);
   document.getElementById('app').innerHTML = `<div class="grid" style="grid-template-columns:repeat(auto-fill,${w}px)">${DECKS[QS.get('sheet')].map(c => `<div><b style="font:600 12px var(--f-mono)">${c.id} ${esc(c.L.key)}</b><div class="view" data-id="${c.id}" style="position:relative;overflow:hidden"></div></div>`).join('')}</div>`;
-  document.querySelectorAll('[data-id]').forEach(v => { const c = BY_ID[v.dataset.id]; mountMock(v, c, w, 0, true); v.querySelector('.m6').style.setProperty('--p', p); });
+  document.querySelectorAll('[data-id]').forEach(v => { const c = BY_ID[v.dataset.id]; mountMock(v, c, w, 0, !QS.get('live')); v.querySelector('.m6').style.setProperty('--p', p); });
 } else {
 render();
 if (window.claude && claude.use) initStore(); else { state.local = true; showNote('Deine Stimmen werden nur in diesem Browser gespeichert.'); renderWho(); }
