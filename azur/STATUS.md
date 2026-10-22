@@ -550,9 +550,26 @@ the owner published). Preview: https://azurclothing.com/?preview_theme_id=209879
 - **Reminder for later (owner, point 9): the model photos will show kids standing on grass. On the plain white site that
   green will stand out strongly; plan the product/model photo areas for it, but only bring it up once those photos
   arrive and it becomes relevant.**
-- Swipe round (design tool `azur/design/`, votes `r6`), decks: transition room -> shop (50), logo position, FIFA-style
-  card frame, arrangement (rows in different orders, triangle 2 over 1, sizes), the drawing (callout boxes on the product
-  page), football-style size picker, duffle bag cart in 3D, "+" add animation. Status: in progress.
+- Swipe round published 2026-10-22 night: artifact v8 of https://claude.ai/artifact/ASxoX7hgSL2FbYLiFxcajH (same db, votes
+  `votes/<uid>.r6`, -1 no / 1 yes / 2 star; the owner votes alone). Code: `azur/design/swipe.html` (tool, no more r2-r5
+  scripts), `r6-base.js` (Yeezy-style shop pieces), `r6-uber.js`, `r6-shop.js`, `r6-pdp.js`. 144 cards in 9 decks:
+  - Übergang U01-U50: room -> shop, each a CSS function of `--p` (0 room, 1 shop) that plays by itself (5.6 s loop), with a
+    slider and the mouse wheel to scrub; in the theme `--p` would be the scroll progress over a sticky room. Pieces that cut
+    the room (doors, slices, blinds, tiles, pixels, touchline, three columns) need a still of the room at scroll start.
+    Ideas from recent.design: Thumbnail Grid Transition (slices), Astro Dither (dot raster).
+  - Logo L01-L13 (position/size, each with a strip of the same header over the room), Karte K01-K16 (FIFA-style card frames,
+    300 x 420, shield path in `FC_PATH`; K08 puts the dialling code +55/+49/+90 where FIFA has the rating), Anordnung
+    A01-A15 (6 row orders, 3 triangles 2 over 1, 3 triangles 1 over 2, podium, zigzag, big middle), Größe G01-G08 (row
+    170-400 px, triangle 220-340 px).
+  - Hinweise H01-H12: the owner's drawing (boxes around the jersey with lines to collar, signature, crest, fabric; loupe
+    crops of the product image). Texts are placeholders read off the Brasilien image; in the theme they should come from
+    product metafields the owner fills in.
+  - Größenwahl Z01-Z14 (clickable in the mock, cycles by itself), Tasche T01-T12 (3/4-view duffle bag SVG `duf6()` with
+    end cap, seams, zipper, two handles; real size, large, and over the room), Plus X01-X14 (cursor clicks the "+" in a
+    4.4 s loop, bag count goes to 1).
+- Tests (local, `?sheet=<deck>&p=<0..1>[&live=1]` shows a whole deck at once): no console errors, swipe/undo/scrub/size
+  click work on desktop 1440 and phone 390, no horizontal scroll (the host adds the viewport meta; local tests inject it).
+- Next: read the owner's r6 votes with ArtifactData (`votes` collection), build the winners into a new draft.
 
 ## Round 13 (the shop in the style of yeezy.com, 2026-10-21)
 Draft "Azur Zimmer Runde 14 (Entwurf)" `gid://shopify/OnlineStoreTheme/209876386131`, preview
