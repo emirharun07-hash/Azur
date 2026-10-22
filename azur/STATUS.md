@@ -539,6 +539,21 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 15 (owner 2026-10-21 night, 11 points; worked through the night, hourly self check-in `trig_01D2dJhLJ4L4axHkqu5PPaNi`)
+Draft theme "Azur Zimmer Runde 15 (Entwurf)" `gid://shopify/OnlineStoreTheme/209879302483` (copy of MAIN = Runde 14, which
+the owner published). Preview: https://azurclothing.com/?preview_theme_id=209879302483
+- Done in the theme (commit cceab26): 1. STADT / LAND gone from the header (logo left, bag right); 3. city jerseys out of
+  the homepage grid (index.json) and the shop page (main-collection hides the collection in its "Ausblenden" setting,
+  empty = Städtetrikots); the "Nächster Drop" field removed (markup, settings, CSS, JS).
+- Open, ask the owner: the two city jerseys still exist as products (direct links, search) and hang in the room render
+  (clickable there; hiding them needs a PC re-render, the room maps hangers by index). Set them to draft in the admin?
+- **Reminder for later (owner, point 9): the model photos will show kids standing on grass. On the plain white site that
+  green will stand out strongly; plan the product/model photo areas for it, but only bring it up once those photos
+  arrive and it becomes relevant.**
+- Swipe round (design tool `azur/design/`, votes `r6`), decks: transition room -> shop (50), logo position, FIFA-style
+  card frame, arrangement (rows in different orders, triangle 2 over 1, sizes), the drawing (callout boxes on the product
+  page), football-style size picker, duffle bag cart in 3D, "+" add animation. Status: in progress.
+
 ## Round 13 (the shop in the style of yeezy.com, 2026-10-21)
 Draft "Azur Zimmer Runde 14 (Entwurf)" `gid://shopify/OnlineStoreTheme/209876386131`, preview
 https://azurclothing.com/?preview_theme_id=209876386131 (the owner published Runde 13 = sports bag + drop card; this is the
