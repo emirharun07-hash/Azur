@@ -2,8 +2,9 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Libre+Bodoni:ital,wght@0,500;0,700;1,500&family=Martian+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
 <style>
+/* Layout: one swipe card at a time (the design mock scaled into it), votes underneath; summary grid when a deck is done. */
 /* Layout: one swipe card at a time (the design mock scaled into it), votes underneath; summary grid when a deck is done. */
 :root {
   --bg: #ecebe7; --panel: #f7f6f3; --fg: #17181a; --muted: #67666a; --line: #d7d5cf;
@@ -87,168 +88,110 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 @media (max-width: 560px) { .ctl { gap: 10px; } .ctl .big { width: 64px; height: 64px; } .meta h2 { font-size: 20px; } .tabs { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; }
   .m.anim:not(.play) *, .m.anim:not(.play) *::before, .m.anim:not(.play) *::after { animation-play-state: paused !important; } }
-
-/* ============ design mocks (fixed 1280 px canvas, scaled into the card) ============ */
-.m { position: relative; width: 1280px; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Archivo', Arial, sans-serif; font-stretch: 100%; font-size: 15px; line-height: 1.4; }
-.m * { box-sizing: border-box; }
-.m.pdp { height: 800px; } .m.shop { height: 1240px; }
-.m h1, .m h2, .m h3 { margin: 0; font-weight: 800; font-stretch: 62%; text-transform: uppercase; letter-spacing: .005em; line-height: .9; }
-.m h1 em, .m h2 em { font-style: normal; color: var(--acc); }
-.m p { margin: 0; }
-.m img { max-width: none; }
-.m .eyebrow { font-family: 'Martian Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); }
-.m .lab { font-family: 'Martian Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
-.m .price { font-family: 'Martian Mono', monospace; font-size: 18px; font-weight: 600; }
-.m .desc { color: var(--mut); font-size: 14px; line-height: 1.5; }
-.m .hand { font-family: 'Caveat', cursive; color: var(--hand); font-weight: 700; }
-.m .sz { display: flex; gap: 8px; }
-.m .sz span { min-width: 48px; height: 42px; padding: 0 10px; display: grid; place-items: center; border: 1.5px solid var(--line); border-radius: var(--r); font-weight: 700; font-size: 14px; background: var(--surf); color: var(--ink); }
-.m .sz span.on { border-color: var(--ink); background: var(--ink); color: var(--bg); }
-.m .cta { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 56px; padding: 0 22px; background: var(--acc); color: var(--accInk);
-  border-radius: var(--r); font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: .05em; font-stretch: 75%; }
-.m .cta .cta-p { font-family: 'Martian Mono', monospace; font-size: 14px; letter-spacing: 0; font-stretch: 100%; }
-.m .ship { font-size: 13px; color: var(--mut); display: flex; gap: 8px; align-items: center; }
-.m .ship::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2fae5c; flex: none; box-shadow: 0 0 0 3px rgb(47 174 92 / .2); }
-.m .ship b { color: var(--ink); font-weight: 700; }
-.m .trust { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--mut); list-style: none; padding: 0; margin: 0; }
-.m .trust li::before { content: "✓"; color: var(--acc); margin-right: 5px; font-weight: 800; }
-.m .guide { font-size: 12px; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-.m .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.m .fs { display: grid; gap: 7px; font-size: 12.5px; color: var(--mut); }
-.m .fs b { color: var(--ink); }
-.m .fs i { display: block; height: 5px; border-radius: 5px; background: var(--line); overflow: hidden; }
-.m .fs i s { display: block; height: 100%; background: var(--acc); }
-.m .ups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.m .u { background: var(--surf2); border-radius: var(--r); padding: 8px; display: grid; gap: 4px; font-size: 11px; position: relative; }
-.m .u img { width: 100%; height: 74px; object-fit: contain; }
-.m .u b { font-weight: 700; font-size: 12px; }
-.m .u .plus { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
-.m .bgroom { position: absolute; inset: -30px; background: url(img/room.webp) center/cover; filter: blur(16px) brightness(.42) saturate(.9); }
-.m .shadow { filter: drop-shadow(0 30px 34px rgb(0 0 0 / .45)); }
-.m .acc-list { display: grid; border-top: 1px solid var(--line); }
-.m .acc-list div { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 14px; }
-.m .acc-list div::after { content: "+"; font-weight: 400; font-size: 18px; line-height: 1; }
-.m .badge { display: inline-block; font-family: 'Martian Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 5px 8px; border-radius: var(--r); background: var(--acc); color: var(--accInk); }
-
-/* shop chrome */
-.m .fromroom { height: 70px; background: linear-gradient(to bottom, rgb(0 0 0 / 0), var(--bg)), url(img/room.webp) center 92%/1280px auto; }
-.m .mq { height: 32px; display: flex; align-items: center; gap: 22px; padding: 0 22px; background: var(--bar, var(--ink)); color: var(--barInk, var(--bg)); white-space: nowrap; overflow: hidden;
-  font-family: 'Martian Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-.m .mq i { font-style: normal; color: var(--barStar, var(--acc)); }
-.m .hd { height: 54px; display: flex; align-items: center; gap: 30px; padding: 0 40px; border-bottom: 1px solid var(--line); background: var(--bg); }
-.m .hd .logo { height: 26px; width: auto; }
-.m .hd nav { display: flex; gap: 22px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; font-stretch: 80%; }
-.m .hd .hd-r { margin-left: auto; display: flex; gap: 18px; align-items: center; font-size: 13px; color: var(--mut); }
-.m .hd .bag { color: var(--ink); font-weight: 700; display: flex; gap: 6px; align-items: center; }
-.m .hd .bag b { display: grid; place-items: center; min-width: 20px; height: 20px; border-radius: 10px; background: var(--acc); color: var(--accInk); font-size: 11px; }
-.m .hd.center { justify-content: center; } .m .hd.center nav { position: absolute; left: 40px; } .m .hd.center .hd-r { position: absolute; right: 40px; }
-.m .pc { display: grid; gap: 8px; position: relative; }
-.m .pc .ph { position: relative; background: var(--surf2); border-radius: var(--r); display: grid; place-items: center; overflow: hidden; }
-.m .pc .ph img { width: 78%; height: 86%; object-fit: contain; }
-.m .pc .nm { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; font-size: 14px; }
-.m .pc .nm span:last-child { font-family: 'Martian Mono', monospace; font-weight: 600; font-size: 13px; }
-.m .pc .qa { position: absolute; left: 10px; right: 10px; bottom: 10px; height: 40px; border-radius: var(--r); background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-stretch: 80%; }
-.m .pc .new { position: absolute; top: 10px; left: 10px; }
-.m .trustrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.m .trustrow div { padding: 18px 22px; display: grid; gap: 4px; font-size: 12.5px; color: var(--mut); border-right: 1px solid var(--line); }
-.m .trustrow div:last-child { border-right: 0; }
-.m .trustrow b { color: var(--ink); font-size: 14px; }
-.m .signup { display: flex; align-items: center; gap: 24px; padding: 26px 40px; background: var(--surf2); }
-.m .signup h3 { font-size: 34px; }
-.m .signup .in { margin-left: auto; display: flex; gap: 0; }
-.m .signup .in span { width: 300px; height: 48px; border: 1.5px solid var(--line); border-right: 0; background: var(--surf); display: flex; align-items: center; padding: 0 14px; color: var(--mut); font-size: 13px; border-radius: var(--r) 0 0 var(--r); }
-.m .signup .in b { height: 48px; padding: 0 20px; display: flex; align-items: center; background: var(--acc); color: var(--accInk); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; border-radius: 0 var(--r) var(--r) 0; font-stretch: 80%; }
-.m .chips { display: flex; gap: 8px; }
-.m .chips span { padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; font-weight: 700; font-size: 13px; }
-.m .chips span.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.m .btn { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 22px; background: var(--acc); color: var(--accInk); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; font-stretch: 80%; border-radius: var(--r); }
-.m .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
-
-/* themes */
-.t-paper { --bg: #f3f0ea; --surf: #fbfaf6; --surf2: #e9e4da; --ink: #16181b; --mut: #6d6a63; --line: #d6cfc2; --acc: #1f5fbf; --accInk: #ffffff; --r: 2px; --hand: #1f5fbf; }
+.view > .scaler { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.scrub { display: flex; align-items: center; gap: 10px; font: 600 12px/1.4 var(--f-mono); color: var(--muted); }
+.scrub input { flex: 1; min-width: 120px; accent-color: var(--accent); }
+.card .view.wheel { cursor: ns-resize; }
+.tabs button .n { font-weight: 400; opacity: .6; margin-left: 4px; }
+@media (prefers-reduced-motion: reduce) { .m6:not(.play) *, .m6:not(.play) *::before, .m6:not(.play) *::after { animation-play-state: paused !important; } }
+.m6[data-static] *, .m6[data-static] *::before, .m6[data-static] *::after { animation-play-state: paused !important; }
 </style>
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-<span id="roundLabel">Stechen</span></h1>
-    <div class="tabs" role="group" aria-label="Bereich">
-      <button type="button" id="tab-pdp" aria-pressed="true">Produktansicht</button>
-      <button type="button" id="tab-shop" aria-pressed="false">Shopseite</button>
-      <button type="button" id="tab-anim" aria-pressed="false">Animation</button>
-      <button type="button" id="tab-color" aria-pressed="false">Farbe</button>
-      <button type="button" id="tab-result" aria-pressed="false">Ergebnis</button>
-    </div>
+    <h1>Azur Design-<span>Runde 15</span></h1>
+    <div class="tabs" role="group" aria-label="Bereich" id="tabs"></div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Stechen: nur noch die Karten, zu denen du im Finale Ja gesagt hast. Wische wie gewohnt: Nein fliegt raus, Ja bleibt im Rennen. Nach jedem Durchgang kommen nur die Ja-Karten noch einmal, bis pro Bereich eine übrig ist. Ein Stern macht eine Karte sofort zum Gewinner. Die Animationen stehen fest, deine sechs Ja passen alle zusammen.</p>
+  <p class="note">Wische wie gewohnt: ← Nein, → Ja, ↑ Super. Jeder Bereich ist eine Frage aus deiner Liste. <b>Übergang</b>: jede Idee spielt sich von selbst ab (Scrollen vom Zimmer in den Shop nachgestellt); mit dem Regler oder dem Mausrad über dem Bild scrollst du selbst. <b>Größenwahl</b>: die Größen im Bild kannst du anklicken. <b>Plus</b>: die Maus klickt von selbst auf das Plus.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
 </div>
 
-<script src="r2.js"></script>
-<script src="r3.js"></script>
-<script src="r4.js"></script>
-<script src="r5.js"></script>
+<script src="r6-base.js"></script>
+<script src="r6-uber.js"></script>
+<script src="r6-shop.js"></script>
+<script src="r6-pdp.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r5';
-const PARTNER_ONLY = true; /* the final: only the partner votes, so no one sees anyone else's votes */
-const STECHEN = true; /* tie-break: passes until one card per area is left (see stechen helpers below) */
-const PRODUCTS = [
-  { id: 'frankfurt', name: 'Frankfurt', code: '069', city: true, price: 64.99, img: 'img/frankfurt.webp' },
-  { id: 'berlin', name: 'Berlin', code: '030', city: true, price: 64.99, img: 'img/berlin.webp' },
-  { id: 'brasilien', name: 'Brasilien', code: 'BRA', city: false, price: 54.99, img: 'img/brasilien.webp' },
-  { id: 'deutschland', name: 'Deutschland', code: 'GER', city: false, price: 54.99, img: 'img/deutschland.webp' },
-  { id: 'tuerkei', name: 'Türkei', code: 'TUR', city: false, price: 54.99, img: 'img/tuerkei.webp' },
-];
-
-const eur = v => v.toFixed(2).replace('.', ',') + ' €';
-const title = p => p.city ? `${p.name} <em>${p.code}</em>` : `${p.name}`;
-const desc = p => p.city ? `Polokragen, Azur-Signatur auf der Brust, die Vorwahl ${p.code} groß auf dem Rücken.` : `Retro-Schnitt, Azur-Signatur auf der Brust, in den Farben von ${p.name}.`;
-const others = (p, n = 3) => PRODUCTS.filter(q => q.id !== p.id).slice(0, n);
-const sizes = (sel = 'M') => `<div class="sz">${['S', 'M', 'L', 'XL'].map(s => `<span class="${s === sel ? 'on' : ''}">${s}</span>`).join('')}</div>`;
-const cta = (p, label = 'In den Warenkorb') => `<div class="cta"><span>${label}</span><span class="cta-p">${eur(p.price)}</span></div>`;
-const ship = () => `<p class="ship"><span>Lieferung in Deutschland ca. <b>3 Werktage</b> · ab 90 € versandkostenfrei</span></p>`;
-const trust = () => `<ul class="trust"><li>14 Tage Rückgabe</li><li>Kostenloser Rückversand</li><li>Sichere Zahlung</li></ul>`;
-const fsbar = p => `<div class="fs"><p>Noch <b>${eur(90 - p.price)}</b> bis zum Gratis-Versand, mit einem zweiten Trikot bist du drüber.</p><i><s style="width:${Math.round(p.price / 90 * 100)}%"></s></i></div>`;
-const ups = p => `<div class="ups">${others(p).map(q => `<div class="u"><span class="plus">+</span><img src="${q.img}" alt=""><b>${q.name}${q.city ? ' ' + q.code : ''}</b><span>${eur(q.price)}</span></div>`).join('')}</div>`;
-const guide = () => `<span class="guide">Größentabelle</span>`;
-const logo = dark => `img/azur-logo-${dark ? 'paper' : 'ink'}.webp`;
-const marquee = () => `<div class="mq">${['Versand in Deutschland ca. 3 Werktage', 'Europa ca. 5 Werktage', 'Ab 90 € versandkostenfrei', '14 Tage Rückgabe', 'Kostenloser Rückversand', 'Sichere Zahlung', 'Versand in Deutschland ca. 3 Werktage'].map(s => `<span>${s}</span>`).join('<i>✦</i>')}</div>`;
-const header = (dark, cls = '') => `<header class="hd ${cls}"><img class="logo" src="${logo(dark)}" alt="Azur"><nav><span>Trikots</span><span>Drops</span><span>Magazin</span><span>Über uns</span></nav><div class="hd-r"><span>Suche</span><span>Konto</span><span class="bag">Warenkorb <b>1</b></span></div></header>`;
-const pcard = (p, h = 300, o = {}) => `<div class="pc">${o.badge ? `<span class="badge new">${o.badge}</span>` : ''}<div class="ph" style="height:${h}px">${o.qa ? '' : ''}<img src="${p.img}" alt="">${o.qa ? `<span class="qa">+ Schnell in den Warenkorb</span>` : ''}</div><div class="nm"><span>${p.name}${p.city ? ' ' + p.code : ''} Trikot</span><span>${eur(p.price)}</span></div></div>`;
-
-/* ---------------------------------------------------------------- decks (round 3 layouts in r3.js, the jerseys take turns) */
-const KINDS = { pdp: { id: 'P', cls: 'L', label: 'Produktansicht', h: 800 }, shop: { id: 'S', cls: 'S', label: 'Shopseite', h: 1240 },
-  anim: { id: 'A', cls: 'A', label: 'Animation', h: 800 }, color: { id: 'F', cls: 'F', label: 'Farbe', h: 800 } };
-function buildDeck(kind, layouts) {
-  return layouts.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: PRODUCTS[(i * 2) % PRODUCTS.length] }));
+const ROUND = 'r6';
+const PARTNER_ONLY = true; /* the owner votes alone, nobody sees anyone else's votes */
+const STECHEN = false;
+const KINDS = {
+  uber: { id: 'U', label: 'Übergang', h: 720, live: 'p', list: typeof UEBER6 !== 'undefined' ? UEBER6 : [] },
+  logo: { id: 'L', label: 'Logo', h: 720, list: typeof LOGO6 !== 'undefined' ? LOGO6 : [] },
+  karte: { id: 'K', label: 'Karte', h: 720, list: typeof KARTE6 !== 'undefined' ? KARTE6 : [] },
+  ord: { id: 'A', label: 'Anordnung', h: 900, list: typeof ORD6 !== 'undefined' ? ORD6 : [] },
+  gr: { id: 'G', label: 'Größe', h: 900, list: typeof GR6 !== 'undefined' ? GR6 : [] },
+  hin: { id: 'H', label: 'Hinweise', h: 800, list: typeof HIN6 !== 'undefined' ? HIN6 : [] },
+  sz: { id: 'Z', label: 'Größenwahl', h: 720, live: 'cycle', list: typeof SZ6 !== 'undefined' ? SZ6 : [] },
+  bag: { id: 'T', label: 'Tasche', h: 720, live: 'css', list: typeof BAG6 !== 'undefined' ? BAG6 : [] },
+  plus: { id: 'X', label: 'Plus', h: 720, live: 'css', list: typeof PLUS6 !== 'undefined' ? PLUS6 : [] },
+};
+function buildDeck(kind) {
+  return KINDS[kind].list.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: P6[i % P6.length] }));
 }
-const DECKS = { pdp: buildDeck('pdp', PDP5), shop: buildDeck('shop', SHOP5), anim: buildDeck('anim', ANIM5), color: buildDeck('color', COLOR5) };
+const DECKS = Object.fromEntries(Object.keys(KINDS).map(k => [k, buildDeck(k)]));
 const ORDER = Object.keys(KINDS).filter(k => DECKS[k].length);
-Object.keys(KINDS).forEach(k => { if (!DECKS[k].length) document.getElementById('tab-' + k).hidden = true; });
 const ALL = ORDER.flatMap(k => DECKS[k]);
 const BY_ID = Object.fromEntries(ALL.map(c => [c.id, c]));
+document.getElementById('tabs').innerHTML = [...ORDER, 'result'].map(k => `<button type="button" id="tab-${k}" aria-pressed="false">${k === 'result' ? 'Ergebnis' : `${KINDS[k].label}<span class="n">${DECKS[k].length}</span>`}</button>`).join('');
 
-document.head.insertAdjacentHTML('beforeend', `<style>${[R3_CSS, R4_CSS, ...new Set([...PDP3, ...SHOP3, ...ALL.map(c => c.L)].map(l => l.css))].join('\n')}</style>`);
+const baseCSS = [R6_CSS, typeof UB_CSS !== 'undefined' ? UB_CSS : '', typeof SHOP6_CSS !== 'undefined' ? SHOP6_CSS : '', typeof PDP6_CSS !== 'undefined' ? PDP6_CSS : ''];
+document.head.insertAdjacentHTML('beforeend', `<style>${[...baseCSS, ...ALL.map(c => c.L.css || '')].join('\n')}</style>`);
 
-function mockHTML(c) {
-  const pal = c.L.pal ? ` style="${Object.entries(c.L.pal).map(([k, v]) => `--${k}:${v}`).join(';')}"` : '';
-  return `<div class="m ${c.kind}${c.L.pal ? '' : ' t-paper'} ${c.L.cls || ''} ${KINDS[c.kind].cls}-${c.L.key}"${pal}>${c.L.html(c.P)}</div>`;
+function mockHTML(c, still) {
+  const K = KINDS[c.kind];
+  return `<div class="m6 k-${c.kind} ${K.id}-${c.L.key}" style="height:${K.h}px;--p:${still ? '.55' : '0'}"${K.live ? ` data-live="${K.live}"` : ''}${still ? ' data-static' : ''}>${c.L.html(c.P)}</div>`;
 }
-const MOCK_H = Object.fromEntries(Object.keys(KINDS).map(k => [k, KINDS[k].h]));
-function mountMock(view, c, width, maxH) {
-  const s = Math.min(width / 1280, maxH ? maxH / MOCK_H[c.kind] : 9);
+function mountMock(view, c, width, maxH, still) {
+  const H = KINDS[c.kind].h;
+  const s = Math.min(width / 1280, maxH ? maxH / H : 9);
   view.style.width = Math.round(1280 * s) + 'px';
-  view.style.height = Math.round(MOCK_H[c.kind] * s) + 'px';
-  view.innerHTML = `<div class="scaler" style="transform:scale(${s})">${mockHTML(c)}</div>`;
+  view.style.height = Math.round(H * s) + 'px';
+  view.innerHTML = `<div class="scaler" style="transform:scale(${s})">${mockHTML(c, still)}</div>`;
 }
+
+/* ---------------------------------------------------------------- live mocks: scroll progress, size cycling */
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const LIVE = { manual: null, t0: performance.now() };
+const ease = x => (x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+function autoP(now) {
+  const t = ((now - LIVE.t0) % 5600) / 1000;
+  if (t < .9) return 0; if (t < 3.3) return ease((t - .9) / 2.4); if (t < 4.5) return 1; return 1 - ease((t - 4.5) / 1.1);
+}
+function tick(now) {
+  const els = document.querySelectorAll('.m6[data-live="p"]:not([data-static])');
+  if (els.length) {
+    const p = LIVE.manual !== null ? LIVE.manual : (RM.matches ? 0 : autoP(now));
+    els.forEach(el => el.style.setProperty('--p', p.toFixed(4)));
+    const sc = document.getElementById('scrub'); if (sc && LIVE.manual === null) sc.value = Math.round(p * 1000);
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+function restartLive() { LIVE.manual = null; LIVE.t0 = performance.now(); }
+function selSize(g, el) {
+  g.querySelectorAll('[data-v]').forEach(x => x.classList.toggle('on', x === el));
+  g.dataset.sel = el.dataset.v;
+  const m = g.closest('.m6'); m.dataset.sel = el.dataset.v;
+  m.querySelectorAll('[data-show]').forEach(s => (s.textContent = el.dataset.v));
+}
+setInterval(() => {
+  if (RM.matches) return;
+  document.querySelectorAll('.m6[data-live="cycle"]:not([data-static]):not([data-touched]) [data-sz]').forEach(g => {
+    const items = [...g.querySelectorAll('[data-v]')], i = items.findIndex(x => x.classList.contains('on'));
+    selSize(g, items[(i + 1) % items.length]);
+  });
+}, 1300);
+document.addEventListener('click', e => {
+  const v = e.target.closest('.m6 [data-sz] [data-v]'); if (!v) return;
+  v.closest('.m6').dataset.touched = '1'; selSize(v.closest('[data-sz]'), v);
+});
 
 /* ---------------------------------------------------------------- votes: db per person, localStorage fallback */
-const VOTE = { '-1': 'Nein', '1': 'Ja', '2': 'Super' };
-const state = { deck: 'pdp', mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false };
+const state = { deck: ORDER[0], mine: {}, all: {}, others: {}, uid: null, db: null, user: null, history: [], local: false };
 const LKEY = 'azur-design-votes';
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || '{}'); } catch (e) { return {}; } }
 function saveLocal() { try { localStorage.setItem(LKEY, JSON.stringify(state.all)); } catch (e) { /* storage blocked */ } }
@@ -285,11 +228,6 @@ async function initStore() {
         state.mine = { ...(state.all[ROUND] || {}), ...state.mine };
       }
     } catch (e) { /* first visit or transient */ }
-    state.db.collection('votes').onSnapshot(s => {
-      const o = {};
-      s.docs.forEach(d => { if (d.id !== state.uid) o[d.id] = (d.data() || {})[ROUND] || {}; });
-      state.others = o; renderWho(); setProgress(); if (state.view === 'done' || state.view === 'result') render();
-    }, () => {});
     showNote(viewOnly ? 'Du kannst die Seite gerade nur ansehen. Bitte darum, dass sie dir mit Mitmach-Rechten freigegeben wird, dann zählen deine Stimmen.' : '');
   } else {
     state.local = true;
@@ -297,50 +235,22 @@ async function initStore() {
   }
   renderWho(); render();
 }
-async function renderWho() {
-  const el = document.getElementById('who');
+function renderWho() {
   const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
-  let txt = STECHEN ? `<span>${ORDER.map(k => `${KINDS[k].label}: <b>${alive(k).length === 1 ? 'entschieden' : 'noch ' + alive(k).length}</b>`).join(' · ')}</span>`
-    : `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
-  const ids = PARTNER_ONLY ? [] : Object.keys(state.others);
-  if (ids.length && state.user) {
-    const ps = await state.user.profiles(ids);
-    ids.forEach(id => {
-      const v = state.others[id], cnt = d => DECKS[d].filter(c => v[c.id] !== undefined).length;
-      txt += `<span>${esc(ps[id] && ps[id].name || 'Partner')}: ${ORDER.map(k => `<b>${cnt(k)}/${DECKS[k].length}</b>`).join(' · ')}</span>`;
-    });
-  } else if (!PARTNER_ONLY) txt += `<span>Partner: noch keine Stimmen</span>`;
-  el.innerHTML = txt;
+  document.getElementById('who').innerHTML = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
 }
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
 /* ---------------------------------------------------------------- views */
 const main = document.getElementById('main');
 function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
-/* stechen: a card's vote is -1 out, 1 still in after this pass, 2 winner, none = not yet shown in this pass */
-const alive = deck => DECKS[deck].filter(c => state.mine[c.id] !== -1);
-const winner = deck => DECKS[deck].find(c => state.mine[c.id] === 2);
-function settle(deck) {
-  if (winner(deck)) return false;
-  const a = alive(deck);
-  if (a.length === 1) { state.mine[a[0].id] = 2; return true; }
-  if (a.length && a.every(c => state.mine[c.id] === 1)) {
-    a.forEach(c => delete state.mine[c.id]); state.mine['pass_' + deck] = (state.mine['pass_' + deck] || 1) + 1; return true;
-  }
-  return false;
-}
-function nextIndex(deck) {
-  if (STECHEN) { while (settle(deck)) persist(); if (winner(deck)) return -1; }
-  return DECKS[deck].findIndex(c => state.mine[c.id] === undefined);
-}
+const nextIndex = deck => DECKS[deck].findIndex(c => state.mine[c.id] === undefined);
 function setProgress() {
   const k = DECKS[state.deck] ? state.deck : ORDER[0], d = DECKS[k];
-  const p = STECHEN ? (d.length - alive(k).length) / Math.max(1, d.length - 1) : d.filter(c => state.mine[c.id] !== undefined).length / d.length;
-  document.getElementById('progress').style.width = (p * 100) + '%';
+  document.getElementById('progress').style.width = (d.filter(c => state.mine[c.id] !== undefined).length / d.length * 100) + '%';
 }
 function render() {
   [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
-  if (DECKS[state.deck]) nextIndex(state.deck); /* settles a finished pass before the bar is drawn */
   setProgress();
   if (state.deck === 'result') return renderResult();
   const i = nextIndex(state.deck);
@@ -348,15 +258,22 @@ function render() {
   renderCard(DECKS[state.deck][i], i);
 }
 function availW() { return Math.min(main.clientWidth || 900, 1120); }
+function liveCtl(c) {
+  const live = KINDS[c.kind].live; if (!live) return '';
+  const scrub = live === 'p' ? '<label class="scrub"><span>Selbst scrollen</span><input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Scroll-Fortschritt"></label>' : '';
+  return `${scrub}<div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="replayBtn">Neu abspielen</button></div>`;
+}
 function renderCard(c, i) {
   state.view = 'card';
+  restartLive();
   const d = DECKS[state.deck];
   main.innerHTML = `<div class="stage"><article class="card" id="card" aria-label="Entwurf ${c.id}">
       <span class="stamp yes">Ja</span><span class="stamp no">Nein</span><span class="stamp star">Super</span>
-      <div class="view" id="cardView"></div>
-      <div class="meta"><span class="id">${STECHEN ? `Stechen · Durchgang ${state.mine['pass_' + state.deck] || 1} · noch ${alive(state.deck).length} im Rennen` : `${c.id} · ${i + 1} von ${d.length}${c.L.fam ? ' · Familie: ' + c.L.fam : ''}`}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
+      <div class="view${KINDS[c.kind].live === 'p' ? ' wheel' : ''}" id="cardView"></div>
+      <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
       <div class="tags">${c.L.tags.map(t => `<span>${t}</span>`).join('')}</div>
-      <div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="zoomBtn">Groß ansehen</button>${c.kind === 'anim' ? '<button type="button" class="link" id="replayBtn">Neu abspielen</button>' : ''}</div></div></article></div>
+      ${liveCtl(c)}
+      <div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="zoomBtn">Groß ansehen</button></div></div></article></div>
     <div class="ctl"><button type="button" class="small" id="undo" ${state.history.length ? '' : 'disabled'}>Zurück</button>
       <button type="button" class="big no" id="vNo" aria-label="Nein"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 14V4M7 14l4.5 6.2c.7 1 2.2.6 2.3-.6l.4-4.6h4.6a2 2 0 0 0 2-2.3l-1-6A2 2 0 0 0 17.8 5H7"/></svg>Nein</button>
       <button type="button" class="star" id="vStar" aria-label="Super"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M12 2.8l2.8 6 6.5.6-4.9 4.3 1.5 6.4L12 16.8 6.1 20.1l1.5-6.4L2.7 9.4l6.5-.6z"/></svg>Super</button>
@@ -375,9 +292,8 @@ function vote(c, v) {
   const card = document.getElementById('card');
   state.history.push({ deck: c.kind, snap: JSON.stringify(state.mine) });
   state.mine[c.id] = v;
-  if (STECHEN && v === 2) DECKS[c.kind].forEach(o => { if (o !== c) state.mine[o.id] = -1; });
   persist(); renderWho();
-  if (card && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (card && !RM.matches) {
     card.style.transform = v === 2 ? 'translateY(-120%) rotate(0)' : `translateX(${v > 0 ? 130 : -130}%) rotate(${v > 0 ? 14 : -14}deg)`;
     card.style.opacity = '0';
     setTimeout(render, 260);
@@ -388,7 +304,7 @@ function undo() {
   state.mine = JSON.parse(h.snap); state.deck = h.deck; persist(); renderWho(); render();
 }
 function bindCard(c) {
-  const card = document.getElementById('card');
+  const card = document.getElementById('card'), view = document.getElementById('cardView');
   document.getElementById('vNo').onclick = () => vote(c, -1);
   document.getElementById('vYes').onclick = () => vote(c, 1);
   document.getElementById('vStar').onclick = () => vote(c, 2);
@@ -396,10 +312,23 @@ function bindCard(c) {
   document.getElementById('zoomBtn').onclick = () => zoom(c);
   document.getElementById('skipDeck').onclick = () => { state.deck = nextKind(state.deck); render(); };
   const rp = document.getElementById('replayBtn');
-  if (rp) rp.onclick = () => { const v = document.getElementById('cardView'); v.innerHTML = v.innerHTML; v.querySelector('.m').classList.add('play'); };
+  if (rp) rp.onclick = () => {
+    restartLive();
+    const m = view.querySelector('.m6');
+    if (KINDS[c.kind].live === 'css') { view.firstElementChild.innerHTML = mockHTML(c); view.querySelector('.m6').classList.add('play'); }
+    else if (m) delete m.dataset.touched;
+  };
+  const sc = document.getElementById('scrub');
+  if (sc) sc.addEventListener('input', () => { LIVE.manual = sc.value / 1000; });
+  if (KINDS[c.kind].live === 'p') view.addEventListener('wheel', e => {
+    e.preventDefault();
+    const m = view.querySelector('.m6'), cur = LIVE.manual !== null ? LIVE.manual : parseFloat(m.style.getPropertyValue('--p')) || 0;
+    LIVE.manual = Math.max(0, Math.min(1, cur + e.deltaY / 900));
+    if (sc) sc.value = Math.round(LIVE.manual * 1000);
+  }, { passive: false });
   let x0 = null, y0 = 0, dx = 0, dy = 0, id = null;
   const stamps = { yes: card.querySelector('.stamp.yes'), no: card.querySelector('.stamp.no'), star: card.querySelector('.stamp.star') };
-  card.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; id = e.pointerId; });
+  card.addEventListener('pointerdown', e => { if (e.target.closest('button, input, label, [data-v]')) return; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; id = e.pointerId; });
   card.addEventListener('pointermove', e => {
     if (x0 === null || e.pointerId !== id) return;
     dx = e.clientX - x0; dy = e.clientY - y0;
@@ -429,6 +358,7 @@ function zoom(c) {
   const z = document.createElement('div'); z.className = 'zoom'; z.setAttribute('role', 'dialog'); z.setAttribute('aria-label', 'Entwurf groß');
   z.innerHTML = `<button type="button" class="x" aria-label="Schließen">✕</button><div class="view"></div>`;
   document.body.appendChild(z);
+  restartLive();
   mountMock(z.querySelector('.view'), c, Math.min(window.innerWidth - 24, 1280));
   z.querySelector('.x').onclick = () => z.remove();
   z.addEventListener('click', e => { if (e.target === z) z.remove(); });
@@ -438,15 +368,12 @@ function voteChip(v, who) {
   return `<span class="v ${v === 2 ? 'star' : v > 0 ? 'yes' : 'no'}">${who} ${v === 2 ? '★' : v > 0 ? 'Ja' : 'Nein'}</span>`;
 }
 function tiles(list) {
-  return list.map(c => {
-    const ov = PARTNER_ONLY ? '' : Object.values(state.others).map(o => voteChip(o[c.id], 'P')).join('');
-    return `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${c.L.name}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}${ov}</span></div></button>`;
-  }).join('');
+  return list.map(c => `<button type="button" class="tile" data-id="${c.id}"><div class="view"></div><div class="row"><b>${c.id} · ${esc(c.L.name)}</b><span class="votes">${voteChip(state.mine[c.id], 'Du')}</span></div></button>`).join('');
 }
 function mountTiles() {
   main.querySelectorAll('.tile').forEach(t => {
     const c = BY_ID[t.dataset.id]; const w = t.clientWidth || 220;
-    mountMock(t.querySelector('.view'), c, w, w * 0.62);
+    mountMock(t.querySelector('.view'), c, w, w * 0.62, true);
     t.onclick = () => zoom(c);
   });
 }
@@ -454,39 +381,35 @@ function renderDone() {
   state.view = 'done';
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
   const i0 = ORDER.indexOf(state.deck), other = [...ORDER.slice(i0 + 1), ...ORDER.slice(0, i0)].find(k => nextIndex(k) >= 0), rest = !!other;
-  if (STECHEN) {
-    const w = winner(state.deck);
-    main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: Gewinner</h2><p>${esc(w.L.name)} hat das Stechen gewonnen. ${rest ? '' : 'Alle Bereiche sind entschieden. Danke, Claude baut daraus jetzt die fertige Seite.'}</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Alle Gewinner ansehen</button>${state.history.length ? '<button type="button" class="link" id="undoDone">Letzte Wahl zurücknehmen</button>' : ''}</div><div class="grid">${tiles([w])}</div></section>`;
-    if (state.history.length) document.getElementById('undoDone').onclick = undo;
-    if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
-    document.getElementById('goRes').onclick = () => { state.deck = 'result'; render(); };
-    return mountTiles();
-  }
   main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: fertig</h2>
-    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch.'} ${PARTNER_ONLY ? 'Danke! Claude liest die Stimmen aus und baut daraus die fertige Seite.' : 'Claude liest eure Stimmen aus und baut daraus die nächste Runde.'}</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button></div>
+    <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch. Danke! Claude liest deine Stimmen aus und baut die Gewinner ein.'}</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button>${state.history.length ? '<button type="button" class="link" id="undoDone">Letzte Wahl zurücknehmen</button>' : ''}</div>
     <div class="grid">${tiles(d.filter(c => state.mine[c.id] > 0))}</div></section>`;
   if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
+  if (state.history.length) document.getElementById('undoDone').onclick = undo;
   document.getElementById('goRes').onclick = () => { state.deck = 'result'; render(); };
   mountTiles();
 }
-function score(c) {
-  const vs = [state.mine[c.id], ...Object.values(state.others).map(o => o[c.id])].filter(v => v !== undefined);
-  return vs.reduce((a, v) => a + (v === 2 ? 3 : v), 0);
-}
+const score = c => { const v = state.mine[c.id]; return v === undefined ? -9 : v === 2 ? 3 : v; };
 function renderResult() {
   state.view = 'result';
-  const sect = STECHEN ? (kind, label) => { const w = winner(kind); return `<h2>${label}: ${w ? 'Gewinner' : 'noch im Rennen'}</h2><div class="grid">${tiles(w ? [w] : alive(kind))}</div>`; } : (kind, label) => {
-    const list = DECKS[kind].filter(c => state.mine[c.id] !== undefined || Object.values(state.others).some(o => o[c.id] !== undefined))
-      .sort((a, b) => score(b) - score(a)).slice(0, 12);
-    return `<h2>${label}: eure Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Stimmen.</p>'}`;
+  const sect = (kind, label) => {
+    const list = DECKS[kind].filter(c => state.mine[c.id] > 0).sort((a, b) => score(b) - score(a));
+    return `<h2>${label}: deine Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Ja-Stimmen.</p>'}`;
   };
-  main.innerHTML = `<section class="done"><p>${STECHEN ? 'Pro Bereich der Gewinner oder, solange noch nicht entschieden, die Karten im Rennen.' : `Punkte: Stern 3, Ja 1, Nein −1${PARTNER_ONLY ? '' : ', von euch beiden zusammengezählt'}.`} Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
+  main.innerHTML = `<section class="done"><p>Alles, wozu du Ja oder Super gesagt hast, Super zuerst. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
   mountTiles();
 }
 [...ORDER, 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));
-let rT; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(render, 150); });
+let rT, lastW = innerWidth; window.addEventListener('resize', () => { if (innerWidth === lastW) return; lastW = innerWidth; clearTimeout(rT); rT = setTimeout(render, 150); });
+/* test sheet for Claude's checks: ?sheet=<deck>&p=<0..1> shows every mock of a deck at once */
+const QS = new URLSearchParams(location.search);
+if (QS.get('sheet') && DECKS[QS.get('sheet')]) {
+  const p = QS.get('p') || '.5', w = +(QS.get('w') || 400);
+  document.getElementById('app').innerHTML = `<div class="grid" style="grid-template-columns:repeat(auto-fill,${w}px)">${DECKS[QS.get('sheet')].map(c => `<div><b style="font:600 12px var(--f-mono)">${c.id} ${esc(c.L.key)}</b><div class="view" data-id="${c.id}" style="position:relative;overflow:hidden"></div></div>`).join('')}</div>`;
+  document.querySelectorAll('[data-id]').forEach(v => { const c = BY_ID[v.dataset.id]; mountMock(v, c, w, 0, true); v.querySelector('.m6').style.setProperty('--p', p); });
+} else {
 render();
 if (window.claude && claude.use) initStore(); else { state.local = true; showNote('Deine Stimmen werden nur in diesem Browser gespeichert.'); renderWho(); }
+}
 </script>
