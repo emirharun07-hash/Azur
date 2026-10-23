@@ -25,7 +25,7 @@ PREFIX = 'azr8-'                                        # bumped when the render
 SET = os.environ.get('AZUR_SET', 'scene3')
 BRANCH = 'claude/shopify-notification-signup-o5avym'
 RAW = f'https://raw.githubusercontent.com/emirharun07-hash/S-per-Lig-Fantasy-Manager/{BRANCH}/'
-BUNDLE = ['azur-config.js', None, 'azur-light.js', 'azur-compositor.js', 'azur-rail.js', 'azur-drop.js', 'azur-viewer.js', 'azur-shop.js', 'azur-mag.js', 'azur-app.js']
+BUNDLE = ['azur-config.js', None, 'azur-light.js', 'azur-compositor.js', 'azur-rail.js', 'azur-drop.js', 'azur-shop.js', 'azur-mag.js', 'azur-app.js']
 SCOPE = ['.azur', '.azur-mag', '.azur-pdp', '.azur-holo', '.azur-ghost']   # the room and the overlays it appends to <body>
 
 

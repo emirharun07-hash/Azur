@@ -38,12 +38,12 @@
   --d-acc: #39ff88;
   --d-acc-ink: #062b14;
   --c-on-photo: #f3eee6;     /* Schrift über dem Zimmer und über Fotos */
-  /* Trikotfarben: ein Hauch davon färbt den Hintergrund, wenn ein Trikot gewählt ist (stark vergraut, ca. 12 %) */
-  --tint-ffm: #1f6b45;
-  --tint-ber: #7a1f2e;
-  --tint-bra: #e2b714;
-  --tint-ger: #6f6f6f;
-  --tint-tur: #c41e26;
+  /* Trikotfarben (Runde 16): Grund, Schrift, Knopf und Knopfschrift der Produktansicht im Zimmer, je Trikot */
+  --tone-ffm: #1f4d36;  --tone-ffm-ink: #f3eee2;  --tone-ffm-acc: #f3eee2;  --tone-ffm-acc-ink: #1f4d36;
+  --tone-ber: #ebe5d7;  --tone-ber-ink: #121212;  --tone-ber-acc: #121212;  --tone-ber-acc-ink: #ebe5d7;
+  --tone-bra: #f7e27c;  --tone-bra-ink: #121212;  --tone-bra-acc: #0d5a33;  --tone-bra-acc-ink: #ffffff;
+  --tone-ger: #e7e6e2;  --tone-ger-ink: #121212;  --tone-ger-acc: #121212;  --tone-ger-acc-ink: #ffffff;
+  --tone-tur: #8a0d14;  --tone-tur-ink: #ffffff;  --tone-tur-acc: #ffffff;  --tone-tur-acc-ink: #8a0d14;
 
   /* Runde 13: eine Schrift im ganzen Shop, schlicht und gleich breit (Martian Mono, selbst gehostet); das Zimmer bleibt bei Archivo */
   --f-sans: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -1119,17 +1119,8 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
 @keyframes fs-roll { from { left: var(--from, 0%); transform: translate(-50%, -50%) rotate(-540deg); } }
 @media (prefers-reduced-motion: reduce) { .freeship__bar > span, .freeship__ball { animation: none; } }
 
-/* 15. Runde 12: eine Website, Trikotfarbe, Warenkorb-Symbol ===================== */
-/* Ein Hauch der Trikotfarbe im Hintergrund, wenn im Zimmer ein Trikot gewählt ist (Produktansicht im Zimmer; die weiße
-   Produktseite des Shops bleibt seit Runde 13 weiß). Die Farbe wird stark vergraut (55 % Farbe, 45 % Grau) und nur zu 12 % in den Grund gemischt. */
-[data-tone="ffm"] { --tint: var(--tint-ffm); }
-[data-tone="ber"] { --tint: var(--tint-ber); }
-[data-tone="bra"] { --tint: var(--tint-bra); }
-[data-tone="ger"] { --tint: var(--tint-ger); }
-[data-tone="tur"] { --tint: var(--tint-tur); }
-:is([data-tone="ffm"], [data-tone="ber"], [data-tone="bra"], [data-tone="ger"], [data-tone="tur"]) {
-  --tint-bg: color-mix(in oklab, var(--c-paper) 88%, color-mix(in oklab, var(--tint) 55%, #808080));
-}
+/* 15. Runde 12: eine Website, Warenkorb-Symbol ===================== */
+/* (Die Trikotfarben der Produktansicht im Zimmer stehen seit Runde 16 als --tone-* oben bei den Tokens, angewandt in azur-room.css.) */
 
 /* Zurück zur Startseite (Shop) */
 .back-home { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); margin-bottom: var(--s-2);

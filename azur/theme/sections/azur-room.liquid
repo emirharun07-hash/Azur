@@ -85,7 +85,6 @@
     A.store = {
       name: {{ shop.name | json }},
       shipping: {{ shipping | json }},
-      care: {{ section.settings.care | json }},
       freeShippingFrom: {{ section.settings.free_shipping_from | default: 0 | json }},
       cartCount: {{ cart.item_count | json }}
     };
@@ -164,7 +163,6 @@
       "options": [{ "value": "blend", "label": "Überblendung (Licht immer wie im Zimmer)" }, { "value": "video", "label": "Gerenderte Kamerafahrt (Video)" }],
       "info": "Die gerenderte Fahrt hat ihr eigenes Licht; je nach Uhrzeit springt es beim Ankommen." },
     { "type": "header", "content": "Produktansicht im Zimmer" },
-    { "type": "text", "id": "care", "label": "Pflegehinweis", "default": "Material- und Pflegehinweise auf der Produktseite." },
     { "type": "number", "id": "free_shipping_from", "label": "Kostenloser Versand ab (€)", "default": 90, "info": "Nach dem Hinzufügen zeigt die Produktansicht, wie viel noch fehlt. 0 = ausblenden." }
   ],
   "blocks": [

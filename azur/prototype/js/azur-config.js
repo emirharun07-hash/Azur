@@ -10,7 +10,6 @@ AZUR.config = {
   flights: 'blend',         // change of view: 'blend' zooms the room's own picture into the next view (round 9: always the
                             // room's light); 'video' plays the rendered flights (round 7: their light can differ from the room's)
   gpuViews: 2,              // views that keep their light passes on the GPU (the others upload again when needed)
-  modelExt: 'glb',                       // jersey models for the product view ('glb.json' where .glb is not served)
 
   /* Accent systems. A is the chosen one; the others stay switchable in the design panel. */
   palettes: {
@@ -146,8 +145,6 @@ AZUR.config = {
     goBed: 'Zum Bett', goRail: 'Zum Ständer',
     menu: 'Menü', menuClose: 'Menü schließen', bag: 'Sporttasche (Warenkorb)',
     menuLinks: [['Shop', 'rail'], ['Kollektion', 'rail'], ['Über uns', 'mag'], ['Zimmer', 'room']],
-    viewerHint: 'Ziehen zum Drehen · Scrollen zum Zoomen',
-    viewerHintTouch: 'Wischen zum Drehen · Zwei Finger zum Zoomen',
     shipTo: 'Noch {x} bis zum kostenlosen Versand',
     shipFree: 'Versand ist kostenlos',
     keepLooking: 'Weiter umsehen', toCart: 'Zur Tasche',

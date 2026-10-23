@@ -209,52 +209,45 @@ html.azur-pdp-open .azur-info, html.azur-pdp-open .azur-regie { opacity: 0 !impo
 .has-selection .azur-missing { opacity: 0; }
 
 /* ------------------------------------------------------------------ product page: Runde 10 „Modemagazin + Aufstellung“
-   The name runs huge across the top, the jersey (3D model, the photo until it is loaded) stands in front of it, the story
-   on the left, the sizes as players on a pitch right next to the jersey („Spieler wird aufgestellt“), a buy bar along the bottom.
-   Runde 12: colours are the shop's tokens (--u-*); it opens under the shop's header (one header, one cart), and its
-   background takes a faint, greyed hint of the jersey's main colour (--tint, set per jersey in the theme's azur.css). */
+   The name runs across the top, the jersey's shop photo stands large in front of it, cut and text on the left, the sizes as
+   players on a pitch right next to the jersey („Spieler wird aufgestellt“), a buy bar along the bottom.
+   Runde 12: colours are the shop's tokens (--u-*); it opens under the shop's header (one header, one cart).
+   Runde 16: background, text and button in the jersey's colours (--tone-* in the theme's azur.css, fallbacks here for the
+   prototype), the name smaller, the photo larger (the 3D model is gone), less text. */
 .azur-pdp { --t-bg: var(--u-paper); --t-surf: var(--u-bg); --t-plate: var(--c-plate, #2c2e31); --t-ink: var(--u-ink);
-  --t-mut: var(--u-mut); --t-line: var(--u-line); --t-acc: var(--u-acc); --t-acc-ink: var(--u-acc-ink);
+  --t-mut: var(--u-mut); --t-line: var(--u-line); --t-acc: var(--u-acc); --t-acc-ink: var(--u-acc-ink); --t-shadow: .5;
   position: fixed; inset: var(--header-bottom, 0px) 0 0; z-index: 45; display: grid; overflow: hidden;
-  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.45fr) minmax(280px, 1fr); grid-template-rows: minmax(0, 22vh) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.7fr) minmax(280px, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
   column-gap: clamp(12px, 1.8vw, 32px); padding: 0 clamp(20px, 4vw, 64px);
   background-color: var(--t-bg); color: var(--t-ink); font-family: var(--body);
-  pointer-events: none; visibility: hidden; opacity: 0; transition: opacity .45s var(--ease), visibility 0s linear .45s, background-color .9s ease; }
-.azur-pdp[data-tone] { background-color: var(--tint-bg, var(--t-bg)); }
-.azur-pdp.is-on { pointer-events: auto; visibility: visible; opacity: 1; transition: opacity .45s var(--ease), background-color .9s ease; }
+  pointer-events: none; visibility: hidden; opacity: 0; transition: opacity .45s var(--ease), visibility 0s linear .45s, background-color .6s ease; }
+.azur-pdp[data-tone="ffm"] { --t-bg: var(--tone-ffm, #1f4d36); --t-ink: var(--tone-ffm-ink, #f3eee2); --t-acc: var(--tone-ffm-acc, #f3eee2); --t-acc-ink: var(--tone-ffm-acc-ink, #1f4d36); }
+.azur-pdp[data-tone="ber"] { --t-bg: var(--tone-ber, #ebe5d7); --t-ink: var(--tone-ber-ink, #121212); --t-acc: var(--tone-ber-acc, #121212); --t-acc-ink: var(--tone-ber-acc-ink, #ebe5d7); --t-shadow: .3; }
+.azur-pdp[data-tone="bra"] { --t-bg: var(--tone-bra, #f7e27c); --t-ink: var(--tone-bra-ink, #121212); --t-acc: var(--tone-bra-acc, #0d5a33); --t-acc-ink: var(--tone-bra-acc-ink, #fff); --t-shadow: .25; }
+.azur-pdp[data-tone="ger"] { --t-bg: var(--tone-ger, #e7e6e2); --t-ink: var(--tone-ger-ink, #121212); --t-acc: var(--tone-ger-acc, #121212); --t-acc-ink: var(--tone-ger-acc-ink, #fff); --t-shadow: .25; }
+.azur-pdp[data-tone="tur"] { --t-bg: var(--tone-tur, #8a0d14); --t-ink: var(--tone-tur-ink, #fff); --t-acc: var(--tone-tur-acc, #fff); --t-acc-ink: var(--tone-tur-acc-ink, #8a0d14); }
+.azur-pdp[data-tone] { --t-surf: color-mix(in oklab, var(--t-bg) 90%, var(--t-ink)); --t-plate: color-mix(in oklab, var(--t-bg) 82%, var(--t-ink));
+  --t-line: color-mix(in oklab, var(--t-bg) 68%, var(--t-ink)); --t-mut: color-mix(in oklab, var(--t-bg) 30%, var(--t-ink)); }
+.azur-pdp.is-on { pointer-events: auto; visibility: visible; opacity: 1; transition: opacity .45s var(--ease), background-color .6s ease; }
 html.azur-pdp-open { overflow: hidden; }
 .azur-pdp__x { position: absolute; z-index: 6; top: 16px; right: clamp(14px, 2.4vw, 28px); width: 44px; height: 44px;
   display: grid; place-items: center; padding: 0; cursor: pointer; border: 1px solid var(--t-line); background: var(--t-surf); color: var(--t-ink); font-size: 26px; line-height: 1; }
 .azur-pdp__x:hover, .azur-pdp__x:focus-visible { border-color: var(--t-ink); }
 .azur-pdp__x span { translate: 0 -1px; }
 .azur-pdp :focus-visible { outline: 2px solid var(--t-acc); outline-offset: 3px; }
-.azur-pdp__title { grid-area: 1 / 1 / 3 / 4; align-self: start; z-index: 0; margin: 0; padding-top: 46px; text-align: center; white-space: nowrap;
-  font-family: var(--display); font-variation-settings: "wdth" 62; font-stretch: 62%; font-weight: 900; font-size: min(16.5vw, calc(200vw / var(--len, 9)), 260px); line-height: .84; text-transform: uppercase;
+.azur-pdp__title { grid-area: 1 / 1 / 2 / 4; align-self: start; z-index: 0; margin: 0; padding-top: 30px; text-align: center; white-space: nowrap;
+  font-family: var(--display); font-variation-settings: "wdth" 62; font-stretch: 62%; font-weight: 900; font-size: min(7.5vw, calc(100vw / var(--len, 9)), 120px); line-height: .84; text-transform: uppercase;
   pointer-events: none; translate: 0 26px; transition: translate .7s var(--ease); }
 .azur-pdp.is-on .azur-pdp__title { translate: 0 0; }
-.azur-pdp__stage { grid-area: 1 / 2 / 3 / 3; z-index: 1; position: relative; display: grid; place-items: center; padding: 11vh 0 1vh; min-height: 0; }
-.azur-pdp__light { position: absolute; inset: 10% 0 0; background: radial-gradient(50% 55% at 50% 58%, color-mix(in srgb, var(--t-acc) 12%, transparent), transparent 70%); opacity: 0; transition: opacity .8s ease; pointer-events: none; }
-.azur-pdp.is-on .azur-pdp__light { opacity: 1; }
-.azur-pdp__img { position: relative; width: min(100%, 600px); max-height: 64vh; object-fit: contain; filter: drop-shadow(0 34px 40px rgba(0, 0, 0, .6)); opacity: 0; transition: opacity .3s ease; }
+.azur-pdp__stage { grid-area: 2 / 2 / 3 / 3; z-index: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 2vh 0; min-height: 0; }
+/* the shop photo, flat and large; its shadow is softer on the light jersey colours */
+.azur-pdp__img { position: relative; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain;
+  filter: drop-shadow(0 30px 34px rgb(0 0 0 / var(--t-shadow))); opacity: 0; transition: opacity .3s ease; }
 .azur-pdp.is-on .azur-pdp__img { opacity: 1; }
-/* the jersey as a 3D model: drag to turn, wheel or pinch to zoom */
-.azur-pdp__canvas { position: absolute; inset: 9vh 0 0; width: 100%; height: calc(100% - 9vh); display: block; opacity: 0; transition: opacity .6s ease; touch-action: none; cursor: grab; }
-.azur-pdp__canvas:active { cursor: grabbing; }
-.azur-pdp.has-model .azur-pdp__canvas { opacity: 1; }
-.azur-pdp.has-model .azur-pdp__img { opacity: 0 !important; transition-duration: .5s; }
-.azur-pdp__hint { position: absolute; left: 50%; bottom: 4px; translate: -50% 0; margin: 0; white-space: nowrap; pointer-events: none; font-family: var(--mono); font-size: 11px;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); opacity: 0; transition: opacity .6s ease .5s; }
-.azur-pdp.has-model .azur-pdp__hint { opacity: 1; }
-.azur-pdp.has-model.is-touched .azur-pdp__hint { opacity: 0; transition-delay: 0s; }
-.azur-pdp__story { grid-area: 2 / 1 / 3 / 2; z-index: 2; align-self: center; display: grid; gap: 12px; max-width: 36ch; padding-block: 12px; }
-.azur-pdp__crumbs { display: flex; gap: 8px; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
-.azur-pdp__crumbs button { background: none; border: 0; padding: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; color: var(--t-ink); text-decoration: underline; text-underline-offset: .25em; }
+.azur-pdp__story { grid-area: 2 / 1 / 3 / 2; z-index: 2; align-self: center; display: grid; gap: 14px; max-width: 32ch; padding-block: 12px; }
 .azur-pdp__fit { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 .azur-pdp__desc { margin: 0; font-size: 16px; line-height: 1.55; color: var(--t-ink); }
-.azur-pdp__hand { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-ink); }
-.azur-pdp__facts { list-style: none; margin: 4px 0 0; padding: 12px 0 0; border-top: 1px solid var(--t-line); display: grid; gap: 6px; font-size: 13px; color: var(--t-mut); }
 .azur-pdp__shop { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-ink); text-decoration: underline; text-underline-offset: .25em; justify-self: start; }
-.azur-pdp__back { justify-self: start; background: none; border: 0; padding: 4px 0 0; cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 /* sizes as players: tap one and he steps up („Spieler wird aufgestellt“) */
 .azur-pdp__sizes { grid-area: 2 / 3 / 3 / 4; z-index: 2; align-self: center; justify-self: start; width: min(100%, 360px); display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
 .azur-pdp__sizes legend { float: left; width: 100%; margin-bottom: 10px; padding: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
@@ -273,15 +266,13 @@ html.azur-pdp-open { overflow: hidden; }
 .azur-pl input:focus-visible + span { outline: 2px solid var(--t-acc); outline-offset: 4px; }
 .azur-pl input:disabled + span { opacity: .35; text-decoration: line-through; cursor: not-allowed; }
 @keyframes azur-pl-pop { 40% { scale: 1.22; } }
-.azur-pdp__picked { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--t-mut); }
 /* the buy bar along the bottom */
 .azur-pdp__buy { grid-area: 3 / 1 / 4 / 4; z-index: 3; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr) minmax(250px, 1fr); align-items: center; gap: 8px 26px;
   margin: 0 0 calc(22px + env(safe-area-inset-bottom, 0px)); padding: 14px 18px 14px 24px; background: var(--t-surf); border: 1px solid var(--t-line);
-  box-shadow: 0 -10px 40px rgb(0 0 0 / .35); translate: 0 130%; transition: translate .6s var(--ease) .08s; }
+  box-shadow: 0 -10px 40px rgb(0 0 0 / calc(var(--t-shadow) * .5)); translate: 0 130%; transition: translate .6s var(--ease) .08s; }
 .azur-pdp.is-on .azur-pdp__buy { translate: 0 0; }
-.azur-pdp__name { margin: 0; display: grid; gap: 2px; }
-.azur-pdp__name b { font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 900; font-size: 26px; line-height: 1; text-transform: uppercase; }
-.azur-pdp__price { font-family: var(--mono); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--t-ink); }
+.azur-pdp__name { margin: 0; }
+.azur-pdp__price { font-family: var(--mono); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--t-ink); }
 .azur-pdp__ship { margin: 0; font-size: 13px; color: var(--t-mut); }
 .azur-pdp__add { position: relative; height: 54px; border: 0; cursor: pointer; background: var(--t-acc); color: var(--t-acc-ink);
   font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
@@ -369,10 +360,9 @@ html.azur-pdp-open { overflow: hidden; }
   .azur-pdp > * { flex: none; }
   .azur-pdp__sizes { order: 1; }                       /* on the phone the size comes right under the jersey */
   .azur-pdp__story { order: 2; }
-  .azur-pdp__title { position: relative; display: block; padding: 64px 16px 0; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; font-size: min(15vw, calc(180vw / var(--len, 9)), 110px); }
-  .azur-pdp__stage { height: 42vh; padding: 0; margin-top: -5vh; }
-  .azur-pdp__img { max-height: 42vh; width: auto; max-width: 86vw; }
-  .azur-pdp__canvas { inset: 0; height: 100%; }
+  .azur-pdp__title { position: relative; display: block; padding: 70px 16px 0; font-size: min(11vw, calc(105vw / var(--len, 9)), 72px); }
+  .azur-pdp__stage { height: 50vh; padding: 0; margin-top: 2vh; }
+  .azur-pdp__img { max-width: 84vw; }
   .azur-pdp__sizes { width: auto; margin: 0 16px; align-self: stretch; justify-self: stretch; }
   .azur-pitch { aspect-ratio: auto; height: 112px; }
   .azur-pitch::before { left: 50%; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 2px solid var(--t-ink); }
@@ -385,8 +375,7 @@ html.azur-pdp-open { overflow: hidden; }
   .azur-pdp__story { max-width: none; margin: 18px 16px 0; align-self: stretch; }
   .azur-pdp__buy { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; border-width: 1px 0 0; grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
     gap: 4px 14px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
-  .azur-pdp__name b { font-size: 20px; }
-  .azur-pdp__price { font-size: 12px; }
+  .azur-pdp__price { font-size: 16px; }
   .azur-pdp__add { height: 50px; padding: 0 12px; letter-spacing: .08em; font-size: 11.5px; }
   .azur-pdp__ship { display: none; }
   .azur-pdp__after { position: fixed; left: 12px; right: 12px; width: auto; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }

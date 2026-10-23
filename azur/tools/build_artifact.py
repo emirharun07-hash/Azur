@@ -92,22 +92,12 @@ def main():
     if os.path.exists(OUT): shutil.rmtree(OUT)
     os.makedirs(OUT)
     copy('index.html')
-    for d in ('js', 'css', 'assets/products', 'assets/brand', 'assets/mag', f'assets/{SET}/views', f'assets/{SET}/models', f'assets/{SET}/outside'):
+    for d in ('js', 'css', 'assets/products', 'assets/brand', 'assets/mag', f'assets/{SET}/views', f'assets/{SET}/outside'):
         for dp, _, fs in os.walk(os.path.join(SRC, d)):
             for f in fs:
-                if f.endswith(('.png', '.webp', '.jpg', '.json', '.js', '.css', '.mp4', '.webm', '.glb')):
+                if f.endswith(('.png', '.webp', '.jpg', '.json', '.js', '.css', '.mp4', '.webm')):
                     copy(os.path.relpath(os.path.join(dp, f), SRC))
     pack_moves(f'assets/{SET}')
-    # artifacts do not serve .glb: the models go base64-wrapped in JSON, the page is told so
-    import base64
-    mdir = os.path.join(OUT, f'assets/{SET}/models')
-    if os.path.isdir(mdir):
-        for f in [f for f in os.listdir(mdir) if f.endswith('.glb')]:
-            src = os.path.join(mdir, f)
-            json.dump({'glb': base64.b64encode(open(src, 'rb').read()).decode()}, open(src + '.json', 'w')); os.remove(src)
-        cfg = os.path.join(OUT, 'js', 'azur-config.js'); t = open(cfg).read()
-        assert "modelExt: 'glb'," in t
-        open(cfg, 'w').write(t.replace("modelExt: 'glb',", "modelExt: 'glb.json',", 1))
     if SET not in ('scene1', 'scene2'): print('low-resolution copies:', low_copies(f'assets/{SET}/views'))
     files = {}
     for dp, _, fs in os.walk(OUT):

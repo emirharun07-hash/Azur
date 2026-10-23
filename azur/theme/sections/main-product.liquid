@@ -3,7 +3,7 @@
   darunter Punkte für die Bilder; darunter mittig der Name, der Preis, die Größen und ein „+“ (in den Warenkorb).
   Versand/Rückgabe klein darunter, Fit/Model/Material/Pflege und Beschreibung zum Aufklappen. Klick aufs Bild vergrößert.
   Runde 12: kein Steuerhinweis neben dem Preis (er steht im Footer, im Warenkorb und im Checkout); Brotkrumen beginnen
-  mit der Startseite; der Hintergrund trägt einen Hauch der Trikotfarbe (data-tone, azur.css).
+  mit der Startseite.
   Ab 1024 px: alle Bilder groß untereinander (erstes über die volle Breite, dann zu zweit), der Kaufbereich läuft mit.
   Darunter: wischen mit Zähler; auf dem Handy erscheint unten eine feste Kaufleiste, sobald der Kaufknopf aus dem Bild ist.
   Ansichtsnamen kommen aus den Alt-Texten: "…Vorderseite" → Vorne, "…Rückseite" → Hinten, "Detail…" → Detail,
@@ -18,9 +18,6 @@
   endcapture
   capture motto
     render 'product-field', product: product, field: 'motto'
-  endcapture
-  capture tone
-    render 'product-field', product: product, field: 'tone'
   endcapture
 
   assign shipping_page = pages[settings.shipping_page_handle]
@@ -42,7 +39,7 @@
   assign images = product.media | where: 'media_type', 'image'
 -%}
 
-<article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}"{% if tone != blank %} data-tone="{{ tone | strip }}"{% endif %}>
+<article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}">
   <nav class="crumbs wrap" aria-label="Brotkrumen">
     <ol>
       <li><a class="link" href="{{ routes.root_url }}">Startseite</a></li>

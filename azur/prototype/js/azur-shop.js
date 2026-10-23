@@ -1,6 +1,6 @@
 /* AZUR — product page over the room and the cart.
-   The product view opens over the room right from a click on a jersey: one half the jersey (a 3D model to turn and
-   zoom, the shop photo until it is loaded or without WebGL), the other half to buy. After a size goes into the bag,
+   The product view opens over the room right from a click on a jersey: the jersey's shop photo large in the middle
+   (Runde 16: no more 3D model, it looked crumpled), on a background in the jersey's colour, the sizes beside it. After a size goes into the bag,
    the page shows how far it is to free shipping and offers to keep looking. Prototype: a simulated cart. Shopify
    (A.config.shopify): the real cart (/cart/add.js, /cart.js) and the theme's own cart drawer; checkout is Shopify's. */
 (function () {
@@ -17,33 +17,26 @@
       const c = A.config.copy;
       this.pdp = document.createElement('section');
       this.pdp.className = 'azur-pdp'; this.pdp.setAttribute('role', 'dialog'); this.pdp.setAttribute('aria-modal', 'true'); this.pdp.setAttribute('aria-labelledby', 'azur-pdp-title');
-      // Runde 10 (Design-Finale): „Modemagazin + Aufstellung“. Der Name riesig quer über die Seite, das Trikot davor,
-      // links die Geschichte, rechts die Größen als Spieler auf einem kleinen Feld, unten eine feste Kaufleiste.
+      // Runde 10 (Design-Finale): „Modemagazin + Aufstellung“. Der Name groß über der Seite, das Trikot davor,
+      // links Schnitt und Beschreibung, rechts die Größen als Spieler auf einem kleinen Feld, unten eine feste Kaufleiste.
+      // Runde 16: Grund in der Trikotfarbe, Name kleiner, weniger Text (kein Pfad, Hinweise, Pflegezeile, Zurück-Link, Name in der Leiste).
       this.pdp.innerHTML = `
         <button class="azur-pdp__x" type="button" data-act="close" aria-label="${c.backToRoom}"><span aria-hidden="true">×</span></button>
         <h1 class="azur-pdp__title" id="azur-pdp-title"></h1>
         <div class="azur-pdp__stage">
-          <div class="azur-pdp__light" aria-hidden="true"></div>
           <img class="azur-pdp__img" alt="">
-          <canvas class="azur-pdp__canvas" tabindex="0" aria-label="3D-Ansicht des Trikots: ziehen zum Drehen, scrollen zum Zoomen, Doppelklick setzt zurück"></canvas>
-          <p class="azur-pdp__hint" aria-hidden="true"></p>
         </div>
         <div class="azur-pdp__story">
-          <nav class="azur-pdp__crumbs" aria-label="Pfad"><button type="button" data-act="close">${c.room}</button><span aria-hidden="true">/</span><span>Trikots</span></nav>
           <p class="azur-pdp__fit"></p>
           <p class="azur-pdp__desc"></p>
-          <p class="azur-pdp__hand" aria-hidden="true">tipp auf deine Größe</p>
-          <ul class="azur-pdp__facts"><li>${A.store.care}</li></ul>
           <a class="azur-pdp__shop" target="_blank" rel="noopener">${c.openInShop || c.toProductPage || 'Im Shop öffnen'} <span aria-hidden="true">↗</span></a>
-          <button class="azur-pdp__back" type="button" data-act="close"><span aria-hidden="true">←</span> ${c.backToRoom}</button>
         </div>
         <fieldset class="azur-pdp__sizes">
           <legend>Deine Größe</legend>
           <div class="azur-pdp__sizerow azur-pitch"><span class="azur-pitch__box is-top"></span><span class="azur-pitch__box is-bottom"></span></div>
-          <p class="azur-pdp__picked" aria-hidden="true">Noch niemand aufgestellt</p>
         </fieldset>
         <div class="azur-pdp__buy">
-          <p class="azur-pdp__name"><b></b><span class="azur-pdp__price"></span></p>
+          <p class="azur-pdp__name"><span class="azur-pdp__price"></span></p>
           <p class="azur-pdp__ship">${A.store.shipping}</p>
           <button class="azur-pdp__add" type="button" data-act="add" disabled>${c.chooseSize}</button>
           <p class="azur-pdp__error" role="alert" hidden></p>
@@ -57,10 +50,6 @@
           </div>
         </div>`;
       document.body.appendChild(this.pdp);
-      this.canvas = this.pdp.querySelector('.azur-pdp__canvas');
-      this.viewer = A.Viewer ? new A.Viewer(this.canvas) : null;
-      this.canvas.addEventListener('azur-touched', () => this.pdp.classList.add('is-touched'));
-      this.pdp.querySelector('.azur-pdp__hint').textContent = matchMedia('(pointer: coarse)').matches ? c.viewerHintTouch : c.viewerHint;
       if (this.live) { this.drawer = null; this.bind(); return; }      // the theme's cart drawer takes over
 
       this.drawer = document.createElement('aside');
@@ -90,7 +79,6 @@
       this.pdp.addEventListener('change', e => {
         if (e.target.name === 'azur-size') {
           this.size = e.target.value;
-          this.pdp.querySelector('.azur-pdp__picked').textContent = 'Aufgestellt: ' + e.target.dataset.size;
           const b = this.pdp.querySelector('.azur-pdp__add');
           b.disabled = false; b.textContent = A.config.copy.addToCart; b.classList.remove('is-done');
           this.pdp.querySelector('.azur-pdp__after').hidden = true;
@@ -123,26 +111,18 @@
       if (!this.pdp.classList.contains('is-on')) this.returnFocus = document.activeElement;   // back there on close
       this.product = product; this.size = null;
       const q = s => this.pdp.querySelector(s);
-      // the giant name is the city or country alone ("Frankfurt"), the bar carries the full name ("Frankfurt 069")
-      const short = product.name.replace(/\s*Trikot$/i, ''), giant = short.replace(/\s+\d{2,4}$/, '');
+      // the name is the city or country alone ("Frankfurt"), without " Trikot" and the dialling code
+      const giant = product.name.replace(/\s*Trikot$/i, '').replace(/\s+\d{2,4}$/, '');
       q('.azur-pdp__title').textContent = giant; q('.azur-pdp__title').style.setProperty('--len', Math.max(5, giant.length));
-      q('.azur-pdp__name b').textContent = short;
       q('.azur-pdp__price').textContent = A.formatPrice(product.price);   // Runde 12: no tax note next to the price (footer, cart, checkout)
-      // a faint hint of the jersey's main colour in the background (the colours are tokens in the theme's azur.css)
+      // background, text and button in the jersey's colours (the palettes are tokens in the theme's azur.css, see azur-room.css)
       const tone = { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
       if (tone) this.pdp.dataset.tone = tone; else delete this.pdp.dataset.tone;
-      q('.azur-pdp__picked').textContent = 'Noch niemand aufgestellt';
       q('.azur-pdp__fit').textContent = product.fit || '';
       q('.azur-pdp__desc').textContent = product.description;
       q('.azur-pdp__shop').href = product.productUrl;      // Shopify: the real product page
       const img = q('.azur-pdp__img'); img.src = product.image; img.alt = product.name;
       q('.azur-pdp__after').hidden = true;
-      // the 3D jersey (scene3 models), the photo until then
-      this.pdp.classList.remove('has-model', 'is-touched');
-      if (this.viewer && this.viewer.ok) {
-        const url = A.url(A.config.assetBase.replace(/views\/$/, 'models/') + product.key + '.' + (A.config.modelExt || 'glb'));
-        this.viewer.show(url).then(ok => { if (ok && this.product === product && this.pdp.classList.contains('is-on')) this.pdp.classList.add('has-model'); });
-      }
       // die Größen als Spieler: Aufstellung auf dem Feld (breit), auf dem Handy in einer Reihe (--hx)
       const n = product.variants.length;
       q('.azur-pdp__sizerow').querySelectorAll('.azur-pl').forEach(el => el.remove());
@@ -169,14 +149,13 @@
         };
         if (img.complete && img.naturalHeight) requestAnimationFrame(fly); else img.addEventListener('load', () => requestAnimationFrame(fly), { once: true });
       }
-      setTimeout(() => q('.azur-pdp__crumbs button').focus({ preventScroll: true }), 50);
+      setTimeout(() => q('.azur-pdp__x').focus({ preventScroll: true }), 50);
       try { history.replaceState(null, '', '#' + product.handle); } catch (e) { }
     }
 
     close() {
       if (!this.pdp.classList.contains('is-on')) return;
-      this.pdp.classList.remove('is-on', 'has-model');
-      if (this.viewer) this.viewer.stop();
+      this.pdp.classList.remove('is-on');
       document.documentElement.classList.remove('azur-pdp-open');
       this.app.setWorldDim();
       try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
