@@ -101,11 +101,11 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 
 <div class="app" id="app">
   <div class="top">
-    <h1>Azur Design-<span>Runde 15</span></h1>
+    <h1>Azur Design-<span>Runde 16</span></h1>
     <div class="tabs" role="group" aria-label="Bereich" id="tabs"></div>
   </div>
   <div class="who" id="who"><span>Stimmen werden geladen …</span></div>
-  <p class="note">Wische wie gewohnt: ← Nein, → Ja, ↑ Super. Jeder Bereich ist eine Frage aus deiner Liste. <b>Übergang</b>: jede Idee spielt sich von selbst ab (Scrollen vom Zimmer in den Shop nachgestellt); mit dem Regler oder dem Mausrad über dem Bild scrollst du selbst. <b>Größenwahl</b>: die Größen im Bild kannst du anklicken. <b>Plus</b>: die Maus klickt von selbst auf das Plus.</p>
+  <p class="note"><b>Stechen</b> bei Übergang, Hinweise und Anordnung: nur deine Ja-Karten aus der letzten Runde. Nein fliegt raus, Ja bleibt im Rennen; nach jedem Durchgang kommen die Ja-Karten noch einmal, bis eine übrig ist. Ein Stern macht eine Karte sofort zum Gewinner. <b>Größenwahl</b> und <b>Tasche</b> sind neu (letztes Mal alles Nein): normal wischen, die Größen im Bild kannst du anklicken. Beim Übergang scrollst du mit dem Regler oder dem Mausrad selbst.</p>
   <div class="note" id="storeNote" hidden></div>
   <div class="bar" aria-hidden="true"><i id="progress" style="width:0"></i></div>
   <main id="main"></main>
@@ -115,24 +115,23 @@ body { background: var(--bg); color: var(--fg); font-family: var(--f-display); f
 <script src="r6-uber.js"></script>
 <script src="r6-shop.js"></script>
 <script src="r6-pdp.js"></script>
+<script src="r7.js"></script>
 <script>
 /* ---------------------------------------------------------------- data */
-const ROUND = 'r6';
+const ROUND = 'r7';
 const PARTNER_ONLY = true; /* the owner votes alone, nobody sees anyone else's votes */
-const STECHEN = false;
+/* r7: tie-break ("Stechen") on the yes cards from r6, keeping their r6 ids; two new decks numbered from 21 */
+const pick7 = (list, keys, prefix) => keys.map(k => { const i = list.findIndex(L => L.key === k); return { L: list[i], id: prefix + String(i + 1).padStart(2, '0') }; });
+const fresh7 = (list, prefix) => list.map((L, i) => ({ L, id: prefix + (21 + i) }));
 const KINDS = {
-  uber: { id: 'U', label: 'Übergang', h: 720, live: 'p', list: typeof UEBER6 !== 'undefined' ? UEBER6 : [] },
-  logo: { id: 'L', label: 'Logo', h: 720, list: typeof LOGO6 !== 'undefined' ? LOGO6 : [] },
-  karte: { id: 'K', label: 'Karte', h: 720, list: typeof KARTE6 !== 'undefined' ? KARTE6 : [] },
-  ord: { id: 'A', label: 'Anordnung', h: 900, list: typeof ORD6 !== 'undefined' ? ORD6 : [] },
-  gr: { id: 'G', label: 'Größe', h: 900, list: typeof GR6 !== 'undefined' ? GR6 : [] },
-  hin: { id: 'H', label: 'Hinweise', h: 800, list: typeof HIN6 !== 'undefined' ? HIN6 : [] },
-  sz: { id: 'Z', label: 'Größenwahl', h: 720, live: 'cycle', list: typeof SZ6 !== 'undefined' ? SZ6 : [] },
-  bag: { id: 'T', label: 'Tasche', h: 720, live: 'css', list: typeof BAG6 !== 'undefined' ? BAG6 : [] },
-  plus: { id: 'X', label: 'Plus', h: 720, live: 'css', list: typeof PLUS6 !== 'undefined' ? PLUS6 : [] },
+  uber: { id: 'U', label: 'Übergang', h: 720, live: 'p', stechen: true, items: pick7(UEBER6, ['wordmask', 'banner', 'split3', 'logoshrink'], 'U') },
+  hin: { id: 'H', label: 'Hinweise', h: 800, stechen: true, items: pick7(HIN6, ['text', 'elbow', 'sides', 'blueprint'], 'H') },
+  ord: { id: 'A', label: 'Anordnung', h: 900, stechen: true, items: pick7(ORD6, ['rowBDT', 'podium'], 'A') },
+  sz: { id: 'Z', label: 'Größenwahl', h: 720, live: 'cycle', items: fresh7(SZ7, 'Z') },
+  bag: { id: 'T', label: 'Tasche', h: 720, live: 'css', items: fresh7(BAG7, 'T') },
 };
 function buildDeck(kind) {
-  return KINDS[kind].list.map((L, i) => ({ id: `${KINDS[kind].id}${String(i + 1).padStart(2, '0')}`, kind, L, P: P6[i % P6.length] }));
+  return KINDS[kind].items.map(({ L, id }, i) => ({ id, kind, L, P: P6[i % P6.length] }));
 }
 const DECKS = Object.fromEntries(Object.keys(KINDS).map(k => [k, buildDeck(k)]));
 const ORDER = Object.keys(KINDS).filter(k => DECKS[k].length);
@@ -140,7 +139,7 @@ const ALL = ORDER.flatMap(k => DECKS[k]);
 const BY_ID = Object.fromEntries(ALL.map(c => [c.id, c]));
 document.getElementById('tabs').innerHTML = [...ORDER, 'result'].map(k => `<button type="button" id="tab-${k}" aria-pressed="false">${k === 'result' ? 'Ergebnis' : `${KINDS[k].label}<span class="n">${DECKS[k].length}</span>`}</button>`).join('');
 
-const baseCSS = [R6_CSS, typeof UB_CSS !== 'undefined' ? UB_CSS : '', typeof SHOP6_CSS !== 'undefined' ? SHOP6_CSS : '', typeof PDP6_CSS !== 'undefined' ? PDP6_CSS : ''];
+const baseCSS = [R6_CSS, UB_CSS, SHOP6_CSS, PDP6_CSS, R7_CSS];
 document.head.insertAdjacentHTML('beforeend', `<style>${[...baseCSS, ...ALL.map(c => c.L.css || '')].join('\n')}</style>`);
 
 function mockHTML(c, still) {
@@ -239,20 +238,40 @@ async function initStore() {
 }
 function renderWho() {
   const n = d => DECKS[d].filter(c => state.mine[c.id] !== undefined).length;
-  document.getElementById('who').innerHTML = `<span>Du: ${ORDER.map(k => `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
+  ORDER.forEach(k => { if (KINDS[k].stechen) nextIndex(k); });   /* settle finished passes first */
+  document.getElementById('who').innerHTML = `<span>Du: ${ORDER.map(k => KINDS[k].stechen
+    ? `${KINDS[k].label} <b>${winner(k) ? 'entschieden' : 'noch ' + alive(k).length}</b>` : `<b>${n(k)}/${DECKS[k].length}</b> ${KINDS[k].label}`).join(' · ')}</span>`;
 }
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 
 /* ---------------------------------------------------------------- views */
 const main = document.getElementById('main');
 function nextKind(k) { return ORDER[(ORDER.indexOf(k) + 1) % ORDER.length]; }
-const nextIndex = deck => DECKS[deck].findIndex(c => state.mine[c.id] === undefined);
+/* Stechen: a card's vote is -1 out, 1 still in after this pass, 2 winner, none = not shown yet in this pass */
+const alive = deck => DECKS[deck].filter(c => state.mine[c.id] !== -1);
+const winner = deck => DECKS[deck].find(c => state.mine[c.id] === 2);
+function settle(deck) {
+  if (winner(deck)) return false;
+  const a = alive(deck);
+  if (a.length === 1) { state.mine[a[0].id] = 2; return true; }
+  if (a.length && a.every(c => state.mine[c.id] === 1)) {
+    a.forEach(c => delete state.mine[c.id]); state.mine['pass_' + deck] = (state.mine['pass_' + deck] || 1) + 1; return true;
+  }
+  if (!a.length) { DECKS[deck].forEach(c => delete state.mine[c.id]); state.mine['pass_' + deck] = (state.mine['pass_' + deck] || 1) + 1; return true; }   /* all out: start over */
+  return false;
+}
+function nextIndex(deck) {
+  if (KINDS[deck].stechen) { while (settle(deck)) persist(); if (winner(deck)) return -1; }
+  return DECKS[deck].findIndex(c => state.mine[c.id] === undefined);
+}
 function setProgress() {
   const k = DECKS[state.deck] ? state.deck : ORDER[0], d = DECKS[k];
-  document.getElementById('progress').style.width = (d.filter(c => state.mine[c.id] !== undefined).length / d.length * 100) + '%';
+  const p = KINDS[k].stechen ? (winner(k) ? 1 : (d.length - alive(k).length) / Math.max(1, d.length - 1)) : d.filter(c => state.mine[c.id] !== undefined).length / d.length;
+  document.getElementById('progress').style.width = (p * 100) + '%';
 }
 function render() {
   [...ORDER, 'result'].forEach(k => document.getElementById('tab-' + k).setAttribute('aria-pressed', String(state.deck === k)));
+  if (DECKS[state.deck]) nextIndex(state.deck);   /* settles a finished pass before the bar is drawn */
   setProgress();
   if (state.deck === 'result') return renderResult();
   const i = nextIndex(state.deck);
@@ -272,7 +291,7 @@ function renderCard(c, i) {
   main.innerHTML = `<div class="stage"><article class="card" id="card" aria-label="Entwurf ${c.id}">
       <span class="stamp yes">Ja</span><span class="stamp no">Nein</span><span class="stamp star">Super</span>
       <div class="view${KINDS[c.kind].live === 'p' ? ' wheel' : ''}" id="cardView"></div>
-      <div class="meta"><span class="id">${c.id} · ${i + 1} von ${d.length}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
+      <div class="meta"><span class="id">${KINDS[c.kind].stechen ? `${c.id} · Stechen · Durchgang ${state.mine['pass_' + c.kind] || 1} · noch ${alive(c.kind).length} im Rennen` : `${c.id} · ${i + 1} von ${d.length}`}</span><h2>${c.L.name}</h2><p>${c.L.idea}</p>
       <div class="tags">${c.L.tags.map(t => `<span>${t}</span>`).join('')}</div>
       ${liveCtl(c)}
       <div style="display:flex;gap:16px;flex-wrap:wrap"><button type="button" class="link" id="zoomBtn">Groß ansehen</button></div></div></article></div>
@@ -294,6 +313,7 @@ function vote(c, v) {
   const card = document.getElementById('card');
   state.history.push({ deck: c.kind, snap: JSON.stringify(state.mine) });
   state.mine[c.id] = v;
+  if (KINDS[c.kind].stechen && v === 2) DECKS[c.kind].forEach(o => { if (o !== c) state.mine[o.id] = -1; });
   persist(); renderWho();
   if (card && !RM.matches) {
     card.style.transform = v === 2 ? 'translateY(-120%) rotate(0)' : `translateX(${v > 0 ? 130 : -130}%) rotate(${v > 0 ? 14 : -14}deg)`;
@@ -383,6 +403,16 @@ function renderDone() {
   state.view = 'done';
   const d = DECKS[state.deck], liked = d.filter(c => state.mine[c.id] > 0).length, stars = d.filter(c => state.mine[c.id] === 2).length;
   const i0 = ORDER.indexOf(state.deck), other = [...ORDER.slice(i0 + 1), ...ORDER.slice(0, i0)].find(k => nextIndex(k) >= 0), rest = !!other;
+  if (KINDS[state.deck].stechen) {
+    const w = winner(state.deck);
+    main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: Gewinner</h2><p>${esc(w.L.name)} hat das Stechen gewonnen. ${rest ? '' : 'Alle Bereiche sind durch. Danke! Claude liest deine Stimmen aus und baut die Gewinner ein.'}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button>${state.history.length ? '<button type="button" class="link" id="undoDone">Letzte Wahl zurücknehmen</button>' : ''}</div>
+      <div class="grid">${tiles([w])}</div></section>`;
+    if (rest) document.getElementById('goOther').onclick = () => { state.deck = other; render(); };
+    if (state.history.length) document.getElementById('undoDone').onclick = undo;
+    document.getElementById('goRes').onclick = () => { state.deck = 'result'; render(); };
+    return mountTiles();
+  }
   main.innerHTML = `<section class="done"><h2>${KINDS[state.deck].label}: fertig</h2>
     <p>Du hast ${liked} Entwürfe gemocht, davon ${stars} mit Stern. ${rest ? '' : 'Alle Bereiche sind durch. Danke! Claude liest deine Stimmen aus und baut die Gewinner ein.'}</p>
     <div style="display:flex;gap:12px;flex-wrap:wrap">${rest ? `<button type="button" class="link" id="goOther">Weiter: ${KINDS[other].label}</button>` : ''}<button type="button" class="link" id="goRes">Ergebnis ansehen</button>${state.history.length ? '<button type="button" class="link" id="undoDone">Letzte Wahl zurücknehmen</button>' : ''}</div>
@@ -396,10 +426,11 @@ const score = c => { const v = state.mine[c.id]; return v === undefined ? -9 : v
 function renderResult() {
   state.view = 'result';
   const sect = (kind, label) => {
+    if (KINDS[kind].stechen) { const w = winner(kind); return `<h2>${label}: ${w ? 'Gewinner' : 'noch im Rennen'}</h2><div class="grid">${tiles(w ? [w] : alive(kind))}</div>`; }
     const list = DECKS[kind].filter(c => state.mine[c.id] > 0).sort((a, b) => score(b) - score(a));
     return `<h2>${label}: deine Favoriten</h2>${list.length ? `<div class="grid">${tiles(list)}</div>` : '<p class="hint" style="text-align:left">Noch keine Ja-Stimmen.</p>'}`;
   };
-  main.innerHTML = `<section class="done"><p>Alles, wozu du Ja oder Super gesagt hast, Super zuerst. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
+  main.innerHTML = `<section class="done"><p>Beim Stechen der Gewinner (oder wer noch im Rennen ist), sonst alles mit Ja oder Super, Super zuerst. Tippe auf eine Kachel, um sie groß zu sehen.</p>${ORDER.map(k => sect(k, KINDS[k].label)).join('')}</section>`;
   mountTiles();
 }
 [...ORDER, 'result'].forEach(k => (document.getElementById('tab-' + k).onclick = () => { state.deck = k; render(); }));

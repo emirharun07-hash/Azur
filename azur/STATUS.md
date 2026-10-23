@@ -553,6 +553,13 @@ owner published). Preview: https://azurclothing.com/?preview_theme_id=2099889769
   (max 120 px desktop, 72 px phone) and above the jersey instead of behind it; less text (no path, size hint, care line,
   back link, "Noch niemand aufgestellt", name in the buy bar); the room section's "Pflegehinweis" setting is gone.
   Checked in the harness on desktop, iPad and phone (all five jerseys, no errors), adding from the room opens the drawer.
+- Swipe round r7 (artifact v9 of https://claude.ai/artifact/ASxoX7hgSL2FbYLiFxcajH, votes `votes/<uid>.r7`): tie-break
+  ("Stechen", per deck now: -1 out, 1 in this pass, 2 winner, `pass_<deck>`) on the r6 yes cards with their r6 ids (Übergang
+  U32/U33/U47/U48, Hinweise H02/H03/H08/H09, Anordnung A01/A13); new decks numbered from 21: Größenwahl Z21-Z32 (the plain
+  row S M L XL with a small football detail: ball/spot/centre circle/goal/back-number type/scoreboard/chalk/back line/big
+  number/pass, `azur/design/r7.js`) and Tasche T21-T32 (six real 3D renders from Blender, `azur/design/render_bag.py`:
+  barrel duffle, flat bottom, handles anchored front and back, end panels by material, Azur signature shrink-wrapped on
+  the side, shadow catcher; plus six drawings of the same shape). Over the room the dark bags are shown in white.
 
 ## Runde 15 (owner 2026-10-21 night, 11 points; worked through the night, hourly self check-in `trig_01D2dJhLJ4L4axHkqu5PPaNi`)
 Draft theme "Azur Zimmer Runde 15 (Entwurf)" `gid://shopify/OnlineStoreTheme/209879302483` (copy of MAIN = Runde 14, which
