@@ -2401,25 +2401,33 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
        shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
        and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
        and once the room is out of the window the IntersectionObserver stops its drawing as before. */
-    /* Runde 18 (owner): scrolling down, a gradient slides up over the room, which stays put (sticky, CSS in the theme's
-       azur-room.liquid): sandy black grains first, then black, lighter downwards until white, where the shop begins.
-       Here only the header follows it: dark type once the light part is under it (html.azur-light), solid once the white
-       end has passed it (html.azur-past, the theme's azur.js listens for `azur-hero`); the room stops drawing while it is
-       fully covered (html.azur-away, which also hides the phones' fixed hint and labels over the shop). */
+    /* Runde 19 (owner): scrolling down you fall through the floor into a new, all white room (CSS and markup in the
+       theme's azur-room.liquid). The room stays put (sticky) while the camera dives to the floor (--azur-dive on the
+       room: larger, darker); the floor (.azur-fall: grains, the black slab, then the white room in one-point
+       perspective) comes up faster than the page scrolls (--azur-fall, eased: quick at first, then at scroll speed),
+       so the whole fall takes a little over half a screen; the white room settles as it arrives (--azur-land).
+       The header follows: dark type over the white room (html.azur-light), solid once the white room is past the
+       header's top half (html.azur-past, azur.js listens for `azur-hero`). html.azur-diving hides the room's hints and
+       chips (the phones' hint is fixed and would stay over the shop); the room stops drawing while the floor covers it. */
     bindScrollAway() {
-      const html = document.documentElement, fade = this.root.parentElement.querySelector('.azur-fade');
-      if (!fade) return;
-      const sand = fade.querySelector('.azur-fade__sand');
+      const html = document.documentElement, sec = this.root.parentElement, fall = sec.querySelector('.azur-fall');
+      if (!fall) return;
+      const slab = fall.querySelector('.azur-fall__slab'), white = fall.querySelector('.azur-fall__room');
       let queued = false;
+      const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
       const update = () => {
         queued = false;
-        const head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
-        const r = fade.getBoundingClientRect(), gradTop = r.top + sand.offsetHeight, t = (hb / 2 - gradTop) / Math.max(1, r.bottom - gradTop);
-        html.classList.toggle('azur-light', t > 0.45);
-        const past = r.bottom <= hb + 1;
-        if (html.classList.contains('azur-past') !== past) { html.classList.toggle('azur-past', past); window.dispatchEvent(new Event('azur-hero')); }
-        const away = gradTop <= 0;
-        if (away !== this.away) { this.away = away; html.classList.toggle('azur-away', away); if (!away) this.kick(); }
+        const vh = window.innerHeight || 1, head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
+        const s = Math.max(0, -sec.getBoundingClientRect().top), x = Math.min(1, s / (0.55 * vh));
+        const dive = 1 - (1 - x) * (1 - x);
+        this.root.style.setProperty('--azur-dive', dive.toFixed(4)); fall.style.setProperty('--azur-fall', dive.toFixed(4));
+        const wr = white.getBoundingClientRect();
+        fall.style.setProperty('--azur-land', Math.min(1, Math.max(0, 1 - wr.top / vh)).toFixed(4));
+        flag('azur-diving', s > 4);
+        flag('azur-light', wr.top < hb / 2);
+        if (flag('azur-past', wr.top <= -0.3 * vh)) window.dispatchEvent(new Event('azur-hero'));
+        const away = slab.getBoundingClientRect().top <= 0;
+        if (away !== this.away) { this.away = away; if (!away) this.kick(); }
       };
       const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
       window.addEventListener('scroll', queue, { passive: true }); window.addEventListener('resize', queue); update();
