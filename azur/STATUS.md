@@ -567,6 +567,12 @@ https://azurclothing.com/?preview_theme_id=210046550355
   added to the compositor's vertical parallax in frame(), so near things (floor, bed, rail) lift more than the wall;
   the plane is now dust (80 px) + plain black (115svh - 20 px) + the same dust mirrored over white
   (`.azur-fall__dust--end`, scaleY(-1), texture shifted); total unchanged. The room's white dots hide while scrolling.
+- Owner, fifth look: it lagged, even more camera, and black still showed above the jerseys. Commit 20ebe50: the
+  room's slide is a CSS scroll-driven animation (`azur-cam`, animation-timeline: scroll(root), range 0-100vh,
+  translate 0 -> -75vh) where supported (Chrome, Edge, Safari 26), the script moves it only elsewhere; the scroll
+  handler only compares scrollY with offsets measured on load/resize (no layout reads while scrolling); frame()
+  reads scrollY for the depth (CAM_DEPTH 0.1, was 0.06) and skips placing the hidden hints/dots while diving;
+  black 105svh, then the mirrored edge and 30svh white (`.azur-fall__white`) before the jerseys.
 
 ## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
 The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
