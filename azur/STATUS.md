@@ -552,6 +552,10 @@ https://azurclothing.com/?preview_theme_id=210046550355
   speed, no white room, no card overlap or shadows. bindScrollAway: azur-diving on any scroll, azur-light at 62 % of the
   gradient under the header, azur-past when its white end passes the header, no drawing once it covers the window.
 - Checked in the harness on desktop, iPad and phone (10 scroll steps each): no errors.
+- Owner, second look: the start must be lower and less harsh, and it was not fully black (the grain over the black,
+  screen blend, lifted it to dark grey); the length is good. Commit 2bfede3: sand edge 80 px (a smooth wash does the
+  darkening, grains faint, make_sand.py 512x80), black now 35 % of the gradient and without grain (measured 0,0,0),
+  grain only in the grey (45-90 %), the gradient 60 px taller so the total stays the same; azur-light at 70 %.
 
 ## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
 The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
