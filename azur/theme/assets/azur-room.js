@@ -2424,7 +2424,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
         const g = grad.getBoundingClientRect(), t = (hb / 2 - g.top) / Math.max(1, g.height);
         flag('azur-diving', sec.getBoundingClientRect().top < -4);
-        flag('azur-light', t > 0.62);                       // the gradient is mid grey there (black for the first 22 %)
+        flag('azur-light', t > 0.7);                        // the gradient is mid grey there (black for the first 35 %)
         if (flag('azur-past', g.bottom <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
         const away = g.top <= 0;
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }

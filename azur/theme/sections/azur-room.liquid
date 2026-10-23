@@ -25,22 +25,23 @@
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
   /* Runde 19 (Owner, zweiter Versuch): beim Scrollen geht man durch den Boden – das Zimmer bleibt stehen (sticky, kein
-     Zoom) und von unten schiebt sich der Boden darüber: ein niedriger, feiner Sandrand (assets/azur-sand.png aus
-     tools/make_sand.py, weiche Körner), dann Schwarz, dann ein langer, gleichmäßiger Verlauf bis Weiß (ohne Linien,
-     mit feinem Korn gegen Streifen); im Weiß kommen die Trikots, wie vorher ohne Raum. Gut zwei Bildschirme lang.
+     Zoom) und von unten schiebt sich der Boden darüber: ein niedriger, weicher Sandrand (80 px: ein sanftes Abdunkeln
+     mit feinen Körnern, assets/azur-sand.png aus tools/make_sand.py), dann reines Schwarz (ohne Korn), dann ein langer,
+     gleichmäßiger Verlauf bis Weiß (ohne Linien, feines Korn nur im Grau gegen Streifen); im Weiß kommen die Trikots,
+     wie vorher ohne Raum. Gut zwei Bildschirme lang.
      Der Header: dunkle Schrift über dem hellen Teil (html.azur-light), fest, sobald das Weiß unter ihm ist
      (html.azur-past): azur-room.js, bindScrollAway. Ohne Bewegung: alles liegt einfach untereinander. */
   .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; }
-  .azur-fall__dust { display: block; height: 140px;
-    background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 512px 140px repeat-x,
-      linear-gradient(transparent 20%, rgba(0, 0, 0, .3) 70%, rgba(0, 0, 0, .7)); }
-  .azur-fall__grad { position: relative; display: block; height: 115vh; height: 115svh; margin-top: -1px;
-    background: linear-gradient(#000 0%, #000 22%, #000 25.9%, #010101 29.8%, #040404 33.7%, #0c0c0c 37.6%, #171717 41.5%, #232323 45.4%,
-      #323232 49.3%, #414141 53.2%, #525252 57.1%, #636363 61%, #757575 64.9%, #878787 68.8%, #999 72.7%, #ababab 76.6%, #bdbdbd 80.5%,
-      #cdcdcd 84.4%, #dcdcdc 88.3%, #eaeaea 92.2%, #f5f5f5 96.1%, #fff 100%); }
-  .azur-fall__grad::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .3;
+  .azur-fall__dust { display: block; height: 80px;
+    background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 512px 80px repeat-x,
+      linear-gradient(transparent, rgba(0, 0, 0, .12) 25%, rgba(0, 0, 0, .45) 55%, rgba(0, 0, 0, .85) 82%, #000); }
+  .azur-fall__grad { position: relative; display: block; height: calc(115vh + 60px); height: calc(115svh + 60px); margin-top: -1px;
+    background: linear-gradient(#000 0%, #000 35%, #000 38.2%, #010101 41.5%, #040404 44.8%, #0c0c0c 48%, #171717 51.2%, #232323 54.5%, #323232 57.8%,
+      #414141 61%, #525252 64.2%, #636363 67.5%, #757575 70.8%, #878787 74%, #999999 77.2%, #ababab 80.5%, #bdbdbd 83.8%,
+      #cdcdcd 87%, #dcdcdc 90.2%, #eaeaea 93.5%, #f5f5f5 96.8%, #ffffff 100%); }
+  .azur-fall__grad::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .18;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
-    -webkit-mask: linear-gradient(#000, #000 55%, transparent 90%); mask: linear-gradient(#000, #000 55%, transparent 90%); }
+    -webkit-mask: linear-gradient(transparent 45%, #000 58%, #000 68%, transparent 90%); mask: linear-gradient(transparent 45%, #000 58%, #000 68%, transparent 90%); }
   @media (prefers-reduced-motion: no-preference) {
     .js .azur[data-hero] { position: sticky; top: 0; }
   }
