@@ -556,6 +556,12 @@ https://azurclothing.com/?preview_theme_id=210046550355
   screen blend, lifted it to dark grey); the length is good. Commit 2bfede3: sand edge 80 px (a smooth wash does the
   darkening, grains faint, make_sand.py 512x80), black now 35 % of the gradient and without grain (measured 0,0,0),
   grain only in the grey (45-90 %), the gradient 60 px taller so the total stays the same; azur-light at 70 %.
+- Owner, third look: black should go further down, top and bottom equally short (the change to white was too long),
+  and the room should move like a camera going down in the room, hitting the black plane and going under. Commit
+  47e9269: bindScrollAway slides .azur-world up at half the scroll speed (style.translate, no zoom; not with reduced
+  motion; stops while the plane covers the room), the plane comes at full speed; the gradient is black until 120 px
+  before its end (one fully black screen), then 12 eased stops to white in 120 px (grain only there); total unchanged.
+  azur-light when the header's middle is within the last 60 px.
 
 ## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
 The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
