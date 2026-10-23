@@ -567,6 +567,9 @@ copy the owner has to delete old drafts in the admin (theme deletion is blocked 
   plus) are no longer visible (the page is the room's view now); they are still in main-product.liquid.
 - Checked in the harness: desktop + phone, fall at 10 steps, shop/city/product/homepage clicks, add to cart opens the
   drawer, close/Escape, product page closes back to the shop: no errors.
+- Store data: the collection "Städtetrikots" was not published to the Onlineshop (its page 404'd and Liquid could not see
+  it); published it 2026-10-23 (publishablePublish, Onlineshop). Until Runde 19 is published, the live Runde 18 theme
+  shows "Hier ist gerade nichts" on that page (its shop hides the city collection everywhere).
 
 ## Runde 18 (owner 2026-10-23: a new scroll transition, "ich schau es mir erstmal an")
 Draft theme "Azur Zimmer Runde 18 (Entwurf)" `gid://shopify/OnlineStoreTheme/209996054867` (copy of the unpublished Runde 17
