@@ -1288,3 +1288,19 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
   .note__dot { left: -0.5rem; top: -0.5rem; width: 1rem; height: 1rem; display: grid; place-items: center; background: var(--c-ink); color: var(--c-paper); font-size: 0.5625rem; }
   .note__dot::after { content: attr(data-n); }
 }
+
+/* 18. Runde 19: Städtetrikots auf eigener Seite ============================== */
+/* Shop: „Länder · Städte“ mittig über dem Raster; Startseite: ein Link unter den Ländertrikots */
+.shop__tabs { display: flex; justify-content: center; gap: var(--s-6); justify-self: stretch; margin-top: var(--s-2);
+  font-size: var(--t-label); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.shop__tabs a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--c-grey-text); }
+.shop__tabs a:hover { color: var(--c-ink); }
+.shop__tabs a[aria-current="page"] { color: var(--c-ink); text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
+.yz__more { margin-top: var(--s-8); text-align: center; font-size: var(--t-label); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.yz__more a { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); }
+.yz__more a:hover { text-decoration: underline; text-underline-offset: 0.3em; }
+/* zwei Karten (Städte): mittig nebeneinander, ohne Treppchen */
+@media (min-width: 48em) {
+  .yz__grid:has(> li:last-child:nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 16.5rem)); justify-content: center; column-gap: var(--s-8); }
+  .yz__grid:has(> li:last-child:nth-child(2)) > li { translate: none; }
+}

@@ -198,7 +198,7 @@ def chrome(template, body, query='', cart_count=0, drawer='', **page):
 def collection_page(query='', drawer='', cart_count=0, handle='trikots'):
     coll = ctx()['collections'].get(handle) or ctx()['collections']['trikots']
     # python-liquid does not treat an unset collection setting as blank: an empty handle stands in for Shopify's nil
-    body = '<div class="shopify-section">' + section('main-collection', {'hide': {'handle': ''}}, template={'name': 'collection', 'suffix': ''}, collection=coll) + '</div>'
+    body = '<div class="shopify-section">' + section('main-collection', {'hide': {'handle': ''}, 'countries': {'handle': ''}}, template={'name': 'collection', 'suffix': ''}, collection=coll) + '</div>'
     return chrome('collection', body, query, cart_count, drawer, collection=coll)
 
 

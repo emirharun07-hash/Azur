@@ -93,7 +93,7 @@ def cards_product(p):
 def render_cards(query=''):
     # the real snippets (product-field, product-image, price, signup-form) via theme_pages
     # Runde 15: only the national jerseys, like templates/index.json
-    return pages.section('azur-cards', {'products': pages.PRODUCTS[2:]}, form=pages.signup_state(query))
+    return pages.section('azur-cards', {'products': pages.PRODUCTS[2:], 'more': {'handle': ''}}, form=pages.signup_state(query))
 
 
 def render_drawer():
