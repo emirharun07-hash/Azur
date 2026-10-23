@@ -562,6 +562,11 @@ https://azurclothing.com/?preview_theme_id=210046550355
   motion; stops while the plane covers the room), the plane comes at full speed; the gradient is black until 120 px
   before its end (one fully black screen), then 12 eased stops to white in 120 px (grain only there); total unchanged.
   azur-light when the header's middle is within the last 60 px.
+- Owner, fourth look ("viel besser"): more camera, and the sandy harshness of the top edge also at the bottom. Commit
+  e1cca1d: the room slides up at 0.6 of the scroll and gets depth: `this.scrollPar` (0 -> 0.06 over one screen) is
+  added to the compositor's vertical parallax in frame(), so near things (floor, bed, rail) lift more than the wall;
+  the plane is now dust (80 px) + plain black (115svh - 20 px) + the same dust mirrored over white
+  (`.azur-fall__dust--end`, scaleY(-1), texture shifted); total unchanged. The room's white dots hide while scrolling.
 
 ## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
 The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
