@@ -539,6 +539,20 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 18 (owner 2026-10-23: a new scroll transition, "ich schau es mir erstmal an")
+Draft theme "Azur Zimmer Runde 18 (Entwurf)" `gid://shopify/OnlineStoreTheme/209996054867` (copy of the unpublished Runde 17
+draft, so Runde 17 keeps the neon-logo transition for comparison; MAIN is still Runde 16). Preview:
+https://azurclothing.com/?preview_theme_id=209996054867
+- Owner: scrolling down, a black gradient appears that starts sandy, gets lighter downwards to white, then the shop.
+- Built (commit ac26e00): the room stays sticky; after it in azur-room.liquid a `.azur-fade` slides up over it:
+  `__sand` 360 px of black grains thinning upwards (assets/azur-sand.png, 512x180 shown at 2x, pixelated), then `__grad`
+  110svh black -> white with a light grain (screen blend) in its dark half; the cards follow directly. The neon flight, the
+  200svh section and the cards overlap of Runde 17 are gone.
+- azur-app.js bindScrollAway: html.azur-light (dark header type) once the gradient under the header is lighter than ~45 %,
+  html.azur-past (solid header) when the white end passes the header, html.azur-away + no drawing while the gradient fully
+  covers the window (also hides the phones' fixed hint/labels, which otherwise stayed over the shop).
+- Checked in the harness on desktop and phone at 8 scroll steps: no errors.
+
 ## Runde 17 (owner 2026-10-23: the winners of the design rounds r6/r7 built in)
 Draft theme "Azur Zimmer Runde 17 (Entwurf)" `gid://shopify/OnlineStoreTheme/209994580307` (copy of MAIN = Runde 16, which the
 owner published). Preview: https://azurclothing.com/?preview_theme_id=209994580307
