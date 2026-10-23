@@ -2407,26 +2407,31 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
        shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
        and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
        and once the room is out of the window the IntersectionObserver stops its drawing as before. */
-    /* Runde 19 (owner, second try): scrolling down you go through the floor. The room stays as it is (sticky, no zoom);
-       the floor (.azur-fall in the theme's azur-room.liquid: a low sandy edge, black, then a long even gradient to
-       white) slides up over it and the jerseys follow in the white. The header follows: dark type once the gradient
-       under it is light (html.azur-light), solid once the white end has passed it (html.azur-past, azur.js listens
-       for `azur-hero`). html.azur-diving hides the room's hints and chips as soon as the page moves (the phones' hint is
-       fixed and would stay over the shop); the room stops drawing while the floor covers it. */
+    /* Runde 20 (owner): scrolling down, a camera goes down in the room and dips through a black plane to the jerseys.
+       The room stays (sticky) but slides up at half the scroll speed (.azur-world, no zoom), while the plane (.azur-fall
+       in the theme's azur-room.liquid: a low soft edge, black long enough to fill the window once, then a short soft
+       change to white) comes up at full speed, so the room reads as further away: the camera sinks toward the floor
+       and goes under. The jerseys follow in the white. The header follows: dark type once the white part is under it
+       (html.azur-light), solid once the white end has passed it (html.azur-past, azur.js listens for `azur-hero`).
+       html.azur-diving hides the room's hints and chips as soon as the page moves (the phones' hint is fixed and would
+       stay over the shop); the room stops drawing (and moving) while the plane covers it. */
     bindScrollAway() {
       const html = document.documentElement, sec = this.root.parentElement, fall = sec.querySelector('.azur-fall');
       if (!fall) return;
       const grad = fall.querySelector('.azur-fall__grad');
-      let queued = false;
+      let queued = false, cam = -1;
       const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
       const update = () => {
         queued = false;
         const head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
-        const g = grad.getBoundingClientRect(), t = (hb / 2 - g.top) / Math.max(1, g.height);
-        flag('azur-diving', sec.getBoundingClientRect().top < -4);
-        flag('azur-light', t > 0.7);                        // the gradient is mid grey there (black for the first 35 %)
-        if (flag('azur-past', g.bottom <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
+        const s = Math.max(0, -sec.getBoundingClientRect().top), g = grad.getBoundingClientRect();
         const away = g.top <= 0;
+        // the camera: the room slides up at half speed until the plane covers it
+        const y = this.reduced ? 0 : Math.round(s * 0.5);
+        if (!away && y !== cam) { cam = y; this.world.style.translate = y ? `0 ${-y}px` : ''; }
+        flag('azur-diving', s > 4);
+        flag('azur-light', g.bottom - hb / 2 < 60);         // the last 120 px of the plane turn white
+        if (flag('azur-past', g.bottom <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
       };
       const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };

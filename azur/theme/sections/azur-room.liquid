@@ -24,24 +24,26 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 19 (Owner, zweiter Versuch): beim Scrollen geht man durch den Boden – das Zimmer bleibt stehen (sticky, kein
-     Zoom) und von unten schiebt sich der Boden darüber: ein niedriger, weicher Sandrand (80 px: ein sanftes Abdunkeln
-     mit feinen Körnern, assets/azur-sand.png aus tools/make_sand.py), dann reines Schwarz (ohne Korn), dann ein langer,
-     gleichmäßiger Verlauf bis Weiß (ohne Linien, feines Korn nur im Grau gegen Streifen); im Weiß kommen die Trikots,
-     wie vorher ohne Raum. Gut zwei Bildschirme lang.
-     Der Header: dunkle Schrift über dem hellen Teil (html.azur-light), fest, sobald das Weiß unter ihm ist
-     (html.azur-past): azur-room.js, bindScrollAway. Ohne Bewegung: alles liegt einfach untereinander. */
+  /* Runde 20 (Owner): beim Scrollen fährt eine Kamera im Zimmer nach unten und taucht durch eine schwarze Ebene zu den
+     Trikots. Das Zimmer bleibt stehen (sticky) und rutscht langsamer nach oben als die Seite (azur-room.js,
+     bindScrollAway: .azur-world um die halbe Scrollstrecke), kein Zoom; von unten kommt schneller die schwarze Ebene:
+     ein niedriger, weicher Rand (80 px: sanftes Abdunkeln mit feinen Körnern, assets/azur-sand.png aus
+     tools/make_sand.py), dann reines Schwarz, lang genug für einen ganz schwarzen Bildschirm, und unten ein kurzer,
+     weicher Übergang zu Weiß (120 px, etwa so kurz wie der Rand oben); dann die Trikots auf Weiß. Gut zwei
+     Bildschirme lang. Header: dunkle Schrift über dem Weiß (html.azur-light), fest, sobald das Weiß unter ihm ist
+     (html.azur-past). Ohne Bewegung: alles liegt einfach untereinander. */
   .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; }
   .azur-fall__dust { display: block; height: 80px;
     background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 512px 80px repeat-x,
       linear-gradient(transparent, rgba(0, 0, 0, .12) 25%, rgba(0, 0, 0, .45) 55%, rgba(0, 0, 0, .85) 82%, #000); }
   .azur-fall__grad { position: relative; display: block; height: calc(115vh + 60px); height: calc(115svh + 60px); margin-top: -1px;
-    background: linear-gradient(#000 0%, #000 35%, #000 38.2%, #010101 41.5%, #040404 44.8%, #0c0c0c 48%, #171717 51.2%, #232323 54.5%, #323232 57.8%,
-      #414141 61%, #525252 64.2%, #636363 67.5%, #757575 70.8%, #878787 74%, #999999 77.2%, #ababab 80.5%, #bdbdbd 83.8%,
-      #cdcdcd 87%, #dcdcdc 90.2%, #eaeaea 93.5%, #f5f5f5 96.8%, #ffffff 100%); }
+    background: linear-gradient(#000 0%, #000 calc(100% - 120px), #000000 calc(100% - 110px), #060606 calc(100% - 100px), #171717 calc(100% - 90px),
+      #2d2d2d calc(100% - 80px), #474747 calc(100% - 70px), #636363 calc(100% - 60px), #818181 calc(100% - 50px), #9f9f9f calc(100% - 40px),
+      #bdbdbd calc(100% - 30px), #d7d7d7 calc(100% - 20px), #eeeeee calc(100% - 10px), #ffffff 100%); }
   .azur-fall__grad::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .18;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
-    -webkit-mask: linear-gradient(transparent 45%, #000 58%, #000 68%, transparent 90%); mask: linear-gradient(transparent 45%, #000 58%, #000 68%, transparent 90%); }
+    -webkit-mask: linear-gradient(transparent calc(100% - 100px), #000 calc(100% - 70px), transparent calc(100% - 15px));
+    mask: linear-gradient(transparent calc(100% - 100px), #000 calc(100% - 70px), transparent calc(100% - 15px)); }
   @media (prefers-reduced-motion: no-preference) {
     .js .azur[data-hero] { position: sticky; top: 0; }
   }
