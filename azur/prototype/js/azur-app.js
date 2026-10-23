@@ -571,30 +571,34 @@
        and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
        and once the room is out of the window the IntersectionObserver stops its drawing as before. */
     /* Runde 20 (owner): scrolling down, a camera goes down in the room and dips through a black plane to the jerseys.
-       The room stays (sticky) but slides up at half the scroll speed (.azur-world, no zoom), while the plane (.azur-fall
-       in the theme's azur-room.liquid: a low soft edge, black long enough to fill the window once, then a short soft
-       change to white) comes up at full speed, so the room reads as further away: the camera sinks toward the floor
-       and goes under. The jerseys follow in the white. The header follows: dark type once the white part is under it
-       (html.azur-light), solid once the white end has passed it (html.azur-past, azur.js listens for `azur-hero`).
+       The room stays (sticky) but slides up slower than the page (.azur-world, 0.6 of the scroll, no zoom) and, like a
+       camera that sinks, near things (floor, bed, rail) move up more than the far wall: the depth parallax the pointer
+       uses, here vertical and driven by the scroll (this.scrollPar, added in frame()). The plane (.azur-fall in the
+       theme's azur-room.liquid: a low sandy edge, black long enough to fill the window once, the same edge mirrored into
+       white) comes up at full speed. The jerseys follow in the white. The header follows: dark type once the white is
+       under it (html.azur-light), solid once the edge has passed it (html.azur-past, azur.js listens for `azur-hero`).
        html.azur-diving hides the room's hints and chips as soon as the page moves (the phones' hint is fixed and would
        stay over the shop); the room stops drawing (and moving) while the plane covers it. */
     bindScrollAway() {
       const html = document.documentElement, sec = this.root.parentElement, fall = sec.querySelector('.azur-fall');
       if (!fall) return;
-      const grad = fall.querySelector('.azur-fall__grad');
+      const black = fall.querySelector('.azur-fall__grad'), end = fall.querySelector('.azur-fall__dust--end');
       let queued = false, cam = -1;
       const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
       const update = () => {
         queued = false;
-        const head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
-        const s = Math.max(0, -sec.getBoundingClientRect().top), g = grad.getBoundingClientRect();
-        const away = g.top <= 0;
-        // the camera: the room slides up at half speed until the plane covers it
-        const y = this.reduced ? 0 : Math.round(s * 0.5);
-        if (!away && y !== cam) { cam = y; this.world.style.translate = y ? `0 ${-y}px` : ''; }
+        const vh = window.innerHeight || 1, head = document.querySelector('[data-header]'), hb = head ? head.getBoundingClientRect().bottom : 0;
+        const s = Math.max(0, -sec.getBoundingClientRect().top), away = black.getBoundingClientRect().top <= 0;
+        const e = end.getBoundingClientRect();
+        // the camera: the room slides up and its near things lift more, until the plane covers it
+        const y = this.reduced ? 0 : Math.round(s * 0.6);
+        if (!away && y !== cam) {
+          cam = y; this.world.style.translate = y ? `0 ${-y}px` : '';
+          this.scrollPar = this.reduced ? 0 : Math.min(1, s / vh) * 0.06; this.dirty = true;
+        }
         flag('azur-diving', s > 4);
-        flag('azur-light', g.bottom - hb / 2 < 60);         // the last 120 px of the plane turn white
-        if (flag('azur-past', g.bottom <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
+        flag('azur-light', e.bottom - hb / 2 < 40);         // the mirrored edge is mostly white in its lower half
+        if (flag('azur-past', e.bottom <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
       };
       const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
@@ -887,7 +891,7 @@
       const e = 1 - Math.exp(-dt * cfg.motion.parallaxEase);      // the same glide at 60, 120 or 144 Hz
       const nx = this.parallax[0] + (-tx * k - this.parallax[0]) * e, ny = this.parallax[1] + (-ty * k * 0.6 - this.parallax[1]) * e;
       const pmove = Math.abs(nx - this.parallax[0]) + Math.abs(ny - this.parallax[1]) > 1e-6;
-      this.parallax = [nx, ny]; this.comp.parallax = this.parallax;
+      this.parallax = [nx, ny]; this.comp.parallax = this.scrollPar ? [nx, ny + this.scrollPar] : this.parallax;   // + the scroll's camera (Runde 20)
       // phones: momentum after a swipe along the rail, then the rail settles with a garment in the middle
       if (this.viewKey === 'rail_m' && !this.dragging) {
         const W = this.stage.clientWidth;
