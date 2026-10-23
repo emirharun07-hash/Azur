@@ -539,6 +539,29 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 17 (owner 2026-10-23: the winners of the design rounds r6/r7 built in)
+Draft theme "Azur Zimmer Runde 17 (Entwurf)" `gid://shopify/OnlineStoreTheme/209994580307` (copy of MAIN = Runde 16, which the
+owner published). Preview: https://azurclothing.com/?preview_theme_id=209994580307
+- r7 votes: Übergang U48 (neon logo flies top left), Hinweise H09 (blueprint), Anordnung A13 (podium), Größenwahl Z21 (as is),
+  Tasche T21 + T22 + T28 yes (no star): built T21 = the black 3D bag, the white one over the room (so T22 is in too).
+  From r6: Karte K01 (fine line), Größe G02 (small), Plus X02 (spins, shows the number), Logo L01 (as is).
+- Grid (homepage + shop, snippets/product-card.liquid): FIFA-shaped card in a fine black line (path as in the swipe mock),
+  code top left (BRA/GER/TUR from "Produkt-Codes"), jersey, name over a rule, the available sizes; card max 16.5rem; from
+  48em three per row and the middle one of each row 3rem higher (podium).
+- Product page: "+" spins away into a black disc with the quantity of that size in the cart (data-qty from /cart/add.js),
+  the drawer slides in 0.75 s later. Notes ("Hinweise am Trikot", a textarea of the product section: handle | x % | y % |
+  title | text, defaults for the three national jerseys measured on the real 1200 px front photos): grey lines from
+  notes left/right to the spots on the first (front) image, positioned in the square image with container units;
+  phones: numbered dots + a list under the gallery. Texts only what the photos/alt texts show (embroidered per alt text).
+- Transition (azur-app.js bindScrollAway + azur-room.liquid CSS): the room's section is 200svh, the room sticky; over one
+  screen it goes dark, the neon AZUR (paper logo with a cyan glow) stays large, then white and the ink signature flies into
+  the header logo's place; the cards section overlaps by 40svh so the jerseys rise during the second half. html classes
+  azur-moving / azur-light / azur-past (azur.js makes the header solid on azur-past, event `azur-hero`). Reduced motion: off.
+- Cart icon: assets/azur-bag-ink.webp / azur-bag-paper.webp (from azur/design/render_bag.py), shown like the logos
+  (paper over the room); the old sportbag SVG and its CSS are gone.
+- Checked in the harness: desktop/iPad/phone, homepage transition at 0/30/55/80/100/140 % on desktop and phone, product
+  page plus + drawer, notes on desktop and phone, shop page, room product view and adding from the room: no errors.
+
 ## Runde 16 (owner 2026-10-23: the room's product view)
 Draft theme "Azur Zimmer Runde 16 (Entwurf)" `gid://shopify/OnlineStoreTheme/209988976979` (copy of MAIN = Runde 15, which the
 owner published). Preview: https://azurclothing.com/?preview_theme_id=209988976979
