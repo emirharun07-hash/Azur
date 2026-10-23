@@ -539,6 +539,20 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 20 (owner 2026-10-23: the fall again, as a gradient)
+The owner published Runde 19 (MAIN = "Azur Zimmer Runde 19 (Entwurf)" 210037637459) and deleted old drafts (15 themes).
+New draft "Azur Zimmer Runde 20 (Entwurf)" `gid://shopify/OnlineStoreTheme/210046550355` (copy of MAIN). Preview:
+https://azurclothing.com/?preview_theme_id=210046550355
+- Owner on Runde 19's fall: no real room at the jerseys (back to plain white as before), the room must not zoom, the
+  sandy top part was too high and too harsh, black jumped to grey with two visible lines; the change may take longer
+  (scrolling 1-3 times is fine: leave the room, go through the floor, come out at the jerseys).
+- Built (commit 01997e2): room sticky, no zoom or veil; `.azur-fall` = `__dust` (140 px, soft grains from
+  tools/make_sand.py -> assets/azur-sand.png 512x140, over a light black wash) + `__grad` (115svh: black for 22 %, then
+  20 eased stops in perceptual lightness to white, one element so no seams, grain fading out by 90 %). No catch-up
+  speed, no white room, no card overlap or shadows. bindScrollAway: azur-diving on any scroll, azur-light at 62 % of the
+  gradient under the header, azur-past when its white end passes the header, no drawing once it covers the window.
+- Checked in the harness on desktop, iPad and phone (10 scroll steps each): no errors.
+
 ## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
 The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
 (Entwurf)" `gid://shopify/OnlineStoreTheme/210037637459` (copy of MAIN). Preview:
