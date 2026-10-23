@@ -24,21 +24,27 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 17: Übergang „Neon-Logo“. Die Section ist zwei Bildschirme hoch, das Zimmer bleibt stehen, während man einen
-     Bildschirm weit scrollt: es wird dunkel, das Neon-AZUR bleibt groß in der Mitte, dann wird alles weiß und die
-     Signatur fliegt in den Header (azur-room.js, bindScrollAway). Ohne Bewegung: normales Scrollen. */
+  /* Runde 18 (Owner): beim Scrollen schiebt sich von unten ein Verlauf über das stehende Zimmer. Er fängt sandig an
+     (schwarze Körner, die dichter werden: assets/azur-sand.png), wird ganz schwarz und nach unten immer heller bis Weiß,
+     mit feinem Korn; darunter beginnt der Shop. Das Zimmer bleibt dafür stehen (sticky), bis der Verlauf darüber ist.
+     Der Header wechselt über dem hellen Teil auf dunkle Schrift (html.azur-light) und wird fest, sobald das Weiß
+     unter ihm ist (html.azur-past): azur-room.js, bindScrollAway. Ohne Bewegung: der Verlauf liegt einfach zwischen
+     Zimmer und Shop. */
   @media (prefers-reduced-motion: no-preference) {
-    .js #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) { height: 200vh; height: 200svh; }
     .js .azur[data-hero] { position: sticky; top: 0; }
-    /* die Trikots kommen in der zweiten Hälfte schon von unten herein, damit am Ende kein leerer weißer Bildschirm steht */
-    .js #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) + .shopify-section {
-      position: relative; z-index: 1; margin-top: -40vh; margin-top: -40svh; background: #fff; }
   }
-  .azur-white { position: absolute; inset: 0; z-index: 91; background: #fff; opacity: 0; pointer-events: none; }   /* the shop's white (the room remaps --c-paper to dark) */
-  .azur-fly { position: absolute; left: 0; top: 0; z-index: 92; height: auto; max-width: none; opacity: 0; pointer-events: none; will-change: transform, opacity; }
-  .azur-fly--neon { filter: drop-shadow(0 0 18px #3fd6f0) drop-shadow(0 0 4px #3fd6f0); }
-  html.azur-moving .header__logo { opacity: 0; }
+  .azur-fade { position: relative; z-index: 1; display: block; pointer-events: none; }
+  .azur-fade__sand { display: block; height: 360px; margin-top: -1px;
+    background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 1024px 360px repeat-x; image-rendering: pixelated; }
+  .azur-fade__grad { position: relative; display: block; height: 110vh; height: 110svh;
+    background: linear-gradient(#000 0%, #000 8%, #141414 20%, #383838 34%, #6a6a6a 49%, #a0a0a0 64%, #d2d2d2 79%, #f2f2f2 91%, #fff 100%); }
+  .azur-fade__grad::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .5;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+    -webkit-mask: linear-gradient(#000 0%, #000 30%, transparent 85%); mask: linear-gradient(#000 0%, #000 30%, transparent 85%); }
+  html.azur-away .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
+  html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--paper { display: none !important; }
+  html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--ink { display: block !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__cart .logo--paper { display: none !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__cart .logo--ink { display: block !important; }
   /* Runde 11: die Leiste liegt nicht über dem Zimmer. Sie fährt erst unter dem Header herunter, sobald der Shop
@@ -49,8 +55,6 @@
   .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]):has(.header--overlay.is-solid) > .shopify-section:has(> .bar) {
     transform: none; visibility: visible; transition: transform .45s var(--ease); }
   .js .azur[data-hero] { --bar-h: 0px; }
-  .azur-shade { position: absolute; inset: 0; z-index: 90; background: #050505; opacity: 0; pointer-events: none; }
-  .azur-stage { transform-origin: 50% 35%; }
 </style>
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
 
@@ -79,6 +83,7 @@
   </div>
 </div>
 <nav aria-label="AZUR"><a class="azur-ghost" href="{{ routes.root_url }}" aria-label="AZUR, zurück ins Zimmer"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a></nav>
+<div class="azur-fade" aria-hidden="true"><i class="azur-fade__sand"></i><i class="azur-fade__grad"></i></div>
 
 <script>
   /* runs inside assets/azur-room.js right after the scene configuration */
