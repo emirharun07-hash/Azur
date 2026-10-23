@@ -539,6 +539,21 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 16 (owner 2026-10-23: the room's product view)
+Draft theme "Azur Zimmer Runde 16 (Entwurf)" `gid://shopify/OnlineStoreTheme/209988976979` (copy of MAIN = Runde 15, which the
+owner published). Preview: https://azurclothing.com/?preview_theme_id=209988976979
+- Owner's r6 votes (all 154 cards, no stars): Übergang U32 wordmask, U33 banner, U47 split3, U48 logoshrink; Logo L01 (as is);
+  Karte K01 line; Anordnung A01 (row as is), A13 podium; Größe G02 small; Hinweise H02 text, H03 elbow, H08 sides, H09
+  blueprint; Plus X02 spin; Größenwahl and Tasche: all no. Not built in yet (asked the owner: tie-break or my pick; a new
+  round for size picker and bag).
+- Room product view (prototype/js/azur-shop.js, css/azur-room.css, rebuilt into the theme): background, text and button in
+  the jersey's colours (`--tone-<key>`, `-ink`, `-acc`, `-acc-ink` in azur.css replace the faint `--tint-*`; fallbacks in
+  azur-room.css for the prototype); the flat shop photo large in the middle instead of the 3D model (it looked crumpled;
+  azur-viewer.js deleted, the GLBs in prototype/assets/scene3/models are no longer used by the web); the name smaller
+  (max 120 px desktop, 72 px phone) and above the jersey instead of behind it; less text (no path, size hint, care line,
+  back link, "Noch niemand aufgestellt", name in the buy bar); the room section's "Pflegehinweis" setting is gone.
+  Checked in the harness on desktop, iPad and phone (all five jerseys, no errors), adding from the room opens the drawer.
+
 ## Runde 15 (owner 2026-10-21 night, 11 points; worked through the night, hourly self check-in `trig_01D2dJhLJ4L4axHkqu5PPaNi`)
 Draft theme "Azur Zimmer Runde 15 (Entwurf)" `gid://shopify/OnlineStoreTheme/209879302483` (copy of MAIN = Runde 14, which
 the owner published). Preview: https://azurclothing.com/?preview_theme_id=209879302483
