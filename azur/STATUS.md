@@ -539,6 +539,35 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 19 (owner 2026-10-23: through the floor into a white room, city page, the room's product view everywhere)
+The owner published Runde 18 (MAIN = "Azur Zimmer Runde 18 (Entwurf)" 209996054867). New draft "Azur Zimmer Runde 19
+(Entwurf)" `gid://shopify/OnlineStoreTheme/210037637459` (copy of MAIN). Preview:
+https://azurclothing.com/?preview_theme_id=210037637459 . The store now has 20 themes (Shopify's limit): before the next
+copy the owner has to delete old drafts in the admin (theme deletion is blocked for us).
+- Owner: the gradient took too long; it should feel like falling through the floor into a new, all white room ("zeig mir
+  mal eine Vorschau, dann fixe ich nach und nach"). Built (commit 514d8a5, azur-room.liquid + azur-app.js bindScrollAway):
+  the room stays (sticky) and the camera dives to the floor (`--azur-dive` on #azur: .azur-world scales 1 -> 2.5 toward 90 %
+  height, a black veil to .75); `.azur-fall` comes up faster than the page scrolls (margin -45svh, translate eased by
+  `--azur-fall`), so the fall is ~0.55 screen + 220 px grains (azur-sand.png at 768x220) + 28svh black slab (faint layers,
+  grain); then `.azur-fall__room`, a white room in one-point perspective (ceiling with a lamp, side walls, back wall,
+  floor; `--bx/--bt/--bb`, narrower on phones) that settles as it arrives (`--azur-land`, scale 1.25 -> 1); the cards
+  section is pulled up 58svh so the cards stand in it (soft floor shadows). html.azur-diving hides the room's hints/chips,
+  azur-light over the white room, azur-past once it is 30 % past; the room stops drawing while the slab covers it.
+- Owner: city jerseys back, but on their own page, separate from the country jerseys (commit 5bb1325):
+  main-collection shows the "Städte" collection's own jerseys (setting `hide`, default staedtetrikots; the other pages
+  still leave them out), a "Länder · Städte" switch on top (setting `countries`, default nationaltrikots); azur-cards
+  (homepage) has a link "Städtetrikots →" under the grid (settings `more`, `more_label`). Two cards sit centred.
+- Owner: clicking a jersey outside the room must be exactly like in the room (commit a0379d5): homepage cards open the
+  room's own view (A.app.shop; the bar stays hidden while it is open); shop/city pages load assets/azur-pdp.js
+  (azur-config.js + azur-shop.js + prototype/js/azur-pdp.js, built by build_theme.py) with the page's jerseys from
+  snippets/azur-pdp-setup.liquid / azur-pdp-item.liquid (tone from "Produkt-Codes", fit from custom.fit or the room's
+  defaults); the product page opens that view as the page (old page hidden under it, shown after 4 s without JS),
+  closing goes back or to the jersey's collection. azur-shop.js open(product, rect, from): "Schließen" instead of
+  "Zurück ins Zimmer", no room moves outside the room. The Runde 17 product-page extras (notes, gallery, spinning
+  plus) are no longer visible (the page is the room's view now); they are still in main-product.liquid.
+- Checked in the harness: desktop + phone, fall at 10 steps, shop/city/product/homepage clicks, add to cart opens the
+  drawer, close/Escape, product page closes back to the shop: no errors.
+
 ## Runde 18 (owner 2026-10-23: a new scroll transition, "ich schau es mir erstmal an")
 Draft theme "Azur Zimmer Runde 18 (Entwurf)" `gid://shopify/OnlineStoreTheme/209996054867` (copy of the unpublished Runde 17
 draft, so Runde 17 keeps the neon-logo transition for comparison; MAIN is still Runde 16). Preview:
