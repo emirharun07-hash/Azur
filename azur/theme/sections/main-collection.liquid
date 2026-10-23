@@ -49,6 +49,8 @@
     {%- if paginate.pages > 1 -%}
       <nav class="pager wrap" aria-label="Seiten">{{ paginate | default_pagination: next: 'Weiter', previous: 'Zurück' }}</nav>
     {%- endif -%}
+    {%- comment -%} Runde 19: ein Klick auf ein Trikot öffnet die Produktansicht aus dem Zimmer {%- endcomment -%}
+    {%- render 'azur-pdp-setup', list: collection.products -%}
   {%- endpaginate -%}
 </div>
 

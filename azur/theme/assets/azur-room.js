@@ -1376,7 +1376,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const t = e.target.closest('[data-act]'); if (!t) return;
         if (t.dataset.act === 'close') this.close();
         if (t.dataset.act === 'add') this.add();
-        if (t.dataset.act === 'more') { this.close(); this.app.keepLooking(); }
+        if (t.dataset.act === 'more') { const f = this.from; this.close(); if (!f) this.app.keepLooking(); }
         if (t.dataset.act === 'cart') { this.close(); this.toggleCart(true); }
       });
       this.pdp.addEventListener('change', e => {
@@ -1409,21 +1409,25 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       });
     }
 
-    open(product, fromRect) {
+    /* from: null when the room opens it; outside the room (Runde 19, azur-pdp.js) { page, closed }: page = the view is the
+       product page itself, closed = what happens after closing (the product page goes back) */
+    open(product, fromRect, from) {
       if (!product || product.type !== 'product') return;
       if (!this.pdp.classList.contains('is-on')) this.returnFocus = document.activeElement;   // back there on close
-      this.product = product; this.size = null;
+      this.product = product; this.size = null; this.from = from || null;
       const q = s => this.pdp.querySelector(s);
+      q('.azur-pdp__x').setAttribute('aria-label', from ? A.config.copy.close || 'Schließen' : A.config.copy.backToRoom);
       // the name is the city or country alone ("Frankfurt"), without " Trikot" and the dialling code
       const giant = product.name.replace(/\s*Trikot$/i, '').replace(/\s+\d{2,4}$/, '');
       q('.azur-pdp__title').textContent = giant; q('.azur-pdp__title').style.setProperty('--len', Math.max(5, giant.length));
       q('.azur-pdp__price').textContent = A.formatPrice(product.price);   // Runde 12: no tax note next to the price (footer, cart, checkout)
       // background, text and button in the jersey's colours (the palettes are tokens in the theme's azur.css, see azur-room.css)
-      const tone = { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
+      const tone = product.tone || { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
       if (tone) this.pdp.dataset.tone = tone; else delete this.pdp.dataset.tone;
       q('.azur-pdp__fit').textContent = product.fit || '';
       q('.azur-pdp__desc').textContent = product.description;
       q('.azur-pdp__shop').href = product.productUrl;      // Shopify: the real product page
+      q('.azur-pdp__shop').hidden = !!(from && from.page);
       const img = q('.azur-pdp__img'); img.src = product.image; img.alt = product.name;
       q('.azur-pdp__after').hidden = true;
       // die Größen als Spieler: Aufstellung auf dem Feld (breit), auf dem Handy in einer Reihe (--hx)
@@ -1453,7 +1457,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         if (img.complete && img.naturalHeight) requestAnimationFrame(fly); else img.addEventListener('load', () => requestAnimationFrame(fly), { once: true });
       }
       setTimeout(() => q('.azur-pdp__x').focus({ preventScroll: true }), 50);
-      try { history.replaceState(null, '', '#' + product.handle); } catch (e) { }
+      if (!(from && from.page)) try { history.replaceState(null, '', '#' + product.handle); } catch (e) { }
     }
 
     close() {
@@ -1461,10 +1465,12 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.pdp.classList.remove('is-on');
       document.documentElement.classList.remove('azur-pdp-open');
       this.app.setWorldDim();
-      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+      const f = this.from; this.from = null;
+      if (!(f && f.page)) try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
       const back = this.returnFocus; this.returnFocus = null;
       if (back && back !== document.body && back.isConnected && back.getClientRects().length) back.focus({ preventScroll: true });
-      else this.app.afterProductClose();
+      else if (!f) this.app.afterProductClose();
+      if (f && f.closed) f.closed();
     }
 
     add() {
@@ -2809,4 +2815,39 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
   A.App = App;
   const boot = () => { A.app = new App(); A.app.init().catch(err => { console.error(err); document.documentElement.classList.add('azur-error'); }); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* ---- azur-pdp.js ---- */
+/* AZUR — the room's product view outside the room (Runde 19, owner: clicking a jersey anywhere is exactly like clicking it
+   in the room). Homepage: the cards under the room open the room's own view (A.app.shop, this file is the end of
+   assets/azur-room.js). Shop and product pages: assets/azur-pdp.js (azur-config.js, the page's products from
+   snippets/azur-pdp-setup.liquid, azur-shop.js, this file) builds the same view with a small stand-in for the room.
+   On a product page the view is the page: it is open from the start and closing it goes back (or to the shop). */
+(function () {
+  const A = window.AZUR = window.AZUR || {};
+  const handleOf = a => { const m = (a.getAttribute('href') || '').match(/\/products\/([^/?#]+)/); return m ? decodeURIComponent(m[1]) : null; };
+  const find = h => (A.products || []).find(p => p.type === 'product' && p.handle === h);
+  let own = null;
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a.card__link');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const shop = own || (A.app && A.app.shop), p = shop && find(handleOf(a));
+    if (!p) return;                                        // the room still loading, or a jersey it does not know: the product page
+    e.preventDefault();
+    const img = a.querySelector('.card__img');
+    shop.open(p, img ? img.getBoundingClientRect() : null, {});
+  });
+  if (document.getElementById('azur') || !A.Shop || !A.config || !A.config.shopify) return;   // the room brings its own view
+  const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  own = new A.Shop({ reduced, setWorldDim() { }, keepLooking() { }, afterProductClose() { }, bumpCart() { }, setCartCount() { } });
+  const page = A.pdp && A.pdp.page && find(A.pdp.page);
+  if (!page) return;
+  const leave = () => {
+    let ref = null; try { ref = document.referrer ? new URL(document.referrer) : null; } catch (e) { }
+    if (ref && ref.origin === location.origin && ref.pathname !== location.pathname && history.length > 1) history.back();
+    else location.href = A.pdp.shop || '/';
+  };
+  own.pdp.classList.add('is-page');
+  own.open(page, null, { page: true, closed: leave });
+  document.documentElement.classList.add('azur-pdp-page');
 })();

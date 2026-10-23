@@ -1,0 +1,37 @@
+{%- comment -%}
+  Ein Trikot für die Produktansicht aus dem Zimmer (Runde 19, assets/azur-pdp.js), als JS-Objekt wie A.products im
+  Zimmer (sections/azur-room.liquid). Schnitt: Metafeld custom.fit, sonst wie im Zimmer (Städte Retro, Länder Regular).
+  Parameter: p  Produkt
+{%- endcomment -%}
+{%- liquid
+  assign key = p.handle | split: '-' | first
+  if key == 'turkei'
+    assign key = 'tuerkei'
+  endif
+  capture tone
+    render 'product-field', product: p, field: 'tone'
+  endcapture
+  assign tone = tone | strip
+  assign fit = p.metafields.custom.fit.value | default: ''
+  if fit == blank
+    case key
+      when 'frankfurt'
+        assign fit = 'Retro-Schnitt'
+      when 'berlin'
+        assign fit = 'Lockerer Retro-Schnitt'
+      else
+        assign fit = 'Regular Fit'
+    endcase
+  endif
+-%}
+{
+  id: {{ p.id | json }}, type: 'product', key: {{ key | json }}, tone: {{ tone | json }}, handle: {{ p.handle | json }},
+  name: {{ p.title | json }}, price: {{ p.price | divided_by: 100.0 | json }},
+  image: {{ p.featured_image | image_url: width: 1000 | json }}, imageAspect: {{ p.featured_image.aspect_ratio | default: 0.75 | json }},
+  productUrl: {{ p.url | json }},
+  description: {{ p.description | strip_html | strip_newlines | truncatewords: 45 | json }},
+  fit: {{ fit | json }},
+  variants: [
+    {%- for v in p.variants -%}{ id: {{ v.id }}, title: {{ v.title | json }}, available: {{ v.available | json }} }{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
+  ]
+}

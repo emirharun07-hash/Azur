@@ -73,7 +73,7 @@
         const t = e.target.closest('[data-act]'); if (!t) return;
         if (t.dataset.act === 'close') this.close();
         if (t.dataset.act === 'add') this.add();
-        if (t.dataset.act === 'more') { this.close(); this.app.keepLooking(); }
+        if (t.dataset.act === 'more') { const f = this.from; this.close(); if (!f) this.app.keepLooking(); }
         if (t.dataset.act === 'cart') { this.close(); this.toggleCart(true); }
       });
       this.pdp.addEventListener('change', e => {
@@ -106,21 +106,25 @@
       });
     }
 
-    open(product, fromRect) {
+    /* from: null when the room opens it; outside the room (Runde 19, azur-pdp.js) { page, closed }: page = the view is the
+       product page itself, closed = what happens after closing (the product page goes back) */
+    open(product, fromRect, from) {
       if (!product || product.type !== 'product') return;
       if (!this.pdp.classList.contains('is-on')) this.returnFocus = document.activeElement;   // back there on close
-      this.product = product; this.size = null;
+      this.product = product; this.size = null; this.from = from || null;
       const q = s => this.pdp.querySelector(s);
+      q('.azur-pdp__x').setAttribute('aria-label', from ? A.config.copy.close || 'Schließen' : A.config.copy.backToRoom);
       // the name is the city or country alone ("Frankfurt"), without " Trikot" and the dialling code
       const giant = product.name.replace(/\s*Trikot$/i, '').replace(/\s+\d{2,4}$/, '');
       q('.azur-pdp__title').textContent = giant; q('.azur-pdp__title').style.setProperty('--len', Math.max(5, giant.length));
       q('.azur-pdp__price').textContent = A.formatPrice(product.price);   // Runde 12: no tax note next to the price (footer, cart, checkout)
       // background, text and button in the jersey's colours (the palettes are tokens in the theme's azur.css, see azur-room.css)
-      const tone = { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
+      const tone = product.tone || { frankfurt: 'ffm', berlin: 'ber', brasilien: 'bra', deutschland: 'ger', tuerkei: 'tur' }[product.key];
       if (tone) this.pdp.dataset.tone = tone; else delete this.pdp.dataset.tone;
       q('.azur-pdp__fit').textContent = product.fit || '';
       q('.azur-pdp__desc').textContent = product.description;
       q('.azur-pdp__shop').href = product.productUrl;      // Shopify: the real product page
+      q('.azur-pdp__shop').hidden = !!(from && from.page);
       const img = q('.azur-pdp__img'); img.src = product.image; img.alt = product.name;
       q('.azur-pdp__after').hidden = true;
       // die Größen als Spieler: Aufstellung auf dem Feld (breit), auf dem Handy in einer Reihe (--hx)
@@ -150,7 +154,7 @@
         if (img.complete && img.naturalHeight) requestAnimationFrame(fly); else img.addEventListener('load', () => requestAnimationFrame(fly), { once: true });
       }
       setTimeout(() => q('.azur-pdp__x').focus({ preventScroll: true }), 50);
-      try { history.replaceState(null, '', '#' + product.handle); } catch (e) { }
+      if (!(from && from.page)) try { history.replaceState(null, '', '#' + product.handle); } catch (e) { }
     }
 
     close() {
@@ -158,10 +162,12 @@
       this.pdp.classList.remove('is-on');
       document.documentElement.classList.remove('azur-pdp-open');
       this.app.setWorldDim();
-      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+      const f = this.from; this.from = null;
+      if (!(f && f.page)) try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
       const back = this.returnFocus; this.returnFocus = null;
       if (back && back !== document.body && back.isConnected && back.getClientRects().length) back.focus({ preventScroll: true });
-      else this.app.afterProductClose();
+      else if (!f) this.app.afterProductClose();
+      if (f && f.closed) f.closed();
     }
 
     add() {

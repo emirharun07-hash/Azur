@@ -237,6 +237,20 @@
   {{ product | structured_data }}
 </script>
 
+{%- comment -%}
+  Runde 19 (Owner): die Produktseite sieht aus wie die Produktansicht im Zimmer und verhält sich so (assets/azur-pdp.js
+  öffnet sie über dieser Seite; schließen geht zurück oder in den Shop). Ohne JavaScript bleibt die Seite darunter.
+{%- endcomment -%}
+{%- liquid
+  assign back = shop_coll.url
+  for c in product.collections
+    if c.handle == 'staedtetrikots' or c.handle == 'nationaltrikots'
+      assign back = c.url
+    endif
+  endfor
+-%}
+{%- render 'azur-pdp-setup', one: product, back: back -%}
+
 {% schema %}
 {
   "name": "Produkt",

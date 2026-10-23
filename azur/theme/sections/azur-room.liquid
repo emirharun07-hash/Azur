@@ -79,6 +79,9 @@
   .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]):has(.header--overlay.is-solid) > .shopify-section:has(> .bar) {
     transform: none; visibility: visible; transition: transform .45s var(--ease); }
   .js .azur[data-hero] { --bar-h: 0px; }
+  /* Runde 19: die Produktansicht öffnet sich auch von den Karten unter dem Zimmer; die Leiste bleibt dann oben weg */
+  html.azur-pdp-open body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]) > .shopify-section:has(> .bar) {
+    transform: translateY(-100%) !important; visibility: hidden !important; }
 </style>
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
 
