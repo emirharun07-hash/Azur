@@ -24,49 +24,25 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 19 (Owner): beim Scrollen fällt man durch den Boden in einen neuen, ganz weißen Raum. Das Zimmer bleibt
-     stehen (sticky) und die Kamera taucht zum Boden hinunter (größer, dunkler: --azur-dive aus azur-room.js); von unten
-     kommt schnell der Boden: erst Körner (der Boden bricht, assets/azur-sand.png), dann die schwarze Decke dazwischen,
-     dann die Decke des weißen Raums. Der weiße Raum ist ein Kasten in Zentralperspektive (Decke mit Lampe, zwei
-     Seitenwände, Rückwand, Boden); er setzt sich beim Ankommen (--azur-land) und die Trikotkarten stehen auf seinem
-     Boden. Header: dunkle Schrift über dem weißen Raum (html.azur-light), fest erst danach (html.azur-past).
-     Ohne Bewegung: alles liegt einfach untereinander. */
-  .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; overflow: clip; }
-  .azur-fall__dust { display: block; height: 220px;
-    background: url("{{ 'azur-sand.png' | asset_url }}") 0 100% / 768px 220px repeat-x; image-rendering: pixelated; }
-  .azur-fall__slab { position: relative; display: block; height: 28vh; height: 28svh; margin-top: -1px;
-    background: linear-gradient(#000 0 34%, #0b0b0b 34% 35%, #000 35% 62%, #0d0d0d 62% 63%, #000 63% 72%, #1a1a1a 92%, #2e2e2e 98.6%, #9a9a9a 98.6%); }
-  /* Tempo: feine senkrechte Streifen (wie vorbeiziehender Staub), unten wird es heller: Licht aus dem Raum darunter */
-  .azur-fall__slab::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='320' stroke-width='1' stroke-linecap='round'%3E%3Cpath d='M108.0 242.6v55.5' stroke='%23fff' stroke-opacity='0.11'/%3E%3Cpath d='M63.2 318.9v38.8' stroke='%23fff' stroke-opacity='0.07'/%3E%3Cpath d='M63.2 -1.1000000000000227v38.8' stroke='%23fff' stroke-opacity='0.07'/%3E%3Cpath d='M42.3 53.8v41.6' stroke='%23fff' stroke-opacity='0.08'/%3E%3Cpath d='M18.0 77.2v40.4' stroke='%23fff' stroke-opacity='0.11'/%3E%3Cpath d='M32.9 -14.5v32.6' stroke='%23fff' stroke-opacity='0.11'/%3E%3Cpath d='M62.4 224.0v75.8' stroke='%23fff' stroke-opacity='0.1'/%3E%3Cpath d='M16.7 222.1v72.4' stroke='%23fff' stroke-opacity='0.09'/%3E%3Cpath d='M105.0 67.7v83.9' stroke='%23fff' stroke-opacity='0.14'/%3E%3Cpath d='M126.1 303.4v34.8' stroke='%23fff' stroke-opacity='0.11'/%3E%3Cpath d='M126.1 -16.600000000000023v34.8' stroke='%23fff' stroke-opacity='0.11'/%3E%3Cpath d='M116.6 248.5v46.1' stroke='%23fff' stroke-opacity='0.07'/%3E%3Cpath d='M100.0 -2.3v68.8' stroke='%23fff' stroke-opacity='0.05'/%3E%3Cpath d='M72.8 132.7v26.6' stroke='%23fff' stroke-opacity='0.1'/%3E%3Cpath d='M80.0 92.9v82.5' stroke='%23fff' stroke-opacity='0.15'/%3E%3Cpath d='M141.7 48.2v19.9' stroke='%23fff' stroke-opacity='0.09'/%3E%3Cpath d='M19.0 213.9v36.9' stroke='%23fff' stroke-opacity='0.06'/%3E%3Cpath d='M45.8 105.2v70.9' stroke='%23fff' stroke-opacity='0.1'/%3E%3Cpath d='M48.6 203.9v21.3' stroke='%23fff' stroke-opacity='0.07'/%3E%3Cpath d='M109.6 230.7v25.3' stroke='%23fff' stroke-opacity='0.06'/%3E%3Cpath d='M80.9 196.3v19.2' stroke='%23fff' stroke-opacity='0.1'/%3E%3Cpath d='M44.4 -9.4v30.3' stroke='%23fff' stroke-opacity='0.08'/%3E%3Cpath d='M74.8 0.4v62.7' stroke='%23fff' stroke-opacity='0.15'/%3E%3Cpath d='M109.1 -15.5v64.7' stroke='%23fff' stroke-opacity='0.12'/%3E%3C/svg%3E") 0 0 / 160px 320px;
-    -webkit-mask: linear-gradient(transparent, #000 18%, #000 70%, transparent); mask: linear-gradient(transparent, #000 18%, #000 70%, transparent); }
-  .azur-fall__slab::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .28;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 220px 220px; }
-  .azur-fall__room { position: relative; display: block; height: 100vh; height: 100svh; overflow: clip; background: #fff;
-    --bx: 13%; --bt: 21%; --bb: 76%; }
-  .azur-fall__box { position: absolute; inset: 0; transform-origin: 50% 40%; }
-  .azur-fall__box > i { position: absolute; inset: 0; }
-  .azur-fall__ceil { clip-path: polygon(0 0, 100% 0, calc(100% - var(--bx)) var(--bt), var(--bx) var(--bt));
-    background: linear-gradient(#bdbdbd, #e2e2e2 calc(var(--bt) * .6), #ededed var(--bt)); }
-  .azur-fall__lamp { inset: calc(var(--bt) * .42) 36% auto !important; height: 7px; border-radius: 4px; background: #fff;
-    box-shadow: 0 0 18px 6px #fff, 0 0 90px 40px rgba(255, 255, 255, .85); }
-  .azur-fall__wl { clip-path: polygon(0 0, var(--bx) var(--bt), var(--bx) var(--bb), 0 100%);
-    background: linear-gradient(90deg, #e6e6e6, #f6f6f6 var(--bx)); }
-  .azur-fall__wr { clip-path: polygon(100% 0, 100% 100%, calc(100% - var(--bx)) var(--bb), calc(100% - var(--bx)) var(--bt));
-    background: linear-gradient(270deg, #e6e6e6, #f6f6f6 var(--bx)); }
-  .azur-fall__floor { clip-path: polygon(var(--bx) var(--bb), calc(100% - var(--bx)) var(--bb), 100% 100%, 0 100%);
-    background: linear-gradient(#ececec var(--bb), #fafafa 92%, #fff); }
-  @media (max-width: 47.99em) { .azur-fall__room { --bx: 7%; --bt: 15%; --bb: 82%; } .azur-fall__lamp { left: 30% !important; right: 30% !important; } }
-  /* die Trikotkarten stehen im weißen Raum, mit einem weichen Schatten auf dem Boden */
-  .js .shopify-section:has(> .azur[data-hero]) ~ .shopify-section:has(> .yz) { position: relative; z-index: 2; margin-top: -58vh; margin-top: -58svh; }
-  .shopify-section:has(> .azur[data-hero]) ~ .shopify-section > .yz .card--fifa::after { content: ""; position: absolute; z-index: -1;
-    left: 12%; right: 12%; bottom: -1.1rem; height: 1.6rem; background: radial-gradient(closest-side, rgba(0, 0, 0, .13), transparent); }
+  /* Runde 19 (Owner, zweiter Versuch): beim Scrollen geht man durch den Boden – das Zimmer bleibt stehen (sticky, kein
+     Zoom) und von unten schiebt sich der Boden darüber: ein niedriger, feiner Sandrand (assets/azur-sand.png aus
+     tools/make_sand.py, weiche Körner), dann Schwarz, dann ein langer, gleichmäßiger Verlauf bis Weiß (ohne Linien,
+     mit feinem Korn gegen Streifen); im Weiß kommen die Trikots, wie vorher ohne Raum. Gut zwei Bildschirme lang.
+     Der Header: dunkle Schrift über dem hellen Teil (html.azur-light), fest, sobald das Weiß unter ihm ist
+     (html.azur-past): azur-room.js, bindScrollAway. Ohne Bewegung: alles liegt einfach untereinander. */
+  .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; }
+  .azur-fall__dust { display: block; height: 140px;
+    background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 512px 140px repeat-x,
+      linear-gradient(transparent 20%, rgba(0, 0, 0, .3) 70%, rgba(0, 0, 0, .7)); }
+  .azur-fall__grad { position: relative; display: block; height: 115vh; height: 115svh; margin-top: -1px;
+    background: linear-gradient(#000 0%, #000 22%, #000 25.9%, #010101 29.8%, #040404 33.7%, #0c0c0c 37.6%, #171717 41.5%, #232323 45.4%,
+      #323232 49.3%, #414141 53.2%, #525252 57.1%, #636363 61%, #757575 64.9%, #878787 68.8%, #999 72.7%, #ababab 76.6%, #bdbdbd 80.5%,
+      #cdcdcd 84.4%, #dcdcdc 88.3%, #eaeaea 92.2%, #f5f5f5 96.1%, #fff 100%); }
+  .azur-fall__grad::after { content: ""; position: absolute; inset: 0; mix-blend-mode: screen; opacity: .3;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+    -webkit-mask: linear-gradient(#000, #000 55%, transparent 90%); mask: linear-gradient(#000, #000 55%, transparent 90%); }
   @media (prefers-reduced-motion: no-preference) {
     .js .azur[data-hero] { position: sticky; top: 0; }
-    /* der Boden kommt schneller als gescrollt (er startet unter dem Fenster und holt auf): der Übergang ist kurz */
-    .js .azur-fall { margin-top: -45vh; margin-top: -45svh; translate: 0 calc(45svh * (1 - var(--azur-fall, 0))); }
-    .js .azur[data-hero] .azur-world { scale: calc(1 + 1.5 * var(--azur-dive, 0)); translate: 0 calc(-1.5 * var(--azur-dive, 0) * 40%); }
-    .js .azur[data-hero] .azur-world::after { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; background: #000; opacity: calc(.75 * var(--azur-dive, 0)); }
-    .js .azur-fall__box { scale: calc(1.25 - .25 * var(--azur-land, 1)); }
   }
   html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
@@ -113,7 +89,7 @@
   </div>
 </div>
 <nav aria-label="AZUR"><a class="azur-ghost" href="{{ routes.root_url }}" aria-label="AZUR, zurück ins Zimmer"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a></nav>
-<div class="azur-fall" aria-hidden="true"><i class="azur-fall__dust"></i><i class="azur-fall__slab"></i><i class="azur-fall__room"><span class="azur-fall__box"><i class="azur-fall__ceil"></i><i class="azur-fall__wl"></i><i class="azur-fall__wr"></i><i class="azur-fall__floor"></i><i class="azur-fall__lamp"></i></span></i></div>
+<div class="azur-fall" aria-hidden="true"><i class="azur-fall__dust"></i><i class="azur-fall__grad"></i></div>
 
 <script>
   /* runs inside assets/azur-room.js right after the scene configuration */
