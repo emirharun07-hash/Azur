@@ -1127,19 +1127,19 @@ body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
   font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; }
 .back-home:hover { text-decoration: underline; text-underline-offset: 0.25em; }
 
-/* Warenkorb-Symbol: die Sporttasche (früher im Zimmer), auf jeder Seite im Header; die Zahl als kleiner Punkt daran */
+/* Warenkorb-Symbol: die Sporttasche, auf jeder Seite im Header; die Zahl als kleiner Punkt daran
+   (Runde 17: ein gerendertes 3D-Bild, schwarz; über dem Zimmer das weiße wie beim Logo, siehe Header oben) */
 .header__cart { position: relative; }
-.sportbag { width: 2.25rem; height: auto; overflow: visible; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.sportbag__body { fill: color-mix(in srgb, currentColor 10%, transparent); }
-.sportbag__stripe { stroke-width: 1.4; opacity: 0.7; }
-.sportbag__ball { fill: currentColor; stroke: none; }
-.sportbag__lines { fill: var(--c-paper); stroke: none; }
-.header__icon:hover .sportbag { stroke-width: 2.6; }
+.bag3d { display: grid; width: 2.6rem; transition: transform var(--dur) var(--ease); }
+.bag3d img { grid-area: 1 / 1; width: 100%; height: auto; }
+.header__cart .logo--ink { display: var(--logo-ink); }
+.header__cart .logo--paper { display: var(--logo-paper); }
+.header__icon:hover .bag3d { transform: translateY(-1px) rotate(-3deg); }
 .header__cart .header__count { position: absolute; top: 0.2rem; right: 0; display: grid; place-items: center; min-width: 1.1rem; height: 1.1rem; padding: 0 0.25rem;
   border-radius: 999px !important; background: var(--c-acc); color: var(--c-acc-ink); font-size: 0.6875rem; font-weight: 700;
   transition: transform var(--dur-panel) var(--ease), opacity var(--dur-panel) var(--ease); }
 .header__cart .header__count[data-count="0"] { opacity: 0; transform: scale(0.4); }   /* leer: kein Punkt (Vorleser lesen die 0 trotzdem) */
-.header.is-compact .sportbag { width: 2rem; }
+.header.is-compact .bag3d { width: 2.3rem; }
 
 /* 16. Runde 13: schlicht nach yeezy.com ===================================== */
 /* Weiß, Schwarz, eine Monospace-Schrift, viel Luft. Gilt für den Shop; das Zimmer und seine Produktansicht bleiben dunkel. */
@@ -1152,9 +1152,7 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .header__logo .logo, .header.is-compact .header__logo .logo { height: 1.25rem; }
 @media (min-width: 48em) { .header__logo .logo { height: 1.4rem; } }
 .header__end { justify-self: end; margin-right: -0.625rem; }
-.sportbag, .header.is-compact .sportbag { width: 1.65rem; stroke-width: 2.4; }
-.sportbag__body { fill: none; }
-.header__cart .header__count { top: 0.35rem; right: 0.05rem; min-width: 0.95rem; height: 0.95rem; font-size: 0.5625rem; font-weight: 400; }
+.header__cart .header__count { top: 0.15rem; right: -0.1rem; min-width: 0.95rem; height: 0.95rem; font-size: 0.5625rem; font-weight: 400; }
 
 /* Leiste oben: kaum sichtbar, graue kleine Schrift auf Weiß */
 .bar { background: var(--c-paper); border-bottom: 0; }
@@ -1171,7 +1169,6 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .card__media { display: block; width: 100%; aspect-ratio: 1 / 0.9; background: var(--c-paper); }
 .card__media .card__img { width: 100%; height: 100%; padding: 6%; object-fit: contain; }
 .card__name { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.card__hint { margin-top: calc(var(--s-3) * -1); font-size: 0.75rem; color: var(--c-grey-text); letter-spacing: 0.06em; text-transform: uppercase; }
 .card__link:hover .card__name { text-decoration: underline; text-underline-offset: 0.3em; }
 /* Shop-Seite: nur „← Startseite“ über dem Raster */
 .shop__head { padding-block: var(--s-4) var(--s-6); }
@@ -1213,8 +1210,15 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .pdp__add svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.5; }
 .pdp__add:hover svg { stroke-width: 2.1; }
 .pdp__add:disabled { color: var(--c-grey-soft); }
-.pdp__add.is-done svg { display: none; }
-.pdp__add.is-done::before { content: "✓"; font-size: 1.25rem; animation: btn-tick 0.38s var(--ease) both; }
+/* Runde 17 („Dreht sich, zeigt die 1“): das Plus dreht sich weg, an seiner Stelle eine schwarze Scheibe mit der Anzahl
+   dieser Größe im Warenkorb (data-qty, azur.js) */
+.pdp__add { position: relative; }
+.pdp__add.is-done svg { animation: add-spin 0.45s var(--ease) forwards; }
+.pdp__add.is-done::before { content: attr(data-qty); position: absolute; inset: 0.55rem; display: grid; place-items: center; border-radius: 50% !important;
+  background: var(--c-ink); color: var(--c-paper); font-size: 0.8125rem; animation: add-one 0.5s var(--ease) 0.25s both; }
+@keyframes add-spin { to { transform: rotate(360deg) scale(0.15); opacity: 0; } }
+@keyframes add-one { from { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pdp__add.is-done svg { animation: none; opacity: 0; } .pdp__add.is-done::before { animation: none; } }
 .pdp--yz .pdp__error { border: 0; padding: 0; font-weight: 400; }
 .pdp--yz .pdp__status { min-height: 0; color: var(--c-grey-text); }
 .pdp--yz .trust { width: 100%; border-top: 0; font-size: 0.75rem; color: var(--c-grey-text); }
@@ -1238,3 +1242,49 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .signup__email:focus { border-color: var(--c-ink); }
 .btn { font-weight: 400; }
 .btn--solid { font-weight: 400; }
+
+/* 17. Runde 17: Gewinner der Design-Runden r6/r7 ================================ */
+/* Karten: das Trikot klein in einer FIFA-Karte aus feiner Linie (Kürzel oben links, Name über einem Strich, Größen) */
+.card--fifa { position: relative; width: min(100%, 16.5rem); margin-inline: auto; aspect-ratio: 300 / 420; }
+.card--fifa .card__link { position: absolute; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; justify-items: center; gap: 0.55rem;
+  padding: 1.35rem 1.2rem 2.9rem; }
+.card__frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: var(--c-paper); stroke: var(--c-ink); stroke-width: 1;
+  vector-effect: non-scaling-stroke; transition: stroke-width var(--dur) var(--ease); }
+.card--fifa .card__link:hover .card__frame { stroke-width: 1.8; }
+.card__code { position: relative; justify-self: start; font-size: 0.6875rem; letter-spacing: 0.1em; }
+.card--fifa .card__media { position: relative; width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; background: none; }
+.card--fifa .card__media .card__img { padding: 0; }
+.card--fifa .card__name { position: relative; min-width: 8.5rem; padding-top: 0.55rem; border-top: 1px solid currentColor; }
+.card__sizes { position: relative; font-size: 0.625rem; letter-spacing: 0.1em; color: var(--c-grey-text); }
+/* drei kleine Karten nebeneinander schon ab Tablet-Breite; Siegertreppchen: die mittlere Karte jeder Reihe steht höher */
+@media (min-width: 48em) {
+  .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s-4); padding-top: 3rem; }
+  .yz__grid > li:nth-child(3n + 2) { translate: 0 -3rem; }
+}
+
+/* Hinweise auf dem ersten Produktbild („Schnittzeichnung“): graue Linien von kurzen Notizen links und rechts zu den Stellen
+   am Trikot. Die Punkte stehen in Prozent des quadratischen Bildes (Einstellung „Hinweise am Trikot“ der Produktseite);
+   das Bild ist quadratisch und mittig, also ist seine Seite min(Breite, Höhe) des Bildfelds (Container-Einheiten).
+   Auf dem Handy: nummerierte Punkte im Bild, die Notizen als Liste darunter. */
+.pdp--yz .gallery__slide:has(.notes) { container-type: size; }
+.notes { --s: min(100cqw, 100cqh); position: absolute; left: 50%; top: 50%; width: var(--s); height: var(--s); translate: -50% -50%; pointer-events: none; }
+.note { position: absolute; left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); width: 0; height: 0; }
+.note__dot { position: absolute; left: -0.18rem; top: -0.18rem; width: 0.36rem; height: 0.36rem; border-radius: 50% !important; background: #8a8a8a; }
+.note__line { position: absolute; top: 0; border-top: 1px solid #a3a3a3; }
+.note--l .note__line { right: 0; width: calc(var(--x) * var(--s) + 1.5rem); }
+.note--r .note__line { left: 0; width: calc((1 - var(--x)) * var(--s) + 1.5rem); }
+.note__label { position: absolute; top: -0.75em; display: grid; gap: 0.15rem; width: 9.5rem; font-size: 0.625rem; line-height: 1.35; color: #8a8a8a; }
+.note__label b { font-weight: 400; color: var(--c-ink); letter-spacing: 0.08em; text-transform: uppercase; }
+.note--l .note__label { right: calc(var(--x) * var(--s) + 1.95rem); text-align: right; }
+.note--r .note__label { left: calc((1 - var(--x)) * var(--s) + 1.95rem); }
+.notes__list { width: min(100%, 26rem); margin: var(--s-4) auto 0; padding: 0 var(--gutter); list-style: none; display: grid; gap: var(--s-2); counter-reset: note;
+  font-size: 0.75rem; color: var(--c-grey-text); }
+.notes__list li { counter-increment: note; }
+.notes__list li::before { content: "0" counter(note) " "; color: var(--c-ink); }
+.notes__list b { font-weight: 400; color: var(--c-ink); letter-spacing: 0.08em; text-transform: uppercase; margin-right: 0.4em; }
+@media (min-width: 48em) { .notes__list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; padding: 0; } }
+@media (max-width: 47.99em) {
+  .note__line, .note__label { display: none; }
+  .note__dot { left: -0.5rem; top: -0.5rem; width: 1rem; height: 1rem; display: grid; place-items: center; background: var(--c-ink); color: var(--c-paper); font-size: 0.5625rem; }
+  .note__dot::after { content: attr(data-n); }
+}

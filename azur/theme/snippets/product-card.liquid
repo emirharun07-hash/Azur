@@ -1,7 +1,7 @@
 {%- comment -%}
-  Produktkarte (Runde 13, schlicht nach yeezy.com): das Trikot frei auf Weiß, darunter nur der Name in Versalien.
-  Kein Preis, keine Farben im Raster; Bild und Name sind ein Link zur Produktseite.
-  data-sizes (verfügbare Größen) bleibt für einen späteren Filter.
+  Produktkarte (Runde 17, Design-Runde: „Feine Linie in Kartenform“): das Trikot klein in einer FIFA-Karte aus einer feinen
+  schwarzen Linie, oben links das Kürzel (BRA, GER, TUR aus „Produkt-Codes“), darunter der Name über einem Strich und
+  die lieferbaren Größen. Karte und Name sind ein Link zur Produktseite.
   Parameter:
     product   Produkt
     eager     true = Bild sofort laden
@@ -10,23 +10,37 @@
   capture label
     render 'product-field', product: product, field: 'label'
   endcapture
+  capture code
+    render 'product-field', product: product, field: 'code'
+  endcapture
   assign img_loading = 'lazy'
   if eager
     assign img_loading = 'eager'
   endif
   assign available_sizes = ''
+  assign size_text = ''
   for variant in product.variants
     if variant.available
       assign available_sizes = available_sizes | append: variant.option1 | append: ','
+      if size_text != blank
+        assign size_text = size_text | append: ' · '
+      endif
+      assign size_text = size_text | append: variant.option1
     endif
   endfor
 -%}
-<article class="card" data-sizes="{{ available_sizes }}">
+<article class="card card--fifa" data-sizes="{{ available_sizes }}">
   <a class="card__link" href="{{ product.url }}">
+    <svg class="card__frame" viewBox="0 0 300 420" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M34 0H266C270 18 282 30 300 32V352C300 370 290 380 272 386L150 420 28 386C10 380 0 370 0 352V32C18 30 30 18 34 0Z"/></svg>
+    <span class="card__code" aria-hidden="true">{{ code | strip }}</span>
     <span class="card__media">
-      {%- render 'product-image', product: product, view: 'front', sizes: '(min-width: 1200px) 30vw, (min-width: 480px) 45vw, 90vw', class: 'card__img', loading: img_loading, decorative: true -%}
+      {%- render 'product-image', product: product, view: 'front', sizes: '(min-width: 480px) 15rem, 60vw', class: 'card__img', loading: img_loading, decorative: true -%}
     </span>
     <span class="card__name">{{ label }}</span>
-    {%- unless product.available -%}<span class="card__hint">Ausverkauft</span>{%- endunless -%}
+    {%- if product.available -%}
+      <span class="card__sizes">{{ size_text }}</span>
+    {%- else -%}
+      <span class="card__sizes">Ausverkauft</span>
+    {%- endif -%}
   </a>
 </article>

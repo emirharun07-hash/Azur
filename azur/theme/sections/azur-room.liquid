@@ -24,10 +24,23 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 9: der Shop schiebt sich beim Scrollen wie ein Blatt über das Zimmer (das Zimmer bleibt zurück und wird
-     dunkler: azur-room.js, bindScrollAway) */
-  #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) + .shopify-section {
-    position: relative; z-index: 1; box-shadow: 0 -1.5rem 3rem rgb(0 0 0 / 0.4); }
+  /* Runde 17: Übergang „Neon-Logo“. Die Section ist zwei Bildschirme hoch, das Zimmer bleibt stehen, während man einen
+     Bildschirm weit scrollt: es wird dunkel, das Neon-AZUR bleibt groß in der Mitte, dann wird alles weiß und die
+     Signatur fliegt in den Header (azur-room.js, bindScrollAway). Ohne Bewegung: normales Scrollen. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) { height: 200vh; height: 200svh; }
+    .js .azur[data-hero] { position: sticky; top: 0; }
+    /* die Trikots kommen in der zweiten Hälfte schon von unten herein, damit am Ende kein leerer weißer Bildschirm steht */
+    .js #inhalt > .shopify-section:first-child:has(> .azur[data-hero]) + .shopify-section {
+      position: relative; z-index: 1; margin-top: -40vh; margin-top: -40svh; background: #fff; }
+  }
+  .azur-white { position: absolute; inset: 0; z-index: 91; background: #fff; opacity: 0; pointer-events: none; }   /* the shop's white (the room remaps --c-paper to dark) */
+  .azur-fly { position: absolute; left: 0; top: 0; z-index: 92; height: auto; max-width: none; opacity: 0; pointer-events: none; will-change: transform, opacity; }
+  .azur-fly--neon { filter: drop-shadow(0 0 18px #3fd6f0) drop-shadow(0 0 4px #3fd6f0); }
+  html.azur-moving .header__logo { opacity: 0; }
+  html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
+  html.azur-light .header--overlay:not(.is-solid) .header__cart .logo--paper { display: none !important; }
+  html.azur-light .header--overlay:not(.is-solid) .header__cart .logo--ink { display: block !important; }
   /* Runde 11: die Leiste liegt nicht über dem Zimmer. Sie fährt erst unter dem Header herunter, sobald der Shop
      beginnt (Header fest); das Zimmer füllt dafür den ganzen Bildschirm. */
   .js body:has(#inhalt > .shopify-section:first-child > .azur[data-hero]) > .shopify-section:has(> .bar) {

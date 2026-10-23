@@ -108,7 +108,7 @@
       if (el.dataset.count !== undefined) el.dataset.count = count;
     });
     // die Sporttasche wackelt kurz, wenn etwas dazukommt (wie früher im Zimmer)
-    const bag = $('.header__cart .sportbag');
+    const bag = $('.header__cart .bag3d');
     if (more && bag && bag.animate && !calm.matches) {
       bag.animate([{ transform: 'none' }, { transform: 'translateY(-4px) rotate(-8deg)', offset: 0.35 },
         { transform: 'translateY(0) rotate(4deg)', offset: 0.7 }, { transform: 'none' }], { duration: 620, easing: 'ease-out' });
@@ -216,7 +216,8 @@
       document.documentElement.style.setProperty('--header-bottom', Math.round(bottom) + 'px');
       // fest, sobald der Einstieg nicht mehr hinter dem ganzen Header liegt
       if (header.classList.contains('header--overlay')) {
-        header.classList.toggle('is-solid', !hero || hero.getBoundingClientRect().bottom <= bottom + 1);
+        // Runde 17: auf der Startseite meldet das Zimmer selbst, wann der Übergang fertig ist (html.azur-past)
+        header.classList.toggle('is-solid', !hero || document.documentElement.classList.contains('azur-past') || hero.getBoundingClientRect().bottom <= bottom + 1);
       }
       // schmal, sobald die Leiste oben weggescrollt ist
       header.classList.toggle('is-compact', window.scrollY > 48);
@@ -225,6 +226,7 @@
     update();
     window.addEventListener('scroll', queue, { passive: true });
     window.addEventListener('resize', queue);
+    window.addEventListener('azur-hero', queue);      // das Zimmer meldet das Ende seines Übergangs
     header.addEventListener('transitionend', queue); // Unterkante nach dem Schrumpfen neu messen
   }
 
@@ -360,11 +362,14 @@
       btn.setAttribute('aria-busy', 'true');
       label.textContent = 'Wird hinzugefügt …';
       try {
-        await addToCart(radio.value, productLabel + ', Größe ' + radio.dataset.size);
+        const data = await addToCart(radio.value, productLabel + ', Größe ' + radio.dataset.size);
         status.textContent = 'Hinzugefügt: ' + productLabel + ', Größe ' + radio.dataset.size + '.';
         label.textContent = 'Hinzugefügt';
+        // Runde 17: das Plus dreht sich zur Anzahl dieser Größe im Warenkorb, dann gleitet der Warenkorb herein
+        const line = data && data.items && data.items.find((i) => String(i.variant_id || i.id) === String(radio.value));
+        btn.dataset.qty = line && line.quantity ? line.quantity : 1;
         btn.classList.add('is-done');
-        openDrawer(btn);
+        window.setTimeout(() => openDrawer(btn), calm.matches ? 0 : 750);
         window.setTimeout(() => {
           label.textContent = baseLabel;
           btn.classList.remove('is-done');

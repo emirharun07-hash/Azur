@@ -2401,16 +2401,34 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
        shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
        and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
        and once the room is out of the window the IntersectionObserver stops its drawing as before. */
+    /* Runde 17 (design vote: „Neon-Logo wandert nach oben links“): the room's section is two screens tall and the room
+       sticks (CSS in the theme's azur-room.liquid). Over the first screen of scrolling the room goes dark while the neon
+       AZUR stays large in the middle (first half), then the page turns white and the signature shrinks into the header's
+       logo (second half); there the shop begins. html.azur-moving hides the header's own logo meanwhile, html.azur-light
+       darkens the header over the white, html.azur-past makes it solid (the theme's azur.js). Reduced motion: none of it. */
     bindScrollAway() {
-      const shade = document.createElement('div'); shade.className = 'azur-shade'; shade.setAttribute('aria-hidden', 'true');
-      this.stage.after(shade);
+      const html = document.documentElement, mk = (tag, cls) => { const e = document.createElement(tag); e.className = cls; e.setAttribute('aria-hidden', 'true'); return e; };
+      const shade = mk('div', 'azur-shade'), white = mk('div', 'azur-white'), neon = mk('img', 'azur-fly azur-fly--neon'), ink = mk('img', 'azur-fly');
+      neon.alt = ink.alt = ''; neon.src = A.url('assets/brand/azur-logo-paper.webp'); ink.src = A.url('assets/brand/azur-logo-ink.webp');
+      this.stage.after(shade, white, neon, ink);
+      const section = this.root.parentElement, clamp = v => Math.min(1, Math.max(0, v)), RATIO = 227 / 480;
       let queued = false;
       const update = () => {
         queued = false;
-        const r = this.root.getBoundingClientRect(), H = r.height || 1, y = Math.min(H, Math.max(0, -r.top)), p = y / H;
-        const on = y > 0 && !this.reduced;
-        this.stage.style.transform = on ? `translate3d(0,${(y * 0.45).toFixed(1)}px,0) scale(${(1 - 0.05 * p).toFixed(4)})` : '';
-        shade.style.opacity = on ? (p * 0.7).toFixed(3) : '0';
+        const span = section.offsetHeight - this.root.offsetHeight, r = section.getBoundingClientRect();
+        const p = this.reduced || span < 40 ? 0 : clamp(-r.top / span), a1 = clamp(p * 2), a2 = clamp(p * 2 - 1);
+        shade.style.opacity = (a1 * 0.9).toFixed(3); white.style.opacity = a2.toFixed(3);
+        this.stage.style.transform = p > 0 ? `scale(${(1 - 0.04 * a1).toFixed(4)})` : '';
+        // from the middle of the room (large) into the header's logo
+        const logo = [...document.querySelectorAll('[data-header] .header__logo .logo')].find(e => e.offsetWidth) || null;
+        const to = logo ? logo.getBoundingClientRect() : { left: 24, top: 18, width: 48 };
+        const w0 = Math.min(innerWidth * 0.62, 640), x0 = (innerWidth - w0) / 2, y0 = this.root.offsetHeight * 0.42 - w0 * RATIO / 2;
+        const w = w0 + (to.width - w0) * a2, x = x0 + (to.left - x0) * a2, y = y0 + (to.top - y0) * a2;
+        for (const img of [neon, ink]) { img.style.width = w.toFixed(1) + 'px'; img.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`; }
+        neon.style.opacity = (a1 * (1 - a2)).toFixed(3); ink.style.opacity = a2.toFixed(3);
+        html.classList.toggle('azur-moving', p > 0 && p < 0.999);
+        html.classList.toggle('azur-light', a2 > 0.5);
+        if (html.classList.contains('azur-past') !== p >= 0.999) { html.classList.toggle('azur-past', p >= 0.999); window.dispatchEvent(new Event('azur-hero')); }
       };
       const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
       window.addEventListener('scroll', queue, { passive: true }); window.addEventListener('resize', queue); update();

@@ -37,6 +37,34 @@
   endif
   assign form_id = 'buy-' | append: section.id
   assign images = product.media | where: 'media_type', 'image'
+
+  # Runde 17: Hinweise auf dem ersten Bild (Einstellung „Hinweise am Trikot“: Handle | x % | y % | Titel | Text)
+  assign notes_count = 0
+  assign notes_marks = ''
+  assign notes_items = ''
+  assign note_lines = section.settings.notes | newline_to_br | split: '<br />'
+  for line in note_lines
+    assign parts = line | strip | split: '|'
+    assign h = parts[0] | strip
+    if h == product.handle and parts.size > 4
+      assign notes_count = notes_count | plus: 1
+      assign nx = parts[1] | strip | plus: 0 | divided_by: 100.0
+      assign ny = parts[2] | strip | plus: 0 | divided_by: 100.0
+      assign ntitle = parts[3] | strip | escape
+      assign ntext = parts[4] | strip | escape
+      assign side = 'r'
+      if nx <= 0.5
+        assign side = 'l'
+      endif
+      capture mark
+        echo '<span class="note note--' | append: side | append: '" style="--x:' | append: nx | append: ';--y:' | append: ny | append: '">'
+        echo '<i class="note__line"></i><i class="note__dot" data-n="' | append: notes_count | append: '"></i>'
+        echo '<span class="note__label"><b>0' | append: notes_count | append: ' ' | append: ntitle | append: '</b>' | append: ntext | append: '</span></span>'
+      endcapture
+      assign notes_marks = notes_marks | append: mark
+      assign notes_items = notes_items | append: '<li><b>' | append: ntitle | append: '</b>' | append: ntext | append: '</li>'
+    endif
+  endfor
 -%}
 
 <article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}">
@@ -93,6 +121,7 @@
               }}
               <span class="sr-only">Vergrößern</span>
             </button>
+            {%- if forloop.first and notes_count > 0 -%}<div class="notes" aria-hidden="true">{{ notes_marks }}</div>{%- endif -%}
           </li>
         {%- else -%}
           <li class="gallery__slide">{{ 'product-apparel-1' | placeholder_svg_tag: 'gallery__placeholder' }}</li>
@@ -112,6 +141,7 @@
       </div>
     {%- endif -%}
   </section>
+  {%- if notes_count > 0 -%}<ol class="notes__list" aria-label="Details am Trikot">{{ notes_items }}</ol>{%- endif -%}
 
   <div class="pdp__info">
     <h1 class="pdp__title">{{ label }}</h1>
@@ -210,7 +240,11 @@
 {% schema %}
 {
   "name": "Produkt",
-  "settings": [],
+  "settings": [
+    { "type": "textarea", "id": "notes", "label": "Hinweise am Trikot (erstes Bild)",
+      "info": "Eine Zeile pro Hinweis: Handle | x in % | y in % | Titel | Text. x und y zählen im quadratischen Vorderseiten-Bild von links oben. Nur Angaben eintragen, die stimmen.",
+      "default": "brasilien-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, grün abgesetzt\nbrasilien-trikot-azur-collection | 40 | 34 | Signatur | Azur-Schriftzug auf der Brust\nbrasilien-trikot-azur-collection | 61 | 32 | Wappen | Wappen mit fünf Sternen, gestickt\nbrasilien-trikot-azur-collection | 78 | 45 | Ärmel | Streifen an den Ärmeln, grünes Bündchen\ndeutschland-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, schwarz abgesetzt\ndeutschland-trikot-azur-collection | 39 | 33 | Signatur | Azur-Schriftzug auf der Brust\ndeutschland-trikot-azur-collection | 63 | 33 | Wappen | Adler mit vier Sternen, gestickt\ndeutschland-trikot-azur-collection | 80 | 45 | Ärmel | Drei Streifen, schwarzes Bündchen\nturkei-trikot-azur-collection | 50 | 19 | Kragen | Rundkragen in Weiß\nturkei-trikot-azur-collection | 39 | 32 | Signatur | Azur-Schriftzug auf der Brust\nturkei-trikot-azur-collection | 63 | 31 | Emblem | Halbmond und Stern, gestickt\nturkei-trikot-azur-collection | 31 | 83 | Etikett | Azur-Etikett am Saum" }
+  ],
   "blocks": [
     {
       "type": "collapsible",

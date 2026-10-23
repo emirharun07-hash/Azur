@@ -1,6 +1,6 @@
 {%- comment -%}
   Header (Runde 13, schlicht nach yeezy.com; Runde 15 ohne STADT / LAND): links klein das Logo (führt zur Startseite),
-  rechts die Sporttasche als Warenkorb. Support, Konto und alle Rechtsseiten stehen im Footer.
+  rechts die Sporttasche als Warenkorb (Runde 17: ein gerendertes 3D-Bild). Support, Konto und alle Rechtsseiten stehen im Footer.
   Startseite: liegt durchsichtig mit heller Schrift über dem Zimmer, bis das Zimmer nach oben weggescrollt ist.
 {%- endcomment -%}
 {%- liquid
@@ -20,8 +20,8 @@
 
     <div class="header__end">
       <a class="header__icon header__cart" href="{{ routes.cart_url }}" data-cart-open aria-haspopup="dialog">
-        {%- comment -%} die Sporttasche aus dem Zimmer ist das eine Warenkorb-Symbol auf allen Seiten {%- endcomment -%}
-        <svg class="sportbag" viewBox="0 0 48 40" width="48" height="40" aria-hidden="true" focusable="false"><path class="sportbag__strap" d="M15 14 C15 5 33 5 33 14"/><rect class="sportbag__body" x="4" y="13" width="40" height="22" rx="10"/><path class="sportbag__stripe" d="M5 24 H43"/><circle class="sportbag__ball" cx="35" cy="24" r="5.2"/><path class="sportbag__lines" d="M35 19.6 l3 2.4 -1.2 3.6 h-3.6 l-1.2-3.6z"/></svg>
+        {%- comment -%} Runde 17: die Sporttasche als echtes 3D-Bild (azur/design/render_bag.py), schwarz auf Weiß, weiß über dem Zimmer {%- endcomment -%}
+        <span class="bag3d" aria-hidden="true"><img class="logo--ink" src="{{ 'azur-bag-ink.webp' | asset_url }}" alt="" width="119" height="90"><img class="logo--paper" src="{{ 'azur-bag-paper.webp' | asset_url }}" alt="" width="120" height="93"></span>
         <span class="sr-only">Warenkorb,</span>
         <span class="header__count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
         <span class="sr-only">Artikel</span>
