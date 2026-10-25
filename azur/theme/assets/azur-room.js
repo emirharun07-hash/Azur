@@ -1883,7 +1883,16 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.buildChrome();
       if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
-      window.addEventListener('resize', () => this.resize());
+      // phones fire resize while the address bar comes and goes during a scroll: at most once a frame, and only when
+      // the stage really changed size (the room is 100svh, so mostly it did not)
+      let rq = false;
+      window.addEventListener('resize', () => {
+        if (rq) return; rq = true;
+        requestAnimationFrame(() => {
+          rq = false; const k = this.stage.clientWidth + 'x' + this.stage.clientHeight + '@' + this.dpr();
+          if (k !== this.sizeKey) { this.sizeKey = k; this.resize(); }
+        });
+      });
       // the room counts as gone once less than a sixth of it shows (a strip behind the header is not worth drawing)
       if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => {
         this.offscreen = !en.isIntersecting || en.intersectionRatio < 0.15;
@@ -1904,14 +1913,18 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       requestAnimationFrame(t => this.frame(t));
       setTimeout(() => this.showHint(), this.reduced ? 200 : 1600);
       const up = v => v && v.upgrade && v.upgrade();
-      setTimeout(() => up(this.comp.view), 900);                   // published builds start on smaller copies
+      setTimeout(() => this.atRoom(() => up(this.comp.view)), 900);   // published builds start on smaller copies
       // other views load in the background so camera moves never wait (each view is 8 textures: phones load on demand,
-      // desktops skip the phone plate)
-      if (!this.isMobile) setTimeout(() => Object.keys(cfg.views).forEach(k => k !== start && k !== 'rail_m' && this.comp.load(k, this.passes, false).then(() => { this.loadDepth(k); setTimeout(() => up(this.comp.cache[k]), 1500); })), 2500);
-      setTimeout(() => this.preloadMoves(), 6000);
+      // desktops skip the phone plate). Runde 20: only while the visitor is at the room, not once they scrolled to the shop
+      if (!this.isMobile) setTimeout(() => this.atRoom(() => Object.keys(cfg.views).forEach(k => k !== start && k !== 'rail_m' && this.comp.load(k, this.passes, false).then(() => { this.loadDepth(k); setTimeout(() => this.atRoom(() => up(this.comp.cache[k])), 1500); }))), 2500);
+      setTimeout(() => this.atRoom(() => this.preloadMoves()), 6000);
       this.handleHash();
       window.addEventListener('hashchange', () => this.handleHash());    // links inside the page (#bett, #anstoss, a jersey)
     }
+
+    /* Background downloads (sharper copies, the other views, the flights) only while the room is on screen: someone who
+       scrolled on to the shop does not need them; they start once the visitor is back at the top. */
+    atRoom(fn) { if (!this.diving) fn(); else setTimeout(() => this.atRoom(fn), 2000); }
 
     /* ---------------------------------------------------------------- times of day */
     stateNow() {
@@ -1934,7 +1947,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.comp.render(this.light); this.placeChrome(); this.setTease(); this.kick();
       if (fade) { await this.snap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in-out' }).finished.catch(() => { }); this.snap.hidden = true; }
       this.stateBusy = false;
-      if (this.root.classList.contains('is-ready')) this.preloadMoves();      // the flights of this time of day
+      if (this.root.classList.contains('is-ready')) this.atRoom(() => this.preloadMoves());      // the flights of this time of day
     }
 
     /* The line under the bed view: at night the magazine has slid off the duvet onto the floor. */
@@ -2440,7 +2453,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         if (!slideByCss && !this.reduced && !away) this.world.style.translate = `0 ${-Math.round(0.75 * Math.min(y, f.vh))}px`;
       };
       window.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', measure); window.addEventListener('load', measure); measure();
+      let mq = false;
+      window.addEventListener('resize', () => { if (!mq) { mq = true; requestAnimationFrame(() => { mq = false; measure(); }); } });
+      window.addEventListener('load', measure); measure();
     }
 
     /* ---------------------------------------------------------------- outside the window (round 4) */

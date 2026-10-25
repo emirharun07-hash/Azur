@@ -27,13 +27,13 @@
   /* Runde 20 (Owner): beim Scrollen fährt eine Kamera im Zimmer nach unten und taucht durch eine schwarze Ebene zu den
      Trikots. Das Zimmer bleibt stehen (sticky), rutscht langsamer nach oben als die Seite und bekommt Tiefe (nahe Dinge
      wandern stärker als die Wand: azur-room.js, bindScrollAway und frame), kein Zoom; von unten kommt schneller die schwarze
-     Ebene: ein niedriger, spröder Rand (80 px: sanftes Abdunkeln mit feinen Körnern, assets/azur-sand.png aus
+     Ebene: ein niedriger, spröder Rand (80 px: sanftes Abdunkeln mit feinen Körnern, assets/azur-sand.webp aus
      tools/make_sand.py), reines Schwarz, lang genug für einen ganz schwarzen Bildschirm, und unten derselbe Rand
      gespiegelt ins Weiß, etwas Weiß; dann die Trikots. Gut zwei Bildschirme lang. Header: dunkle Schrift über dem Weiß
      (html.azur-light), fest, sobald das Weiß unter ihm ist (html.azur-past). Ohne Bewegung: alles untereinander. */
   .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; }
   .azur-fall__dust { display: block; height: 80px;
-    background: url("{{ 'azur-sand.png' | asset_url }}") 0 0 / 512px 80px repeat-x,
+    background: url("{{ 'azur-sand.webp' | asset_url }}") 0 0 / 512px 80px repeat-x,
       linear-gradient(transparent, rgba(0, 0, 0, .12) 25%, rgba(0, 0, 0, .45) 55%, rgba(0, 0, 0, .85) 82%, #000); }
   .azur-fall__grad { display: block; height: 105vh; height: 105svh; margin-top: -1px; background: #000; }
   /* unten derselbe sandige Rand wie oben, gespiegelt: aus dem Schwarz lösen sich Körner ins Weiß */
