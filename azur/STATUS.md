@@ -539,6 +539,25 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 21 (owner 2026-10-25: a performance checklist, "guck selber ob es Sinn ergibt")
+The owner published Runde 20 (MAIN = "Azur Zimmer Runde 20 (Entwurf)" 210046550355). New draft "Azur Zimmer Runde 21
+(Entwurf)" `gid://shopify/OnlineStoreTheme/210150687059` (copy of MAIN). Preview:
+https://azurclothing.com/?preview_theme_id=210150687059
+- The list: cache API responses, load balancer, DB index, compress images, cache expensive queries, N+1 queries,
+  debounce input handlers, code splitting, CDN, server-side caching, pagination, compress API payloads, unnecessary
+  re-renders, minify JS/CSS, lazy loading, defer scripts, unused dependencies, DB connection pooling.
+- Not ours (Shopify runs the servers): load balancer, DB index/N+1/pooling, server/query caching, CDN. Checked on the
+  live CDN (/cdn/shop/t/36/assets/...): theme assets come minified, Brotli-compressed, cache-control 1 year (azur.css
+  69 KB -> 9.9 KB on the wire, azur-room.js 177 -> 36 KB). Already in place: layout defers azur.js, fonts self-hosted
+  and preloaded, no third-party scripts, azur-admin.js only on #admin, room renders as WebP in lo -> md -> full tiers,
+  collection paginated by 24, card images lazy, cart.js fetches only on actions.
+- Done (commit bcd48cd): background downloads (md upgrade, the other views, flight videos) only while the visitor is
+  at the room (`atRoom`, re-checked every 2 s): scrolling straight to the shop loads 3.4 instead of 6.2 MB in 10 s;
+  resize handled at most once a frame and only when the stage size or dpr changed (phones fire resize while the
+  address bar moves); azur-sand.webp (lossless, 19 KB) instead of the PNG (33 KB; the PNG stays unused in the theme).
+- Left as is: the idle jersey sway redraws the room at ~30 fps (a design choice; it stops while covered, offscreen, in
+  the product view or the magazine); code splitting (36 KB Brotli for the whole room is small).
+
 ## Runde 20 (owner 2026-10-23: the fall again, as a gradient)
 The owner published Runde 19 (MAIN = "Azur Zimmer Runde 19 (Entwurf)" 210037637459) and deleted old drafts (15 themes).
 New draft "Azur Zimmer Runde 20 (Entwurf)" `gid://shopify/OnlineStoreTheme/210046550355` (copy of MAIN). Preview:
