@@ -539,6 +539,16 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 22 (owner 2026-10-26: iPad lags, iPhone cannot scroll, transition too long)
+The owner published Runde 21 (MAIN 210150687059). New draft "Azur Zimmer Runde 22 (Entwurf)"
+`gid://shopify/OnlineStoreTheme/210231624019`. Preview: https://azurclothing.com/?preview_theme_id=210231624019
+- iPhone: `.is-mobile .azur-stage` had touch-action: none (for swiping along the rail), so a touch on the full-screen
+  room could never scroll the page. Now pan-y: horizontal swipes still pan the rail (tested with CDP touch events),
+  vertical ones scroll.
+- iPad Pro lag: touch devices (`this.coarse`, pointer: coarse) draw at dpr <= 1.5 and skip the depth camera while
+  scrolling (the CSS slide stays); the idle sway pauses on all devices while html.azur-diving.
+- Shorter: black 70svh (was 105), white before the jerseys 20svh (was 30), slide range 0-90vh. Commit 11b5586.
+
 ## Runde 21 (owner 2026-10-25: a performance checklist, "guck selber ob es Sinn ergibt")
 The owner published Runde 20 (MAIN = "Azur Zimmer Runde 20 (Entwurf)" 210046550355). New draft "Azur Zimmer Runde 21
 (Entwurf)" `gid://shopify/OnlineStoreTheme/210150687059` (copy of MAIN). Preview:
