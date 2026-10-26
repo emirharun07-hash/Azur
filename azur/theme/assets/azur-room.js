@@ -1859,6 +1859,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.reducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
       this.reduced = this.reducedQuery.matches;
       this.isMobile = matchMedia(cfg.mobileQuery).matches;
+      this.coarse = matchMedia('(pointer: coarse)').matches;      // touch screens (phones, iPads): lighter drawing
       this.root.classList.toggle('is-mobile', this.isMobile);
       this.applyPalette();
 
@@ -2724,7 +2725,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     }
     kick() { this.dirty = true; }
     // phones draw at 1.5x at most: sharp enough for photos, a third fewer pixels than 2x
-    dpr() { return Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.5 : 2); }
+    dpr() { return Math.min(window.devicePixelRatio || 1, this.isMobile || this.coarse ? 1.5 : 2); }   // Runde 21: tablets too
 
     frame(t) {
       const dt = Math.min(0.05, (t - this.lastT) / 1000); this.lastT = t;
@@ -2745,7 +2746,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const nx = this.parallax[0] + (-tx * k - this.parallax[0]) * e, ny = this.parallax[1] + (-ty * k * 0.6 - this.parallax[1]) * e;
       const pmove = Math.abs(nx - this.parallax[0]) + Math.abs(ny - this.parallax[1]) > 1e-6;
       // + the scroll's camera (Runde 20): near things lift more than the wall over the first screen of scrolling
-      const sp = this.fall && !this.reduced ? Math.round(Math.min(1, window.scrollY / this.fall.vh) * CAM_DEPTH * 2000) / 2000 : 0;
+      const sp = this.fall && !this.reduced && !this.coarse ? Math.round(Math.min(1, window.scrollY / this.fall.vh) * CAM_DEPTH * 2000) / 2000 : 0;
       if (sp !== this.scrollPar) { this.scrollPar = sp; this.dirty = true; }
       this.parallax = [nx, ny]; this.comp.parallax = sp ? [nx, ny + sp] : this.parallax;
       // phones: momentum after a swipe along the rail, then the rail settles with a garment in the middle
@@ -2817,7 +2818,8 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.comp.time = t / 1000;
       const idle = !this.reduced && A.config.motion.sway.idleDeg > 0;
       // one render per frame: the frame loop draws once when dirty (drawing here as well doubled the work)
-      if (!covered && (swaying || (idle && t - (this.swayAt || 0) > 33))) { this.swayAt = t; this.dirty = true; }
+      // Runde 21: no idle sway while the page scrolls away (the room moves anyway; the iPad lagged)
+      if (!covered && (swaying || (idle && !this.diving && t - (this.swayAt || 0) > 33))) { this.swayAt = t; this.dirty = true; }
     }
 
     /* UI follows the room's light: labels switch to night styling after dusk. */
