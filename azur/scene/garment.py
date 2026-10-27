@@ -344,9 +344,6 @@ def jersey(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.7
     got = frozen(name, front_path, back_path, knit_normal, hanger_mat)
     if got:
         o, hg = got
-        # the small crumples softened a little (the outline stays); the larger folds remain, as the owner wants
-        sm = o.modifiers.new('calm', 'LAPLACIANSMOOTH'); sm.iterations = 3; sm.lambda_factor = 0.6
-        sm.lambda_border = 0.0; sm.use_volume_preserve = True; sm.use_normalized = True
         sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
         sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1
         return o, hg
