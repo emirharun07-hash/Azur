@@ -2,11 +2,16 @@
     "state":  "arbeitet",
     "request":  "r22-4",
     "job":  "preview:full,room_day",
-    "note":  "Runde 22, hoechste Qualitaet: die Trikots mit den Falten wie in der r22-1-Vorschau (flacher, 0.55), nur die Seiten zwischen Achsel und Saum gerade gezogen (Owner: am Bauch nicht nach innen knicken), kein Glaetten. Ersetzt r22-3. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+    "note":  "preview:full,room_day fertig nach 43.2 min",
     "watch":  3,
-    "time":  "2026-10-27T22:32:08Z",
-    "device":  "23:10:29 render device HIP: AMD Radeon RX 6750 XT",
+    "time":  "2026-10-27T23:15:24Z",
+    "device":  "23:32:15 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
-
+                "00:01.125  blend            | Read blend: \"C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\azur_room_scene3.blend\"",
+                "00:03.344  cycles           | WARNING CUEW initialization failed: Error opening the library",
+                "23:32:15 render device HIP: AMD Radeon RX 6750 XT",
+                "43:07.532  render           | Saved: \u0027C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\previews\\room_day.png\u0027",
+                "00:15:19 preview room_day 2584.1 s",
+                "00:15:24 preview finished 1 shots"
             ]
 }
