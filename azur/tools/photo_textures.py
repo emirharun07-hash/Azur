@@ -6,7 +6,7 @@ the shop's product image of the same jersey (assets/jerseys/back/<key>-vorne-v2.
 intended one. Gains are kept between 0.7 and 1.7 and act on coloured pixels only (white prints and collars stay white).
 
     python3 azur/tools/photo_textures.py tuerkei brasilien deutschland
-        -> azur/assets/jerseys/real/<key>-vorne.webp, <key>-hinten.webp (RGBA, at most 1600 px)
+        -> azur/assets/jerseys/real/<key>-vorne.webp, <key>-hinten.webp (RGBA, at most 3000 px)
 """
 import os
 import sys
@@ -38,7 +38,7 @@ def main(keys):
             rgb = a[..., :3]; mx = rgb.max(2, keepdims=True)
             sat = np.clip((mx - rgb.min(2, keepdims=True)) / np.maximum(mx, 1) * 1.6, 0, 1)   # white stays white
             a[..., :3] = np.clip(rgb * (1 + (gain - 1) * sat), 0, 255)
-            out = Image.fromarray(a.astype(np.uint8), 'RGBA'); out.thumbnail((1600, 1600), Image.LANCZOS)
+            out = Image.fromarray(a.astype(np.uint8), 'RGBA'); out.thumbnail((3000, 3000), Image.LANCZOS)
             out.save(os.path.join(OUT, f'{k}-{side}.webp'), quality=92)
             print(k, side, out.size, 'gain', np.round(gain, 2), flush=True)
 

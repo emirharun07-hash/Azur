@@ -16,7 +16,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _SESSION = None
 
 
-def cutout(path, size=2400):
+def cutout(path, size=3200):
     global _SESSION
     from rembg import new_session, remove
     _SESSION = _SESSION or new_session('u2net')

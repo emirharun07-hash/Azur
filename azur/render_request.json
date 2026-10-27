@@ -1,6 +1,6 @@
 {
-  "id": "r22-1",
-  "note": "Runde 22: die drei Laendertrikots (Brasilien, Deutschland, Tuerkei) tragen die Fotos der echten Trikots (assets/jerseys/real/*-fit.webp), alle Trikots haengen flacher (AZUR_JERSEY_FLAT 0.55). Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+  "id": "r22-2",
+  "note": "Runde 22, hoechste Qualitaet (Owner: so gut wie es geht, darf Tage rendern): die drei Laendertrikots mit den Fotos der echten Trikots in doppelter Stoffaufloesung, alle Trikots haengen flacher; 4x Samples (4096, Neon 8192), feinere Rauschschwelle, mehr Lichtreflexionen, Kamerafahrten 512 Samples, Strasse 1024. Ersetzt r22-1. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
   "set": "scene3",
   "rebuild": true,
   "jobs": ["preview:full,room_day", "preview", "queue", "glow", "outside", "moves"]

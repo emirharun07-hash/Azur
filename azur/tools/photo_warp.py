@@ -151,6 +151,7 @@ def main(keys):
         for side in ('vorne', 'hinten'):
             src = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}.webp')).convert('RGBA')
             dst = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'back', f'{k}-{side}-v2.webp')).convert('RGBA')
+            dst = dst.resize((dst.width * 2, dst.height * 2), Image.LANCZOS)   # Runde 22: twice the fabric resolution (UVs are relative)
             out, ps, pd = warp(src, dst, k in SHOP_SLEEVES, NUDGE.get(k, 0.0))
             out.save(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}-fit.webp'), quality=92)
             a, b = dots(src, ps, (0, 0, 255)), dots(dst, pd, (255, 0, 0))

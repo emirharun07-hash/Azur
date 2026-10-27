@@ -30,7 +30,7 @@ import render_queue as rq   # reuses scene loading, views, light setup and git s
 # stay on this machine (.cache/moves); only the videos and moves.json go up.
 FPS = int(os.environ.get('AZUR_MOVES_FPS', 60 if rq.HI else 30))
 FRAMES = int(os.environ.get('AZUR_MOVES_FRAMES', round(1.2 * FPS)))
-SAMPLES = int(os.environ.get('AZUR_MOVES_SAMPLES', 128 if rq.HI else 48))   # round 5: 48 smeared in the shade
+SAMPLES = int(os.environ.get('AZUR_MOVES_SAMPLES', 512 if rq.HI else 48))   # round 5: 48 smeared in the shade; Runde 22: 512
 RES = tuple(int(x) for x in os.environ.get('AZUR_MOVES_RES', '1920x1080' if rq.HI else '1280x720').split('x'))
 VARIANTS = ('day', 'evening', 'night') if rq.HI else ('day', 'night')
 STATE_OF = {'day': 'day', 'evening': 'evening', 'night': 'night'}
@@ -77,7 +77,7 @@ GLOW = [srgb2lin(int('16B8FF'[i:i + 2], 16) / 255) for i in (0, 2, 4)]   # palet
 def light_variant(sc, variant):
     """Same light rig as render_queue's passes, mixed with the prototype's daylight weights."""
     rq.render_settings(sc, 'beauty'); rq.lights_off(sc)
-    sc.cycles.samples = SAMPLES; sc.cycles.adaptive_threshold = 0.02 if rq.HI else 0.04
+    sc.cycles.samples = SAMPLES; sc.cycles.adaptive_threshold = 0.006 if rq.HI else 0.04
     bg = sc.world.node_tree.nodes['Background'].inputs['Strength']
     nb = bpy.data.materials['neon_tube'].node_tree.nodes['Principled BSDF']
     if variant == 'day' and rq.HI:        # azur-config.js daylight key h 12.5

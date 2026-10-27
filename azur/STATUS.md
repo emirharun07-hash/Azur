@@ -539,6 +539,24 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 22b (owner 2026-10-27: the real jerseys in the room, best quality, days of rendering are fine)
+- Photos of the real national jerseys (azur/photos/<key>/vorne, hinten, detail-logo, detail-wappen; HEIC converted).
+  City jerseys keep the shop images (owner: no photos for them, they stay in the room and on their page).
+- Pipeline: tools/photo_cutout.py (rembg u2net, hang tag cut by a row opening, floor rows under the hem dropped,
+  3200 px) -> tools/photo_textures.py (colour matched to the shop image on coloured pixels only, 3000 px) ->
+  tools/photo_warp.py (thin-plate spline from landmarks on both outlines onto the shop image's outline at 2x = 2400 px:
+  hem corners, armpits by convexity defects, cuff corners by walking shoulder->armpit, collar/shoulders from the hem
+  width, inner grid; brightness matched to the shop image; collar from the shop image (3D inside); Brasilien and
+  Deutschland sleeves from the shop image (printed stripes); Türkei chest nudged 2.5 % down) -> assets/jerseys/real/
+  <key>-<side>-fit.webp, used by build_room.py JERSEY_PHOTOS for the three national keys with the frozen drapes (UVs
+  belong to the shop outline). A new cloth drape from the flat lays looked boxy (sleeves out): not used.
+- Owner: the jerseys should hang calmer, only slightly 3D, and sway on hover: garment.frozen() presses the drape's
+  depth to 0.55 (AZUR_JERSEY_FLAT). scene/jersey_lab.py renders the three in a studio (old / real / fit).
+- Quality (owner: "150000 %"): render_queue SAMPLES 4096 (sprite 512), NOISE 0.0015, neon 8192 at 0.001, bounces
+  16/12/8/12, adaptive min 256, no glossy blur; moves 512 samples at 0.006; outside 1024 at 0.006.
+- PC request r22-2 (rebuild, preview:full,room_day, preview, queue, glow, outside, moves). After it: check the test
+  still, then build_artifact/build_theme with a new Files prefix (azr9-), upload, new draft theme.
+
 ## Runde 22 (owner 2026-10-26: iPad lags, iPhone cannot scroll, transition too long)
 The owner published Runde 21 (MAIN 210150687059). New draft "Azur Zimmer Runde 22 (Entwurf)"
 `gid://shopify/OnlineStoreTheme/210231624019`. Preview: https://azurclothing.com/?preview_theme_id=210231624019

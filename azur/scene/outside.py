@@ -214,7 +214,7 @@ def setup(sc):
     sc.view_settings.exposure = float(os.environ.get('AZUR_OUT_EXPOSURE', 0.4))   # outdoors in daylight, not the dim room
     sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = 0.5
     sc.render.fps = FPS; sc.render.use_persistent_data = True
-    sc.cycles.samples = int(os.environ.get('AZUR_OUT_SAMPLES', 256 if os.environ.get('AZUR_GPU') else 48)); sc.cycles.adaptive_threshold = 0.02
+    sc.cycles.samples = int(os.environ.get('AZUR_OUT_SAMPLES', 1024 if os.environ.get('AZUR_GPU') else 48)); sc.cycles.adaptive_threshold = 0.006
     return J, ball
 
 
