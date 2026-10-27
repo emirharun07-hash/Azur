@@ -1,10 +1,10 @@
 {
-    "state":  "bereit",
-    "request":  "",
-    "job":  "",
-    "note":  "Warte-Modus laeuft (Version 3)",
+    "state":  "arbeitet",
+    "request":  "r22-4",
+    "job":  "preview:full,room_day",
+    "note":  "Runde 22, hoechste Qualitaet: die Trikots mit den Falten wie in der r22-1-Vorschau (flacher, 0.55), nur die Seiten zwischen Achsel und Saum gerade gezogen (Owner: am Bauch nicht nach innen knicken), kein Glaetten. Ersetzt r22-3. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-27T22:32:02Z",
+    "time":  "2026-10-27T22:32:08Z",
     "device":  "23:10:29 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
 
