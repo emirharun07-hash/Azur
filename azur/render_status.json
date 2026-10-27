@@ -1,15 +1,12 @@
 {
-    "state":  "arbeitet",
-    "request":  "r22-2",
-    "job":  "preview:full,room_day",
-    "note":  "Runde 22, hoechste Qualitaet (Owner: so gut wie es geht, darf Tage rendern): die drei Laendertrikots mit den Fotos der echten Trikots in doppelter Stoffaufloesung, alle Trikots haengen flacher; 4x Samples (4096, Neon 8192), feinere Rauschschwelle, mehr Lichtreflexionen, Kamerafahrten 512 Samples, Strasse 1024. Ersetzt r22-1. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
+    "state":  "bereit",
+    "request":  "",
+    "job":  "",
+    "note":  "Warte-Modus laeuft (Version 3)",
     "watch":  3,
-    "time":  "2026-10-27T21:47:25Z",
-    "device":  "22:45:17 render device HIP: AMD Radeon RX 6750 XT",
+    "time":  "2026-10-27T22:09:32Z",
+    "device":  "22:48:19 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
-                "00:00.453  blend            | Read blend: \"C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\azur_room_scene3.blend\"",
-                "00:02.609  cycles           | WARNING CUEW initialization failed: Error opening the library",
-                "22:45:17 render device HIP: AMD Radeon RX 6750 XT",
-                "22:45:18 a newer render request is on the branch: stopping this run"
+
             ]
 }
