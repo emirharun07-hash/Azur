@@ -87,7 +87,10 @@ def landmarks(alpha):
     return np.vstack([P, inner])
 
 
-def warp(src_rgba, dst_rgba):
+SHOP_SLEEVES = {'brasilien', 'deutschland'}   # printed stripes and cuffs: the shop image's sleeves are cleaner than bent photo
+
+
+def warp(src_rgba, dst_rgba, shop_sleeves=False):
     src, dst = np.asarray(src_rgba), np.asarray(dst_rgba)
     ps, pd = landmarks(src[..., 3]), landmarks(dst[..., 3])
     H, W = dst.shape[:2]
@@ -104,12 +107,26 @@ def warp(src_rgba, dst_rgba):
     _, idx = ndimage.distance_transform_edt(a, return_indices=True)
     filled = src[..., :3][idx[0], idx[1]]
     rgb = cv2.remap(filled, mx, my, cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    # brightness and colour of the bent photo matched to the shop image over the body's middle, so the parts taken from
+    # the shop image (collar, sleeves) meet it without an edge (the photos were taken in a dim, warm room)
+    body_mid = (dst[..., 3] > 200)
+    y_s, x_s = np.nonzero(body_mid); ry = np.percentile(y_s, [45, 80]).astype(int); rx = np.percentile(x_s, [35, 65]).astype(int)
+    pm = np.median(rgb[ry[0]:ry[1], rx[0]:rx[1]].reshape(-1, 3).astype(np.float32), 0)
+    dm = np.median(dst[ry[0]:ry[1], rx[0]:rx[1], :3].reshape(-1, 3).astype(np.float32), 0)
+    rgb = np.clip(rgb.astype(np.float32) * np.clip((dm + 1) / (pm + 1), 0.8, 1.45), 0, 255)
     # the collar stays the shop image's: it shows the collar in 3D (with its inside), the flat photo cannot; the design
     # is the same. An ellipse around the neck, feathered.
     hl, hr, nc = pd[13], pd[14], pd[0]
     bw = hr[0] - hl[0]; ys = np.nonzero(dst[..., 3] > 128)[0]; hh = ys.max() - ys.min()
     ex, ey = bw * 0.26, hh * 0.11
     k = np.clip(1.6 - np.sqrt(((gx - nc[0]) / ex) ** 2 + ((gy - nc[1]) / ey) ** 2), 0, 1)[..., None] ** 1.5
+    if shop_sleeves:
+        # the sleeves (outside the body: shoulder - armpit - hem on each side) from the shop image as well
+        body = np.array([pd[3], pd[11], pd[13], pd[14], pd[12], pd[4]], np.int32)
+        bm = np.zeros((H, W), np.uint8); cv2.fillPoly(bm, [body], 1)
+        bm = cv2.dilate(bm, np.ones((5, 5), np.uint8))
+        sl = cv2.GaussianBlur((1 - bm).astype(np.float32), (0, 0), 4)[..., None]
+        k = np.maximum(k, sl)
     rgb = (rgb * (1 - k) + dst[..., :3] * k).astype(np.uint8)
     out = np.dstack([rgb, dst[..., 3]])
     return Image.fromarray(out, 'RGBA'), ps, pd
@@ -128,7 +145,7 @@ def main(keys):
         for side in ('vorne', 'hinten'):
             src = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}.webp')).convert('RGBA')
             dst = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'back', f'{k}-{side}-v2.webp')).convert('RGBA')
-            out, ps, pd = warp(src, dst)
+            out, ps, pd = warp(src, dst, k in SHOP_SLEEVES)
             out.save(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}-fit.webp'), quality=92)
             a, b = dots(src, ps, (0, 0, 255)), dots(dst, pd, (255, 0, 0))
             hh = 700; a = cv2.resize(a, (round(a.shape[1] * hh / a.shape[0]), hh)); b = cv2.resize(b, (round(b.shape[1] * hh / b.shape[0]), hh))
