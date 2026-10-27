@@ -224,6 +224,7 @@ def _remove(*objs):
 # Frozen drapes (round 4): the owner approved the jerseys as they hung in round 3 and wants them unchanged until real
 # scans arrive. frozen/<key>.glb holds that drape (the product-view model the PC exported in r3-5: shell + hanger in
 # the jersey's own space, hook point at the origin). jersey() loads it instead of simulating; AZUR_RESIM=1 simulates.
+FLAT = float(os.environ.get('AZUR_JERSEY_FLAT', 0.55))   # depth of the frozen drapes (1 = as simulated)
 FROZEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frozen')
 
 
@@ -247,6 +248,9 @@ def frozen(name, front_path, back_path, knit_normal=None, hanger_mat=None):
         mw = x.matrix_world.copy(); x.matrix_world = Matrix.Identity(4)
         x.data.transform(mw)                                  # whatever the importer put on the object goes into the mesh
         x.data.update()
+    # Runde 22 (owner): the jerseys hang calmer, only slightly 3D: the drape's depth (front to back, local y) pressed
+    # toward the hanger's plane; outline, folds and UVs stay
+    o.data.transform(Matrix.Diagonal((1.0, FLAT, 1.0, 1.0))); o.data.update()
     # front / back faces from the imported material slots, then the room's own materials (knit normal, sheen)
     bm = bmesh.new(); bm.from_mesh(o.data)                    # glTF splits vertices at the UV seam: weld the shell again
     bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-5); bm.to_mesh(o.data); bm.free()

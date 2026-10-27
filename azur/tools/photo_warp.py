@@ -87,10 +87,11 @@ def landmarks(alpha):
     return np.vstack([P, inner])
 
 
+NUDGE = {'tuerkei': 0.025}   # owner: the Türkei logo sat a little high; the chest moves down by this share of the height
 SHOP_SLEEVES = {'brasilien', 'deutschland'}   # printed stripes and cuffs: the shop image's sleeves are cleaner than bent photo
 
 
-def warp(src_rgba, dst_rgba, shop_sleeves=False):
+def warp(src_rgba, dst_rgba, shop_sleeves=False, nudge=0.0):
     src, dst = np.asarray(src_rgba), np.asarray(dst_rgba)
     ps, pd = landmarks(src[..., 3]), landmarks(dst[..., 3])
     H, W = dst.shape[:2]
@@ -100,6 +101,11 @@ def warp(src_rgba, dst_rgba, shop_sleeves=False):
     cy, cx = np.mgrid[0:H:step, 0:W:step]
     mp = f(np.c_[cx.ravel(), cy.ravel()]).reshape(cy.shape[0], cy.shape[1], 2).astype(np.float32)
     mx = cv2.resize(mp[..., 0], (W, H), interpolation=cv2.INTER_CUBIC); my = cv2.resize(mp[..., 1], (W, H), interpolation=cv2.INTER_CUBIC)
+    if nudge:                                   # move the chest down, fading out toward the collar and the hem
+        ys = np.nonzero(dst[..., 3] > 128)[0]; top, bot = ys.min(), ys.max(); hh = bot - top
+        t = np.clip((gy - top) / max(hh, 1), 0, 1)
+        wgt = np.clip(np.minimum((t - 0.08) / 0.15, (0.95 - t) / 0.45), 0, 1)
+        my = my - (nudge * (ps[:, 1].max() - ps[:, 1].min()) * wgt).astype(np.float32)
     # the photo's own edge colour beyond its outline (no floor), then sampled through the map
     from scipy import ndimage
     from scipy import ndimage as nd
@@ -145,7 +151,7 @@ def main(keys):
         for side in ('vorne', 'hinten'):
             src = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}.webp')).convert('RGBA')
             dst = Image.open(os.path.join(HERE, 'assets', 'jerseys', 'back', f'{k}-{side}-v2.webp')).convert('RGBA')
-            out, ps, pd = warp(src, dst, k in SHOP_SLEEVES)
+            out, ps, pd = warp(src, dst, k in SHOP_SLEEVES, NUDGE.get(k, 0.0))
             out.save(os.path.join(HERE, 'assets', 'jerseys', 'real', f'{k}-{side}-fit.webp'), quality=92)
             a, b = dots(src, ps, (0, 0, 255)), dots(dst, pd, (255, 0, 0))
             hh = 700; a = cv2.resize(a, (round(a.shape[1] * hh / a.shape[0]), hh)); b = cv2.resize(b, (round(b.shape[1] * hh / b.shape[0]), hh))

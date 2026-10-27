@@ -479,6 +479,10 @@ def garment_plane(name, image_path, aspect, mtx, h=JERSEY_H, push=0.012, tint=(1
 # The photos' alpha draws the exact silhouette; front and back meet at the outline, so the shell is closed.
 JERSEY_PHOTOS = {k: (f'{A}/jerseys/back/{k}-vorne{v}.webp', f'{A}/jerseys/back/{k}-hinten{v}.webp')
                  for k, v in (('frankfurt', '-v2'), ('berlin', ''), ('brasilien', '-v2'), ('deutschland', '-v2'), ('tuerkei', '-v2'))}
+# Runde 22: the national jerseys wear the owner's photos of the real shirts, bent onto the frozen drapes
+# (tools/photo_cutout.py, photo_textures.py, photo_warp.py); the city jerseys keep the shop images
+for k in ('brasilien', 'deutschland', 'tuerkei'):
+    JERSEY_PHOTOS[k] = (f'{A}/jerseys/real/{k}-vorne-fit.webp', f'{A}/jerseys/real/{k}-hinten-fit.webp')
 
 def jersey_mesh(name, front_path, back_path, h=JERSEY_H, cell=0.011, depth=0.055):
     import numpy as np
