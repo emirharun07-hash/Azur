@@ -1,10 +1,10 @@
 {
-    "state":  "abgeloest",
-    "request":  "r22-1",
-    "job":  "",
-    "note":  "neuer Auftrag auf dem Branch, dieser wurde bei queue beendet",
+    "state":  "arbeitet",
+    "request":  "r22-2",
+    "job":  "preview:full,room_day",
+    "note":  "Runde 22, hoechste Qualitaet (Owner: so gut wie es geht, darf Tage rendern): die drei Laendertrikots mit den Fotos der echten Trikots in doppelter Stoffaufloesung, alle Trikots haengen flacher; 4x Samples (4096, Neon 8192), feinere Rauschschwelle, mehr Lichtreflexionen, Kamerafahrten 512 Samples, Strasse 1024. Ersetzt r22-1. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
     "watch":  3,
-    "time":  "2026-10-27T21:45:20Z",
+    "time":  "2026-10-27T21:47:25Z",
     "device":  "22:45:17 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "00:00.453  blend            | Read blend: \"C:\\Users\\Emir\\S-per-Lig-Fantasy-Manager\\azur\\.cache\\azur_room_scene3.blend\"",
