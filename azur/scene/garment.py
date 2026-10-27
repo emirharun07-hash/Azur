@@ -225,7 +225,36 @@ def _remove(*objs):
 # scans arrive. frozen/<key>.glb holds that drape (the product-view model the PC exported in r3-5: shell + hanger in
 # the jersey's own space, hook point at the origin). jersey() loads it instead of simulating; AZUR_RESIM=1 simulates.
 FLAT = float(os.environ.get('AZUR_JERSEY_FLAT', 0.55))   # depth of the frozen drapes (1 = as simulated)
+# 'smooth' builds each jersey as a gently rounded shell straight from its picture's outline (no folds at all); the
+# owner wants light folds after all, so 'frozen' (the round-3 drapes, calmed in frozen()) stays the default
+STYLE = os.environ.get('AZUR_JERSEY_STYLE', 'frozen')
 FROZEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frozen')
+
+
+def calm_sides(o, bins=60):
+    """Runde 22 (owner: light folds are fine, but the sides should not pinch in so hard at the waist): between the
+    armpits and the hem the shirt's half-width per height is lifted to a straight line from the chest to the hem;
+    vertices move outward in x by that ratio (their UVs stay, the fabric follows)."""
+    import numpy as np
+    co = np.array([v.co[:] for v in o.data.vertices])
+    z0, z1 = co[:, 2].min(), co[:, 2].max(); hgt = z1 - z0
+    ztop, zbot = z1 - hgt * 0.38, z0 + hgt * 0.02        # from under the sleeves down to the hem
+    edges = np.linspace(zbot, ztop, bins + 1); mid = (edges[:-1] + edges[1:]) / 2
+    half = np.array([np.abs(co[(co[:, 2] >= a) & (co[:, 2] < b), 0]).max() if ((co[:, 2] >= a) & (co[:, 2] < b)).any() else np.nan
+                     for a, b in zip(edges[:-1], edges[1:])])
+    ok = ~np.isnan(half)
+    if ok.sum() < 4: return
+    half = np.interp(mid, mid[ok], half[ok])
+    k = max(3, bins // 10)
+    top, bot = half[-k:].mean(), half[:k].mean()
+    target = np.maximum(half, bot + (top - bot) * (mid - mid[0]) / (mid[-1] - mid[0]))
+    ratio = np.clip(target / np.maximum(half, 1e-4), 1.0, 1.35)
+    # fade the correction in below the armpits and keep it smooth along the height
+    fade = np.clip((ztop - mid) / (hgt * 0.08), 0, 1); ratio = 1 + (ratio - 1) * fade
+    ratio = np.convolve(np.pad(ratio, 3, mode='edge'), np.ones(7) / 7, mode='valid')
+    for v in o.data.vertices:
+        if zbot <= v.co.z <= ztop: v.co.x *= float(np.interp(v.co.z, mid, ratio))
+    o.data.update()
 
 
 def frozen(name, front_path, back_path, knit_normal=None, hanger_mat=None):
@@ -251,6 +280,7 @@ def frozen(name, front_path, back_path, knit_normal=None, hanger_mat=None):
     # Runde 22 (owner): the jerseys hang calmer, only slightly 3D: the drape's depth (front to back, local y) pressed
     # toward the hanger's plane; outline, folds and UVs stay
     o.data.transform(Matrix.Diagonal((1.0, FLAT, 1.0, 1.0))); o.data.update()
+    calm_sides(o)
     # front / back faces from the imported material slots, then the room's own materials (knit normal, sheen)
     bm = bmesh.new(); bm.from_mesh(o.data)                    # glTF splits vertices at the UV seam: weld the shell again
     bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-5); bm.to_mesh(o.data); bm.free()
@@ -278,11 +308,45 @@ def frozen(name, front_path, back_path, knit_normal=None, hanger_mat=None):
     return o, hg
 
 
+def smooth(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.74):
+    """The jersey as its picture shows it, gently rounded (thickest in the middle, thin at the outline), on its hanger:
+    smooth fabric, no wrinkles. The pictures are the shop's ghost-mannequin shots or the owner's photos bent onto them
+    (sleeves slightly down), so the outline already hangs like a shirt."""
+    o, info = panels(name, front_path, back_path, h=h, depth=SMOOTH_DEPTH)
+    o['front'], o['back'] = info['front'], info['back']
+    width = min(0.40, info['body_w'] * 0.86)
+    span = [(x, z) for x, z in info['shoulder'] if abs(x) < width / 2]
+    collar = info['collar_top']
+    tip = min(z for _, z in span) if span else collar - 0.05
+    slope = math.degrees(math.atan2(max(0.01, collar - tip), width / 2))
+    hg = wood_hanger(name + '_hanger', width=width, slope_deg=min(24.0, max(8.0, slope + 2)), mat=hanger_mat)
+    hg.data.transform(Matrix.Translation((0, 0, collar - TUNE['hanger_drop']))); hg.location = (0, 0, 0)
+    # a slight curve, the way a shirt on a hanger bellies out a little at the chest and falls back at the hem
+    for v in o.data.vertices:
+        t = min(1.0, max(0.0, -v.co.z / h))
+        v.co.y -= 0.018 * math.sin(math.pi * min(1.0, t * 1.4))
+    o.data.update()
+    materials(o, name, knit_normal)
+    o.name, hg.name = name, name + '_hanger'; o.data.name, hg.data.name = name, name + '_hanger'
+    sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
+    sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1
+    print(f'jersey {name}: smooth shell from the picture ({len(o.data.vertices)} vertices)', flush=True)
+    return o, hg
+
+
+SMOOTH_DEPTH = 0.06
+
+
 def jersey(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.74, frames=None):
     """Build shell + hanger, drape, return (jersey object, hanger object). Origin = hook point at the top of the collar."""
+    if STYLE == 'smooth' and not os.environ.get('AZUR_RESIM'):
+        return smooth(name, front_path, back_path, knit_normal, hanger_mat, h)
     got = frozen(name, front_path, back_path, knit_normal, hanger_mat)
     if got:
         o, hg = got
+        # the small crumples softened a little (the outline stays); the larger folds remain, as the owner wants
+        sm = o.modifiers.new('calm', 'LAPLACIANSMOOTH'); sm.iterations = 3; sm.lambda_factor = 0.6
+        sm.lambda_border = 0.0; sm.use_volume_preserve = True; sm.use_normalized = True
         sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
         sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1
         return o, hg
