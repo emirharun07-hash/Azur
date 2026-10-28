@@ -39,7 +39,3 @@ Alles liegt im Ordner [`azur/`](azur):
 - Der Shop bleibt mit Passwort geschlossen, bis der Owner ihn öffnet.
 - Keine Passwörter oder Schlüssel in dieses Repo.
 
-## Früher
-
-Hier lag ursprünglich eine andere Idee (ein Süper-Lig-Fantasy-Manager). Sie ist nicht gelöscht, sondern liegt im Zweig
-[`alte-fantasy-app`](../../tree/alte-fantasy-app).
