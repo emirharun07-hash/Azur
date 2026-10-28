@@ -41,9 +41,12 @@ def main(kind):
     if kind == 'real': os.environ['AZUR_RESIM'] = '1'                       # new sewing patterns: drape them anew
     wood = bpy.data.materials.new('hanger'); wood.use_nodes = True
     wood.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.35, 0.2, 0.1, 1)
-    for i, k in enumerate(KEYS):
-        jo, hg = garment.jersey('jersey_' + k, *photos(kind, k), hanger_mat=wood)
-        mt = Matrix.Translation(((i - 1) * 0.62, 0, 1.9))
+    one = os.environ.get('AZUR_LAB_ONE')          # one jersey framed like a shop photo (portrait, close)
+    knit = os.path.join(ROOT, '.cache', 'ph', 'tex', 'cotton_jersey')
+    knit = next((os.path.join(knit, f) for f in sorted(os.listdir(knit)) if 'nor_gl' in f), None) if os.path.isdir(knit) else None
+    for i, k in enumerate([one] if one else KEYS):
+        jo, hg = garment.jersey('jersey_' + k, *photos(kind, k), knit_normal=knit, hanger_mat=wood)
+        mt = Matrix.Translation((0 if one else (i - 1) * 0.62, 0, 1.9))
         jo.matrix_world = mt; hg.matrix_world = mt
     # backdrop and light
     bpy.ops.mesh.primitive_plane_add(size=12, location=(0, 0.6, 1.5), rotation=(math.pi / 2, 0, 0))
@@ -53,6 +56,10 @@ def main(kind):
         bpy.ops.object.light_add(type='AREA', location=loc, rotation=rot); l = bpy.context.object; l.data.energy = en; l.data.size = 3
     bpy.ops.object.camera_add(location=(0, -4.2, 1.6), rotation=(math.radians(90), 0, 0)); cam = bpy.context.object
     cam.data.lens = 62; sc.camera = cam
+    if one:   # shop-photo framing: the shirt fills a portrait frame, a big soft light from the front
+        cam.location = (0, -2.2, 1.55); cam.data.lens = 70
+        bpy.ops.object.light_add(type='AREA', location=(0, -2.6, 1.8), rotation=(math.radians(90), 0, 0)); l = bpy.context.object
+        l.data.energy = 55; l.data.size = 2.5
     out = os.path.join(ROOT, 'previews', f"jerseys_{kind}{os.environ.get('AZUR_LAB_TAG', '')}.jpg"); os.makedirs(os.path.dirname(out), exist_ok=True)
     sc.render.image_settings.file_format = 'JPEG'; sc.render.filepath = out
     bpy.ops.render.render(write_still=True); print('wrote', out, flush=True)
