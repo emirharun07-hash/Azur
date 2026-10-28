@@ -28,27 +28,27 @@
      Trikots. Das Zimmer bleibt stehen (sticky), rutscht langsamer nach oben als die Seite und bekommt Tiefe (nahe Dinge
      wandern stärker als die Wand: azur-room.js, bindScrollAway und frame), kein Zoom; von unten kommt schneller die schwarze
      Ebene: ein niedriger, spröder Rand (80 px: sanftes Abdunkeln mit feinen Körnern, assets/azur-sand.webp aus
-     tools/make_sand.py), reines Schwarz (Runde 21: kürzer, 70svh), und unten derselbe Rand
+     tools/make_sand.py), reines Schwarz (Runde 21: kürzer, 70svh; Runde 23: nur noch 22svh, es nahm den Bildschirm ein), und unten derselbe Rand
      gespiegelt ins Weiß, etwas Weiß; dann die Trikots. Knapp zwei Bildschirme lang. Header: dunkle Schrift über dem Weiß
      (html.azur-light), fest, sobald das Weiß unter ihm ist (html.azur-past). Ohne Bewegung: alles untereinander. */
   .azur-fall { position: relative; z-index: 1; display: block; pointer-events: none; }
   .azur-fall__dust { display: block; height: 80px;
     background: url("{{ 'azur-sand.webp' | asset_url }}") 0 0 / 512px 80px repeat-x,
       linear-gradient(transparent, rgba(0, 0, 0, .12) 25%, rgba(0, 0, 0, .45) 55%, rgba(0, 0, 0, .85) 82%, #000); }
-  .azur-fall__grad { display: block; height: 70vh; height: 70svh; margin-top: -1px; background: #000; }
+  .azur-fall__grad { display: block; height: 22vh; height: 22svh; margin-top: -1px; background: #000; }
   /* unten derselbe sandige Rand wie oben, gespiegelt: aus dem Schwarz lösen sich Körner ins Weiß */
   .azur-fall__dust--end { margin-top: -1px; background-color: #fff; background-position: 197px 0, 0 0; transform: scaleY(-1); }
   /* Platz im Weißen, bevor die Trikots kommen (oben ist dann kein Schwarz mehr zu sehen) */
-  .azur-fall__white { display: block; height: 20vh; height: 20svh; margin-top: -1px; background: #fff; }
+  .azur-fall__white { display: block; height: 10vh; height: 10svh; margin-top: -1px; background: #fff; }
   @media (prefers-reduced-motion: no-preference) {
     .js .azur[data-hero] { position: sticky; top: 0; }
-    /* die Kamera: das Zimmer rutscht im ersten Bildschirm um drei Viertel nach oben, vom Browser mit dem Scrollen
+    /* die Kamera: das Zimmer rutscht in den ersten 60 % des Bildschirms um 45 % nach oben, vom Browser mit dem Scrollen
        selbst bewegt (flüssig); ohne diese Technik bewegt es azur-room.js */
     @supports (animation-timeline: scroll()) {
-      .js .azur[data-hero] .azur-world { animation: azur-cam linear both; animation-timeline: scroll(root); animation-range: 0 90vh; }
+      .js .azur[data-hero] .azur-world { animation: azur-cam linear both; animation-timeline: scroll(root); animation-range: 0 60vh; }
     }
   }
-  @keyframes azur-cam { to { translate: 0 -75vh; } }
+  @keyframes azur-cam { to { translate: 0 -45vh; } }
   html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views, .azur-dots) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--paper { display: none !important; }

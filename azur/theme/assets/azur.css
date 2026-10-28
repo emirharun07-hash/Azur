@@ -1245,7 +1245,8 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 
 /* 17. Runde 17: Gewinner der Design-Runden r6/r7 ================================ */
 /* Karten: das Trikot klein in einer FIFA-Karte aus feiner Linie (Kürzel oben links, Name über einem Strich, Größen) */
-.card--fifa { position: relative; width: min(100%, 16.5rem); margin-inline: auto; aspect-ratio: 300 / 420; }
+.card--fifa { position: relative; width: min(100%, clamp(18rem, 27vw, 27rem));   /* Runde 23: größer (es wirkte leer) */
+  margin-inline: auto; aspect-ratio: 300 / 420; }
 .card--fifa .card__link { position: absolute; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; justify-items: center; gap: 0.55rem;
   padding: 1.35rem 1.2rem 2.9rem; }
 .card__frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: var(--c-paper); stroke: var(--c-ink); stroke-width: 1;
@@ -1258,8 +1259,8 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .card__sizes { position: relative; font-size: 0.625rem; letter-spacing: 0.1em; color: var(--c-grey-text); }
 /* drei kleine Karten nebeneinander schon ab Tablet-Breite; Siegertreppchen: die mittlere Karte jeder Reihe steht höher */
 @media (min-width: 48em) {
-  .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s-4); padding-top: 3rem; }
-  .yz__grid > li:nth-child(3n + 2) { translate: 0 -3rem; }
+  .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s-5); padding-top: 4rem; }
+  .yz__grid > li:nth-child(3n + 2) { translate: 0 -4rem; }
 }
 
 /* Hinweise auf dem ersten Produktbild („Schnittzeichnung“): graue Linien von kurzen Notizen links und rechts zu den Stellen
@@ -1301,6 +1302,6 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
 .yz__more a:hover { text-decoration: underline; text-underline-offset: 0.3em; }
 /* zwei Karten (Städte): mittig nebeneinander, ohne Treppchen */
 @media (min-width: 48em) {
-  .yz__grid:has(> li:last-child:nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 16.5rem)); justify-content: center; column-gap: var(--s-8); }
+  .yz__grid:has(> li:last-child:nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 27rem)); justify-content: center; column-gap: var(--s-8); }
   .yz__grid:has(> li:last-child:nth-child(2)) > li { translate: none; }
 }

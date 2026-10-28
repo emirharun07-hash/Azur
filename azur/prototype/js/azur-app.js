@@ -614,7 +614,7 @@
         if (flag('azur-past', f.end - y <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
         const away = f.black - y <= 0;
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
-        if (!slideByCss && !this.reduced && !away) this.world.style.translate = `0 ${-Math.round(0.75 * Math.min(y, f.vh))}px`;
+        if (!slideByCss && !this.reduced && !away) this.world.style.translate = `0 ${-Math.round(0.75 * Math.min(y, 0.6 * f.vh))}px`;
       };
       window.addEventListener('scroll', update, { passive: true });
       let mq = false;
