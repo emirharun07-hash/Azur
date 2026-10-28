@@ -59,7 +59,8 @@ def main(kind):
     if one:   # shop-photo framing: the shirt fills a portrait frame, a big soft light from the front
         cam.location = (0, -2.2, 1.55); cam.data.lens = 70
         bpy.ops.object.light_add(type='AREA', location=(0, -2.6, 1.8), rotation=(math.radians(90), 0, 0)); l = bpy.context.object
-        l.data.energy = 55; l.data.size = 2.5
+        l.data.energy = 30; l.data.size = 2.5
+        sc.view_settings.look = 'AgX - Medium High Contrast'
     out = os.path.join(ROOT, 'previews', f"jerseys_{kind}{os.environ.get('AZUR_LAB_TAG', '')}.jpg"); os.makedirs(os.path.dirname(out), exist_ok=True)
     sc.render.image_settings.file_format = 'JPEG'; sc.render.filepath = out
     bpy.ops.render.render(write_still=True); print('wrote', out, flush=True)

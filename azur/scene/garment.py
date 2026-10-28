@@ -347,7 +347,7 @@ def smooth(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.7
     return o, hg
 
 
-SMOOTH_DEPTH = 0.06
+SMOOTH_DEPTH = float(os.environ.get('AZUR_JERSEY_DEPTH', 0.06))
 FOLDS = float(os.environ.get('AZUR_JERSEY_FOLDS', 0.006))   # depth of the soft folds in metres (0: none)
 
 
