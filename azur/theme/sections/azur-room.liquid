@@ -24,21 +24,35 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 23 (Owner: cleaner, kein Schwarz, nicht mittendrin anhalten): vom Zimmer zur Seite ist es ein Wisch wie am
-     Handy. Ab einer kleinen Strecke gleitet die Seite von selbst zu den Trikots (azur-room.js, bindScrollAway), zurück
-     genauso. Dabei bleibt das Zimmer etwas zurück (rutscht langsamer als die Seite: Tiefe) und dunkelt leicht ab; beides
-     bewegt der Browser mit dem Scrollen selbst (flüssig), ohne diese Technik azur-room.js. Ohne Bewegung: kein Gleiten. */
-  .azur-fall { display: block; height: 0; }
+  /* Runde 23/25 (Owner: cleaner, kein Schwarz, nicht mittendrin anhalten, beide Teile verbunden): vom Zimmer zur Seite
+     ist es ein Wisch wie am Handy. Ab einer kleinen Strecke gleitet die Seite von selbst zu den Trikots (azur-room.js,
+     bindScrollAway); zurück ins Zimmer erst, wenn man weit hochzieht, sonst gleitet sie zurück zu den Trikots.
+     Die Seite kommt als weißes Blatt mit runden Ecken und weichem Schatten über das Zimmer; das Zimmer bleibt zurück
+     (rutscht langsamer: Tiefe) und dunkelt leicht ab; die Trikots steigen etwas schneller als das Blatt nach oben und
+     kommen versetzt an. Alles bewegt der Browser mit dem Scrollen selbst (flüssig), ohne diese Technik azur-room.js
+     über --azur-t. Am Handy hat das Blatt oben etwas mehr Platz, damit das erste Trikot unter Header und Leiste frei steht. */
+  .azur-fall { --azur-lip: 28px; position: relative; z-index: 4; display: block; height: var(--azur-lip); margin-top: calc(-1 * var(--azur-lip));
+    background: var(--c-paper); border-radius: var(--azur-lip) var(--azur-lip) 0 0 !important;
+    box-shadow: 0 -26px 48px -18px rgb(0 0 0 / .55), 0 -1px 0 rgb(255 255 255 / .35); pointer-events: none; }
+  @media (max-width: 47.99em) { .azur-fall { height: calc(var(--azur-lip) + 3rem); } }
   .js .azur[data-hero]::after { content: ""; position: absolute; inset: 0; z-index: 3; background: #000; opacity: var(--azur-dim, 0);
     pointer-events: none; }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li { --azur-rise: 10vh; }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(2) { --azur-rise: 16vh; }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(n + 3) { --azur-rise: 22vh; }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: scroll()) {
       .js .azur[data-hero] .azur-world { animation: azur-cam linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
       .js .azur[data-hero]::after { animation: azur-dim linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+      .js .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li {
+        animation: azur-rise linear both; animation-timeline: scroll(root); animation-range: 0 var(--azur-end, 100vh); }
     }
+    html.azur-slide-js .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li {
+      transform: translateY(calc((1 - var(--azur-t, 1)) * var(--azur-rise))); }
   }
   @keyframes azur-cam { to { translate: 0 40vh; } }
   @keyframes azur-dim { to { opacity: .45; } }
+  @keyframes azur-rise { from { transform: translateY(var(--azur-rise)); } to { transform: none; } }
   html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views, .azur-dots) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--paper { display: none !important; }

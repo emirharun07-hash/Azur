@@ -608,11 +608,14 @@
       const f = this.fall = {};
       const measure = () => {
         f.vh = window.innerHeight || 1;
-        // where the shop starts, or as far as the page goes (a short shop on a tall iPad)
-        f.end = Math.min(mark.getBoundingClientRect().top + window.scrollY, document.documentElement.scrollHeight - f.vh);
+        // where the room has gone (the page's lip overlaps its foot), or as far as the page goes (a short shop on a tall iPad)
+        const lip = -parseFloat(getComputedStyle(mark).marginTop) || 0;
+        f.end = Math.min(mark.getBoundingClientRect().top + window.scrollY + lip, document.documentElement.scrollHeight - f.vh);
+        html.style.setProperty('--azur-end', Math.max(1, Math.round(f.end)) + 'px');     // the jerseys rise in over this stretch
         update();
       };
       const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
+      if (!slideByCss) html.classList.add('azur-slide-js');
       const update = () => {
         const y = window.scrollY, hb = parseFloat(html.style.getPropertyValue('--header-bottom')) || 0;
         this.diving = y > 4; flag('azur-diving', this.diving);
@@ -620,38 +623,49 @@
         if (flag('azur-past', f.end - y <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
         const away = y >= f.end - 1;
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
-        if (!slideByCss && !this.reduced && !away) {
-          const t = Math.min(1, y / f.vh); this.world.style.translate = `0 ${Math.round(0.4 * f.vh * t)}px`;
+        if (!slideByCss && !this.reduced && (!away || f.t < 1)) {
+          const t = f.t = Math.min(1, y / f.vh); this.world.style.translate = `0 ${Math.round(0.4 * f.vh * t)}px`;
           this.root.style.setProperty('--azur-dim', (0.45 * t).toFixed(3));
+          html.style.setProperty('--azur-t', Math.min(1, y / f.end).toFixed(3));
         }
       };
-      // the swipe: where the page rests between the room (0) and the shop (f.end) it glides on in the last direction
-      const SNAP_GO = 0.1;
-      let lastY = window.scrollY, dir = 0, touching = false, gliding = null, idle = 0;
+      /* The swipe (Runde 25): where the page rests between the room (0) and the shop (f.end) it glides on by itself.
+         Down from the room a short stretch is enough; up from the shop it only goes back into the room once the visitor
+         pulled well into it, otherwise it glides back to the jerseys (on a phone, looking at the top jersey must not
+         drop you into the room). The glide eases out of the visitor's own motion; a touch, the wheel or a key stops it. */
+      const GO_DOWN = 90, GO_UP = 0.4;
+      let lastY = window.scrollY, dir = 0, touching = false, glide = 0, idle = 0;
+      const stopGlide = () => { if (glide) { cancelAnimationFrame(glide); glide = 0; } };
       const glideTo = top => {
-        gliding = { top, until: performance.now() + 1400 };
-        window.scrollTo({ top, behavior: this.reduced ? 'auto' : 'smooth' });
+        stopGlide();
+        const y0 = window.scrollY, d = top - y0;
+        if (this.reduced || Math.abs(d) < 2) { window.scrollTo(0, top); return; }
+        const dur = Math.min(950, 560 + Math.abs(d) * 0.4), t0 = performance.now();
+        const step = now => {
+          const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+          window.scrollTo(0, Math.round(y0 + d * e));
+          glide = k < 1 ? requestAnimationFrame(step) : 0;
+        };
+        glide = requestAnimationFrame(step);
       };
       const settle = () => {
-        if (touching) return;
-        if (gliding && performance.now() < gliding.until) { idle = setTimeout(settle, gliding.until - performance.now() + 20); return; }
-        gliding = null;
+        if (touching || glide) return;
         const y = window.scrollY, end = f.end;
         if (y <= 1 || y >= end - 1) return;
-        const go = Math.min(SNAP_GO * end, 90);          // a short swipe is enough, on a tall iPad too
-        glideTo(dir >= 0 ? (y > go ? end : 0) : (y < end - go ? 0 : end));
+        glideTo(dir >= 0 ? (y > Math.min(0.1 * end, GO_DOWN) ? end : 0) : (y < end * (1 - GO_UP) ? 0 : end));
       };
       const onScroll = () => {
         const y = window.scrollY;
-        if (y !== lastY) dir = y > lastY ? 1 : -1;
+        if (y !== lastY && !glide) dir = y > lastY ? 1 : -1;
         lastY = y; update();
-        if (gliding && Math.abs(y - gliding.top) < 2) gliding = null;
-        clearTimeout(idle); idle = setTimeout(settle, gliding ? 250 : 110);     // a glide cut short goes on
+        clearTimeout(idle); if (!glide) idle = setTimeout(settle, 110);
       };
       window.addEventListener('scroll', onScroll, { passive: true });
-      if ('onscrollend' in window) window.addEventListener('scrollend', () => { gliding = null; clearTimeout(idle); idle = setTimeout(settle, 30); });
-      window.addEventListener('touchstart', () => { touching = true; }, { passive: true });
+      if ('onscrollend' in window) window.addEventListener('scrollend', () => { clearTimeout(idle); if (!glide) idle = setTimeout(settle, 30); });
+      window.addEventListener('touchstart', () => { touching = true; stopGlide(); }, { passive: true });
       window.addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(settle, 110); }, { passive: true });
+      window.addEventListener('wheel', stopGlide, { passive: true });
+      window.addEventListener('keydown', stopGlide);
       let mq = false;
       window.addEventListener('resize', () => { if (!mq) { mq = true; requestAnimationFrame(() => { mq = false; measure(); }); } });
       window.addEventListener('load', measure); measure();
