@@ -595,28 +595,63 @@
        only reads scrollY against offsets measured on resize (no layout while scrolling) and sets the classes: html.azur-
        diving hides the room's hints, chips and dots, html.azur-light gives the header dark type over the white,
        html.azur-past makes it solid (azur.js listens for `azur-hero`); while the plane covers the room it is not drawn. */
+    /* Runde 23 (owner: cleaner, no black, never stop halfway): room -> shop is one swipe. Once the visitor has scrolled
+       a little way (SNAP_GO of the room) and lets go, the page glides on to the shop by itself (and back up the same
+       way); a stop in between never stays. The room stays a little behind (.azur-world slides down 0.4 of the window
+       while the page goes up one: depth) and dims (::after), both CSS scroll-driven animations where the browser has
+       them, else this handler moves the world. html.azur-diving hides the room's hints, chips and dots, html.azur-light
+       gives the header dark type over the white, html.azur-past makes it solid (azur.js listens for `azur-hero`). */
     bindScrollAway() {
-      const html = document.documentElement, fall = this.root.parentElement.querySelector('.azur-fall');
-      if (!fall) return;
-      const black = fall.querySelector('.azur-fall__grad'), end = fall.querySelector('.azur-fall__dust--end');
+      const html = document.documentElement, mark = this.root.parentElement.querySelector('.azur-fall');
+      if (!mark) return;
       const slideByCss = !!(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'));
       const f = this.fall = {};
       const measure = () => {
-        const y = window.scrollY;
-        f.vh = window.innerHeight || 1; f.black = black.getBoundingClientRect().top + y; f.end = end.getBoundingClientRect().bottom + y;
+        f.vh = window.innerHeight || 1;
+        // where the shop starts, or as far as the page goes (a short shop on a tall iPad)
+        f.end = Math.min(mark.getBoundingClientRect().top + window.scrollY, document.documentElement.scrollHeight - f.vh);
         update();
       };
       const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
       const update = () => {
         const y = window.scrollY, hb = parseFloat(html.style.getPropertyValue('--header-bottom')) || 0;
         this.diving = y > 4; flag('azur-diving', this.diving);
-        flag('azur-light', f.end - y - hb / 2 < 40);       // the mirrored edge is mostly white in its lower half
+        flag('azur-light', f.end - y - hb / 2 < 40);
         if (flag('azur-past', f.end - y <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
-        const away = f.black - y <= 0;
+        const away = y >= f.end - 1;
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
-        if (!slideByCss && !this.reduced && !away) this.world.style.translate = `0 ${-Math.round(0.75 * Math.min(y, 0.6 * f.vh))}px`;
+        if (!slideByCss && !this.reduced && !away) {
+          const t = Math.min(1, y / f.vh); this.world.style.translate = `0 ${Math.round(0.4 * f.vh * t)}px`;
+          this.root.style.setProperty('--azur-dim', (0.45 * t).toFixed(3));
+        }
       };
-      window.addEventListener('scroll', update, { passive: true });
+      // the swipe: where the page rests between the room (0) and the shop (f.end) it glides on in the last direction
+      const SNAP_GO = 0.1;
+      let lastY = window.scrollY, dir = 0, touching = false, gliding = null, idle = 0;
+      const glideTo = top => {
+        gliding = { top, until: performance.now() + 1400 };
+        window.scrollTo({ top, behavior: this.reduced ? 'auto' : 'smooth' });
+      };
+      const settle = () => {
+        if (touching) return;
+        if (gliding && performance.now() < gliding.until) { idle = setTimeout(settle, gliding.until - performance.now() + 20); return; }
+        gliding = null;
+        const y = window.scrollY, end = f.end;
+        if (y <= 1 || y >= end - 1) return;
+        const go = Math.min(SNAP_GO * end, 90);          // a short swipe is enough, on a tall iPad too
+        glideTo(dir >= 0 ? (y > go ? end : 0) : (y < end - go ? 0 : end));
+      };
+      const onScroll = () => {
+        const y = window.scrollY;
+        if (y !== lastY) dir = y > lastY ? 1 : -1;
+        lastY = y; update();
+        if (gliding && Math.abs(y - gliding.top) < 2) gliding = null;
+        clearTimeout(idle); idle = setTimeout(settle, gliding ? 250 : 110);     // a glide cut short goes on
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      if ('onscrollend' in window) window.addEventListener('scrollend', () => { gliding = null; clearTimeout(idle); idle = setTimeout(settle, 30); });
+      window.addEventListener('touchstart', () => { touching = true; }, { passive: true });
+      window.addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(settle, 110); }, { passive: true });
       let mq = false;
       window.addEventListener('resize', () => { if (!mq) { mq = true; requestAnimationFrame(() => { mq = false; measure(); }); } });
       window.addEventListener('load', measure); measure();
