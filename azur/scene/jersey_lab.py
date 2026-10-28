@@ -53,7 +53,7 @@ def main(kind):
         bpy.ops.object.light_add(type='AREA', location=loc, rotation=rot); l = bpy.context.object; l.data.energy = en; l.data.size = 3
     bpy.ops.object.camera_add(location=(0, -4.2, 1.6), rotation=(math.radians(90), 0, 0)); cam = bpy.context.object
     cam.data.lens = 62; sc.camera = cam
-    out = os.path.join(ROOT, 'previews', f'jerseys_{kind}.jpg'); os.makedirs(os.path.dirname(out), exist_ok=True)
+    out = os.path.join(ROOT, 'previews', f"jerseys_{kind}{os.environ.get('AZUR_LAB_TAG', '')}.jpg"); os.makedirs(os.path.dirname(out), exist_ok=True)
     sc.render.image_settings.file_format = 'JPEG'; sc.render.filepath = out
     bpy.ops.render.render(write_still=True); print('wrote', out, flush=True)
 

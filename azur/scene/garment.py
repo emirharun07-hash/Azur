@@ -231,29 +231,40 @@ STYLE = os.environ.get('AZUR_JERSEY_STYLE', 'frozen')
 FROZEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frozen')
 
 
+SIDES = os.environ.get('AZUR_JERSEY_SIDES', 'line')      # 'line': the waist filled to a straight side; 'off'
+HEM = float(os.environ.get('AZUR_JERSEY_HEM', 1.0))       # the hem's width relative to the drape (<1 takes it in)
+
+
 def calm_sides(o, bins=60):
-    """Runde 22 (owner: light folds are fine, but the sides should not pinch in so hard at the waist): between the
-    armpits and the hem the shirt's half-width per height is lifted to a straight line from the chest to the hem;
-    vertices move outward in x by that ratio (their UVs stay, the fabric follows)."""
+    """Runde 22 (owner: light folds are fine, but the sides should not pinch in so hard at the waist): below the
+    armpits the body's half-width per height is lifted to a straight line from the armpit to the hem; vertices move in
+    x by that ratio (their UVs stay, the fabric follows). Runde 22b (owner: r22-4 far too wide at the sides): the line
+    starts at the body under the armpit, no longer at the sleeves' width; HEM < 1 narrows the hem toward it."""
     import numpy as np
+    if SIDES == 'off' and HEM == 1.0: return
     co = np.array([v.co[:] for v in o.data.vertices])
     z0, z1 = co[:, 2].min(), co[:, 2].max(); hgt = z1 - z0
-    ztop, zbot = z1 - hgt * 0.38, z0 + hgt * 0.02        # from under the sleeves down to the hem
-    edges = np.linspace(zbot, ztop, bins + 1); mid = (edges[:-1] + edges[1:]) / 2
+    edges = np.linspace(z0, z1, bins + 1); mid = (edges[:-1] + edges[1:]) / 2
     half = np.array([np.abs(co[(co[:, 2] >= a) & (co[:, 2] < b), 0]).max() if ((co[:, 2] >= a) & (co[:, 2] < b)).any() else np.nan
                      for a, b in zip(edges[:-1], edges[1:])])
     ok = ~np.isnan(half)
-    if ok.sum() < 4: return
+    if ok.sum() < 8: return
     half = np.interp(mid, mid[ok], half[ok])
-    k = max(3, bins // 10)
-    top, bot = half[-k:].mean(), half[:k].mean()
-    target = np.maximum(half, bot + (top - bot) * (mid - mid[0]) / (mid[-1] - mid[0]))
-    ratio = np.clip(target / np.maximum(half, 1e-4), 1.0, 1.35)
-    # fade the correction in below the armpits and keep it smooth along the height
-    fade = np.clip((ztop - mid) / (hgt * 0.08), 0, 1); ratio = 1 + (ratio - 1) * fade
+    # the armpit: going up from the hem, where the outline jumps out to the sleeves
+    arm = next((i for i in range(bins // 5, bins - 2) if half[i] > 1.3 * half[i - 2]), int(bins * 0.55))
+    top_i = max(2, arm - 3); bot_i = 1
+    ztop, zbot = mid[top_i], mid[bot_i]
+    sel = slice(bot_i, top_i + 1); m = mid[sel]; h = half[sel]
+    t = (m - zbot) / max(ztop - zbot, 1e-6)                   # 0 at the hem, 1 under the armpit
+    top, bot = h[-1], h[0]
+    target = h.copy()
+    if SIDES == 'line': target = np.maximum(h, bot + (top - bot) * t)
+    target = target * (HEM + (1 - HEM) * t)                   # the hem taken in, nothing at the armpit
+    ratio = np.clip(target / np.maximum(h, 1e-4), 0.6, 1.35)
     ratio = np.convolve(np.pad(ratio, 3, mode='edge'), np.ones(7) / 7, mode='valid')
+    ratio = 1 + (ratio - 1) * np.clip((ztop - m) / (hgt * 0.06), 0, 1)   # fade in under the armpit
     for v in o.data.vertices:
-        if zbot <= v.co.z <= ztop: v.co.x *= float(np.interp(v.co.z, mid, ratio))
+        if v.co.z <= ztop: v.co.x *= float(np.interp(v.co.z, m, ratio))
     o.data.update()
 
 
@@ -325,6 +336,8 @@ def smooth(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.7
     for v in o.data.vertices:
         t = min(1.0, max(0.0, -v.co.z / h))
         v.co.y -= 0.018 * math.sin(math.pi * min(1.0, t * 1.4))
+        # Runde 22b (owner: light folds, like the real shirt hanging): a few soft vertical folds, growing toward the hem
+        if FOLDS: v.co.y += FOLDS * t ** 1.3 * (math.sin(v.co.x * 41 + 0.7) * 0.6 + math.sin(v.co.x * 23 - v.co.z * 4 + 2.1) * 0.4)
     o.data.update()
     materials(o, name, knit_normal)
     o.name, hg.name = name, name + '_hanger'; o.data.name, hg.data.name = name, name + '_hanger'
@@ -335,6 +348,7 @@ def smooth(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.7
 
 
 SMOOTH_DEPTH = 0.06
+FOLDS = float(os.environ.get('AZUR_JERSEY_FOLDS', 0.006))   # depth of the soft folds in metres (0: none)
 
 
 def jersey(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.74, frames=None):
