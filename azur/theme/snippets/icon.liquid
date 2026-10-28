@@ -1,0 +1,13 @@
+{%- comment -%}
+  Linien-Symbole, 24 × 24, Strich in Textfarbe. Immer mit sichtbarem oder Screenreader-Text daneben.
+  Parameter: name  menu | close | search | account | bag
+{%- endcomment -%}
+<svg class="icon icon--{{ name }}" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square">
+  {%- case name -%}
+    {%- when 'menu' -%}<path d="M3 8h18M3 16h18"/>
+    {%- when 'close' -%}<path d="M5 5l14 14M19 5L5 19"/>
+    {%- when 'search' -%}<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
+    {%- when 'account' -%}<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+    {%- when 'bag' -%}<path d="M4 8h16v13H4z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/>
+  {%- endcase -%}
+</svg>

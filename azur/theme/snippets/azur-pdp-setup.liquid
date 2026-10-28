@@ -1,0 +1,44 @@
+{%- comment -%}
+  Runde 19 (Owner): ein Klick auf ein Trikot im Shop öffnet genau die Produktansicht aus dem Zimmer (Grund in der
+  Trikotfarbe, das Trikot groß, die Größen auf dem Feld, unten die Kaufleiste); auf der Produktseite ist diese Ansicht
+  die Seite selbst. Code: assets/azur-pdp.js (aus azur/prototype/js, tools/build_theme.py), Aussehen: assets/azur-room.css.
+  Parameter:
+    list   Trikots der Seite (Shop)
+    one    das Trikot der Produktseite (die Ansicht ist dann die Seite; schließen geht zurück)
+    back   wohin „schließen“ führt, wenn man nicht aus dem Shop kam
+{%- endcomment -%}
+{%- liquid
+  assign shipping = 'Versand in Deutschland'
+  if settings.shipping_cost != blank
+    assign shipping = 'Versand ' | append: settings.shipping_cost
+  endif
+-%}
+{{ 'azur-room.css' | asset_url | stylesheet_tag }}
+{%- if one -%}
+  <style>
+    .azur-pdp.is-page { transition: none; }
+    /* die alte Produktseite liegt unter der Ansicht; bis das Skript sie öffnet, bleibt sie unsichtbar (nach 4 s doch) */
+    @keyframes azur-pdp-fallback { to { visibility: visible; } }
+    .js .pdp--yz { visibility: hidden; animation: azur-pdp-fallback 0s 4s forwards; }
+    html.azur-pdp-page .pdp--yz { animation: none; }
+  </style>
+{%- endif -%}
+<script>
+  window.AZUR_SETUP = function (A) {
+    A.config.shopify = true;
+    A.formatPrice = function (v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; };
+    A.store = { name: {{ shop.name | json }}, shipping: {{ shipping | json }}, freeShippingFrom: {{ settings.free_shipping_threshold | default: 0 | json }}, cartCount: {{ cart.item_count | json }} };
+    A.config.copy.toProductPage = 'Zur Produktseite';
+    A.config.copy.adding = 'Wird hinzugefügt …';
+    A.config.copy.close = 'Schließen';
+    A.pdp = { page: {% if one %}{{ one.handle | json }}{% else %}null{% endif %}, shop: {{ back | default: routes.all_products_collection_url | default: '/collections/all' | json }} };
+    A.products = [
+      {%- if one -%}
+        {%- render 'azur-pdp-item', p: one -%}
+      {%- else -%}
+        {%- for p in list -%}{%- render 'azur-pdp-item', p: p -%}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
+      {%- endif -%}
+    ];
+  };
+</script>
+<script src="{{ 'azur-pdp.js' | asset_url }}" defer></script>

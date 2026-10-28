@@ -1,0 +1,23 @@
+{%- comment -%}
+  Teaser-Bild neben der Anmeldung für Drops. Standard: das Frankfurt-Trikot von vorne, freigestellt und groß
+  angeschnitten auf der ruhigen Bildfläche (Adler, Signatur, FRANKFURT-Band). Mit eigenem Bild: füllt die Fläche.
+  Parameter: image   Shopify-Bild (optional)
+             label   kleine Zeile unten links, z. B. „Frankfurt 069“ (optional)
+             class
+             eager   true = sofort laden (erster Bildschirm)
+{%- endcomment -%}
+{%- liquid
+  assign teaser_alt = image.alt | default: ''
+  assign teaser_loading = 'lazy'
+  if eager
+    assign teaser_loading = 'eager'
+  endif
+-%}
+<figure class="teaser{% if image %} teaser--photo{% endif %}{% if class %} {{ class }}{% endif %}">
+  {%- if image -%}
+    {{ image | image_url: width: 1600 | image_tag: class: 'teaser__img', widths: '600, 900, 1200, 1600', sizes: '(min-width: 1024px) 45vw, 100vw', loading: teaser_loading, alt: teaser_alt }}
+  {%- else -%}
+    <img class="teaser__img teaser__img--cut" src="{{ 'campaign-frankfurt.webp' | asset_url }}" width="1138" height="1187" alt="Frankfurt-Trikot von vorne: Adler, Azur-Signatur, grünes FRANKFURT-Band" loading="{{ teaser_loading }}" decoding="async">
+  {%- endif -%}
+  {%- if label != blank -%}<figcaption class="teaser__label">{{ label }}</figcaption>{%- endif -%}
+</figure>

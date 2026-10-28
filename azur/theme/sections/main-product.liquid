@@ -1,0 +1,275 @@
+{%- comment -%}
+  Produktseite (Runde 13, schlicht nach yeezy.com): ein großes Bild in der Mitte auf Weiß, links und rechts Pfeile,
+  darunter Punkte für die Bilder; darunter mittig der Name, der Preis, die Größen und ein „+“ (in den Warenkorb).
+  Versand/Rückgabe klein darunter, Fit/Model/Material/Pflege und Beschreibung zum Aufklappen. Klick aufs Bild vergrößert.
+  Runde 12: kein Steuerhinweis neben dem Preis (er steht im Footer, im Warenkorb und im Checkout); Brotkrumen beginnen
+  mit der Startseite.
+  Ab 1024 px: alle Bilder groß untereinander (erstes über die volle Breite, dann zu zweit), der Kaufbereich läuft mit.
+  Darunter: wischen mit Zähler; auf dem Handy erscheint unten eine feste Kaufleiste, sobald der Kaufknopf aus dem Bild ist.
+  Ansichtsnamen kommen aus den Alt-Texten: "…Vorderseite" → Vorne, "…Rückseite" → Hinten, "Detail…" → Detail,
+  "…Seitenansicht…" → Seite, "3/4" → 3/4.
+{%- endcomment -%}
+{%- liquid
+  capture label
+    render 'product-field', product: product, field: 'label'
+  endcapture
+  capture colorway
+    render 'product-field', product: product, field: 'colorway'
+  endcapture
+  capture motto
+    render 'product-field', product: product, field: 'motto'
+  endcapture
+
+  assign shipping_page = pages[settings.shipping_page_handle]
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+  # Brotkrumen: Produkte der Navigations-Kategorie (z. B. Nationaltrikots) zeigen dorthin
+  assign crumb = shop_coll
+  assign cat = settings.nav_collection
+  if cat.url != blank
+    for c in product.collections
+      if c.handle == cat.handle
+        assign crumb = cat
+      endif
+    endfor
+  endif
+  assign form_id = 'buy-' | append: section.id
+  assign images = product.media | where: 'media_type', 'image'
+
+  # Runde 17: Hinweise auf dem ersten Bild (Einstellung „Hinweise am Trikot“: Handle | x % | y % | Titel | Text)
+  assign notes_count = 0
+  assign notes_marks = ''
+  assign notes_items = ''
+  assign note_lines = section.settings.notes | newline_to_br | split: '<br />'
+  for line in note_lines
+    assign parts = line | strip | split: '|'
+    assign h = parts[0] | strip
+    if h == product.handle and parts.size > 4
+      assign notes_count = notes_count | plus: 1
+      assign nx = parts[1] | strip | plus: 0 | divided_by: 100.0
+      assign ny = parts[2] | strip | plus: 0 | divided_by: 100.0
+      assign ntitle = parts[3] | strip | escape
+      assign ntext = parts[4] | strip | escape
+      assign side = 'r'
+      if nx <= 0.5
+        assign side = 'l'
+      endif
+      capture mark
+        echo '<span class="note note--' | append: side | append: '" style="--x:' | append: nx | append: ';--y:' | append: ny | append: '">'
+        echo '<i class="note__line"></i><i class="note__dot" data-n="' | append: notes_count | append: '"></i>'
+        echo '<span class="note__label"><b>0' | append: notes_count | append: ' ' | append: ntitle | append: '</b>' | append: ntext | append: '</span></span>'
+      endcapture
+      assign notes_marks = notes_marks | append: mark
+      assign notes_items = notes_items | append: '<li><b>' | append: ntitle | append: '</b>' | append: ntext | append: '</li>'
+    endif
+  endfor
+-%}
+
+<article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}">
+  <nav class="crumbs wrap" aria-label="Brotkrumen">
+    <ol>
+      <li><a class="link" href="{{ routes.root_url }}">Startseite</a></li>
+      <li><a class="link" href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+      <li aria-current="page">{{ label }}</li>
+    </ol>
+  </nav>
+
+  <section class="gallery" aria-label="Bilder: {{ label }}" data-gallery>
+    <div class="gallery__stage">
+      {%- if images.size > 1 -%}
+        <button class="gallery__arrow gallery__arrow--prev" type="button" data-gallery-prev>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span class="sr-only">Vorheriges Bild</span>
+        </button>
+      {%- endif -%}
+      <ul class="gallery__track" data-track tabindex="0" aria-label="Produktbilder. Mit den Pfeiltasten wechseln.">
+        {%- for media in images -%}
+          {%- liquid
+            assign a = media.alt | downcase
+            assign head = a | slice: 0, 6
+            assign view = 'Bild ' | append: forloop.index
+            if a contains '3/4'
+              assign view = '3/4'
+            elsif head == 'detail'
+              assign view = 'Detail'
+            elsif a contains 'seitenansicht'
+              assign view = 'Seite'
+            elsif a contains 'rückseite' or a contains 'hinten'
+              assign view = 'Hinten'
+            elsif a contains 'vorderseite' or a contains 'vorne'
+              assign view = 'Vorne'
+            elsif forloop.first
+              assign view = 'Vorne'
+            endif
+            assign loading = 'lazy'
+            if forloop.first
+              assign loading = 'eager'
+            endif
+          -%}
+          <li class="gallery__slide" data-view="{{ view }}" aria-label="{{ forloop.index }} von {{ forloop.length }}: {{ view }}">
+            <button class="gallery__zoom" type="button" data-zoom="{{ media | image_url: width: 2400 }}" data-zoom-alt="{{ media.alt | escape }}">
+              {{
+                media
+                | image_url: width: 1600
+                | image_tag:
+                  widths: '480, 720, 960, 1200, 1600',
+                  sizes: '(min-width: 1024px) 44vw, 90vw',
+                  loading: loading,
+                  fetchpriority: 'auto',
+                  alt: media.alt
+              }}
+              <span class="sr-only">Vergrößern</span>
+            </button>
+            {%- if forloop.first and notes_count > 0 -%}<div class="notes" aria-hidden="true">{{ notes_marks }}</div>{%- endif -%}
+          </li>
+        {%- else -%}
+          <li class="gallery__slide">{{ 'product-apparel-1' | placeholder_svg_tag: 'gallery__placeholder' }}</li>
+        {%- endfor -%}
+      </ul>
+      {%- if images.size > 1 -%}
+        <button class="gallery__arrow gallery__arrow--next" type="button" data-gallery-next>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="sr-only">Nächstes Bild</span>
+        </button>
+      {%- endif -%}
+    </div>
+    {%- if images.size > 1 -%}
+      <div class="gallery__dots" role="group" aria-label="Bild wählen">
+        {%- for media in images -%}
+          <button class="gallery__dot" type="button" data-go="{{ forloop.index0 }}"{% if forloop.first %} aria-current="true"{% endif %}><span class="sr-only">Bild {{ forloop.index }}</span></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </section>
+  {%- if notes_count > 0 -%}<ol class="notes__list" aria-label="Details am Trikot">{{ notes_items }}</ol>{%- endif -%}
+
+  <div class="pdp__info">
+    <h1 class="pdp__title">{{ label }}</h1>
+    <p class="pdp__price" data-price>{% render 'price', amount: product.selected_or_first_available_variant.price %}</p>
+
+    {%- form 'product', product, id: form_id, class: 'pdp__buy', data-buy: '' -%}
+      {% render 'size-picker', product: product, form_id: form_id %}
+      <p class="pdp__error" data-buy-error role="alert" hidden></p>
+      <button class="pdp__add" type="submit" name="add" data-buy-btn{% unless product.available %} disabled{% endunless %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+        <span class="sr-only" data-buy-label>{% if product.available %}In den Warenkorb{% else %}Ausverkauft{% endif %}</span>
+      </button>
+      <p class="pdp__status" data-buy-status role="status"></p>
+    {%- endform -%}
+
+    {% render 'trust-line', class: 'pdp__trust' %}
+
+    {%- if motto != blank -%}
+      <p class="pdp__motto">{{ motto }}</p>
+    {%- endif -%}
+
+      {%- liquid
+        assign f_fit = product.metafields.custom.fit.value
+        assign f_model = product.metafields.custom.model.value
+        assign f_material = product.metafields.custom.material.value
+        assign f_care = product.metafields.custom.care.value
+        assign has_facts = false
+        if f_fit != blank or f_model != blank or f_material != blank or f_care != blank or request.design_mode
+          assign has_facts = true
+        endif
+      -%}
+      {%- if has_facts -%}
+        <dl class="facts pdp__facts">
+          {%- if f_fit != blank -%}
+            <div class="facts__row"><dt>Fit</dt><dd>{{ f_fit | escape }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Fit</dt><dd>{% render 'placeholder', text: 'Metafeld custom.fit fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_model != blank -%}
+            <div class="facts__row"><dt>Model</dt><dd>{{ f_model | escape }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Model</dt><dd>{% render 'placeholder', text: 'Metafeld custom.model fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_material != blank -%}
+            <div class="facts__row"><dt>Material</dt><dd>{{ f_material | escape | newline_to_br }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Material</dt><dd>{% render 'placeholder', text: 'Metafeld custom.material fehlt' %}</dd></div>
+          {%- endif -%}
+          {%- if f_care != blank -%}
+            <div class="facts__row"><dt>Pflege</dt><dd>{{ f_care | escape | newline_to_br }}</dd></div>
+          {%- elsif request.design_mode -%}
+            <div class="facts__row"><dt>Pflege</dt><dd>{% render 'placeholder', text: 'Metafeld custom.care fehlt' %}</dd></div>
+          {%- endif -%}
+        </dl>
+      {%- endif -%}
+
+      <div class="pdp__more">
+        {%- comment -%} leer: versteckt, die Admin-Bearbeitung (azur/admin) blendet sie zum Schreiben ein {%- endcomment -%}
+        <details class="acc" open{% if product.description == blank %} hidden{% endif %}>
+          <summary class="acc__head">Beschreibung</summary>
+          <div class="acc__body rte" data-azur-edit="product" data-product-id="{{ product.id }}">{{ product.description }}</div>
+        </details>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign has_link = false
+            if block.settings.show_shipping_link and shipping_page.url != blank
+              assign has_link = true
+            endif
+            if block.settings.text == blank and has_link == false
+              continue
+            endif
+          -%}
+          <details class="acc" {{ block.shopify_attributes }}{% if block.settings.open %} open{% endif %}>
+            <summary class="acc__head">{{ block.settings.title }}</summary>
+            <div class="acc__body rte">
+              {{ block.settings.text }}
+              {%- if has_link -%}
+                <p><a class="link acc__link" href="{{ shipping_page.url }}">{{ shipping_page.title }}</a></p>
+              {%- endif -%}
+            </div>
+          </details>
+        {%- endfor -%}
+      </div>
+  </div>
+
+  <dialog class="zoom" data-zoom-dialog aria-label="Bild vergrößert">
+    <button class="zoom__close" type="button" data-zoom-close>Schließen</button>
+    <div class="zoom__pane"><img class="zoom__img" alt="" width="2400" height="2400" data-zoom-img></div>
+  </dialog>
+</article>
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+{%- comment -%}
+  Runde 19 (Owner): die Produktseite sieht aus wie die Produktansicht im Zimmer und verhält sich so (assets/azur-pdp.js
+  öffnet sie über dieser Seite; schließen geht zurück oder in den Shop). Ohne JavaScript bleibt die Seite darunter.
+{%- endcomment -%}
+{%- liquid
+  assign back = shop_coll.url
+  for c in product.collections
+    if c.handle == 'staedtetrikots' or c.handle == 'nationaltrikots'
+      assign back = c.url
+    endif
+  endfor
+-%}
+{%- render 'azur-pdp-setup', one: product, back: back -%}
+
+{% schema %}
+{
+  "name": "Produkt",
+  "settings": [
+    { "type": "textarea", "id": "notes", "label": "Hinweise am Trikot (erstes Bild)",
+      "info": "Eine Zeile pro Hinweis: Handle | x in % | y in % | Titel | Text. x und y zählen im quadratischen Vorderseiten-Bild von links oben. Nur Angaben eintragen, die stimmen.",
+      "default": "brasilien-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, grün abgesetzt\nbrasilien-trikot-azur-collection | 40 | 34 | Signatur | Azur-Schriftzug auf der Brust\nbrasilien-trikot-azur-collection | 61 | 32 | Wappen | Wappen mit fünf Sternen, gestickt\nbrasilien-trikot-azur-collection | 78 | 45 | Ärmel | Streifen an den Ärmeln, grünes Bündchen\ndeutschland-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, schwarz abgesetzt\ndeutschland-trikot-azur-collection | 39 | 33 | Signatur | Azur-Schriftzug auf der Brust\ndeutschland-trikot-azur-collection | 63 | 33 | Wappen | Adler mit vier Sternen, gestickt\ndeutschland-trikot-azur-collection | 80 | 45 | Ärmel | Drei Streifen, schwarzes Bündchen\nturkei-trikot-azur-collection | 50 | 19 | Kragen | Rundkragen in Weiß\nturkei-trikot-azur-collection | 39 | 32 | Signatur | Azur-Schriftzug auf der Brust\nturkei-trikot-azur-collection | 63 | 31 | Emblem | Halbmond und Stern, gestickt\nturkei-trikot-azur-collection | 31 | 83 | Etikett | Azur-Etikett am Saum" }
+  ],
+  "blocks": [
+    {
+      "type": "collapsible",
+      "name": "Aufklapper",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Versand & Rückgabe" },
+        { "type": "richtext", "id": "text", "label": "Text", "info": "Nur bestätigte Angaben eintragen. Leer = Aufklapper wird ausgeblendet." },
+        { "type": "checkbox", "id": "show_shipping_link", "label": "Link zur Versandseite anhängen (wenn veröffentlicht)", "default": false },
+        { "type": "checkbox", "id": "open", "label": "Offen anzeigen", "default": false }
+      ]
+    }
+  ]
+}
+{% endschema %}

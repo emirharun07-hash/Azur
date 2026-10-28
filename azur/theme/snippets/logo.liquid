@@ -1,0 +1,17 @@
+{%- comment -%}
+  AZUR-Signatur, freigestellt aus der gestickten Originalsignatur (assets/azur-logo-*.webp).
+  Parameter:
+    tone   ink (Anthrazit, für helle Flächen) | paper (Creme, für dunkle Flächen)
+    class  zusätzliche Klasse
+    alt    Alternativtext, Standard: Shopname
+    eager  true = sofort laden (Header)
+{%- endcomment -%}
+{%- liquid
+  assign file = 'azur-logo-ink.webp'
+  if tone == 'paper'
+    assign file = 'azur-logo-paper.webp'
+  endif
+  assign alt_text = alt | default: shop.name
+-%}
+<img class="logo{% if class %} {{ class }}{% endif %}" src="{{ file | asset_url }}" alt="{{ alt_text | escape }}" width="480" height="227"
+  {%- if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async">

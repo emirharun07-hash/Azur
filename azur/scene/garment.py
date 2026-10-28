@@ -1,0 +1,384 @@
+"""AZUR jerseys on wooden hangers: cloth-simulated shells built from the shop's front and back photos.
+
+The photo outline is the sewing pattern: a front and a back panel that meet along the outline (a closed shell). A
+wooden hanger sits inside at the shoulders, its hook leaves through the collar. Gravity does the rest in Blender's cloth
+solver: the shoulders rest on the hanger, the sleeves drop, front and back fall together below the arms, and a little
+inner pressure keeps the shirt from looking flat. Textures stay the photos (UVs from the flat pattern).
+
+Swappable: when real 3D scans of the jerseys exist, `jersey()` can load them instead and keep the same contract
+(an object whose local origin is the hook point, front facing -Y).
+Kept light for render time: about 2-3k vertices per panel before subdivision.
+"""
+import bpy, bmesh, math, os
+from mathutils import Vector, Matrix
+
+# cloth and hanger settings in one place (tools/jersey lab runs try other values on all jerseys at once)
+TUNE = dict(cell=0.014, shell_depth=0.09, hanger_depth=0.022, hanger_drop=0.045, pressure=0.35, quality=8, frames=48,
+            self_collision=True, collision_quality=3, air_damping=3.0, bending=1.6)
+
+
+def _img(path, cs='sRGB'):
+    im = bpy.data.images.load(path, check_existing=True); im.colorspace_settings.name = cs; return im
+
+
+def wood_hanger(name, width=0.43, slope_deg=13.0, thick=0.012, depth=None, mat=None):
+    """Contoured wooden hanger as a mesh (also the collision body for the cloth). Origin: where the hook enters."""
+    depth = depth or TUNE['hanger_depth']
+    bm = bmesh.new()
+    half = width / 2; n = 24
+    prof = []
+    for i in range(n + 1):                          # centre line from left tip to right tip
+        x = -half + width * i / n
+        drop = math.tan(math.radians(slope_deg)) * abs(x) + 0.010 * (abs(x) / half) ** 3
+        prof.append((x, -drop))
+    rings = []
+    for i, (x, z) in enumerate(prof):
+        t = abs(x) / half
+        d = depth * (1.0 - 0.25 * t) ; h = thick * (1.0 + 0.6 * (1 - t))        # fuller in the middle
+        ring = [bm.verts.new((x, y, z + dz)) for y, dz in ((-d / 2, -h / 2), (d / 2, -h / 2), (d / 2, h / 2), (-d / 2, h / 2))]
+        rings.append(ring)
+    for a, b in zip(rings, rings[1:]):
+        for k in range(4):
+            bm.faces.new((a[k], a[(k + 1) % 4], b[(k + 1) % 4], b[k]))
+    bm.faces.new(list(reversed(rings[0]))); bm.faces.new(rings[-1])
+    me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(o)
+    o.modifiers.new('bev', 'BEVEL').width = 0.003
+    for p in me.polygons: p.use_smooth = True
+    if mat: me.materials.append(mat)
+    return o
+
+
+def panel_textures(name, front_path, back_path, tex_dir=None):
+    """The photos as the panels see them: cropped to the garment, the back mirrored onto the front's size, transparent
+    pixels filled with the nearest garment colour. Returns the two crops and the saved texture paths."""
+    import numpy as np
+    from PIL import Image
+    from scipy import ndimage
+    fr = Image.open(front_path).convert('RGBA'); bk = Image.open(back_path).convert('RGBA')
+    frc = fr.crop(fr.getchannel('A').getbbox())
+    bkc = bk.crop(bk.getchannel('A').getbbox()).transpose(Image.FLIP_LEFT_RIGHT).resize(frc.size, Image.LANCZOS)
+    tex_dir = tex_dir or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.cache', 'jersey_tex')
+    os.makedirs(tex_dir, exist_ok=True)
+    fpath, bpath = os.path.join(tex_dir, name + '_front.png'), os.path.join(tex_dir, name + '_back.png')
+    def bleed(im):                    # every transparent pixel takes the colour of the nearest garment pixel
+        a = np.asarray(im)
+        _, idx = ndimage.distance_transform_edt(a[..., 3] < 128, return_indices=True)
+        rgb = a[..., :3][idx[0], idx[1]]
+        return Image.fromarray(np.dstack([rgb, np.full(rgb.shape[:2], 255, np.uint8)]).astype(np.uint8), 'RGBA')
+    bleed(frc).save(fpath); bleed(bkc).save(bpath)
+    return frc, bkc, fpath, bpath
+
+
+def panels(name, front_path, back_path, h=0.74, cell=None, depth=None, tex_dir=None):
+    """Closed shell from the photo outline. Returns (object, info) with the shoulder line for the hanger."""
+    import numpy as np
+    from PIL import Image
+    from scipy import ndimage
+    cell = cell or TUNE['cell']; depth = depth or TUNE['shell_depth']
+    frc, bkc, fpath, bpath = panel_textures(name, front_path, back_path, tex_dir)
+    W, H = frc.size; w = h * W / H
+    rows, cols = int(round(h / cell)), int(round(w / cell))
+    af = np.asarray(frc.getchannel('A').resize((cols, rows), Image.BOX), dtype=np.float32) / 255
+    ab = np.asarray(bkc.getchannel('A').resize((cols, rows), Image.BOX), dtype=np.float32) / 255
+    cells = ndimage.binary_fill_holes(np.maximum(af, ab) > 0.5)
+    # a notch under the arm only one or two cells wide: the outline relaxation below pulls its two walls into each
+    # other and the shell starts tangled (it crumpled the Deutschland jersey). Close it; the sleeve then meets the
+    # body a little lower, as on a real shirt.
+    cells = cells | ndimage.binary_closing(np.pad(cells, 2), structure=np.ones((1, 3), bool))[2:-2, 2:-2]
+    lab, nlab = ndimage.label(cells)                     # keep the garment, drop stray specks
+    if nlab > 1: cells = lab == (np.argmax(np.bincount(lab.ravel())[1:]) + 1)
+    dist = ndimage.distance_transform_edt(cells) * cell
+    k = depth / math.sqrt(max(dist.max(), 1e-6))
+    pad = np.pad(cells, 1); dpad = np.pad(dist, 1)
+    used = {}; verts = []
+    def vid(r, c, layer):
+        key = (r, c, layer)
+        if key in used: return used[key]
+        around = [(r - 1, c - 1), (r - 1, c), (r, c - 1), (r, c)]
+        boundary = not all(pad[rr + 1, cc + 1] for rr, cc in around)
+        if boundary and layer == 1 and (r, c, 0) in used:
+            used[key] = used[(r, c, 0)]; return used[key]
+        d = 0.0 if boundary else float(np.mean([dpad[rr + 1, cc + 1] for rr, cc in around]))
+        t = k * math.sqrt(d)
+        x = (c / cols - 0.5) * w; z = -(r / rows) * h
+        verts.append((x, -t / 2 if layer == 0 else t / 2, z)); used[key] = len(verts) - 1
+        return used[key]
+    faces, fmat, fuv = [], [], []
+    for layer in (0, 1):
+        for r in range(rows):
+            for c in range(cols):
+                if not cells[r, c]: continue
+                q = [(r, c), (r + 1, c), (r + 1, c + 1), (r, c + 1)] if layer == 0 else [(r, c), (r, c + 1), (r + 1, c + 1), (r + 1, c)]
+                faces.append([vid(rr, cc, layer) for rr, cc in q]); fmat.append(layer)
+                fuv.append([(cc / cols, 1 - rr / rows) for rr, cc in q])
+    me = bpy.data.meshes.new(name); me.from_pydata(verts, [], faces); me.update()
+    # the cell grid leaves a staircase outline: relax the outline vertices along the outline (x/z only, UVs follow)
+    bm = bmesh.new(); bm.from_mesh(me)
+    rim = [e for e in bm.edges if len(e.link_faces) == 2 and (e.link_faces[0].normal.y > 0) != (e.link_faces[1].normal.y > 0)
+           and abs(e.link_faces[0].normal.y) > 0.5 and abs(e.link_faces[1].normal.y) > 0.5]   # where front meets back
+    nbr = {}
+    for e in rim:
+        a_, b_ = e.verts; nbr.setdefault(a_, set()).add(b_); nbr.setdefault(b_, set()).add(a_)
+    for _ in range(6):
+        new = {v: Vector(((v.co.x + sum(n.co.x for n in ns) / len(ns)) / 2, v.co.y, (v.co.z + sum(n.co.z for n in ns) / len(ns)) / 2)) for v, ns in nbr.items() if len(ns) == 2}
+        for v, co in new.items(): v.co = co
+    bm.to_mesh(me); bm.free(); me.update()
+    ul = me.uv_layers.new(name='UVMap')
+    for fi, poly in enumerate(me.polygons):
+        poly.material_index = fmat[fi]; poly.use_smooth = True
+        for loop in poly.loop_indices:
+            co = me.vertices[me.loops[loop].vertex_index].co
+            ul.data[loop].uv = (co.x / w + 0.5, 1 + co.z / h)
+    o = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(o)
+    # shoulder line: the top of the outline per column (for the hanger), and the collar centre
+    tops = [next((r for r in range(rows) if cells[r, c]), rows) for c in range(cols)]
+    mid = cols // 2
+    widths = [int(cells[r].sum()) for r in range(int(rows * 0.45), int(rows * 0.8))]   # the body below the sleeves
+    info = dict(w=w, h=h, rows=rows, cols=cols, cell=cell, collar_top=-(tops[mid] / rows) * h, body_w=min(widths) * cell,
+                shoulder=[((c / cols - 0.5) * w, -(tops[c] / rows) * h) for c in range(cols)], front=fpath, back=bpath)
+    return o, info
+
+
+def materials(o, name, knit_normal=None):
+    """Photo textures on both panels, cotton sheen, a fine knit normal map."""
+    for path, side in ((o['front'], 'front'), (o['back'], 'back')):
+        m = bpy.data.materials.new(name + '_' + side); m.use_nodes = True
+        nt = m.node_tree; N = nt.nodes; b = N['Principled BSDF']
+        it = N.new('ShaderNodeTexImage'); it.image = _img(path); it.extension = 'EXTEND'; it.interpolation = 'Cubic'
+        nt.links.new(it.outputs['Color'], b.inputs['Base Color'])
+        b.inputs['Roughness'].default_value = 0.62; b.inputs['Sheen Weight'].default_value = 0.4; b.inputs['Sheen Roughness'].default_value = 0.35
+        if knit_normal:
+            tc = N.new('ShaderNodeTexCoord'); mp = N.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (38, 38, 38)
+            nn = N.new('ShaderNodeTexImage'); nn.image = _img(knit_normal, 'Non-Color'); nm = N.new('ShaderNodeNormalMap'); nm.inputs['Strength'].default_value = 0.2
+            nt.links.new(tc.outputs['UV'], mp.inputs[0]); nt.links.new(mp.outputs[0], nn.inputs[0]); nt.links.new(nn.outputs[0], nm.inputs['Color']); nt.links.new(nm.outputs[0], b.inputs['Normal'])
+        o.data.materials.append(m)
+
+
+def drape(o, hanger, frames=None, pressure=None, pin=None, scene=None):
+    """Hang the shell on the hanger (both in the same local frame, hook point at the origin) and bake the result."""
+    sc = scene or bpy.context.scene
+    frames = frames or TUNE['frames']; pressure = TUNE['pressure'] if pressure is None else pressure
+    col = hanger.modifiers.new('col', 'COLLISION'); hanger.collision.thickness_outer = 0.004; hanger.collision.cloth_friction = 40
+    cl = o.modifiers.new('cloth', 'CLOTH'); cs = cl.settings
+    cs.quality = TUNE['quality']; cs.mass = 0.15; cs.air_damping = TUNE['air_damping']
+    cs.tension_stiffness = 45; cs.compression_stiffness = 45; cs.shear_stiffness = 12; cs.bending_stiffness = TUNE['bending']
+    if pin: cs.vertex_group_mass = pin; cs.pin_stiffness = 1.0
+    cs.use_pressure = pressure > 0; cs.uniform_pressure_force = pressure; cs.pressure_factor = 1.0
+    cc = cl.collision_settings; cc.use_self_collision = TUNE['self_collision']; cc.self_distance_min = 0.004; cc.distance_min = 0.004
+    cc.collision_quality = TUNE['collision_quality']
+    pc = cl.point_cache; pc.frame_start = 1; pc.frame_end = frames
+    sc.frame_start, sc.frame_end = 1, frames
+    for f in range(1, frames + 1): sc.frame_set(f)
+    dg = bpy.context.evaluated_depsgraph_get(); coords = [v.co.copy() for v in o.evaluated_get(dg).data.vertices]
+    o.modifiers.remove(cl); hanger.modifiers.remove(col)
+    for v, c in zip(o.data.vertices, coords): v.co = c
+    sc.frame_set(1)
+
+
+# The cloth solver is chaotic: one grid cell more or less can tangle a shell into a ball. Every drape is checked, and a
+# failed one runs again with a slightly different grid or pressure; the first that passes is kept (else the best).
+RETRIES = [dict(), dict(cell=0.0135), dict(cell=0.0145), dict(pressure=0.2), dict(cell=0.013, pressure=0.25), dict(cell=0.015, quality=12)]
+
+
+def drape_check(o, info, h):
+    """A hanging shirt keeps most of its width (the sleeves drop a little), stays thin and keeps its length."""
+    pts = [v.co for v in o.data.vertices]
+    xs = [p.x for p in pts]; ys = [p.y for p in pts]; zs = [p.z for p in pts]
+    wid = (max(xs) - min(xs)) / info['w']; dep = max(ys) - min(ys); low = -min(zs) / h
+    ok = wid > 0.76 and dep < 0.15 and low > 0.95
+    return ok, wid + low - 4 * max(0.0, dep - 0.09), dict(width=round(wid, 2), depth=round(dep, 3), length=round(low, 2))
+
+
+def _drape_once(name, front_path, back_path, hanger_mat, h, frames):
+    o, info = panels(name, front_path, back_path, h=h)
+    o['front'], o['back'] = info['front'], info['back']
+    # hanger inside, its top a little under the collar edge and following the shoulder line
+    width = min(0.40, info['body_w'] * 0.86)
+    span = [(x, z) for x, z in info['shoulder'] if abs(x) < width / 2]
+    collar = info['collar_top']
+    tip = min(z for _, z in span) if span else collar - 0.05            # the outline top at the hanger tips
+    slope = math.degrees(math.atan2(max(0.01, collar - tip), width / 2))
+    hg = wood_hanger(name + '_hanger', width=width, slope_deg=min(24.0, max(8.0, slope + 2)), mat=hanger_mat)
+    hg.location = (0, 0, collar - TUNE['hanger_drop'])
+    bpy.context.view_layer.update()
+    # the hanger is the collision body in the shell's frame; apply its location into the mesh
+    hg.data.transform(Matrix.Translation(hg.location)); hg.location = (0, 0, 0)
+    # the collar is held where the hook passes through the neck opening (otherwise it flops forward)
+    vg = o.vertex_groups.new(name='collar')
+    vg.add([v.index for v in o.data.vertices if v.co.z > collar - 0.035 and abs(v.co.x) < 0.075], 1.0, 'REPLACE')
+    away = Vector((80.0, 80.0, 80.0))                # simulate far from the room (its floor, bed and walls collide too)
+    o.location = away; hg.location = away; bpy.context.view_layer.update()
+    drape(o, hg, frames=frames, pin='collar')
+    o.location = (0, 0, 0); hg.location = (0, 0, 0)
+    o.vertex_groups.remove(vg)
+    return o, hg, info
+
+
+def _remove(*objs):
+    for x in objs:
+        me = x.data; bpy.data.objects.remove(x, do_unlink=True)
+        if me and me.users == 0: bpy.data.meshes.remove(me)
+
+
+# Frozen drapes (round 4): the owner approved the jerseys as they hung in round 3 and wants them unchanged until real
+# scans arrive. frozen/<key>.glb holds that drape (the product-view model the PC exported in r3-5: shell + hanger in
+# the jersey's own space, hook point at the origin). jersey() loads it instead of simulating; AZUR_RESIM=1 simulates.
+FLAT = float(os.environ.get('AZUR_JERSEY_FLAT', 0.55))   # depth of the frozen drapes (1 = as simulated)
+# 'smooth' builds each jersey as a gently rounded shell straight from its picture's outline (no folds at all); the
+# owner wants light folds after all, so 'frozen' (the round-3 drapes, calmed in frozen()) stays the default
+STYLE = os.environ.get('AZUR_JERSEY_STYLE', 'frozen')
+FROZEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'frozen')
+
+
+SIDES = os.environ.get('AZUR_JERSEY_SIDES', 'line')      # 'line': the waist filled to a straight side; 'off'
+HEM = float(os.environ.get('AZUR_JERSEY_HEM', 1.0))       # the hem's width relative to the drape (<1 takes it in)
+
+
+def calm_sides(o, bins=60):
+    """Runde 22 (owner: light folds are fine, but the sides should not pinch in so hard at the waist): below the
+    armpits the body's half-width per height is lifted to a straight line from the armpit to the hem; vertices move in
+    x by that ratio (their UVs stay, the fabric follows). Runde 22b (owner: r22-4 far too wide at the sides): the line
+    starts at the body under the armpit, no longer at the sleeves' width; HEM < 1 narrows the hem toward it."""
+    import numpy as np
+    if SIDES == 'off' and HEM == 1.0: return
+    co = np.array([v.co[:] for v in o.data.vertices])
+    z0, z1 = co[:, 2].min(), co[:, 2].max(); hgt = z1 - z0
+    edges = np.linspace(z0, z1, bins + 1); mid = (edges[:-1] + edges[1:]) / 2
+    half = np.array([np.abs(co[(co[:, 2] >= a) & (co[:, 2] < b), 0]).max() if ((co[:, 2] >= a) & (co[:, 2] < b)).any() else np.nan
+                     for a, b in zip(edges[:-1], edges[1:])])
+    ok = ~np.isnan(half)
+    if ok.sum() < 8: return
+    half = np.interp(mid, mid[ok], half[ok])
+    # the armpit: going up from the hem, where the outline jumps out to the sleeves
+    arm = next((i for i in range(bins // 5, bins - 2) if half[i] > 1.3 * half[i - 2]), int(bins * 0.55))
+    top_i = max(2, arm - 3); bot_i = 1
+    ztop, zbot = mid[top_i], mid[bot_i]
+    sel = slice(bot_i, top_i + 1); m = mid[sel]; h = half[sel]
+    t = (m - zbot) / max(ztop - zbot, 1e-6)                   # 0 at the hem, 1 under the armpit
+    top, bot = h[-1], h[0]
+    target = h.copy()
+    if SIDES == 'line': target = np.maximum(h, bot + (top - bot) * t)
+    target = target * (HEM + (1 - HEM) * t)                   # the hem taken in, nothing at the armpit
+    ratio = np.clip(target / np.maximum(h, 1e-4), 0.6, 1.35)
+    ratio = np.convolve(np.pad(ratio, 3, mode='edge'), np.ones(7) / 7, mode='valid')
+    ratio = 1 + (ratio - 1) * np.clip((ztop - m) / (hgt * 0.06), 0, 1)   # fade in under the armpit
+    for v in o.data.vertices:
+        if v.co.z <= ztop: v.co.x *= float(np.interp(v.co.z, m, ratio))
+    o.data.update()
+
+
+def frozen(name, front_path, back_path, knit_normal=None, hanger_mat=None):
+    key = name[len('jersey_'):] if name.startswith('jersey_') else name
+    path = os.path.join(FROZEN, key + '.glb')
+    if os.environ.get('AZUR_RESIM') or not os.path.exists(path): return None
+    before = set(bpy.data.objects); mats0, imgs0 = set(bpy.data.materials), set(bpy.data.images)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == 'MESH']
+    sides = lambda o: {(s.material.name if s.material else '') for s in o.material_slots}
+    o = next(x for x in meshes if any('front' in n or 'back' in n for n in sides(x)))
+    hg = next((x for x in meshes if x is not o and 'hanger' in x.name), None)
+    for x in new:
+        x.parent = None
+    for x in [x for x in new if x not in (o, hg)]:
+        bpy.data.objects.remove(x, do_unlink=True)            # the chrome hook: the room has its own
+    for x in (o, hg):
+        if not x: continue
+        mw = x.matrix_world.copy(); x.matrix_world = Matrix.Identity(4)
+        x.data.transform(mw)                                  # whatever the importer put on the object goes into the mesh
+        x.data.update()
+    # Runde 22 (owner): the jerseys hang calmer, only slightly 3D: the drape's depth (front to back, local y) pressed
+    # toward the hanger's plane; outline, folds and UVs stay
+    o.data.transform(Matrix.Diagonal((1.0, FLAT, 1.0, 1.0))); o.data.update()
+    calm_sides(o)
+    # front / back faces from the imported material slots, then the room's own materials (knit normal, sheen)
+    bm = bmesh.new(); bm.from_mesh(o.data)                    # glTF splits vertices at the UV seam: weld the shell again
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-5); bm.to_mesh(o.data); bm.free()
+    names = [s.material.name if s.material else '' for s in o.material_slots]
+    side = [0 if 'front' in n else 1 for n in names]
+    faces = [side[p.material_index] if p.material_index < len(side) else 0 for p in o.data.polygons]
+    o.data.materials.clear()                                  # (this resets the faces' material indices)
+    if o.data.has_custom_normals:                             # the exporter's split normals would keep the seam sharp
+        bpy.context.view_layer.objects.active = o; bpy.ops.mesh.customdata_custom_splitnormals_clear()
+    for poly in o.data.polygons: poly.use_smooth = True
+    _, _, o['front'], o['back'] = panel_textures(name, front_path, back_path)    # the crops the UVs were made for
+    materials(o, name, knit_normal)
+    for poly, k in zip(o.data.polygons, faces): poly.material_index = k
+    o.name, o.data.name = name, name
+    if hg:
+        hg.name, hg.data.name = name + '_hanger', name + '_hanger'
+        if hanger_mat: hg.data.materials.clear(); hg.data.materials.append(hanger_mat)
+        for poly in hg.data.polygons: poly.use_smooth = True
+    for m in set(bpy.data.materials) - mats0:                 # the model's own (simplified) materials and textures
+        if m.users == 0: bpy.data.materials.remove(m)
+    for im in set(bpy.data.images) - imgs0:
+        if im.users == 0: bpy.data.images.remove(im)
+    for m, side_ in zip(o.data.materials, ('front', 'back')): m.name = name + '_' + side_
+    print(f'jersey {name}: frozen drape from {os.path.basename(path)} ({len(o.data.vertices)} vertices)', flush=True)
+    return o, hg
+
+
+def smooth(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.74):
+    """The jersey as its picture shows it, gently rounded (thickest in the middle, thin at the outline), on its hanger:
+    smooth fabric, no wrinkles. The pictures are the shop's ghost-mannequin shots or the owner's photos bent onto them
+    (sleeves slightly down), so the outline already hangs like a shirt."""
+    o, info = panels(name, front_path, back_path, h=h, depth=SMOOTH_DEPTH)
+    o['front'], o['back'] = info['front'], info['back']
+    width = min(0.40, info['body_w'] * 0.86)
+    span = [(x, z) for x, z in info['shoulder'] if abs(x) < width / 2]
+    collar = info['collar_top']
+    tip = min(z for _, z in span) if span else collar - 0.05
+    slope = math.degrees(math.atan2(max(0.01, collar - tip), width / 2))
+    hg = wood_hanger(name + '_hanger', width=width, slope_deg=min(24.0, max(8.0, slope + 2)), mat=hanger_mat)
+    hg.data.transform(Matrix.Translation((0, 0, collar - TUNE['hanger_drop']))); hg.location = (0, 0, 0)
+    # a slight curve, the way a shirt on a hanger bellies out a little at the chest and falls back at the hem
+    for v in o.data.vertices:
+        t = min(1.0, max(0.0, -v.co.z / h))
+        v.co.y -= 0.018 * math.sin(math.pi * min(1.0, t * 1.4))
+        # Runde 22b (owner: light folds, like the real shirt hanging): a few soft vertical folds, growing toward the hem
+        if FOLDS: v.co.y += FOLDS * t ** 1.3 * (math.sin(v.co.x * 41 + 0.7) * 0.6 + math.sin(v.co.x * 23 - v.co.z * 4 + 2.1) * 0.4)
+    o.data.update()
+    materials(o, name, knit_normal)
+    o.name, hg.name = name, name + '_hanger'; o.data.name, hg.data.name = name, name + '_hanger'
+    sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
+    sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1
+    print(f'jersey {name}: smooth shell from the picture ({len(o.data.vertices)} vertices)', flush=True)
+    return o, hg
+
+
+SMOOTH_DEPTH = float(os.environ.get('AZUR_JERSEY_DEPTH', 0.06))
+FOLDS = float(os.environ.get('AZUR_JERSEY_FOLDS', 0.006))   # depth of the soft folds in metres (0: none)
+
+
+def jersey(name, front_path, back_path, knit_normal=None, hanger_mat=None, h=0.74, frames=None):
+    """Build shell + hanger, drape, return (jersey object, hanger object). Origin = hook point at the top of the collar."""
+    if STYLE == 'smooth' and not os.environ.get('AZUR_RESIM'):
+        return smooth(name, front_path, back_path, knit_normal, hanger_mat, h)
+    got = frozen(name, front_path, back_path, knit_normal, hanger_mat)
+    if got:
+        o, hg = got
+        sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
+        sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1
+        return o, hg
+    best = None
+    for i, var in enumerate(RETRIES):
+        saved = dict(TUNE); TUNE.update(var)
+        try:
+            o, hg, info = _drape_once(name, front_path, back_path, hanger_mat, h, frames)
+        finally:
+            TUNE.clear(); TUNE.update(saved)
+        ok, score, m = drape_check(o, info, h)
+        print(f'jersey {name}: drape {i + 1} {"ok" if ok else "tangled, again"} {m} {var or ""}', flush=True)
+        if best is None or score > best[0]:
+            if best: _remove(best[1], best[2])
+            best = (score, o, hg)
+        else:
+            _remove(o, hg)
+        if ok: break
+    _, o, hg = best
+    o.name, hg.name = name, name + '_hanger'; o.data.name, hg.data.name = name, name + '_hanger'
+    materials(o, name, knit_normal)
+    sub = o.modifiers.new('sub', 'SUBSURF'); sub.levels = 1; sub.render_levels = 2
+    sol = o.modifiers.new('sol', 'SOLIDIFY'); sol.thickness = 0.0015; sol.offset = 1   # cloth edge thickness at the hem
+    return o, hg

@@ -1,0 +1,1307 @@
+/* ==========================================================================
+   AZUR — Theme-Stylesheet
+   1. Tokens   2. Basis   3. Schrift   4. Bausteine   5. Header, Menü   6. Warenkorb
+   7. Footer   8. Karten, Raster   9. Startseite   10. Shop, Produkt   11. Übrige Seiten
+
+   Grundpalette (Runde 12, Farbwahl: „Anthrazit & Neon“): Anthrazit, kreideweiße Schrift, Neongrün nur für
+   Kaufen-Knöpfe, Fortschritt und kleine Hinweise. Sonst kommt Farbe aus den Produktbildern.
+   Keine Rundungen, keine Schatten, keine Verläufe. Große Schrift nur im Einstieg.
+   Shop-Aufbau wie bei Streetwear-Marken: schwarze Leiste oben, Logo in der Mitte, Symbole rechts,
+   Produkte auf ruhigen Flächen im Hochformat, Namen in kleinen Versalien.
+   ========================================================================== */
+
+/* 1. Tokens ================================================================ */
+/* Farbpalette: ALLE Farben des Shops und des Zimmers kommen aus diesem einen Block. Für eine andere Grundfarbe nur
+   hier die Werte tauschen. Runde 13 (nach yeezy.com): der Shop ist weiß, Schrift schwarz, nichts Buntes; das Zimmer und
+   seine Produktansicht bleiben dunkel (Anthrazit & Neon, der dunkle Satz --d-* unten). */
+:root {
+  --c-paper: #ffffff;        /* Grundfläche: Weiß */
+  --c-surface: #ffffff;      /* Flächen über dem Grund (Warenkorb, Leiste) */
+  --c-plate: #ffffff;        /* Fläche hinter den Produkten: auch Weiß, die Trikots stehen frei */
+  --c-ink: #000000;          /* Schrift: Schwarz */
+  --c-grey-line: #e6e6e6;    /* feine Linien */
+  --c-grey-text: #767676;    /* Sekundärtext (4,5:1 auf Weiß) */
+  --c-grey-soft: #c4c4c4;    /* nicht gewählter Menüpunkt (wie bei yeezy.com), Flächen, Symbole */
+  --c-acc: #000000;          /* Kaufen: schwarz */
+  --c-acc-ink: #ffffff;      /* Schrift auf dem Kaufknopf */
+  --c-error: #c62828;        /* nur für Fehlermeldungen (5,6:1 auf Weiß) */
+  --c-scheme: light;         /* dark bei dunklem Grund, light bei hellem (Formularfelder, Scrollbalken) */
+  --logo-ink: block;         /* welches Logo auf dem Grund steht: dunkles (ink) bei hellem Grund, helles (paper) bei dunklem */
+  --logo-paper: none;
+  /* dunkle Bereiche (das Zimmer und seine Produktansicht, Passwortseite, dunkle Abschnitte): Anthrazit & Neon */
+  --c-deep: #111214;
+  --d-paper: #1c1d1f;
+  --d-ink: #f1eee8;
+  --d-text: #a9aaa9;
+  --d-line: #35383b;
+  --d-surface: #242628;
+  --d-acc: #39ff88;
+  --d-acc-ink: #062b14;
+  --c-on-photo: #f3eee6;     /* Schrift über dem Zimmer und über Fotos */
+  /* Trikotfarben (Runde 16): Grund, Schrift, Knopf und Knopfschrift der Produktansicht im Zimmer, je Trikot */
+  --tone-ffm: #1f4d36;  --tone-ffm-ink: #f3eee2;  --tone-ffm-acc: #f3eee2;  --tone-ffm-acc-ink: #1f4d36;
+  --tone-ber: #ebe5d7;  --tone-ber-ink: #121212;  --tone-ber-acc: #121212;  --tone-ber-acc-ink: #ebe5d7;
+  --tone-bra: #f7e27c;  --tone-bra-ink: #121212;  --tone-bra-acc: #0d5a33;  --tone-bra-acc-ink: #ffffff;
+  --tone-ger: #e7e6e2;  --tone-ger-ink: #121212;  --tone-ger-acc: #121212;  --tone-ger-acc-ink: #ffffff;
+  --tone-tur: #8a0d14;  --tone-tur-ink: #ffffff;  --tone-tur-acc: #ffffff;  --tone-tur-acc-ink: #8a0d14;
+
+  /* Runde 13: eine Schrift im ganzen Shop, schlicht und gleich breit (Martian Mono, selbst gehostet); das Zimmer bleibt bei Archivo */
+  --f-sans: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --w-narrow: 62%;
+
+  --t-body: 0.875rem;
+  --t-small: 0.8125rem;
+  --t-label: 0.75rem;
+  --t-title: clamp(2rem, 3.6vw, 3.25rem);   /* Seitentitel */
+  --ls-label: 0.06em;
+
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+  --s-9: 7rem;
+
+  --gutter: var(--s-4);
+  --gap: var(--s-3);
+  --bar-h: 2.25rem;          /* schwarze Leiste über dem Header */
+  --header-h: 3.5rem;
+  --header-h-compact: 3rem;  /* Header nach dem Scrollen */
+  --tap: 2.75rem;            /* Mindestgröße für Tippflächen (44 px) */
+  --measure: 36rem;
+
+  --bw: 1px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 160ms;
+  --dur-panel: 240ms;
+  --z-header: 50;
+  --z-drawer: 100;
+}
+@media (min-width: 48em) {
+  :root { --gutter: var(--s-5); --gap: var(--s-4); --header-h: 4rem; --t-body: 0.9375rem; }
+}
+@media (min-width: 90em) {
+  :root { --gutter: 2.5rem; --gap: var(--s-5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; --dur-panel: 0ms; }
+}
+
+/* 2. Basis ================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+html {
+  color-scheme: var(--c-scheme);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + var(--s-4));
+}
+html.is-locked { overflow: hidden; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: var(--f-sans);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+main { flex: 1 0 auto; }
+main:focus { outline: none; }
+h1, h2, h3, h4, p, ul, ol, figure, blockquote, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img, video, svg { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+s { text-decoration-thickness: 1px; }
+button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; margin: 0; }
+button { -webkit-appearance: none; appearance: none; background: none; border: 0; padding: 0; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+[hidden] { display: none !important; }
+::selection { background: var(--c-ink); color: var(--c-paper); }
+:focus-visible { outline: 2px solid var(--focus, var(--c-ink)); outline-offset: 3px; }
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  left: var(--gutter);
+  top: -4rem;
+  z-index: 200;
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.skip-link:focus { top: var(--s-2); }
+.wrap { width: 100%; max-width: 100rem; margin-inline: auto; padding-inline: var(--gutter); }
+
+/* 3. Schrift =============================================================== */
+/* Überschriften (Runde 13): leise Versalien in derselben Schrift, keine fetten Schlagzeilen mehr */
+.campaign__title,
+.footer__signup-title,
+.drops__title,
+.page-title,
+.shop__title,
+.pdp__title,
+.about__title,
+.notfound__num,
+.gate__title,
+.drawer__empty-title {
+  font-stretch: 87.5%;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Kleine Versalien mit Laufweite: Navigation, Buttons, Beschriftungen */
+.btn,
+.size,
+.campaign__link,
+.lineup__title,
+.lineup__all,
+.rail__all,
+.sizes__legend,
+.crumbs,
+.gallery__count,
+.gallery__thumb-label,
+.acc__head,
+.footer__head,
+.footer__base,
+.drawer__title,
+.drawer__close,
+.legal__side-head,
+.page-kicker,
+.shop__kicker,
+.about__kicker,
+.facts__row dt,
+.form__label,
+.card__flag,
+.rail__title,
+.chart__close,
+.chart__table thead th,
+.drops__kicker,
+.teaser__label,
+.trust__k,
+.gate__kicker {
+  font-size: var(--t-label);
+  font-stretch: 87.5%;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-thickness var(--dur);
+}
+.link:hover { text-decoration-thickness: 2px; }
+
+.rte > * + * { margin-top: var(--s-3); }
+.rte a { text-decoration: underline; text-underline-offset: 0.2em; }
+.rte ul { list-style: square; padding-left: 1.25em; }
+.rte ol { list-style: decimal; padding-left: 1.25em; }
+.rte h2, .rte h3 { font-size: 1.125rem; line-height: 1.3; margin-top: var(--s-5); }
+.rte strong { font-weight: 650; }
+.rte em { color: var(--c-grey-text); }
+
+/* 4. Bausteine ============================================================= */
+.btn {
+  --btn-bg: transparent;
+  --btn-fg: var(--c-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  min-height: 3.25rem;
+  padding: 0 var(--s-5);
+  border: var(--bw) solid var(--btn-line, var(--c-ink));
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  text-align: left;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.btn--solid { --btn-bg: var(--c-acc); --btn-fg: var(--c-acc-ink); --btn-line: var(--c-acc); font-weight: 700; }
+.btn--line { --btn-bg: transparent; --btn-fg: var(--c-ink); }
+.btn--block { width: 100%; }
+.btn--big { min-height: 3.75rem; }
+.btn .arrow { transition: transform var(--dur) var(--ease); }
+@media (hover: hover) {
+  .btn--solid:hover { --btn-bg: transparent; --btn-fg: var(--c-acc); }
+  .btn--line:hover { --btn-bg: var(--c-ink); --btn-fg: var(--c-paper); }
+  .btn:hover .arrow { transform: translateX(0.25rem); }
+}
+.btn:disabled { opacity: 0.45; }
+
+/* Größen-Chip */
+.size {
+  display: grid;
+  place-items: center;
+  min-height: 3rem;
+  padding: 0 var(--s-3);
+  border: var(--bw) solid var(--c-ink);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+@media (hover: hover) {
+  .size:hover { background: var(--c-plate); }
+}
+input:checked + .size { background: var(--c-ink); color: var(--c-paper); }
+input:focus-visible + .size { outline: 2px solid var(--c-ink); outline-offset: 3px; }
+.size[data-soldout],
+input:disabled + .size {
+  color: var(--c-grey-text);
+  border-color: var(--c-grey-line);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Formulare */
+.form { display: grid; gap: var(--s-4); max-width: var(--measure); margin-top: var(--s-6); }
+.form__row { display: grid; gap: var(--s-2); }
+.form__label { color: var(--c-grey-text); }
+.form__input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: var(--s-3) var(--s-4);
+  border: var(--bw) solid var(--c-ink);
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.form__input:focus-visible { outline-offset: 0; }
+textarea.form__input { resize: vertical; }
+.form__hint { font-size: var(--t-small); color: var(--c-grey-text); }
+.form__ok,
+.form__error { padding: var(--s-3) var(--s-4); border-left: 2px solid currentColor; font-size: var(--t-small); }
+.form__error { color: var(--c-error); }
+.form__error ul { list-style: none; }
+
+/* Menge */
+.qty {
+  display: inline-grid;
+  grid-template-columns: var(--tap) 2.25rem var(--tap);
+  justify-self: start;
+  width: max-content;
+  height: calc(var(--tap) + 2 * var(--bw));   /* Knöpfe innen 44 px, Rahmen kommt dazu */
+  border: var(--bw) solid var(--c-ink);
+}
+.qty__btn { font-size: 1.125rem; line-height: 1; }
+.qty__btn:disabled { color: var(--c-grey-line); }
+@media (hover: hover) {
+  .qty__btn:not(:disabled):hover { background: var(--c-ink); color: var(--c-paper); }
+}
+.qty__n { display: grid; place-items: center; border-inline: var(--bw) solid var(--c-ink); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+
+/* Aufklapper */
+.acc { border-top: var(--bw) solid var(--c-grey-line); }
+.acc:last-child { border-bottom: var(--bw) solid var(--c-grey-line); }
+.acc__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 3.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+.acc__head::-webkit-details-marker { display: none; }
+.acc__head::after { content: "+"; font-size: 1.125rem; font-weight: 400; }
+.acc[open] > .acc__head::after { content: "−"; }
+.acc__body { padding-bottom: var(--s-5); font-size: var(--t-small); max-width: var(--measure); }
+.acc__link { display: inline-flex; align-items: center; min-height: var(--tap); }
+
+/* 5. Leiste, Header, Menü ================================================= */
+/* Leiste oben (Runde 12): ruhig und statisch, Sekundärschrift auf der Fläche, eine Haarlinie darunter */
+.bar { background: var(--c-surface); color: var(--c-grey-text); border-bottom: 1px solid var(--c-grey-line); }
+.bar__inner { display: flex; align-items: center; justify-content: center; min-height: var(--bar-h); padding-block: 0.35rem; text-align: center; }
+.bar__group { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.15rem 0; margin: 0; padding: 0; list-style: none; }
+.bar__item { display: flex; align-items: center; font-size: 0.75rem; font-weight: 500; line-height: 1.3; letter-spacing: 0.02em; }
+.bar__item + .bar__item::before { content: ""; flex: none; width: 3px; height: 3px; margin-inline: 0.85rem; border-radius: 50% !important; background: currentColor; opacity: 0.6; }
+a.bar__inner:hover .bar__item { color: var(--c-ink); }
+
+.section-header { position: sticky; top: 0; z-index: var(--z-header); }
+.header {
+  position: relative;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  border-bottom: var(--bw) solid var(--c-grey-line);
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.header__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  height: var(--header-h);
+  transition: height var(--dur-panel) var(--ease);
+}
+/* Schmal, sobald die Seite gescrollt ist (is-compact aus azur.js). Der Abschnitt behält seine Höhe im Fluss: was der
+   Header schrumpft, kommt als Rand darunter dazu, im selben Takt, damit der Inhalt nicht springt. */
+.section-header { transition: margin-bottom var(--dur-panel) var(--ease); }
+.section-header:has(> .header.is-compact) { margin-bottom: calc(var(--header-h) - var(--header-h-compact)); }
+.header.is-compact .header__bar { height: var(--header-h-compact); }
+/* Symbole haben 44 px Tippfläche; die negativen Ränder setzen das Zeichen selbst auf die Satzkante */
+.header__end { display: flex; align-items: center; justify-content: flex-end; height: 100%; margin-right: -0.625rem; }
+.header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: var(--tap);
+  height: var(--tap);
+}
+.header__icon .icon { width: 1.375rem; height: 1.375rem; flex: none; }
+.header__icon:hover .icon { stroke-width: 2; }
+.header__count { font-size: 0.75rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.header__logo { display: flex; align-items: center; justify-content: center; height: 100%; padding-inline: var(--s-3); }
+.header__logo .logo { height: 1.75rem; width: auto; transition: height var(--dur-panel) var(--ease); }
+.header__logo .logo--ink, .footer__logo .logo--ink { display: var(--logo-ink); }   /* das Logo, das auf dem Grund steht (Palette oben) */
+.header__logo .logo--paper, .footer__logo .logo--paper { display: var(--logo-paper); }
+.header.is-compact .header__logo .logo { height: 1.5rem; }
+/* Startseite mit Einstieg ganz oben: der Einstieg läuft unter den Header, der Header ist durchsichtig, bis der
+   Einstieg weggescrollt ist (is-solid) oder Menü / Support offen sind. Auf dunklem Grund oder Foto: helles Logo. */
+body:has(#inhalt > .shopify-section:first-child > [data-hero]) #inhalt {
+  margin-top: calc(var(--header-h) * -1);
+}
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero])
+  .header--overlay:not(.is-solid) {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+  .header--overlay:not(.is-solid) {
+  color: var(--c-on-photo);
+  --focus: var(--c-on-photo);
+}
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+  .header--overlay:not(.is-solid) .logo--ink { display: none; }
+.js:not(.azur-pdp-open) body:has(#inhalt > .shopify-section:first-child > [data-hero]:is(.campaign--dark, .campaign--photo))
+  .header--overlay:not(.is-solid) .logo--paper { display: block; }
+
+/* 6. Warenkorb ============================================================= */
+.drawer { position: fixed; inset: 0; z-index: var(--z-drawer); display: flex; justify-content: flex-end; }
+.drawer__scrim { position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); opacity: 0; transition: opacity var(--dur-panel) var(--ease); }
+.drawer__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 30rem);
+  height: 100%;
+  background: var(--c-surface);
+  border-left: var(--bw) solid var(--c-grey-line);
+  transform: translateX(100%);
+  transition: transform var(--dur-panel) var(--ease);
+}
+.drawer.is-open .drawer__scrim { opacity: 1; }
+.drawer.is-open .drawer__panel { transform: none; }
+.drawer__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: none;
+  height: var(--header-h);
+  padding-inline: var(--gutter);
+  border-bottom: var(--bw) solid var(--c-grey-line);
+}
+.drawer__title { display: flex; align-items: center; gap: var(--s-2); }
+.drawer__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  letter-spacing: 0;
+}
+.drawer__close { min-height: 2.75rem; }
+.drawer__close:hover { text-decoration: underline; text-underline-offset: 0.3em; }
+.drawer__status:empty,
+.drawer__error:empty { display: none; }
+.drawer__status,
+.drawer__error { flex: none; padding: var(--s-3) var(--gutter); font-size: var(--t-small); border-bottom: var(--bw) solid var(--c-grey-line); }
+.drawer__status { background: var(--c-plate); }
+.drawer__error { color: var(--c-error); }
+.drawer__content { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.drawer__content .lines { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding-inline: var(--gutter); }
+.drawer__content.is-busy { opacity: 0.5; pointer-events: none; }
+.line {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  gap: var(--s-4);
+  padding-block: var(--s-4);
+  border-bottom: var(--bw) solid var(--c-grey-line);
+}
+.line__img { display: block; aspect-ratio: 1; background: var(--c-plate); }
+.line__img img { width: 100%; height: 100%; object-fit: contain; }
+.line__info { display: grid; align-content: start; gap: var(--s-2); }
+.line__name { font-weight: 600; }
+.line__meta { font-size: var(--t-small); color: var(--c-grey-text); }
+.line__side { display: grid; align-content: space-between; justify-items: end; gap: var(--s-2); }
+.line__price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.line__remove { font-size: var(--t-small); color: var(--c-grey-text); }
+/* Name und Entfernen: Tippfläche 44 px über Innenabstand, negative Ränder halten die Zeilen gleich */
+.line__name a,
+.line__remove { display: inline-block; padding-block: calc((var(--tap) - 1.55em) / 2); margin-block: calc((1.55em - var(--tap)) / 2); }
+.drawer__foot {
+  flex: none;
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--gutter) max(var(--s-4), env(safe-area-inset-bottom));
+  border-top: var(--bw) solid var(--c-ink);
+}
+.drawer__total { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; }
+.drawer__sum { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.drawer__note { font-size: var(--t-small); color: var(--c-grey-text); }
+.drawer__empty { display: grid; align-content: start; gap: var(--s-5); padding: var(--s-6) var(--gutter); }
+.drawer__empty-title { font-size: 2rem; }
+.drawer__empty-links { display: grid; gap: var(--s-2); }
+
+.cartpage { padding-block: var(--s-6) var(--s-8); }
+.cartpage .lines { margin-top: var(--s-5); border-top: var(--bw) solid var(--c-ink); }
+.cartpage__qty { width: 5rem; min-height: var(--tap); padding: 0 var(--s-3); border: var(--bw) solid var(--c-ink); background: transparent; }
+.cartpage__foot { display: grid; gap: var(--s-3); max-width: 30rem; margin: var(--s-5) 0 0 auto; }
+.cartpage__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); justify-content: flex-end; }
+.cartpage__empty { display: grid; justify-items: start; gap: var(--s-5); margin-top: var(--s-5); }
+
+/* 7. Footer ================================================================ */
+.footer { margin-top: var(--s-8); border-top: var(--bw) solid var(--c-grey-line); }
+.footer__top {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-6) var(--gap);
+  padding-block: var(--s-7) var(--s-6);
+}
+.footer__brand { grid-column: 1 / -1; display: grid; gap: var(--s-2); justify-items: start; align-content: start; }
+.footer__logo { display: flex; align-items: center; min-height: var(--tap); }
+.footer__logo .logo { height: 2.25rem; width: auto; }
+.footer__line { color: var(--c-grey-text); font-size: var(--t-small); max-width: 22rem; }
+.footer__head { color: var(--c-ink); font-weight: 700; letter-spacing: 0.12em; margin-bottom: var(--s-2); }
+.footer__col ul { display: grid; }
+.footer__col a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.footer__col a:hover { text-decoration: underline; text-underline-offset: 0.22em; }
+.footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-5);
+  padding-block: var(--s-4) max(var(--s-4), env(safe-area-inset-bottom));
+  border-top: var(--bw) solid var(--c-grey-line);
+  color: var(--c-grey-text);
+}
+@media (min-width: 48em) {
+  .footer__top { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .footer__col a { font-size: 0.8125rem; }
+}
+@media (min-width: 64em) {
+  .footer__top { grid-template-columns: 2fr repeat(4, minmax(0, 1fr)); }
+  .footer__brand { grid-column: auto; }
+}
+
+/* 8. Karten, Raster ======================================================== */
+/* Shop: zwei Spalten, ab 1024 px sechs Spuren (große Karten halb, übrige zu dritt) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-5) var(--s-2);
+}
+@media (min-width: 48em) {
+  .grid { gap: var(--s-6) var(--s-3); }
+}
+@media (min-width: 64em) {
+  .grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-flow: row dense; }
+  .grid > .card { grid-column: span 2; }
+  .grid > .card--large { grid-column: span 3; }
+}
+.grid--lineup { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-flow: row dense; }
+.grid--lineup > .card { grid-column: span 2; }
+.grid--lineup > .card--large { grid-column: span 3; }
+.grid__empty { grid-column: 1 / -1; display: grid; justify-items: start; gap: var(--s-4); padding-block: var(--s-6); }
+
+.card { min-width: 0; }   /* Aussehen der Karte: Abschnitt 16 (Runde 13) */
+.card__img { width: 100%; height: 100%; object-fit: contain; }
+
+.rail { padding-top: var(--s-8); }
+.rail__head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); margin-bottom: var(--s-2); }
+.rail__all { display: inline-flex; align-items: center; min-height: var(--tap); white-space: nowrap; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
+@media (min-width: 64em) {
+  .rail .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rail .grid > .card { grid-column: auto; }
+  .rail .grid > .card:only-child { grid-column: span 2; }
+}
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .rail .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.pager { display: flex; gap: var(--s-4); justify-content: center; padding-top: var(--s-6); font-size: var(--t-small); }
+
+/* 9. Startseite ============================================================ */
+/* Einstieg: ein Motiv über die volle Breite. Das Trikot ist größer als die Fläche und unten angeschnitten.
+   Hell: ruhige Bildfläche wie hinter den Produkten; dunkel: Schwarz. Der Header liegt durchsichtig darüber,
+   deshalb beginnt das Motiv erst unter dem Header. */
+.campaign { position: relative; overflow: hidden; background: var(--c-plate); }
+/* dunkle Bereiche: dieselben Bausteine, mit dem dunklen Satz der Palette (Runde 13 auch die Produktansicht im Zimmer) */
+:is(.campaign--dark, .template-password, .drops--dark, .azur-pdp) {
+  --c-paper: var(--c-deep); --c-surface: var(--d-surface); --c-plate: var(--d-surface); --c-ink: var(--d-ink); --c-grey-text: var(--d-text);
+  --c-grey-line: var(--d-line); --c-grey-soft: var(--d-line); --c-acc: var(--d-acc); --c-acc-ink: var(--d-acc-ink); --c-error: #ff8a80;
+  --logo-ink: none; --logo-paper: block;
+  background: var(--c-deep); color: var(--c-ink); color-scheme: dark;
+}
+.azur-pdp { --c-paper: var(--d-paper); }   /* die Produktansicht im Zimmer: Anthrazit wie vorher */
+.campaign__media { position: relative; display: block; height: calc(min(122vw, 72svh) + var(--header-h)); min-height: 24rem; overflow: hidden; }
+.campaign__cutout {
+  position: absolute;
+  max-width: none;
+  width: 112%;
+  height: auto;
+  left: 50%;
+  top: 3%;
+  transform: translateX(-50%);
+}
+.campaign__cutout { top: calc(var(--header-h) + var(--s-2)); }
+.campaign__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.campaign__text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-2) var(--s-5);
+  padding: var(--s-4) var(--gutter) var(--s-5);
+}
+.campaign__name { display: grid; gap: var(--s-1); }
+.campaign__title { font-size: clamp(2.25rem, 10vw, 3.25rem); }
+.campaign__price { font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.campaign__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: var(--tap);
+  border-bottom: var(--bw) solid currentColor;
+}
+.campaign__link .arrow { transition: transform var(--dur) var(--ease); }
+.campaign__link:hover .arrow { transform: translateX(0.25rem); }
+
+/* Tablet hochkant: Aufbau wie mobil, Motiv etwas kleiner */
+@media (min-width: 48em) and (max-width: 63.99em) {
+  .campaign__media { height: calc(min(92vw, 68svh) + var(--header-h)); }
+  .campaign__cutout { width: 84%; }
+  .campaign__title { font-size: clamp(3rem, 7vw, 4rem); }
+}
+/* Ab 1024 px: Motiv füllt den ersten Bildschirm, Zeile und Link unten links */
+@media (min-width: 64em) {
+  .campaign { height: calc(100vh - var(--bar-h)); height: calc(100svh - var(--bar-h)); min-height: calc(34rem + var(--header-h)); max-height: calc(60rem + var(--header-h)); }
+  .campaign__media { position: absolute; inset: 0; height: auto; min-height: 0; }
+  .campaign__cutout { width: auto; height: 114%; left: 58%; top: calc(var(--header-h) + 3%); }
+  .campaign__text {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: grid;
+    justify-items: start;
+    gap: var(--s-4);
+    max-width: 24%;
+    padding: 0 0 var(--s-7) var(--gutter);
+  }
+  .campaign__title { font-size: clamp(3rem, 4.6vw, 5rem); }
+}
+.campaign--photo .campaign__media { height: min(125vw, 78svh); }
+@media (min-width: 64em) {
+  .campaign--photo .campaign__media { height: auto; }
+  .campaign--photo .campaign__text { color: var(--c-on-photo); --focus: var(--c-on-photo); }
+}
+
+/* Produkte: Zeile und Link oben, darunter sechs Spuren auf jeder Breite (große Karten halb, übrige zu dritt) */
+.lineup { padding-top: var(--s-5); }
+@media (min-width: 64em) { .lineup { padding-top: var(--s-6); } }
+.lineup__head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); margin-bottom: var(--s-1); }
+.lineup__title { display: flex; align-items: center; min-height: var(--tap); }
+.lineup__all { display: inline-flex; align-items: center; min-height: var(--tap); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
+.lineup__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--s-4) var(--s-2);
+}
+.lineup__grid > .card { grid-column: span 2; }
+.lineup__grid > .card--large { grid-column: span 3; }
+@media (min-width: 48em) { .lineup__grid { gap: var(--s-6) var(--s-3); } }
+
+/* Service-Zeile: drei Angaben nebeneinander, mittig, zwischen feinen Linien */
+.service { padding-top: var(--s-8); }
+.service__list { display: grid; border-block: var(--bw) solid var(--c-grey-line); }
+.service__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: var(--s-2) var(--s-3);
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.service__item + .service__item { border-top: var(--bw) solid var(--c-grey-line); }
+.service__item .link { display: inline-flex; align-items: center; min-height: var(--tap); }
+@media (min-width: 48em) {
+  .service__list { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .service__item + .service__item { border-top: 0; border-left: var(--bw) solid var(--c-grey-line); }
+}
+
+/* Detail mit einem Satz */
+.detail { display: grid; gap: var(--s-5) var(--gap); padding-top: var(--s-8); }
+@media (min-width: 64em) { .detail { padding-top: var(--s-9); } }
+.detail__media { margin-inline: calc(var(--gutter) * -1); background: var(--c-deep); }
+.detail__img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.detail__text { display: grid; gap: var(--s-4); justify-items: start; }
+.detail__copy { font-size: 1.25rem; line-height: 1.4; max-width: 26ch; }
+.detail__link { font-size: var(--t-small); }
+@media (min-width: 64em) {
+  .detail { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: end; }
+  .detail__media { grid-column: 1 / span 8; margin-inline: calc(var(--gutter) * -1) 0; }
+  .detail__text { grid-column: 10 / span 3; padding-bottom: var(--s-2); }
+}
+
+/* 10. Shop, Produkt ======================================================== */
+.shop__head { display: grid; justify-items: start; }   /* seit Runde 13 nur „← Startseite“ (Abschnitt 16) */
+
+.crumbs { color: var(--c-grey-text); }
+.crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s-2); }
+.crumbs li { display: flex; align-items: center; min-height: var(--tap); }
+.crumbs a { display: inline-flex; align-items: center; min-width: var(--tap); min-height: var(--tap); }
+.crumbs li + li::before { content: "/"; margin-right: var(--s-2); color: var(--c-grey-text); }
+.crumbs [aria-current] { color: var(--c-ink); }
+
+.pdp__grid { display: grid; gap: var(--s-4) var(--gap); }
+@media (min-width: 64em) {
+  .pdp__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--s-8); align-items: start; }
+  .pdp__info { position: sticky; top: calc(var(--header-h) + var(--s-5)); }
+}
+.gallery { min-width: 0; margin-inline: calc(var(--gutter) * -1); }
+@media (min-width: 48em) { .gallery { margin-inline: 0; } }
+.gallery__stage { position: relative; background: var(--c-plate); }
+.gallery__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.gallery__track::-webkit-scrollbar { display: none; }
+.gallery__track:focus-visible { outline-offset: -3px; }
+.gallery__slide { position: relative; flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 1; padding: 1.5%; }
+.gallery__slide--detail { padding: 0; }
+.gallery__zoom { position: relative; display: block; width: 100%; height: 100%; cursor: zoom-in; }
+.gallery__slide img { width: 100%; height: 100%; object-fit: contain; }
+.gallery__slide--detail img { object-fit: cover; }
+/* Ab 1024 px: kein Wischen, alle Bilder groß untereinander – das erste über die volle Breite, dann zu zweit */
+@media (min-width: 64em) {
+  .gallery__stage { background: none; }
+  .gallery__track { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); overflow: visible; scroll-snap-type: none; }
+  .gallery__slide { background: var(--c-plate); padding: 4%; }
+  .gallery__slide:first-child { grid-column: 1 / -1; padding: 3% 8%; }
+  .gallery__slide:last-child:nth-child(even) { grid-column: 1 / -1; aspect-ratio: 2 / 1; }
+  .gallery__slide--detail { padding: 0; }
+}
+.gallery__placeholder { width: 60%; height: auto; fill: var(--c-grey-soft); }
+.gallery__count { position: absolute; right: var(--s-3); bottom: var(--s-3); color: var(--c-grey-text); font-variant-numeric: tabular-nums; pointer-events: none; }
+.gallery__thumbs { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 5.5rem)); gap: var(--s-2); padding: var(--s-3) var(--gutter) 0; }
+@media (min-width: 48em) { .gallery__thumbs { padding-inline: 0; } }
+.gallery__thumb { display: grid; gap: var(--s-1); text-align: left; }
+.gallery__thumb-img { display: block; aspect-ratio: 1; background: var(--c-plate); border-bottom: 2px solid transparent; transition: border-color var(--dur) var(--ease); }
+.gallery__thumb-img img { width: 100%; height: 100%; object-fit: contain; }
+.gallery__thumb-label { color: var(--c-grey-text); font-size: 0.75rem; }
+.gallery__thumb:hover .gallery__thumb-img { border-bottom-color: var(--c-grey-line); }
+.gallery__thumb[aria-current="true"] .gallery__thumb-img { border-bottom-color: var(--c-ink); }
+.gallery__thumb[aria-current="true"] .gallery__thumb-label { color: var(--c-ink); }
+/* Unter 768 px: ohne Vorschaubilder (Zähler bleibt); der Kaufknopf steht als feste Leiste unten */
+@media (max-width: 47.99em) {
+  .gallery__thumbs { display: none; }
+}
+/* Ab 1024 px stehen alle Bilder untereinander: ohne Zähler und Vorschaubilder */
+@media (min-width: 64em) {
+  .gallery__count,
+  .gallery__thumbs { display: none; }
+}
+
+.pdp__info { display: grid; gap: var(--s-4); align-content: start; }
+@media (min-width: 48em) { .pdp__info { gap: var(--s-5); } }
+.pdp__head { display: grid; gap: var(--s-2); }
+.pdp__title { font-size: clamp(2rem, 3vw, 2.75rem); }
+.pdp__price-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-4); padding-top: var(--s-3); border-top: var(--bw) solid var(--c-grey-line); }
+.pdp__price { font-size: 1.375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pdp__ship { flex-basis: 100%; }
+/* verlinkte Versandzeile: Tippfläche 44 px, ohne die Zeile höher zu machen */
+.pdp__ship .link { display: inline-block; padding-block: 0.7rem; margin-block: -0.7rem; }
+.pdp__tax,
+.pdp__ship,
+.pdp__colors { font-size: var(--t-small); color: var(--c-grey-text); }
+.pdp__buy { display: grid; gap: var(--s-3); }
+.sizes { position: relative; border: 0; margin: 0; padding: 0; min-width: 0; }
+/* Legende als Float: liegt dann im Inhalt des Fieldsets, die Größentabelle kann daneben stehen */
+.sizes__legend { float: left; display: flex; gap: var(--s-3); padding: 0; margin-bottom: var(--s-3); }
+.sizes__picked { color: var(--c-grey-text); }
+/* Größentabelle rechts neben der Legende (Zeile 0,9rem + Abstand): die Tippfläche endet an der Größenreihe
+   und ragt nach oben in den Abstand, der Text steht auf Höhe der Legende */
+.sizes__chart {
+  position: absolute;
+  top: calc(0.9rem + var(--s-3) - var(--tap));
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  min-height: var(--tap);
+  padding-bottom: var(--s-2);
+  font-size: var(--t-small);
+}
+.chart {
+  width: min(100% - 2 * var(--gutter), 26rem);
+  max-height: calc(100% - 2 * var(--gutter));
+  padding: var(--s-2) var(--s-5) var(--s-5);
+  border: var(--bw) solid var(--c-ink);
+  background: var(--c-paper);
+  color: var(--c-ink);
+}
+.chart::backdrop { background: rgb(18 18 18 / 0.4); }
+.chart__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s-3); }
+.chart__title { font-size: 1rem; font-weight: 600; }
+.chart__close { min-height: var(--tap); }
+.chart__close:hover { text-decoration: underline; text-underline-offset: 0.3em; }
+.chart__table { width: 100%; border-collapse: collapse; font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+.chart__table th,
+.chart__table td { padding: var(--s-2) var(--s-3) var(--s-2) 0; border-bottom: var(--bw) solid var(--c-grey-line); text-align: left; }
+.chart__table thead th { color: var(--c-grey-text); border-bottom-color: var(--c-ink); }
+.chart__table tbody th { font-weight: 600; }
+.sizes__row { clear: both; display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); }
+.sizes__row .size { min-height: 3.25rem; font-size: 0.875rem; margin-left: calc(var(--bw) * -1); }
+.sizes__row .size:first-of-type { margin-left: 0; }
+.sizes.is-invalid .size:not([data-soldout]) { border-color: var(--c-error); }
+.pdp__error { padding-left: var(--s-3); border-left: 2px solid var(--c-error); color: var(--c-error); font-size: var(--t-small); font-weight: 600; }
+.pdp__status { font-size: var(--t-small); min-height: 1.4em; }
+.pdp__add.is-done { --btn-bg: var(--c-acc); --btn-fg: var(--c-acc-ink); }
+.pdp__motto { font-size: var(--t-small); color: var(--c-grey-text); }
+.pdp__more { margin-top: var(--s-2); }
+
+/* 11. Übrige Seiten ======================================================== */
+.page-head { padding-block: var(--s-7) var(--s-6); display: grid; gap: var(--s-3); }
+.page-kicker { color: var(--c-grey-text); }
+.page-title { font-size: var(--t-title); overflow-wrap: anywhere; hyphens: auto; }
+.page-meta { font-size: var(--t-small); color: var(--c-grey-text); }
+
+.about { display: grid; gap: var(--s-6) var(--gap); padding-top: var(--s-7); }
+.about__text { display: grid; gap: var(--s-4); align-content: start; }
+.about__kicker { color: var(--c-grey-text); }
+.about__title { font-size: var(--t-title); }
+.about__lead { font-size: 1.25rem; line-height: 1.4; max-width: 30ch; }
+.about__body { color: var(--c-grey-text); max-width: var(--measure); }
+.about__img { background: var(--c-deep); }
+.about__img img { width: 100%; height: auto; }
+.facts { border-top: var(--bw) solid var(--c-ink); }
+.facts__row { display: grid; grid-template-columns: minmax(7rem, 1fr) 2fr; gap: var(--s-4); padding-block: var(--s-3); border-bottom: var(--bw) solid var(--c-grey-line); }
+.facts__row dt { color: var(--c-grey-text); padding-top: 0.2em; }
+.about__ask { font-size: var(--t-small); color: var(--c-grey-text); }
+@media (min-width: 64em) {
+  .about { grid-template-columns: repeat(12, minmax(0, 1fr)); row-gap: var(--s-8); }
+  .about__text { grid-column: 1 / span 5; }
+  .about__img { grid-column: 7 / span 6; }
+  .about .facts { grid-column: 1 / span 7; }
+  .about__ask { grid-column: 1 / span 7; }
+}
+
+.legal { display: grid; gap: var(--s-6) var(--gap); padding-top: var(--s-6); }
+.legal__side { display: grid; gap: var(--s-3); align-content: start; }
+.legal__side-head { color: var(--c-grey-text); }
+.legal__nav { display: flex; flex-wrap: wrap; gap: 0 var(--s-4); }
+.legal__nav a { display: inline-flex; align-items: center; min-height: var(--tap); font-size: var(--t-small); text-decoration: underline; text-decoration-color: var(--c-grey-line); text-underline-offset: 0.25em; }
+.legal__nav a:hover,
+.legal__nav a[aria-current="page"] { text-decoration-color: currentColor; }
+.legal__nav a[aria-current="page"] { font-weight: 600; }
+.legal__body { min-width: 0; display: grid; gap: var(--s-5); align-content: start; }
+.legal__text { max-width: var(--measure); }
+@media (min-width: 64em) {
+  .legal { grid-template-columns: repeat(12, minmax(0, 1fr)); padding-top: var(--s-7); }
+  .legal__side { grid-column: 1 / span 3; position: sticky; top: calc(var(--header-h) + var(--s-5)); }
+  .legal__nav { display: grid; gap: 0; }
+  .legal__body { grid-column: 5 / span 8; }
+}
+
+.list { border-top: var(--bw) solid var(--c-ink); }
+.list__item { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-4); padding-block: var(--s-4); border-bottom: var(--bw) solid var(--c-grey-line); font-weight: 600; }
+.list__item:hover { text-decoration: underline; text-underline-offset: 0.22em; }
+.list__meta { font-size: var(--t-small); font-weight: 400; color: var(--c-grey-text); }
+.list__none { padding-block: var(--s-4); }
+.search { display: grid; grid-template-columns: 1fr auto; max-width: 36rem; }
+.search .form__input { border-right: 0; }
+
+.notfound { display: grid; justify-items: start; gap: var(--s-5); padding-top: var(--s-7); }
+.notfound__num { font-size: clamp(6rem, 22vw, 14rem); line-height: 0.8; }
+
+/* Passwortseite, Geschenkkarte */
+.template-password .form__input { border-color: var(--c-ink); }
+.gate { min-height: 100vh; min-height: 100dvh; display: flex; align-items: stretch; }
+.gate__inner { display: grid; grid-template-rows: auto 1fr auto; gap: var(--s-7); padding-block: var(--s-6); }
+/* Mit Teaser-Bild: Handy unter dem Logo (flach), ab 1024 px rechts über die volle Höhe */
+.gate--teaser .gate__inner { grid-template-rows: auto auto 1fr auto; gap: var(--s-6); }
+@media (min-width: 64em) {
+  .gate--teaser .gate__inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto; column-gap: var(--s-8); }
+  .gate--teaser .gate__logo { grid-column: 1; grid-row: 1; }
+  .gate--teaser .gate__text { grid-column: 1; grid-row: 2; }
+  .gate--teaser .gate__pw,
+  .gate--teaser .gate__form { grid-column: 1; grid-row: 3; }
+  .teaser.gate__teaser { grid-column: 2; grid-row: 1 / span 3; aspect-ratio: auto; min-height: 32rem; }
+  .gate__teaser .teaser__img--cut { width: 150%; top: 6%; }
+}
+.gate__logo { height: 3rem; width: auto; }
+.gate__text { display: grid; gap: var(--s-4); align-content: center; }
+.gate__kicker,
+.gate__msg,
+.template-password .form__label { color: var(--c-grey-text); }
+.gate__title { font-size: clamp(4.5rem, 20vw, 13rem); line-height: 0.82; }
+.gate__msg { max-width: var(--measure); }
+.gate__form { display: grid; gap: var(--s-2); max-width: 30rem; }
+.gate__row { display: grid; grid-template-columns: 1fr auto; }
+.gate__row .form__input { border-right: 0; }
+.gate__error { padding-left: var(--s-3); border-left: 2px solid currentColor; }
+
+/* 12. Drops per Mail ======================================================= */
+/* Formular (Runde 12): Beschriftung über dem Feld, Feld und Knopf gleich hoch in einer Zeile (Handy: der Knopf darunter
+   über die volle Breite), Fehler direkt unter dem Feld, Erfolg als Kasten mit Haken, darunter die Einwilligungszeile */
+.signup { display: grid; gap: var(--s-2); width: 100%; max-width: 34rem; }
+.signup__label { font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-ink); }
+.signup__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; }
+.signup__email { height: 3.25rem; min-height: 0; border: var(--bw) solid var(--c-grey-text); border-right: 0; background: var(--c-paper); }
+.signup__email:focus { border-color: var(--c-ink); }
+.signup__email::placeholder { color: var(--c-grey-soft); opacity: 1; }
+.signup__email[aria-invalid="true"] { border-color: var(--c-error); }
+.signup__btn { height: 3.25rem; min-height: 0; padding-inline: var(--s-5); }
+@media (max-width: 25em) {
+  .signup__row { grid-template-columns: 1fr; gap: var(--s-2); }
+  .signup__email { border-right: var(--bw) solid var(--c-grey-text); }
+}
+.signup__error { display: flex; align-items: center; gap: var(--s-2); margin: 0; color: var(--c-error); font-size: var(--t-small); font-weight: 600; }
+.signup__error::before { content: "!"; flex: none; display: grid; place-items: center; width: 1.25rem; height: 1.25rem; border: 1.5px solid currentColor; border-radius: 50% !important; font-size: 0.75rem; line-height: 1; }
+.signup__legal { margin-top: var(--s-1); font-size: 0.75rem; line-height: 1.45; color: var(--c-grey-text); }
+.signup__ok { display: flex; align-items: flex-start; gap: var(--s-3); padding: var(--s-4); border: var(--bw) solid var(--c-grey-line); background: var(--c-surface); }
+.signup__ok p { margin: 0; color: var(--c-grey-text); }
+.signup__ok strong { display: block; margin-bottom: var(--s-1); color: var(--c-ink); }
+.signup__tick { flex: none; display: grid; place-items: center; width: 1.75rem; height: 1.75rem; background: var(--c-acc); color: var(--c-acc-ink); font-weight: 700; }
+
+/* Teaser-Bild neben der Anmeldung: Frankfurt-Trikot freigestellt auf der Bildfläche, groß und unten angeschnitten
+   (Kragen, Adler, Signatur, FRANKFURT-Band); eigenes Foto füllt die Fläche */
+.teaser { position: relative; margin: 0; overflow: hidden; aspect-ratio: 4 / 3; background: var(--c-plate); }
+.teaser__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.teaser__img--cut { inset: auto; top: 7%; left: 50%; width: 118%; height: auto; max-width: none; transform: translateX(-50%); }
+/* Zeile oben links: dort liegt auf allen Ausschnitten nur die Bildfläche, nicht der Schriftzug */
+.teaser__label {
+  position: absolute;
+  left: var(--s-3);
+  top: var(--s-3);
+  padding: 0.4rem 0.55rem 0.35rem;
+  background: var(--c-ink);
+  color: var(--c-paper);
+}
+
+/* Footer: Teaser-Bild, daneben Überschrift, Text und Formular (Handy untereinander);
+   ohne Bild ab 1024 px Überschrift links, Formular rechts */
+.footer__signup { display: grid; gap: var(--s-5); padding-block: var(--s-7); border-bottom: var(--bw) solid var(--c-grey-line); }
+.footer__signup-body { display: grid; gap: var(--s-5); align-content: center; }
+.footer__signup-text { display: grid; gap: var(--s-3); align-content: start; }
+.footer__signup-title { font-size: clamp(3rem, 13vw, 6rem); line-height: 0.88; text-wrap: balance; }
+.footer__signup-lead { max-width: 30rem; color: var(--c-grey-text); }
+@media (min-width: 48em) {
+  .footer__signup--teaser { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: center; }
+  .footer__signup--teaser .footer__signup-title { font-size: clamp(3rem, 6.4vw, 6rem); }
+}
+@media (min-width: 64em) {
+  .footer__signup { padding-block: var(--s-8); }
+  .footer__signup:not(.footer__signup--teaser) .footer__signup-body { grid-template-columns: minmax(0, 1fr) minmax(0, 34rem); gap: var(--s-8); align-items: end; }
+  .footer__signup--teaser { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--s-8); }
+  .footer__signup--teaser .footer__signup-body { gap: var(--s-6); }
+}
+
+/* Abschnitt „Drops per Mail“ (Seite Drops, optional Startseite) */
+.drops { padding-block: var(--s-8); }
+.drops__inner { display: grid; gap: var(--s-6); }
+.drops__main { display: grid; gap: var(--s-6); align-content: end; }
+.drops__head { display: grid; gap: var(--s-3); align-content: end; }
+.drops__kicker { color: var(--c-grey-text); }
+.drops__title { font-size: clamp(3.5rem, 17vw, 10rem); line-height: 0.84; text-wrap: balance; }
+.drops__body { display: grid; gap: var(--s-5); align-content: end; }
+.drops__text { max-width: 30rem; font-size: 1.125rem; line-height: 1.45; }
+.drops--dark .drops__kicker,
+.drops--dark .signup__legal { color: var(--c-grey-text); }
+.drops--dark .form__input { color: var(--c-ink); }
+@media (min-width: 64em) {
+  .drops { padding-block: var(--s-9); }
+  .drops__inner:not(.drops__inner--teaser) .drops__main { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--s-8); align-items: end; }
+  .drops:has(.drops__inner--teaser) { padding-block: var(--s-8); }
+  .drops__inner--teaser { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-8); align-items: center; }
+  .drops__inner--teaser .drops__title { font-size: clamp(4rem, 7.4vw, 8.5rem); }
+  .teaser.drops__teaser { aspect-ratio: 1; }
+  .drops__teaser .teaser__img--cut { width: 140%; top: 5%; }
+}
+
+/* Passwortseite: Anmeldung zuerst, Passwort aufklappbar */
+.gate__signup { display: grid; gap: var(--s-4); max-width: 34rem; margin-top: var(--s-4); }
+.template-password .signup__email { border-color: var(--c-ink); color: var(--c-ink); }
+.template-password .signup__email::placeholder,
+.template-password .signup__legal { color: var(--c-grey-text); }
+.template-password .signup__ok { background: var(--c-surface); }
+.template-password .signup__error { color: var(--c-error); border-color: var(--c-error); }
+.gate__pw { border-top: var(--bw) solid var(--c-grey-line); max-width: 30rem; }
+.gate__pw-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap);
+  color: var(--c-grey-text);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+.gate__pw-head::-webkit-details-marker { display: none; }
+.gate__pw-head::after { content: "+"; font-size: 1.125rem; font-weight: 400; }
+.gate__pw[open] > .gate__pw-head::after { content: "−"; }
+.gate__pw .gate__form { padding-bottom: var(--s-2); }
+
+/* 13. Produktseite: Service, Angaben, Kaufleiste, Zoom ======================= */
+.trust { display: grid; border-top: var(--bw) solid var(--c-grey-line); font-size: var(--t-small); }
+.trust__row { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: var(--s-3); align-items: baseline; padding-block: var(--s-2); border-bottom: var(--bw) solid var(--c-grey-line); }
+.trust__k { font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-grey-text); }
+.trust .link { display: inline-block; padding-block: 0.7rem; margin-block: -0.7rem; }
+.pdp__facts { font-size: var(--t-small); }
+.pdp__facts .facts__row { grid-template-columns: 6rem minmax(0, 1fr); padding-block: var(--s-2); }
+
+/* Hinweis auf fehlende Angaben, nur im Theme-Editor */
+.ph-tag {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  background: #f6c700;
+  color: #111111;
+  box-shadow: inset 0 0 0 1px #111111;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Feste Kaufleiste (Handy, Tablet): erscheint, sobald der Kaufknopf aus dem Bild ist */
+.buybar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--s-2);
+  padding: var(--s-2) var(--gutter) max(var(--s-2), env(safe-area-inset-bottom));
+  background: var(--c-paper);
+  border-top: var(--bw) solid var(--c-grey-line);
+  transform: translateY(110%);
+  transition: transform var(--dur-panel) var(--ease);
+}
+.buybar.is-shown { transform: none; }
+.buybar__size {
+  min-height: 3.25rem;
+  padding: 0 var(--s-3);
+  border: var(--bw) solid var(--c-ink);
+  background: transparent;
+  color: var(--c-ink);
+  font-weight: 600;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+.buybar__add { min-height: 3.25rem; padding-inline: var(--s-3); }
+@media (max-width: 63.99em) { .template-product main { padding-bottom: 5rem; } }
+@media (min-width: 64em) { .buybar { display: none !important; } }
+
+/* Bild vergrößert: ganzer Bildschirm, verschieben per Wischen oder Scrollen */
+.zoom { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--c-plate); color: var(--c-ink); }
+.zoom::backdrop { background: rgb(18 18 18 / 0.6); }
+.zoom__close {
+  position: fixed;
+  top: max(var(--s-3), env(safe-area-inset-top));
+  right: var(--gutter);
+  z-index: 2;
+  min-height: var(--tap);
+  padding: 0 var(--s-4);
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.zoom__pane { width: 100%; height: 100%; overflow: auto; overscroll-behavior: contain; }
+.zoom__img { width: 220%; max-width: none; height: auto; }
+@media (min-width: 64em) { .zoom__img { width: 140%; } }
+
+/* Warenkorb: kostenloser Versand, Express-Kasse */
+.freeship { display: grid; gap: var(--s-2); padding: var(--s-3) var(--gutter); border-bottom: var(--bw) solid var(--c-grey-line); font-size: var(--t-small); }
+.freeship__bar { position: relative; display: block; height: 6px; margin-block: 0.4rem 0.2rem; background: var(--c-grey-line); border-radius: 3px !important; }
+.freeship__bar > span { display: block; height: 100%; background: var(--c-acc); border-radius: 3px !important; animation: fs-grow 0.9s var(--ease) both; }
+.drawer__express { min-height: 0; }
+
+/* 14. Runde 10: Animationen (Knopf wird zum Haken, Ball rollt zum Gratis-Versand) ================= */
+/* Animation „Knopf wird zum Haken“: der Kaufen-Knopf füllt sich von links und zeigt den Haken */
+.btn.is-done {
+  --btn-fg: var(--c-paper);
+  --btn-line: var(--c-ink);
+  background-image: linear-gradient(var(--c-ink), var(--c-ink));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  animation: btn-fill 0.38s var(--ease) both;
+}
+.btn.is-done::before { content: "✓"; font-weight: 800; animation: btn-tick 0.38s var(--ease) both; }
+@keyframes btn-fill { from { background-size: 0% 100%; } }
+@keyframes btn-tick { from { transform: scale(0); } 70% { transform: scale(1.3); } }
+
+/* Animation „Ball rollt zum Gratis-Versand“: im Warenkorb rollt ein Ball bis zum aktuellen Stand */
+.freeship__ball {
+  position: absolute;
+  top: 50%;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50% !important;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 50% 50%, #111 0 22%, transparent 24%),
+    radial-gradient(circle at 50% 0, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 0 62%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 100% 62%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 24% 100%, #111 0 16%, transparent 18%),
+    radial-gradient(circle at 76% 100%, #111 0 16%, transparent 18%),
+    #fff;
+  box-shadow: 0 0 0 1px #111;
+  animation: fs-roll 0.9s var(--ease) both;
+}
+@keyframes fs-grow { from { width: var(--from, 0%); } }
+@keyframes fs-roll { from { left: var(--from, 0%); transform: translate(-50%, -50%) rotate(-540deg); } }
+@media (prefers-reduced-motion: reduce) { .freeship__bar > span, .freeship__ball { animation: none; } }
+
+/* 15. Runde 12: eine Website, Warenkorb-Symbol ===================== */
+/* (Die Trikotfarben der Produktansicht im Zimmer stehen seit Runde 16 als --tone-* oben bei den Tokens, angewandt in azur-room.css.) */
+
+/* Zurück zur Startseite (Shop) */
+.back-home { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); margin-bottom: var(--s-2);
+  font-size: var(--t-label); font-weight: 600; letter-spacing: var(--ls-label); text-transform: uppercase; }
+.back-home:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+
+/* Warenkorb-Symbol: die Sporttasche, auf jeder Seite im Header; die Zahl als kleiner Punkt daran
+   (Runde 17: ein gerendertes 3D-Bild, schwarz; über dem Zimmer das weiße wie beim Logo, siehe Header oben) */
+.header__cart { position: relative; }
+.bag3d { display: grid; width: 2.6rem; transition: transform var(--dur) var(--ease); }
+.bag3d img { grid-area: 1 / 1; width: 100%; height: auto; }
+.header__cart .logo--ink { display: var(--logo-ink); }
+.header__cart .logo--paper { display: var(--logo-paper); }
+.header__icon:hover .bag3d { transform: translateY(-1px) rotate(-3deg); }
+.header__cart .header__count { position: absolute; top: 0.2rem; right: 0; display: grid; place-items: center; min-width: 1.1rem; height: 1.1rem; padding: 0 0.25rem;
+  border-radius: 999px !important; background: var(--c-acc); color: var(--c-acc-ink); font-size: 0.6875rem; font-weight: 700;
+  transition: transform var(--dur-panel) var(--ease), opacity var(--dur-panel) var(--ease); }
+.header__cart .header__count[data-count="0"] { opacity: 0; transform: scale(0.4); }   /* leer: kein Punkt (Vorleser lesen die 0 trotzdem) */
+.header.is-compact .bag3d { width: 2.3rem; }
+
+/* 16. Runde 13: schlicht nach yeezy.com ===================================== */
+/* Weiß, Schwarz, eine Monospace-Schrift, viel Luft. Gilt für den Shop; das Zimmer und seine Produktansicht bleiben dunkel. */
+body { font-stretch: 87.5%; letter-spacing: 0.02em; }
+
+/* Header: links klein das Logo, rechts die Sporttasche; ohne Linie (Runde 15: STADT / LAND weg) */
+.header { border-bottom-color: transparent; }
+.header__bar { grid-template-columns: minmax(0, 1fr) auto; }
+.header__logo { justify-self: start; padding-inline: 0; }
+.header__logo .logo, .header.is-compact .header__logo .logo { height: 1.25rem; }
+@media (min-width: 48em) { .header__logo .logo { height: 1.4rem; } }
+.header__end { justify-self: end; margin-right: -0.625rem; }
+.header__cart .header__count { top: 0.15rem; right: -0.1rem; min-width: 0.95rem; height: 0.95rem; font-size: 0.5625rem; font-weight: 400; }
+
+/* Leiste oben: kaum sichtbar, graue kleine Schrift auf Weiß */
+.bar { background: var(--c-paper); border-bottom: 0; }
+.bar__item { font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Raster (Startseite und Shop): Trikot frei auf Weiß, darunter nur der Name; Desktop 3, iPad 2, Handy 1 */
+.yz { padding-block: var(--s-7) var(--s-8); }
+.yz__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-8) var(--s-6); margin: 0 auto; list-style: none; }
+@media (min-width: 30em) { .yz__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 75em) { .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-9); } }
+.yz__empty { grid-column: 1 / -1; color: var(--c-grey-text); text-align: center; }
+.card { text-align: center; }
+.card__link { display: grid; justify-items: center; gap: var(--s-4); }
+.card__media { display: block; width: 100%; aspect-ratio: 1 / 0.9; background: var(--c-paper); }
+.card__media .card__img { width: 100%; height: 100%; padding: 6%; object-fit: contain; }
+.card__name { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.card__link:hover .card__name { text-decoration: underline; text-underline-offset: 0.3em; }
+/* Shop-Seite: nur „← Startseite“ über dem Raster */
+.shop__head { padding-block: var(--s-4) var(--s-6); }
+.back-home { font-weight: 400; color: var(--c-grey-text); }
+.back-home:hover { color: var(--c-ink); }
+
+/* Produktseite: ein Bild in der Mitte mit Pfeilen und Punkten, darunter mittig Name, Preis, Größen und „+“ */
+.pdp--yz { padding-bottom: var(--s-8); }
+.pdp--yz .crumbs { padding-block: var(--s-2) 0; font-size: 0.6875rem; }
+.pdp--yz .crumbs a { min-width: 0; }
+.pdp--yz .gallery { width: min(100%, 52rem); margin: 0 auto; }
+.pdp--yz .gallery__stage { background: none; }
+.pdp--yz .gallery__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0; }
+/* das Bild so hoch, dass Name, Preis und „+“ auf dem ersten Bildschirm darunter stehen (wie bei yeezy.com) */
+.pdp--yz .gallery__slide { flex: 0 0 100%; aspect-ratio: auto; height: min(52vh, 30rem); padding: 2% 12%; background: none; grid-column: auto; }
+@media (max-width: 47.99em) { .pdp--yz .gallery__slide { height: auto; aspect-ratio: 1; padding: 6% 10%; } }
+.gallery__arrow { position: absolute; top: 50%; z-index: 2; display: grid; place-items: center; width: var(--tap); height: var(--tap); translate: 0 -50%; color: var(--c-ink); }
+.gallery__arrow svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gallery__arrow--prev { left: 0; }
+.gallery__arrow--next { right: 0; }
+.gallery__arrow:hover svg { stroke-width: 2.4; }
+.gallery__dots { display: flex; justify-content: center; gap: 0.25rem; margin-top: var(--s-2); }
+.gallery__dot { display: grid; place-items: center; width: 1.25rem; height: 1.25rem; }
+.gallery__dot::before { content: ""; width: 5px; height: 5px; border-radius: 50% !important; background: var(--c-grey-soft); }
+.gallery__dot[aria-current="true"]::before { background: var(--c-ink); }
+.pdp--yz .pdp__info { position: static; width: min(100%, 26rem); margin: var(--s-4) auto 0; padding-inline: var(--gutter); gap: var(--s-4); justify-items: center; text-align: center; }
+.pdp--yz .pdp__title { font-size: 0.9375rem; letter-spacing: 0.08em; }
+.pdp--yz .pdp__price { font-size: 0.9375rem; font-weight: 400; }
+.pdp--yz .pdp__buy { justify-items: center; gap: var(--s-2); width: 100%; }
+.pdp--yz .sizes__legend { float: none; width: 100%; justify-content: center; margin-bottom: var(--s-2); color: var(--c-grey-text); font-size: 0.6875rem; }
+.pdp--yz .sizes__chart { position: static; display: block; margin: 0 auto var(--s-2); font-size: 0.6875rem; }
+.pdp--yz .sizes__row { display: flex; justify-content: center; gap: var(--s-2); }
+.pdp--yz .sizes__row .size { min-width: 2.75rem; min-height: 2.75rem; margin: 0; border: 0; background: none; color: var(--c-grey-text); font-size: 0.8125rem; }
+.pdp--yz .sizes__row .size:hover { color: var(--c-ink); }
+.pdp--yz input:checked + .size { background: none; color: var(--c-ink); text-decoration: underline; text-underline-offset: 0.35em; }
+.pdp--yz .size[data-soldout] { color: var(--c-grey-soft); }
+.pdp--yz .sizes.is-invalid .size:not([data-soldout]) { color: var(--c-error); }
+.pdp__add { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; color: var(--c-ink); transition: opacity var(--dur) var(--ease); }
+.pdp__add svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.pdp__add:hover svg { stroke-width: 2.1; }
+.pdp__add:disabled { color: var(--c-grey-soft); }
+/* Runde 17 („Dreht sich, zeigt die 1“): das Plus dreht sich weg, an seiner Stelle eine schwarze Scheibe mit der Anzahl
+   dieser Größe im Warenkorb (data-qty, azur.js) */
+.pdp__add { position: relative; }
+.pdp__add.is-done svg { animation: add-spin 0.45s var(--ease) forwards; }
+.pdp__add.is-done::before { content: attr(data-qty); position: absolute; inset: 0.55rem; display: grid; place-items: center; border-radius: 50% !important;
+  background: var(--c-ink); color: var(--c-paper); font-size: 0.8125rem; animation: add-one 0.5s var(--ease) 0.25s both; }
+@keyframes add-spin { to { transform: rotate(360deg) scale(0.15); opacity: 0; } }
+@keyframes add-one { from { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pdp__add.is-done svg { animation: none; opacity: 0; } .pdp__add.is-done::before { animation: none; } }
+.pdp--yz .pdp__error { border: 0; padding: 0; font-weight: 400; }
+.pdp--yz .pdp__status { min-height: 0; color: var(--c-grey-text); }
+.pdp--yz .trust { width: 100%; border-top: 0; font-size: 0.75rem; color: var(--c-grey-text); }
+.pdp--yz .trust__row { display: block; border: 0; padding-block: 0.15rem; text-align: center; }
+.pdp--yz .trust__k { margin-right: 0.6em; font-weight: 400; }
+.pdp--yz .pdp__motto, .pdp--yz .pdp__facts, .pdp--yz .pdp__more { width: 100%; text-align: left; }
+.pdp--yz .facts { border-top-color: var(--c-grey-line); }
+.pdp--yz .acc__head { font-weight: 400; }
+
+/* Warenkorb, Footer, Anmeldung: dieselbe ruhige Sprache */
+.drawer__panel { border-left: var(--bw) solid var(--c-grey-line); }
+.drawer__title, .drawer__close { font-weight: 400; }
+.footer { border-top-color: var(--c-grey-line); }
+.footer__signup { padding-block: var(--s-6); }
+.footer__signup-title { font-size: 0.9375rem; }
+.footer__signup-lead { font-size: var(--t-small); }
+.footer__head { font-weight: 400; color: var(--c-grey-text); }
+.footer__col a { font-size: 0.75rem; }
+.signup__label { font-weight: 400; color: var(--c-grey-text); }
+.signup__email { border-color: var(--c-grey-line); }
+.signup__email:focus { border-color: var(--c-ink); }
+.btn { font-weight: 400; }
+.btn--solid { font-weight: 400; }
+
+/* 17. Runde 17: Gewinner der Design-Runden r6/r7 ================================ */
+/* Karten: das Trikot klein in einer FIFA-Karte aus feiner Linie (Kürzel oben links, Name über einem Strich, Größen) */
+.card--fifa { position: relative; width: min(100%, clamp(18rem, 27vw, 27rem));   /* Runde 23: größer (es wirkte leer) */
+  margin-inline: auto; aspect-ratio: 300 / 420; }
+.card--fifa .card__link { position: absolute; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; justify-items: center; gap: 0.55rem;
+  padding: 1.35rem 1.2rem 2.9rem; }
+.card__frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: var(--c-paper); stroke: var(--c-ink); stroke-width: 1;
+  vector-effect: non-scaling-stroke; transition: stroke-width var(--dur) var(--ease); }
+.card--fifa .card__link:hover .card__frame { stroke-width: 1.8; }
+.card__code { position: relative; justify-self: start; font-size: 0.6875rem; letter-spacing: 0.1em; }
+.card--fifa .card__media { position: relative; width: 100%; height: 100%; aspect-ratio: auto; min-height: 0; background: none; }
+.card--fifa .card__media .card__img { padding: 0; }
+.card--fifa .card__name { position: relative; min-width: 8.5rem; padding-top: 0.55rem; border-top: 1px solid currentColor; }
+.card__sizes { position: relative; font-size: 0.625rem; letter-spacing: 0.1em; color: var(--c-grey-text); }
+/* drei kleine Karten nebeneinander schon ab Tablet-Breite; Siegertreppchen: die mittlere Karte jeder Reihe steht höher */
+@media (min-width: 48em) {
+  .yz__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s-5); padding-top: 4rem; }
+  .yz__grid > li:nth-child(3n + 2) { translate: 0 -4rem; }
+}
+
+/* Hinweise auf dem ersten Produktbild („Schnittzeichnung“): graue Linien von kurzen Notizen links und rechts zu den Stellen
+   am Trikot. Die Punkte stehen in Prozent des quadratischen Bildes (Einstellung „Hinweise am Trikot“ der Produktseite);
+   das Bild ist quadratisch und mittig, also ist seine Seite min(Breite, Höhe) des Bildfelds (Container-Einheiten).
+   Auf dem Handy: nummerierte Punkte im Bild, die Notizen als Liste darunter. */
+.pdp--yz .gallery__slide:has(.notes) { container-type: size; }
+.notes { --s: min(100cqw, 100cqh); position: absolute; left: 50%; top: 50%; width: var(--s); height: var(--s); translate: -50% -50%; pointer-events: none; }
+.note { position: absolute; left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); width: 0; height: 0; }
+.note__dot { position: absolute; left: -0.18rem; top: -0.18rem; width: 0.36rem; height: 0.36rem; border-radius: 50% !important; background: #8a8a8a; }
+.note__line { position: absolute; top: 0; border-top: 1px solid #a3a3a3; }
+.note--l .note__line { right: 0; width: calc(var(--x) * var(--s) + 1.5rem); }
+.note--r .note__line { left: 0; width: calc((1 - var(--x)) * var(--s) + 1.5rem); }
+.note__label { position: absolute; top: -0.75em; display: grid; gap: 0.15rem; width: 9.5rem; font-size: 0.625rem; line-height: 1.35; color: #8a8a8a; }
+.note__label b { font-weight: 400; color: var(--c-ink); letter-spacing: 0.08em; text-transform: uppercase; }
+.note--l .note__label { right: calc(var(--x) * var(--s) + 1.95rem); text-align: right; }
+.note--r .note__label { left: calc((1 - var(--x)) * var(--s) + 1.95rem); }
+.notes__list { width: min(100%, 26rem); margin: var(--s-4) auto 0; padding: 0 var(--gutter); list-style: none; display: grid; gap: var(--s-2); counter-reset: note;
+  font-size: 0.75rem; color: var(--c-grey-text); }
+.notes__list li { counter-increment: note; }
+.notes__list li::before { content: "0" counter(note) " "; color: var(--c-ink); }
+.notes__list b { font-weight: 400; color: var(--c-ink); letter-spacing: 0.08em; text-transform: uppercase; margin-right: 0.4em; }
+@media (min-width: 48em) { .notes__list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; padding: 0; } }
+@media (max-width: 47.99em) {
+  .note__line, .note__label { display: none; }
+  .note__dot { left: -0.5rem; top: -0.5rem; width: 1rem; height: 1rem; display: grid; place-items: center; background: var(--c-ink); color: var(--c-paper); font-size: 0.5625rem; }
+  .note__dot::after { content: attr(data-n); }
+}
+
+/* 18. Runde 19: Städtetrikots auf eigener Seite ============================== */
+/* Shop: „Länder · Städte“ mittig über dem Raster; Startseite: ein Link unter den Ländertrikots */
+.shop__tabs { display: flex; justify-content: center; gap: var(--s-6); justify-self: stretch; margin-top: var(--s-2);
+  font-size: var(--t-label); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.shop__tabs a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--c-grey-text); }
+.shop__tabs a:hover { color: var(--c-ink); }
+.shop__tabs a[aria-current="page"] { color: var(--c-ink); text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
+.yz__more { margin-top: var(--s-8); text-align: center; font-size: var(--t-label); letter-spacing: var(--ls-label); text-transform: uppercase; }
+.yz__more a { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); }
+.yz__more a:hover { text-decoration: underline; text-underline-offset: 0.3em; }
+/* zwei Karten (Städte): mittig nebeneinander, ohne Treppchen */
+@media (min-width: 48em) {
+  .yz__grid:has(> li:last-child:nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 27rem)); justify-content: center; column-gap: var(--s-8); }
+  .yz__grid:has(> li:last-child:nth-child(2)) > li { translate: none; }
+}

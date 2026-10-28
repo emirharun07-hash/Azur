@@ -1,0 +1,22 @@
+{%- comment -%}
+  Support-Links als <li>-Liste: FAQ, Kontaktformular, Bestellungen und Rücksendungen (Kundenkonto), Versand und Rückgabe.
+  Die Support-E-Mail steht auf der Kontaktseite. Punkte ohne Ziel entfallen (Seite unveröffentlicht, Kundenkonten aus).
+  Parameter: class  Klasse der Links
+{%- endcomment -%}
+{%- liquid
+  assign faq = pages['faq']
+  assign contact = pages['contact']
+  assign shipping_page = pages[settings.shipping_page_handle]
+-%}
+{%- if faq.url != blank -%}
+  <li><a class="{{ class }}" href="{{ faq.url }}">FAQ</a></li>
+{%- endif -%}
+{%- if contact.url != blank -%}
+  <li><a class="{{ class }}" href="{{ contact.url }}">Kontaktformular</a></li>
+{%- endif -%}
+{%- if shop.customer_accounts_enabled -%}
+  <li><a class="{{ class }}" href="{{ routes.account_url }}">Bestellungen und Rücksendungen</a></li>
+{%- endif -%}
+{%- if shipping_page.url != blank -%}
+  <li><a class="{{ class }}" href="{{ shipping_page.url }}">Versand und Rückgabe</a></li>
+{%- endif -%}

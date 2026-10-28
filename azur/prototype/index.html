@@ -1,0 +1,81 @@
+<meta charset="utf-8">
+<title>AZUR Zimmer</title>
+<meta name="description" content="AZUR Fußballtrikots. Betritt das Zimmer, in dem ein Fußballtraum beginnt: Berlin 030, Frankfurt 069, Brasilien, Deutschland, Türkei.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Martian+Mono:wdth,wght@75..112.5,300..600&family=Caveat:wght@500&display=swap">
+<link rel="stylesheet" href="css/azur-room.css">
+
+<div id="azur" class="azur" data-view="room">
+  <header class="azur-head">
+    <div class="azur-head__right">
+      <button class="azur-head__bag" type="button" aria-label="Sporttasche (Warenkorb) öffnen" hidden>
+        <svg viewBox="0 0 48 40" aria-hidden="true"><path class="bag-strap" d="M15 14 C15 5 33 5 33 14"/><rect class="bag-body" x="4" y="13" width="40" height="22" rx="10"/><path class="bag-stripe" d="M5 24 H43"/><circle class="bag-ball" cx="35" cy="24" r="5.2"/><path class="bag-ball-lines" d="M35 19.6 l3 2.4 -1.2 3.6 h-3.6 l-1.2-3.6z"/></svg>
+        <span class="azur-head__count">0</span>
+      </button>
+      <button class="azur-head__sound" type="button" aria-pressed="true" aria-label="Ton aus" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9.5h3.6L12 6v12l-4.4-3.5H4z"/><path class="wave" d="M15.5 9.6a3.4 3.4 0 0 1 0 4.8M18 7.2a6.8 6.8 0 0 1 0 9.6"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
+      <button class="azur-head__dots" type="button" aria-label="Menü" aria-expanded="false" aria-controls="azur-menu"><i></i><i></i><i></i></button>
+    </div>
+    <nav class="azur-menu" id="azur-menu" aria-label="Hauptnavigation" hidden>
+      <a href="#trikots" data-go="rail">Shop</a>
+      <a href="#trikots" data-go="rail">Kollektion</a>
+      <a href="#anstoss" data-go="mag">Über uns</a>
+      <a href="#" data-go="room">Zimmer</a>
+    </nav>
+  </header>
+  <nav aria-label="AZUR"><a class="azur-ghost" href="#" aria-label="AZUR, zurück ins Zimmer"><img src="assets/brand/azur-logo-paper.webp" alt="AZUR" width="480" height="227"></a></nav>
+
+  <main class="azur-stage" aria-label="Das Zimmer">
+    <div class="azur-world">
+      <canvas class="azur-canvas" aria-hidden="true"></canvas>
+      <img class="azur-fallback" alt="Ein Kinderzimmer voller Fußballposter, ein Kleiderständer mit AZUR-Trikots, ein AZUR-Neonschild." hidden>
+      <div class="azur-layer"></div>
+    </div>
+    <canvas class="azur-snap" aria-hidden="true" hidden></canvas>
+    <p class="azur-hint" aria-live="polite"></p>
+    <p class="azur-tease" aria-live="polite"></p>
+    <nav class="azur-views" aria-label="Ansicht wählen">
+      <button type="button" data-view="bed">Bett</button>
+      <button type="button" data-view="room">Zimmer</button>
+      <button type="button" data-view="rail">Ständer</button>
+    </nav>
+    <div class="azur-loader" aria-hidden="true"><img class="azur-loader__neon" src="assets/brand/azur-logo-paper.webp" alt=""></div>
+    <p class="azur-missing">Die Raumbilder werden gerade gerendert</p>
+  </main>
+
+  <!-- Crawlable product list: the room is the premium path, these links always work. -->
+  <nav class="azur-sr" id="trikots" aria-label="Alle Trikots">
+    <ul>
+      <li><a href="https://azurclothing.com/products/frankfurt-trikot-azur-collection">Frankfurt 069 Trikot, 64,99 €</a></li>
+      <li><a href="https://azurclothing.com/products/berlin-trikot-azur-collection">Berlin 030 Trikot, 64,99 €</a></li>
+      <li><a href="https://azurclothing.com/products/brasilien-trikot-azur-collection">Brasilien Trikot, 54,99 €</a></li>
+      <li><a href="https://azurclothing.com/products/deutschland-trikot-azur-collection">Deutschland Trikot, 54,99 €</a></li>
+      <li><a href="https://azurclothing.com/products/turkei-trikot-azur-collection">Türkei Trikot, 54,99 €</a></li>
+      <li><a href="https://azurclothing.com/pages/drops">Nächster Drop: per E-Mail benachrichtigen lassen</a></li>
+    </ul>
+  </nav>
+  <noscript>
+    <style>.azur-loader{display:none}.azur-noscript{position:fixed;inset:0;overflow:auto;padding:40px 24px;background:#F3EEE6;color:#15130F;font-family:Archivo,system-ui,sans-serif}.azur-noscript a{color:#0A6A9A}</style>
+    <div class="azur-noscript">
+      <h1>AZUR Trikots</h1>
+      <ul>
+        <li><a href="https://azurclothing.com/products/frankfurt-trikot-azur-collection">Frankfurt 069 Trikot, 64,99 €</a></li>
+        <li><a href="https://azurclothing.com/products/berlin-trikot-azur-collection">Berlin 030 Trikot, 64,99 €</a></li>
+        <li><a href="https://azurclothing.com/products/brasilien-trikot-azur-collection">Brasilien Trikot, 54,99 €</a></li>
+        <li><a href="https://azurclothing.com/products/deutschland-trikot-azur-collection">Deutschland Trikot, 54,99 €</a></li>
+        <li><a href="https://azurclothing.com/products/turkei-trikot-azur-collection">Türkei Trikot, 54,99 €</a></li>
+      </ul>
+    </div>
+  </noscript>
+</div>
+
+<script src="js/azur-config.js"></script>
+<script src="js/azur-data.js"></script>
+<script src="js/azur-light.js"></script>
+<script src="js/azur-compositor.js"></script>
+<script src="js/azur-rail.js"></script>
+<script src="js/azur-drop.js"></script>
+<script src="js/azur-shop.js"></script>
+<script src="js/azur-panel.js"></script>
+<script src="js/azur-mag.js"></script>
+<script src="js/azur-app.js"></script>

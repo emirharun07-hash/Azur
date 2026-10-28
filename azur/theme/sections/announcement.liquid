@@ -1,0 +1,55 @@
+{%- comment -%}
+  Leiste über dem Header, schlicht und ruhig (Runde 12: kein Laufband, keine Animation). Die Meldungen stehen
+  nebeneinander, getrennt durch einen Punkt; auf schmalen Bildschirmen umbrechen sie mittig.
+  Eine Meldung pro Zeile im Feld „Meldungen“. Ohne Meldungen: „Versand …“ aus Theme-Einstellungen → Azur. Beides leer = keine Leiste.
+  Vorrang hat das Shop-Metafeld azur.announcement: das setzt die Admin-Bearbeitung direkt auf der Website (azur/admin).
+  Startseite mit dem Zimmer: die Leiste liegt nicht über dem Zimmer, sie kommt unter dem Header dazu, sobald der Shop beginnt
+  (sections/azur-room.liquid).
+{%- endcomment -%}
+{%- liquid
+  assign source = section.settings.messages
+  assign edited = shop.metafields.azur.announcement.value
+  if edited != blank
+    assign source = edited
+  endif
+  assign messages = source | newline_to_br | split: '<br />'
+  assign items = ''
+  for m in messages
+    assign t = m | strip | escape
+    if t != blank
+      assign items = items | append: '<li class="bar__item">' | append: t | append: '</li>'
+    endif
+  endfor
+  if items == blank and settings.shipping_cost != blank
+    assign t = 'Versand ' | append: settings.shipping_cost | escape
+    assign items = '<li class="bar__item">' | append: t | append: '</li>'
+  endif
+  assign tag = 'div'
+  if section.settings.link != blank
+    assign tag = 'a'
+  endif
+-%}
+{%- if items != blank -%}
+  <div class="bar" data-azur-bar="{{ source | strip | escape }}">
+    <{{ tag }} class="bar__inner wrap"{% if tag == 'a' %} href="{{ section.settings.link }}"{% endif %}>
+      <ul class="bar__group" role="list">{{ items }}</ul>
+    </{{ tag }}>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Leiste oben",
+  "class": "section-bar",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "messages",
+      "label": "Meldungen",
+      "default": "14 Tage kostenlose Rückgabe\nVersand ab 90 € kostenlos",
+      "info": "Eine Meldung pro Zeile. Nur Angaben, die im Shop so eingestellt sind. Leer = „Versand …“ aus Theme-Einstellungen → Azur."
+    },
+    { "type": "url", "id": "link", "label": "Link", "info": "Optional, z. B. die Versandseite. Gilt für die ganze Leiste." }
+  ]
+}
+{% endschema %}

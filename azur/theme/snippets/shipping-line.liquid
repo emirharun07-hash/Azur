@@ -1,0 +1,25 @@
+{%- comment -%}
+  Versandzeile aus den Theme-Einstellungen: "Versand 1,99 €, ab 90 € kostenlos · Lieferung in 2–4 Werktagen".
+  Verlinkt auf die Versandseite, sobald sie veröffentlicht ist. Gibt nichts aus, wenn beide Angaben leer sind.
+  Parameter: part  'cost' | 'time' (Standard: beides)
+{%- endcomment -%}
+{%- liquid
+  assign bits = ''
+  if part != 'time' and settings.shipping_cost != blank
+    assign bits = 'Versand ' | append: settings.shipping_cost
+  endif
+  if part != 'cost' and settings.delivery_days != blank
+    if bits != ''
+      assign bits = bits | append: ' · '
+    endif
+    assign bits = bits | append: 'Lieferung in ' | append: settings.delivery_days | append: ' Werktagen'
+  endif
+  assign shipping_page = pages[settings.shipping_page_handle]
+-%}
+{%- if bits != '' -%}
+  {%- if shipping_page.url != blank -%}
+    <a class="link" href="{{ shipping_page.url }}">{{ bits | escape }}</a>
+  {%- else -%}
+    {{ bits | escape }}
+  {%- endif -%}
+{%- endif -%}

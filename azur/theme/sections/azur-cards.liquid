@@ -1,0 +1,41 @@
+{%- comment -%}
+  Trikots unter dem Zimmer (Runde 13, schlicht nach yeezy.com): ein Raster auf Weiß, jedes Trikot frei stehend, darunter
+  nur der Name in Versalien; ein Klick führt zur Produktseite. Desktop 3, iPad 2, Handy 1 pro Reihe.
+  (Runde 15: das Feld „Nächster Drop“ ist raus.)
+  Runde 19: unter den Ländertrikots ein Link zur eigenen Seite der Städtetrikots.
+  (Runde 10–12 standen hier Sammelkarten zum Umdrehen; der Section-Name bleibt, damit die Startseite sie behält.)
+{%- endcomment -%}
+{%- if section.settings.products.size > 0 -%}
+  <section class="yz" aria-labelledby="yz-title-{{ section.id }}">
+    <h2 class="sr-only" id="yz-title-{{ section.id }}">{{ section.settings.heading }}</h2>
+    <ul class="yz__grid wrap" role="list">
+      {%- for p in section.settings.products limit: 10 -%}
+        <li>{% render 'product-card', product: p %}</li>
+      {%- endfor -%}
+    </ul>
+    {%- liquid
+      assign more = section.settings.more
+      if more.handle == blank
+        assign more = collections['staedtetrikots']
+      endif
+    -%}
+    {%- if more.url != blank and section.settings.more_label != blank -%}
+      <p class="yz__more"><a href="{{ more.url }}">{{ section.settings.more_label }} <span class="arrow" aria-hidden="true">→</span></a></p>
+    {%- endif -%}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Spielerkarten",
+  "settings": [
+    { "type": "product_list", "id": "products", "label": "Produkte", "limit": 10 },
+    { "type": "text", "id": "heading", "label": "Überschrift (nur für Vorleser)", "default": "Trikots" },
+    { "type": "collection", "id": "more", "label": "Link darunter zu", "info": "Leer = Städtetrikots." },
+    { "type": "text", "id": "more_label", "label": "Text des Links (leer = kein Link)", "default": "Städtetrikots" }
+  ],
+  "presets": [
+    { "name": "Trikots (Raster)" }
+  ]
+}
+{% endschema %}

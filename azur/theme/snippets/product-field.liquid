@@ -1,0 +1,51 @@
+{%- comment -%}
+  Gibt ein Zusatzfeld zu einem Produkt aus. Quelle: Theme-Einstellung "Produkt-Codes"
+  (eine Zeile pro Produkt: Handle | Code | Farbwelt | Farben | Zeile).
+
+  Aufruf: {% render 'product-field', product: product, field: 'code' %}
+  field: name   "Berlin" bzw. "Berlin 030" (Produkttitel ohne " Trikot" und " – …")
+         code   "030"
+         label  "Berlin 030", "Türkei" (Code nur, wenn er eine Vorwahl ist)
+         tone   ber | ffm | tur | ger | bra | …
+         colorway, motto
+{%- endcomment -%}
+{%- liquid
+  assign out = ''
+  assign code = ''
+  assign lines = settings.product_meta | newline_to_br | split: '<br />'
+  for line in lines
+    assign parts = line | strip | split: '|'
+    assign handle = parts[0] | strip
+    if handle == product.handle
+      assign code = parts[1] | strip
+      case field
+        when 'code'
+          assign out = code
+        when 'tone'
+          assign out = parts[2] | strip
+        when 'colorway'
+          assign out = parts[3] | strip
+        when 'motto'
+          assign out = parts[4] | strip
+      endcase
+    endif
+  endfor
+
+  assign name = product.title | split: ' –' | first | split: ' Trikot' | first | strip
+  if field == 'name'
+    assign out = name
+  elsif field == 'code' and out == ''
+    assign out = product.title | slice: 0, 3 | upcase
+  elsif field == 'label'
+    # Vorwahlen gehören zum Namen ("Berlin 030"), Ländercodes nicht ("Türkei" statt "Türkei TUR")
+    assign out = name
+    assign n = code | plus: 0
+    if n > 0
+      unless name contains code
+        assign out = name | append: ' ' | append: code
+      endunless
+    endif
+  endif
+
+  echo out
+-%}

@@ -1,0 +1,39 @@
+{%- comment -%}
+  Header (Runde 13, schlicht nach yeezy.com; Runde 15 ohne STADT / LAND): links klein das Logo (führt zur Startseite),
+  rechts die Sporttasche als Warenkorb (Runde 17: ein gerendertes 3D-Bild). Support, Konto und alle Rechtsseiten stehen im Footer.
+  Startseite: liegt durchsichtig mit heller Schrift über dem Zimmer, bis das Zimmer nach oben weggescrollt ist.
+{%- endcomment -%}
+{%- liquid
+  assign overlay = false
+  if template.name == 'index'
+    assign overlay = true
+  endif
+-%}
+<header class="header{% if overlay %} header--overlay{% endif %}" data-header>
+  <div class="header__bar wrap">
+    <a class="header__logo" href="{{ routes.root_url }}">
+      {%- comment -%} beide Signaturen; welche sichtbar ist, entscheidet die Palette (azur.css, --logo-ink / --logo-paper) {%- endcomment -%}
+      {%- render 'logo', tone: 'ink', eager: true, class: 'logo--ink' -%}
+      {%- render 'logo', tone: 'paper', eager: true, class: 'logo--paper' -%}
+      <span class="sr-only">Startseite</span>
+    </a>
+
+    <div class="header__end">
+      <a class="header__icon header__cart" href="{{ routes.cart_url }}" data-cart-open aria-haspopup="dialog">
+        {%- comment -%} Runde 17: die Sporttasche als echtes 3D-Bild (azur/design/render_bag.py), schwarz auf Weiß, weiß über dem Zimmer {%- endcomment -%}
+        <span class="bag3d" aria-hidden="true"><img class="logo--ink" src="{{ 'azur-bag-ink.webp' | asset_url }}" alt="" width="119" height="90"><img class="logo--paper" src="{{ 'azur-bag-paper.webp' | asset_url }}" alt="" width="120" height="93"></span>
+        <span class="sr-only">Warenkorb,</span>
+        <span class="header__count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
+        <span class="sr-only">Artikel</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "settings": []
+}
+{% endschema %}

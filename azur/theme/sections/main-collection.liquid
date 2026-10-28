@@ -1,0 +1,67 @@
+{%- comment -%}
+  Shop / Kollektion (Runde 13, schlicht nach yeezy.com): oben klein „← Startseite“, darunter das Raster wie auf der
+  Startseite (Trikot frei auf Weiß, nur der Name).
+  Runde 15: Trikots aus der Kollektion „Städte“ (leer = Städtetrikots) erscheinen hier nicht.
+  Runde 19 (Owner): die Städtetrikots haben ihre eigene Seite (die Kollektion „Städte“ selbst zeigt sie), die
+  Ländertrikots stehen getrennt davon; oben wechselt „Länder · Städte“ zwischen beiden Seiten.
+{%- endcomment -%}
+{%- liquid
+  assign hide = section.settings.hide
+  if hide.handle == blank
+    assign hide = collections['staedtetrikots']
+  endif
+  assign cities = hide
+  if collection.handle == cities.handle
+    assign hide = nil
+  endif
+  assign countries = section.settings.countries
+  if countries.handle == blank
+    assign countries = collections['nationaltrikots']
+  endif
+-%}
+<div class="shop" data-collection>
+  <header class="shop__head wrap">
+    <a class="back-home" href="{{ routes.root_url }}"><span class="arrow" aria-hidden="true">←</span> Startseite</a>
+    <h1 class="sr-only">{{ collection.title }}</h1>
+    {%- if cities.url != blank and countries.url != blank -%}
+      <nav class="shop__tabs" aria-label="Trikots">
+        <a href="{{ countries.url }}"{% if collection.handle != cities.handle %} aria-current="page"{% endif %}>Länder</a>
+        <a href="{{ cities.url }}"{% if collection.handle == cities.handle %} aria-current="page"{% endif %}>Städte</a>
+      </nav>
+    {%- endif -%}
+  </header>
+
+  {%- paginate collection.products by 24 -%}
+    <ul class="yz__grid wrap" role="list">
+      {%- assign shown = 0 -%}
+      {%- for p in collection.products -%}
+        {%- assign hidden = false -%}
+        {%- if hide.handle != blank -%}
+          {%- for c in p.collections -%}{%- if c.handle == hide.handle -%}{%- assign hidden = true -%}{%- endif -%}{%- endfor -%}
+        {%- endif -%}
+        {%- unless hidden -%}
+          <li>{% render 'product-card', product: p, eager: forloop.first %}</li>
+          {%- assign shown = shown | plus: 1 -%}
+        {%- endunless -%}
+      {%- endfor -%}
+      {%- if shown == 0 -%}<li class="yz__empty">Hier ist gerade nichts.</li>{%- endif -%}
+    </ul>
+    {%- if paginate.pages > 1 -%}
+      <nav class="pager wrap" aria-label="Seiten">{{ paginate | default_pagination: next: 'Weiter', previous: 'Zurück' }}</nav>
+    {%- endif -%}
+    {%- comment -%} Runde 19: ein Klick auf ein Trikot öffnet die Produktansicht aus dem Zimmer {%- endcomment -%}
+    {%- render 'azur-pdp-setup', list: collection.products -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Shop",
+  "settings": [
+    { "type": "collection", "id": "hide", "label": "Städte (eigene Seite)", "info": "Diese Trikots stehen nur auf ihrer eigenen Seite, nicht bei den Ländern. Leer = Städtetrikots." },
+    { "type": "collection", "id": "countries", "label": "Länder", "info": "Ziel von „Länder“ oben im Shop. Leer = Nationaltrikots." },
+    { "type": "text", "id": "kicker", "label": "(ohne Wirkung seit Runde 13)", "default": "Shop" },
+    { "type": "checkbox", "id": "feature_large", "label": "(ohne Wirkung seit Runde 13)", "default": true }
+  ]
+}
+{% endschema %}

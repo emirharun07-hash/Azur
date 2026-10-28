@@ -1,0 +1,50 @@
+{%- comment -%}
+  Anmeldung per E-Mail für Drops und Neuigkeiten. Nur ein Feld: E-Mail.
+  Shopify-Formular 'customer': legt einen Kontakt mit E-Mail-Marketing-Einwilligung an und setzt Tags, damit sich die
+  Liste in Shopify Email nach Tag anschreiben lässt (Standard: newsletter, drops). Die Bestätigungsmail
+  (Double-Opt-in) verschickt Shopify, wenn sie im Admin eingeschaltet ist.
+  Nach dem Absenden lädt Shopify die Seite neu und springt per Anker zurück zum Formular.
+  Runde 12: sichtbare Beschriftung über dem Feld, Feld und Knopf gleich hoch in einer Zeile, Fehler direkt unter dem Feld
+  (Feld rot umrandet), Erfolg als Kasten mit Haken. azur.js prüft die Adresse schon vor dem Absenden (data-signup).
+  Parameter: id        eindeutig auf der Seite, z. B. 'footer'
+             tags      Tags, kommagetrennt (Standard: newsletter, drops)
+             button    Text des Buttons
+             success   Text nach dem Absenden
+{%- endcomment -%}
+{%- liquid
+  assign form_id = 'drops-' | append: id
+  assign tag_list = tags | default: 'newsletter, drops'
+-%}
+{%- form 'customer', id: form_id, class: 'signup' -%}
+  {%- if form.posted_successfully? -%}
+    <div class="signup__ok" role="status">
+      <span class="signup__tick" aria-hidden="true">✓</span>
+      <p><strong>Du bist eingetragen.</strong> {{ success | default: 'Kommt eine Bestätigungsmail, klick bitte auf den Link darin.' }}</p>
+    </div>
+  {%- else -%}
+    <input type="hidden" name="contact[tags]" value="{{ tag_list | escape }}">
+    <label class="signup__label" for="{{ form_id }}-email">E-Mail-Adresse</label>
+    <div class="signup__row">
+      <input class="form__input signup__email" id="{{ form_id }}-email" type="email" name="contact[email]"
+        placeholder="name@beispiel.de" autocomplete="email" autocapitalize="off" spellcheck="false" inputmode="email" required
+        aria-describedby="{{ form_id }}-error" data-signup-email
+        {%- if form.errors %} aria-invalid="true"{% endif %}>
+      <button class="btn btn--solid signup__btn" type="submit">{{ button | default: 'Eintragen' }}</button>
+    </div>
+    <p class="signup__error" id="{{ form_id }}-error" role="alert" data-signup-error{% unless form.errors %} hidden{% endunless %}>
+      {%- if form.errors -%}
+        {%- for field in form.errors -%}
+          {%- if field == 'form' -%}
+            {{ form.errors.messages[field] }}
+          {%- else -%}
+            {{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </p>
+    <p class="signup__legal">
+      Mails von {{ shop.name }} zu neuen Drops und Neuigkeiten. Abmelden geht jederzeit über den Link in jeder Mail.
+      {%- if shop.privacy_policy %} <a class="link" href="{{ shop.privacy_policy.url }}">Datenschutz</a>{% endif -%}
+    </p>
+  {%- endif -%}
+{%- endform -%}

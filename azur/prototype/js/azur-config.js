@@ -1,0 +1,159 @@
+/* AZUR — scene configuration.
+   Everything that is art direction lives here: palette, views, motion, light over the day, copy.
+   The other scripts only read from AZUR.config, so motion and look can change without touching logic. */
+window.AZUR = window.AZUR || {};
+
+AZUR.config = {
+  assetBase: 'assets/scene3/views/',   // the renders (round 3 on): light passes, masks, depth per view
+  neonGlow: 1.4,            // round 4: strength of the sign's soft glow (neon_glow.webp, added with the neon light)
+  neonCore: 4.0,            // the tubes' cores this much brighter (the stored neon pass stops below them: white-hot core)
+  flights: 'blend',         // change of view: 'blend' zooms the room's own picture into the next view (round 9: always the
+                            // room's light); 'video' plays the rendered flights (round 7: their light can differ from the room's)
+  gpuViews: 2,              // views that keep their light passes on the GPU (the others upload again when needed)
+
+  /* Accent systems. A is the chosen one; the others stay switchable in the design panel. */
+  palettes: {
+    A: { name: 'Azur Electric',  glow: '#16B8FF', highlight: '#8DEBFF', ink: '#0A6A9A', night: '#07131D' },
+    B: { name: 'Stadium Cobalt', glow: '#315CFF', highlight: '#A8C7FF', ink: '#2747D8', night: '#0A0D14' },
+    C: { name: 'Acid Pitch',     glow: '#B7FF00', highlight: '#D9FF75', ink: '#466400', night: '#0B100A' },
+    D: { name: 'Silver Neon',    glow: '#00E5FF', highlight: '#D7DCE2', ink: '#3D4651', night: '#090A0C' },
+    E: { name: 'Night Claret',   glow: '#FF3568', highlight: '#FF8DA8', ink: '#C21A4C', night: '#12090D' },
+    F: { name: 'Sunset Orange',  glow: '#FF7038', highlight: '#FFC36A', ink: '#A9441A', night: '#16100C' }
+  },
+  palette: 'A',
+
+  /* Views = camera positions rendered in Blender (scene/render_queue.py). Positions of hangers, window and
+     bed come from assets/views/views.json; the values here are art direction on top of that. */
+  views: {
+    // round 7 (the owner: "zu wackelig"): half the parallax; the room shifts gently instead of bending at depth edges
+    room:   { label: 'Zimmer', parallax: 0.005, focus: 0.55, garmentScale: 1.0,
+              bedHotspot: [[0.20, 0.83], [0.46, 0.79], [0.53, 1.0], [0.18, 1.0]] },
+    rail:   { label: 'Ständer', parallax: 0.006, focus: 0.62, garmentScale: 1.0 },
+    bed:    { label: 'Bett', parallax: 0.005, focus: 0.5, ids: false, window: false },
+                // round 6: no view has its own exposure any more (the bed had +0.5 stops, -0.8 at night): one light for all
+    rail_m: { label: 'Ständer', parallax: 0.004, focus: 0.62, garmentScale: 1.0, swipe: true }
+  },
+  startView: { desktop: 'room', mobile: 'rail_m' },
+  /* Hover outlines (scene3 glow.png) and the white dots that invite a click: where each view can go. */
+  targets: {
+    room: ['bed', 'rail'],
+    rail: ['bed'],
+    bed: ['mag', 'bed', 'rail'],   // Runde 12: the bed glows and answers a click here too (it opens ANSTOSS, which lies on it)
+    rail_m: []
+  },
+  outline: { strength: 0.95, ease: 9 },
+
+  /* The room through the day, on the visitor's clock (hours). Night: he is asleep; morning: the duvet thrown back;
+     day: he is out (fewer things on the floor); evening: the school bag is back. */
+  dayStates: [{ from: 6.5, state: 'morning' }, { from: 9, state: 'day' }, { from: 17, state: 'evening' }, { from: 23, state: 'night' }],
+  mobileQuery: '(max-width: 760px), (pointer: coarse) and (max-width: 1024px) and (orientation: portrait)',
+
+  /* Motion. Durations in ms, pendulums in degrees and degrees per second. Tweak freely. */
+  motion: {
+    intensity: 1.0,           // global multiplier (design panel)
+    /* the jerseys in the render swing on their hooks (degrees, per second); ripple = cloth wave in plate px.
+       Round 7: calmer, no jelly: no cloth ripple, no idle breathing, a small swing that settles quickly; the jerseys
+       only move when touched (hover, brush, click, chosen, the phone rail panning) */
+    sway: { stiffness: 9, damping: 2.6, maxDeg: 1.6, hoverKick: 1.4, leaveKick: 0.6, brush: 0.00015, clickKick: 3.0, selectKick: 14,
+            panImpulse: 0.0108, idleDeg: 0, ripple: 0, neighbour: 0.3 },
+    // change of view ('blend'): this view zooms toward the next one and fades; the next settles from a little closer
+    pan: { ms: 950, zoom: 1.6, drift: 0.05, settle: 1.06, back: 1.2 },
+    parallaxEase: 3.5         // how fast the room follows the pointer (per second; round 7: by time, not per frame)
+  },
+  interactionStrength: 1.0,
+
+  /* Light over the day. Each key: hour, then linear RGB weights for every rendered light pass.
+     The browser mixes the passes (sky, sun_low, sun_high, neon, lamp, ceiling, street) with these weights.
+     exposure is in stops (the approved stills use 2.65). neon is a scalar; its colour is the palette glow. */
+  daylight: [
+    { h: 0.0,  sky: [0.012, 0.016, 0.034], sunLow: 0, sunHigh: 0, neon: 1.05, lamp: 0.0,  ceiling: 0.0,  spot: 0.5, street: 0.3,  exposure: 3.0, window: 0.15, garment: [0.28, 0.0, 0.42] },
+    { h: 5.2,  sky: [0.05, 0.065, 0.12],   sunLow: 0, sunHigh: 0, neon: 0.95, lamp: 0.0,  ceiling: 0.0,  spot: 0.35, street: 0.24, exposure: 2.95, window: 0.35, garment: [0.42, 0.0, 0.36] },
+    { h: 6.4,  sky: [0.42, 0.46, 0.6],     sunLow: 0, sunHigh: 0, neon: 0.55, lamp: 0.0,  ceiling: 0.0,  spot: 0.25, street: 0.15, exposure: 2.8, window: 0.75, garment: [0.66, 0.02, 0.25] },
+    { h: 8.5,  sky: [0.9, 0.9, 0.92],      sunLow: 0, sunHigh: [0.25, 0.24, 0.22], neon: 0.12, lamp: 0, ceiling: 0, spot: 0.3, street: 0, exposure: 2.75, window: 1, garment: [0.92, 0.0, 0.06] },
+    { h: 12.5, sky: [1.0, 1.0, 1.0],       sunLow: 0, sunHigh: [0.75, 0.72, 0.66], neon: 0.08, lamp: 0, ceiling: 0, spot: 0.3, street: 0, exposure: 2.65, window: 1, garment: [0.98, 0.0, 0.0] },
+    { h: 16.0, sky: [1.0, 0.97, 0.92],     sunLow: [0.35, 0.27, 0.18], sunHigh: [0.3, 0.27, 0.22], neon: 0.12, lamp: 0, ceiling: 0, spot: 0.35, street: 0, exposure: 2.65, window: 1, garment: [0.95, 0.12, 0.0] },
+    { h: 18.4, sky: [1.0, 0.86, 0.72],     sunLow: [1.0, 0.6, 0.33], sunHigh: 0, neon: 0.35, lamp: 0, ceiling: 0, spot: 0.45, street: 0, exposure: 2.65, window: 1, garment: [0.92, 0.32, 0.0] },
+    { h: 19.6, sky: [0.62, 0.45, 0.42],    sunLow: [0.85, 0.36, 0.14], sunHigh: 0, neon: 0.75, lamp: 0.25, ceiling: 0, spot: 0.6, street: 0, exposure: 2.85, window: 0.8, garment: [0.78, 0.4, 0.05] },
+    { h: 20.6, sky: [0.17, 0.22, 0.42],    sunLow: 0, sunHigh: 0, neon: 1.0, lamp: 0.75, ceiling: 0.0, spot: 0.7, street: 0.15, exposure: 2.95, window: 0.55, garment: [0.48, 0.12, 0.3] },
+    { h: 22.3, sky: [0.04, 0.055, 0.11],   sunLow: 0, sunHigh: 0, neon: 1.05, lamp: 0.85, ceiling: 0.0, spot: 0.7, street: 0.3, exposure: 3.0, window: 0.25, garment: [0.32, 0.04, 0.36] },
+    { h: 23.0, sky: [0.02, 0.028, 0.06],   sunLow: 0, sunHigh: 0, neon: 1.05, lamp: 0.0,  ceiling: 0.0, spot: 0.55, street: 0.3, exposure: 3.0, window: 0.18, garment: [0.3, 0.0, 0.4] },   // lights out
+    { h: 24.0, sky: [0.012, 0.016, 0.034], sunLow: 0, sunHigh: 0, neon: 1.05, lamp: 0.0,  ceiling: 0.0,  spot: 0.5, street: 0.3,  exposure: 3.0, window: 0.15, garment: [0.28, 0.0, 0.42] }
+  ],
+  lampTint: [1.0, 0.62, 0.32],        // warm bulb in the desk lamp
+  ceilingTint: [1.0, 0.86, 0.68],
+  streetTint: [0.95, 0.84, 0.7],    // LED street lamp, slightly warm
+  spotTint: [1.0, 0.82, 0.62],      // ceiling spot over the rail (scene2): warm, shows the jerseys
+  /* Germany-typical sun times (shifted by season, see azur-light.js); no geolocation needed. */
+  location: { lat: 51.2, lon: 10.4 },
+
+  /* Labels and copy (customer facing = German). */
+  copy: {
+    hintDesktop: 'Wähle ein Trikot',
+    hintMobile: 'Tippe auf ein Trikot',
+    view: 'Ansehen',
+    viewJersey: 'Trikot ansehen',
+    putBack: 'Zurückhängen',
+    backToRoom: 'Zurück ins Zimmer',
+    room: 'Zimmer', rail: 'Ständer', bed: 'Bett',
+    chooseSize: 'Größe wählen',
+    addToCart: 'In den Warenkorb',
+    added: 'Im Warenkorb',
+    cart: 'Warenkorb', checkout: 'Zur Kasse', emptyCart: 'Dein Warenkorb ist leer.',
+    total: 'Summe', inclVat: 'inkl. MwSt.',
+    nav: ['Shop', 'Kollektion', 'Über uns'],
+    dropTitle: 'Nächster Drop',
+    dropText: 'Noch unter Verschluss.',
+    dropPlaceholder: 'Deine E-Mail-Adresse',
+    dropButton: 'Benachrichtige mich',
+    dropLegal: 'Mit der Anmeldung erhältst du E-Mails von AZUR zu neuen Drops. Abmeldung jederzeit möglich.',
+    dropDone: 'Du bist dabei.',
+    dropDoneText: 'Wir melden uns, bevor der Drop live geht.',
+    dropInvalid: 'Bitte gib eine gültige E-Mail-Adresse ein.',
+    bedTease: 'Psst. Blätter mal im Heft auf der Decke.',
+    bedTeaseNight: 'Psst. Das Heft ist vom Bett gerutscht. Blätter mal rein.',   // at night it lies on the floor
+    magSpot: 'ANSTOSS lesen',
+    mag: {
+      label: 'ANSTOSS, Ausgabe 01. Das Heft von AZUR',
+      prev: 'Zurückblättern', next: 'Weiterblättern', close: 'Heft zuklappen',
+      coverWord: 'Titel', backWord: 'Rückseite',
+      issue: 'Ausgabe 01 · Das Heft von AZUR',
+      coverAlt: 'Zwei Kinder spielen Fußball im Morgennebel, einer im Fallrückzieher, einer im Tor.',
+      coverLines: ['Zwei Städte.', 'Drei Länder.', 'Ein Zimmer.'],
+      coverSticker: 'Mit Lookbook: alle Trikots',
+      editorialKicker: 'Editorial',
+      editorialHead: 'Anstoß.',
+      editorialLead: 'Poster an der Wand, der Ball unterm Bett, das Trikot für morgen schon rausgelegt. So fängt es an.',
+      about: ['Wir nehmen Farben und Zeichen von Ländern und Städten und setzen sie auf ein reduziertes Trikot.',
+              'Embleme und die Azur-Signatur auf der Brust. Getragen auf dem Platz und danach.'],
+      sign: 'Emir & Talha',
+      signNote: 'Emir Kilic und Talha Zaffar, Gründer von AZUR',
+      storyAlt: 'Ein Spieler im roten Shirt schießt einen Ball über eine sonnige Wiese.',
+      storyQuote: 'Getragen auf dem Platz und danach.',
+      lookKicker: 'Lookbook',
+      tocKicker: 'In diesem Heft',
+      toRail: 'Am Ständer ansehen', toProduct: 'Ansehen', toShop: 'Im Shop',
+      /* pages: null = the default issue (cover, editorial, photo, all jerseys, drop, back); see azur-mag.js */
+      pages: null,
+      dropKicker: 'Vorschau',
+      dropHead: 'Nächster Drop',
+      dropText: 'Am Ständer hängt noch etwas unter der Hülle. Noch unter Verschluss. Trag dich ein, dann erfährst du es zuerst.',
+      toDrop: 'Zur Hülle am Ständer',
+      bye: 'Bis zum nächsten Anstoß.',
+      credits: 'Fotos: sasint, Negative Space (CC0)'
+    },
+    roomHint: 'Klick auf den Ständer oder aufs Bett',
+    goBed: 'Zum Bett', goRail: 'Zum Ständer',
+    menu: 'Menü', menuClose: 'Menü schließen', bag: 'Sporttasche (Warenkorb)',
+    menuLinks: [['Shop', 'rail'], ['Kollektion', 'rail'], ['Über uns', 'mag'], ['Zimmer', 'room']],
+    shipTo: 'Noch {x} bis zum kostenlosen Versand',
+    shipFree: 'Versand ist kostenlos',
+    keepLooking: 'Weiter umsehen', toCart: 'Zur Tasche',
+    openInShop: 'Im Shop öffnen',
+    prototypeNote: 'Prototyp · Warenkorb und Anmeldung sind simuliert'
+  }
+};
+
+/* Paths are written as in the prototype ('assets/scene2/views/rail/sky.webp'). In Shopify the section sets
+   AZUR.config.urlMap (renders in Content > Files, logos in the theme's assets) and AZUR.config.inline (the JSON). */
+AZUR.url = p => (AZUR.config.urlMap ? AZUR.config.urlMap(p) : p);
+
