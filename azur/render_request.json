@@ -1,14 +1,7 @@
 {
-  "id": "r22-4",
-  "note": "Runde 22, hoechste Qualitaet: die Trikots mit den Falten wie in der r22-1-Vorschau (flacher, 0.55), nur die Seiten zwischen Achsel und Saum gerade gezogen (Owner: am Bauch nicht nach innen knicken), kein Glaetten. Ersetzt r22-3. Zuerst ein Testbild in voller Qualitaet, dann alles neu.",
-  "set": "scene3",
-  "rebuild": true,
-  "jobs": [
-    "preview:full,room_day",
-    "preview",
-    "queue",
-    "glow",
-    "outside",
-    "moves"
-  ]
+ "id": "r22-pause",
+ "note": "Pause: Owner gefaellt die Trikot-Form im Testbild nicht (zu breit, unnatuerlich). Trikots werden ueberarbeitet, danach kommt ein neuer Auftrag.",
+ "set": "scene3",
+ "pause_until_unix": 1793788785,
+ "jobs": []
 }
