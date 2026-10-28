@@ -1,10 +1,10 @@
 {
-    "state":  "abgeloest",
-    "request":  "r22-4",
+    "state":  "pausiert",
+    "request":  "r22-pause",
     "job":  "",
-    "note":  "neuer Auftrag auf dem Branch, dieser wurde bei queue beendet",
+    "note":  "Pause bis 11:39, danach: Pause: Owner gefaellt die Trikot-Form im Testbild nicht (zu breit, unnatuerlich). Trikots werden ueberarbeitet, danach kommt ein neuer Auftrag.",
     "watch":  3,
-    "time":  "2026-10-28T11:02:03Z",
+    "time":  "2026-10-28T11:04:06Z",
     "device":  "00:20:47 render device HIP: AMD Radeon RX 6750 XT",
     "log":  [
                 "02:25:37 offline: the outputs stay committed and go up once the internet is back",
