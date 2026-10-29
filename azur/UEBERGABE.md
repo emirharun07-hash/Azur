@@ -89,6 +89,10 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - `azur/tools/`: Bauen, Testen, Rendern.
   - `azur/kampagnen-board/`: Arbeitsfläche für Kampagnen, App für Windows und Mac sowie eine claude.ai-Fassung.
   - `azur/admin/`: Texte direkt auf der Website bearbeiten.
+  - `azur/assets/logo/`: das Logo.
+    - Groß: `azur-logo-gross-schwarz.png` und `azur-logo-gross-creme.png`, 6000 × 3035 px, durchsichtiger Hintergrund.
+    - Als Vektor: `azur-logo.svg`.
+    - Das ist vom 480-px-Original nachgezeichnet. Eine Originaldatei vom Designer gibt es im Repo nicht.
 - **Theme-Dateien hochladen:** `themeFilesUpsert` mit `{type: URL, value:
   "https://raw.githubusercontent.com/emirharun07-hash/Azur/<volle 40-stellige Commit-ID>/azur/theme/<Datei>"}`
   (eine kurze ID gibt 404). Danach die MD5 aus `theme { files { checksumMd5 } }` mit `md5sum` vergleichen.
