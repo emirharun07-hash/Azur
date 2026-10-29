@@ -6,8 +6,8 @@
      das Zimmer hört auf `azur-fall` und zeichnet dann nicht),
    - färbt die Browserleiste (theme-color) dunkel über dem Zimmer, weiß im Shop,
    - und je nach Variante (data-azs, aus snippets/azur-variants.liquid): glide = nach dem Loslassen gleitet die Seite
-     von selbst ganz ins Zimmer oder ganz zu den Trikots (Stand Runde 25), swipe = am Handy ein Wisch nimmt einen mit,
-     native = der Browser scrollt ganz normal.
+     von selbst ganz ins Zimmer oder ganz zu den Trikots (Stand Runde 25), native = der Browser scrollt ganz normal
+     (die Wahl des Owners, auf allen Geräten).
    Die Bewegung selbst (Zimmer bleibt zurück, Blende, Trikots steigen) macht CSS mit dem Scrollen (sections/azur-room.liquid);
    wo der Browser das nicht kann, liefert dieses Skript --azur-t (0 im Zimmer, 1 im Shop). */
 (() => {
@@ -54,7 +54,7 @@
      Hinunter reicht ein kurzes Stück; hinauf geht es erst zurück ins Zimmer, wenn man weit hineinzieht, sonst gleitet
      sie zurück zu den Trikots. Eine Berührung, das Mausrad oder eine Taste hält das Gleiten an. */
   const GO_DOWN = 90, GO_UP = 0.4;
-  let lastY = window.scrollY, dir = 0, touching = false, glide = 0, idle = 0, touchY = 0;
+  let lastY = window.scrollY, dir = 0, touching = false, glide = 0, idle = 0;
   const stopGlide = () => { if (glide) { cancelAnimationFrame(glide); glide = 0; } };
   const glideTo = top => {
     stopGlide();
@@ -74,25 +74,16 @@
     if (y <= 1 || y >= end - 1) return;
     glideTo(dir >= 0 ? (y > Math.min(0.1 * end, GO_DOWN) ? end : 0) : (y < end * (1 - GO_UP) ? 0 : end));
   };
-  /* swipe (Runde 26, Handy): beim Loslassen entscheidet die Richtung des Wischs, der Browser fährt weich ans Ziel
-     (sofort, nicht erst nach dem Auslaufen). Hinauf ins Zimmer geht es nur aus dem oberen Teil des Wegs. */
-  const swipe = () => {
-    const y = window.scrollY, end = F.end;
-    if (mode() !== 'swipe' || Math.abs(y - touchY) < 12 || y <= 1 || y >= end - 1) return;
-    const top = dir > 0 ? end : (y < 0.6 * end ? 0 : end);
-    window.scrollTo({ top, behavior: 'smooth' });
-  };
-
   const onScroll = () => {
     const y = window.scrollY;
     if (y !== lastY && !glide) dir = y > lastY ? 1 : -1;
     lastY = y; update();
     clearTimeout(idle); if (!glide && !touching) idle = setTimeout(settle, 110);
   };
-  const release = () => { touching = false; clearTimeout(idle); swipe(); idle = setTimeout(settle, 110); };
+  const release = () => { touching = false; clearTimeout(idle); idle = setTimeout(settle, 110); };
   window.addEventListener('scroll', onScroll, { passive: true });
   if ('onscrollend' in window) window.addEventListener('scrollend', () => { clearTimeout(idle); if (!glide && !touching) idle = setTimeout(settle, 30); });
-  window.addEventListener('touchstart', () => { touching = true; touchY = window.scrollY; stopGlide(); }, { passive: true });
+  window.addEventListener('touchstart', () => { touching = true; stopGlide(); }, { passive: true });
   window.addEventListener('touchend', release, { passive: true });
   window.addEventListener('touchcancel', release, { passive: true });     // Runde 26: sonst blieb touching hängen
   window.addEventListener('wheel', stopGlide, { passive: true });
@@ -102,9 +93,6 @@
   const remeasure = () => { if (!mq) { mq = true; requestAnimationFrame(() => { mq = false; measure(); }); } };
   window.addEventListener('resize', remeasure);
   window.addEventListener('load', measure);
-  // Maus angesteckt oder abgezogen (Tablet): PC- oder Handy-Variante neu wählen
-  const fine = mm('(hover: hover) and (pointer: fine)');
-  if (fine.addEventListener) fine.addEventListener('change', () => { if (window.AZUR_V) window.AZUR_V.apply(); remeasure(); });
   if (window.ResizeObserver) new ResizeObserver(remeasure).observe(document.body);
   measure();
   if (meta) meta.setAttribute('content', html.classList.contains('azur-light') ? '#ffffff' : '#0b0b0c');

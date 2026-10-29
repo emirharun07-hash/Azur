@@ -1312,12 +1312,9 @@ body { font-stretch: 87.5%; letter-spacing: 0.02em; }
   .yz__grid:has(> li:last-child:nth-child(2)) > li { translate: none; }
 }
 
-/* 18. Runde 26: Logo-Varianten zum Ausprobieren (data-al am <html>, snippets/azur-variants.liquid) ============ */
-/* jetzt     wie bisher: klein oben links
-   gross     dasselbe Logo deutlich größer oben links
-   mitte     größer und mittig, die Tasche bleibt rechts
+/* 18. Runde 26: Logo, zwei Varianten noch zur Wahl (data-al am <html>, snippets/azur-variants.liquid) ============ */
+/* gross     das Logo deutlich größer oben links
    leiste    eine schmale Glasleiste: über dem Zimmer dunkel durchscheinend, im Shop hell; Logo mittelgroß
-   schwebend Logo und Tasche als kleine Glas-Inseln, der Header selbst bleibt immer durchsichtig
    Die Tippfläche des Logos ist immer mindestens 44 px hoch und führt zur Startseite. */
 html[data-al="gross"] .header__logo .logo { height: 2.1rem; }
 html[data-al="gross"] .header.is-compact .header__logo .logo { height: 1.7rem; }
@@ -1325,28 +1322,10 @@ html[data-al="gross"] .header.is-compact .header__logo .logo { height: 1.7rem; }
   html[data-al="gross"] .header__logo .logo { height: 2.6rem; }
   html[data-al="gross"] .header.is-compact .header__logo .logo { height: 2rem; }
 }
-html[data-al="mitte"] .header__bar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
-html[data-al="mitte"] .header__logo { grid-column: 2; justify-self: center; }
-html[data-al="mitte"] .header__end { grid-column: 3; }
-html[data-al="mitte"] .header__logo .logo { height: 2rem; }
-html[data-al="mitte"] .header.is-compact .header__logo .logo { height: 1.6rem; }
-@media (min-width: 48em) {
-  html[data-al="mitte"] .header__logo .logo { height: 2.4rem; }
-  html[data-al="mitte"] .header.is-compact .header__logo .logo { height: 1.9rem; }
-}
 html[data-al="leiste"] .header { background: rgb(255 255 255 / 0.9) !important; -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2); border-bottom: 1px solid rgb(0 0 0 / 0.06) !important; }
 html[data-al="leiste"]:not(.azur-light):not(.azur-pdp-open) .header--overlay:not(.is-solid) {
   background: rgb(11 11 12 / 0.45) !important; border-bottom-color: rgb(255 255 255 / 0.08) !important; }
 html[data-al="leiste"] .header__logo .logo, html[data-al="leiste"] .header.is-compact .header__logo .logo { height: 1.6rem; }
 @media (min-width: 48em) { html[data-al="leiste"] .header__logo .logo, html[data-al="leiste"] .header.is-compact .header__logo .logo { height: 1.8rem; } }
-html[data-al="schwebend"] .header { background: transparent !important; border-bottom-color: transparent !important; }
-html[data-al="schwebend"] :is(.header__logo, .header__cart) { height: auto; min-height: var(--tap); padding: 0.35rem 0.95rem; border-radius: 999px !important;
-  background: rgb(255 255 255 / 0.78); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 6px 18px -10px rgb(0 0 0 / 0.35);
-  transition: background-color var(--dur) var(--ease); }
-html[data-al="schwebend"] .header__end { margin-right: 0; }
-html[data-al="schwebend"] .header__cart { min-width: calc(var(--tap) + 0.4rem); padding-inline: 0.5rem; }
-html[data-al="schwebend"]:not(.azur-light):not(.azur-pdp-open) .header--overlay:not(.is-solid) :is(.header__logo, .header__cart) {
-  background: rgb(11 11 12 / 0.38); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1); }
-html[data-al="schwebend"] .header__logo .logo, html[data-al="schwebend"] .header.is-compact .header__logo .logo { height: 1.55rem; }
-@media (min-width: 48em) { html[data-al="schwebend"] .header__logo .logo, html[data-al="schwebend"] .header.is-compact .header__logo .logo { height: 1.75rem; } }
+

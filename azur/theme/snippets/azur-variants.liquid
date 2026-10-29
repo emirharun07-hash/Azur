@@ -1,32 +1,22 @@
 {%- comment -%}
-  Runde 26: Varianten zum Ausprobieren, bevor der Owner sich entscheidet (Übergang am PC, Scrollen am Handy, Logo).
-  In der Adresse: ?ad=… (PC), ?am=… (Handy und Tablet), ?al=… (Logo); die Wahl gilt in diesem Tab weiter (sessionStorage).
-  Ohne Angabe: der Stand von vorher („jetzt“). ?ad=jetzt&am=jetzt&al=jetzt setzt zurück.
-  Am <html> stehen danach data-ad, data-am, data-al und daraus abgeleitet data-azt (welche Optik der Übergang hat)
-  und data-azs (wie gescrollt wird: glide = gleitet nach dem Loslassen von selbst, native = normal, swipe = ein Wisch).
-  PC heißt: Maus oder Trackpad (hover und feiner Zeiger); alles mit Touch bekommt die Handy-Variante.
-  ?ax=d oder ?ax=m erzwingt PC oder Handy (für die Vorschau in einem Fenster), ?ax= hebt das wieder auf.
+  Runde 26: was der Owner in der Auswahl behalten hat. Der Übergang vom Zimmer in den Shop ist auf allen Geräten derselbe
+  (Favorit: kamera; jetzt und blende bleiben zum Vergleich), beim Logo stehen gross und leiste noch zur Wahl.
+  In der Adresse: ?ad=… (Übergang), ?al=… (Logo); die Wahl gilt in diesem Tab weiter (sessionStorage).
+  Am <html> stehen danach data-ad, data-al und daraus abgeleitet data-azt (welche Optik der Übergang hat) und data-azs
+  (wie gescrollt wird: glide = gleitet nach dem Loslassen von selbst, nur bei „jetzt“, Stand Runde 25; sonst native).
 {%- endcomment -%}
 <script>
   (function (d) {
-    var K = { ad: ['jetzt', 'blende', 'blatt', 'kamera', 'schlicht'], am: ['jetzt', 'nativ', 'schlicht', 'schwung'],
-      al: ['jetzt', 'gross', 'mitte', 'leiste', 'schwebend'], ax: ['d', 'm'] };
+    var K = { ad: ['kamera', 'jetzt', 'blende'], al: ['gross', 'leiste'] };
     var s = {}, k, q;
     try { s = JSON.parse(sessionStorage.getItem('azur-v') || '{}') || {}; } catch (e) { }
     try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
-    for (k in K) {
-      if (q && q.has(k)) s[k] = q.get(k);
-      if (K[k].indexOf(s[k]) < 0) delete s[k];
-    }
+    for (k in s) if (!K[k] || K[k].indexOf(s[k]) < 0) delete s[k];
+    for (k in K) if (q && q.has(k) && K[k].indexOf(q.get(k)) >= 0) s[k] = q.get(k);
     try { sessionStorage.setItem('azur-v', JSON.stringify(s)); } catch (e) { }
-    var apply = function () {
-      var desk = s.ax ? s.ax === 'd' : !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
-      var ad = s.ad || 'jetzt', am = s.am || 'jetzt';
-      d.setAttribute('data-ad', ad); d.setAttribute('data-am', am); d.setAttribute('data-al', s.al || 'jetzt');
-      d.setAttribute('data-azt', desk ? ad : { jetzt: 'jetzt', nativ: 'leicht', schlicht: 'schlicht', schwung: 'leicht' }[am]);
-      d.setAttribute('data-azs', desk ? (ad === 'jetzt' ? 'glide' : 'native') : { jetzt: 'glide', nativ: 'native', schlicht: 'native', schwung: 'swipe' }[am]);
-    };
-    apply();
-    window.AZUR_V = { apply: apply, chosen: s };
+    var ad = s.ad || K.ad[0];
+    d.setAttribute('data-ad', ad); d.setAttribute('data-al', s.al || K.al[0]);
+    d.setAttribute('data-azt', ad);
+    d.setAttribute('data-azs', ad === 'jetzt' ? 'glide' : 'native');
   })(document.documentElement);
 </script>

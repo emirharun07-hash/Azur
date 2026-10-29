@@ -539,6 +539,21 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 26b (owner 2026-10-29, after the choice: "Mach das Wischprinzip vom PC auch für iPad und Handy")
+
+- **Owner's picks** (artifact db `picks/<id>`): transition kept jetzt, blende, kamera, favourite **kamera**; phone
+  scrolling kept only **nativ**; logo kept **gross** and **leiste**, no favourite yet (asked).
+- **Built**: one transition on every device. `snippets/azur-variants.liquid` no longer tells PC from touch:
+  `data-azt` = `ad` (default kamera, jetzt and blende stay reachable for comparison), `data-azs` = native (glide only
+  with `?ad=jetzt`). Removed: `am`, `ax`, the swipe mode in `azur-fall.js`, the looks blatt, schlicht, leicht and the
+  logos jetzt, mitte, schwebend. Logo default for now: gross, `?al=leiste` for the other.
+- **Fixed on the way**: the room's lower edge showed as a hard line in the first fifth of the transition (PC too):
+  the mist above the sheet now covers fully from the start and only grows in height (`scaleY`, compositor only),
+  and overlaps the sheet by 1px (a hairline showed at DSF 2).
+- **Tests** (harness): PC fast wheel 1374/0, one notch stays where it is (native); old addresses (`?am=schwung&al=mitte&ad=blatt`)
+  fall back to kamera/gross; phones 320, 390, 430 and iPad 820×1180 / 1180×820 scroll natively without errors; reduced
+  motion everywhere; phone with CPU ×4 no worse than the accepted nativ state; no seam rows in the frames.
+
 ## Runde 26 (owner 2026-10-29: desktop transition, phone hang, BRA/GER/TUR labels, white areas on phones, logo, a Tinder-style choice)
 
 Runde 25 (gid://shopify/OnlineStoreTheme/210487050579) is MAIN. Nothing of this round is in a Shopify theme yet: the Shopify
@@ -552,7 +567,7 @@ commits fdba5cc and 29cb224 are local only until access is back.
 - **New** `assets/azur-fall.js`: the way from the room into the shop, separate from `azur-room.js` and running before
   the room has loaded. Modes from `data-azs`: glide (Runde 25), swipe (phone: one swipe takes you all the way),
   native. `prefers-reduced-motion` always gives native.
-- **Variants** (`snippets/azur-variants.liquid`, URL params): `ad` PC transition jetzt|blende|blatt|kamera|schlicht,
+- **Variants** (`snippets/azur-variants.liquid`, URL params, until 26b): `ad` PC transition jetzt|blende|blatt|kamera|schlicht,
   `am` phone scrolling jetzt|nativ|schlicht|schwung, `al` logo jetzt|gross|mitte|leiste|schwebend, `ax=d|m` forces
   PC or phone mode.
 - **Choice page** (Tinder style, not in the shop): https://claude.ai/artifact/6ZauCfjzk6SppfUSx2hnDu, built from
