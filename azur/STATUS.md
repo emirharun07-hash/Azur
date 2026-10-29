@@ -555,6 +555,11 @@ on every device without losing quality.
 - **Tests** (harness): PC fast wheel 1374/0, one notch stays where it is (native); old addresses (`?am=schwung&al=mitte&ad=blatt`)
   fall back to kamera/gross; phones 320, 390, 430 and iPad 820×1180 / 1180×820 scroll natively without errors; reduced
   motion everywhere; phone with CPU ×4 no worse than the accepted nativ state; no seam rows in the frames.
+- **Shopify draft**: "Azur Zimmer Runde 26 (Entwurf)", gid://shopify/OnlineStoreTheme/210545869139, a themeDuplicate of
+  MAIN (Runde 25, its six files checked equal to f1e7df7 first) plus the six changed files from 278efae (URL upload
+  from raw.githubusercontent.com, all MD5 checked equal). Preview: https://azurclothing.com/?preview_theme_id=210545869139
+  (shop stays behind its password). `config/preview` on the choice page is left unset: its links name variants that
+  are gone.
 
 ## Runde 26 (owner 2026-10-29: desktop transition, phone hang, BRA/GER/TUR labels, white areas on phones, logo, a Tinder-style choice)
 
