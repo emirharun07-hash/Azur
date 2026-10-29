@@ -1,13 +1,13 @@
 {%- comment -%}
   Runde 26: was der Owner in der Auswahl behalten hat. Der Übergang vom Zimmer in den Shop ist auf allen Geräten derselbe
-  (Favorit: kamera; jetzt und blende bleiben zum Vergleich), beim Logo stehen gross und leiste noch zur Wahl.
-  In der Adresse: ?ad=… (Übergang), ?al=… (Logo); die Wahl gilt in diesem Tab weiter (sessionStorage).
-  Am <html> stehen danach data-ad, data-al und daraus abgeleitet data-azt (welche Optik der Übergang hat) und data-azs
+  (Favorit: kamera; jetzt und blende bleiben zum Vergleich). Das Logo ist entschieden (groß, assets/azur.css).
+  In der Adresse: ?ad=… (Übergang); die Wahl gilt in diesem Tab weiter (sessionStorage).
+  Am <html> stehen danach data-ad und daraus abgeleitet data-azt (welche Optik der Übergang hat) und data-azs
   (wie gescrollt wird: glide = gleitet nach dem Loslassen von selbst, nur bei „jetzt“, Stand Runde 25; sonst native).
 {%- endcomment -%}
 <script>
   (function (d) {
-    var K = { ad: ['kamera', 'jetzt', 'blende'], al: ['gross', 'leiste'] };
+    var K = { ad: ['kamera', 'jetzt', 'blende'] };
     var s = {}, k, q;
     try { s = JSON.parse(sessionStorage.getItem('azur-v') || '{}') || {}; } catch (e) { }
     try { q = new URLSearchParams(location.search); } catch (e) { q = null; }
@@ -15,7 +15,7 @@
     for (k in K) if (q && q.has(k) && K[k].indexOf(q.get(k)) >= 0) s[k] = q.get(k);
     try { sessionStorage.setItem('azur-v', JSON.stringify(s)); } catch (e) { }
     var ad = s.ad || K.ad[0];
-    d.setAttribute('data-ad', ad); d.setAttribute('data-al', s.al || K.al[0]);
+    d.setAttribute('data-ad', ad);
     d.setAttribute('data-azt', ad);
     d.setAttribute('data-azs', ad === 'jetzt' ? 'glide' : 'native');
   })(document.documentElement);

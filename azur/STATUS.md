@@ -542,11 +542,13 @@ on every device without losing quality.
 ## Runde 26b (owner 2026-10-29, after the choice: "Mach das Wischprinzip vom PC auch für iPad und Handy")
 
 - **Owner's picks** (artifact db `picks/<id>`): transition kept jetzt, blende, kamera, favourite **kamera**; phone
-  scrolling kept only **nativ**; logo kept **gross** and **leiste**, no favourite yet (asked).
+  scrolling kept only **nativ**; logo kept **gross** and **leiste**, then chose **gross** ("Groß").
 - **Built**: one transition on every device. `snippets/azur-variants.liquid` no longer tells PC from touch:
   `data-azt` = `ad` (default kamera, jetzt and blende stay reachable for comparison), `data-azs` = native (glide only
   with `?ad=jetzt`). Removed: `am`, `ax`, the swipe mode in `azur-fall.js`, the looks blatt, schlicht, leicht and the
-  logos jetzt, mitte, schwebend. Logo default for now: gross, `?al=leiste` for the other.
+  logos jetzt, mitte, schwebend.
+- **Logo gross** is now the plain header rule in `assets/azur.css` (2.1rem / 2.6rem from 48em, 1.7rem / 2rem when the
+  header turns compact; tap area 48–64 px, links to `/`); `?al=` and `data-al` are gone, old addresses just ignore it.
 - **Fixed on the way**: the room's lower edge showed as a hard line in the first fifth of the transition (PC too):
   the mist above the sheet now covers fully from the start and only grows in height (`scaleY`, compositor only),
   and overlaps the sheet by 1px (a hairline showed at DSF 2).
