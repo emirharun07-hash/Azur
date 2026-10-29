@@ -539,6 +539,34 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 26 (owner 2026-10-29: desktop transition, phone hang, BRA/GER/TUR labels, white areas on phones, logo, a Tinder-style choice)
+
+Runde 25 (gid://shopify/OnlineStoreTheme/210487050579) is MAIN. Nothing of this round is in a Shopify theme yet: the Shopify
+connector needs signing in again, and GitHub refuses the push (403, Claude GitHub App not installed for `azur`), so
+commits fdba5cc and 29cb224 are local only until access is back.
+
+- **Fixed in every variant**: the phone hang (big room textures were uploaded in one go and blocked the main thread for
+  up to ~1 s each; now in small slices and only while nobody swipes; the sound starts on a tap, not on a swipe);
+  BRA/GER/TUR sit inside the card at every size; dark page and browser bar over the room, no white under the
+  sliding toolbars (`theme-color` follows `azur-light`); iPhone landscape keeps logo and bag next to the notch.
+- **New** `assets/azur-fall.js`: the way from the room into the shop, separate from `azur-room.js` and running before
+  the room has loaded. Modes from `data-azs`: glide (Runde 25), swipe (phone: one swipe takes you all the way),
+  native. `prefers-reduced-motion` always gives native.
+- **Variants** (`snippets/azur-variants.liquid`, URL params): `ad` PC transition jetzt|blende|blatt|kamera|schlicht,
+  `am` phone scrolling jetzt|nativ|schlicht|schwung, `al` logo jetzt|gross|mitte|leiste|schwebend, `ax=d|m` forces
+  PC or phone mode.
+- **Choice page** (Tinder style, not in the shop): https://claude.ai/artifact/6ZauCfjzk6SppfUSx2hnDu, built from
+  rendered frames (scratchpad `r26/`). Picks land in the artifact db at `picks/<user id>` (`r26`: `ad:kamera` → 1/-1,
+  `fav:ad` → favourite); `config/preview` `{theme}` turns on the shop links without a republish.
+- **Tests** (harness, Chromium): fast wheel down/up on PC lands on 1374/0 in all transitions; one wheel notch glides
+  to the shop (801) with jetzt, stays at 100 with reduced motion; phones 320×568, 375×667, 430×932 without errors;
+  schwung goes to the shop on one swipe, a short swipe up from the shop goes back to the jerseys (noted as a con).
+- **Browser limits** (iOS 26 Safari): the bar tint comes from fixed elements and the page background, not
+  reliably from `theme-color` (WebKit bugs 301756 and 305546, see Ben Frain's write-up); the rubber-band overscroll
+  shows the `html` background, which is why it is dark now.
+- **Next**: the owner's picks → build only the winners into a new draft (themeDuplicate of MAIN, upload the 6 theme
+  files), then #52 simplify.
+
 ## Runde 22b (owner 2026-10-27: the real jerseys in the room, best quality, days of rendering are fine)
 - Photos of the real national jerseys (azur/photos/<key>/vorne, hinten, detail-logo, detail-wappen; HEIC converted).
   City jerseys keep the shop images (owner: no photos for them, they stay in the room and on their page).
