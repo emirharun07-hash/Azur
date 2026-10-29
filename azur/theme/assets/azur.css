@@ -160,6 +160,8 @@ button:disabled { cursor: not-allowed; }
 }
 .skip-link:focus { top: var(--s-2); }
 .wrap { width: 100%; max-width: 100rem; margin-inline: auto; padding-inline: var(--gutter); }
+/* Runde 26: quer gehaltenes iPhone (viewport-fit=cover): Logo, Tasche und Inhalt bleiben neben der Kamera-Aussparung */
+.wrap { padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right)); }
 
 /* 3. Schrift =============================================================== */
 /* Überschriften (Runde 13): leise Versalien in derselben Schrift, keine fetten Schlagzeilen mehr */
@@ -1332,7 +1334,7 @@ html[data-al="mitte"] .header.is-compact .header__logo .logo { height: 1.6rem; }
   html[data-al="mitte"] .header__logo .logo { height: 2.4rem; }
   html[data-al="mitte"] .header.is-compact .header__logo .logo { height: 1.9rem; }
 }
-html[data-al="leiste"] .header { background: rgb(255 255 255 / 0.8) !important; -webkit-backdrop-filter: blur(14px) saturate(1.2);
+html[data-al="leiste"] .header { background: rgb(255 255 255 / 0.9) !important; -webkit-backdrop-filter: blur(14px) saturate(1.2);
   backdrop-filter: blur(14px) saturate(1.2); border-bottom: 1px solid rgb(0 0 0 / 0.06) !important; }
 html[data-al="leiste"]:not(.azur-light):not(.azur-pdp-open) .header--overlay:not(.is-solid) {
   background: rgb(11 11 12 / 0.45) !important; border-bottom-color: rgb(255 255 255 / 0.08) !important; }

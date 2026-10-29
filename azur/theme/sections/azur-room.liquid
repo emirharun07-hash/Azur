@@ -33,7 +33,7 @@
        jetzt     Stand Runde 25: Zimmer bleibt etwas zurück und dunkelt ab, Blatt mit dunklem Schatten
        blende    weiche Überblendung: das Zimmer verblasst ins Weiß, die Kante des Blatts löst sich in Nebel auf
        blatt     das Zimmer steht still, das Blatt schiebt sich mit runden Ecken und leichtem Schatten darüber
-       kamera    die Kamera fährt leicht ins Zimmer hinein, dann geht es ohne Kante ins Weiß
+       kamera    die Kamera fährt deutlich ins Zimmer hinein (zum Ständer), erst danach wird es weiß, ohne Kante
        schlicht  ganz normales Scrollen, ohne jede Bewegung
        leicht    Handy: kaum Bewegung (Zimmer bleibt ein wenig zurück), runde Ecken, kein Schatten
      Alles bewegt der Browser mit dem Scrollen selbst; ohne diese Technik rechnet azur-fall.js über --azur-t nach. */
@@ -44,8 +44,8 @@
     --azur-veil-a: .15; --azur-veil-b: .85; --azur-mist: 1; --azur-rise-k: .6; --azur-fade: 1; --azur-shadow: none; }
   html[data-azt="blatt"] { --azur-peek: 0px; --azur-drift: 1; --azur-veil: var(--c-paper); --azur-veil-max: .3; --azur-rise-k: .5;
     --azur-shadow: 0 -14px 36px -16px rgb(0 0 0 / .12); }
-  html[data-azt="kamera"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: 1; --azur-zoom: 1.2; --azur-veil: var(--c-paper);
-    --azur-veil-max: 1; --azur-veil-a: .3; --azur-veil-b: .9; --azur-mist: 1; --azur-rise-k: .6; --azur-fade: 1; --azur-shadow: none; }
+  html[data-azt="kamera"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: 1; --azur-zoom: 1.4; --azur-veil: var(--c-paper);
+    --azur-veil-max: 1; --azur-veil-a: .45; --azur-veil-b: .95; --azur-mist: 1; --azur-rise-k: .6; --azur-fade: 1; --azur-shadow: none; }
   html[data-azt="schlicht"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: 0; --azur-veil-max: 0; --azur-rise-k: 0; --azur-shadow: none; }
   html[data-azt="leicht"] { --azur-lip: 20px; --azur-peek: 0px; --azur-drift: .3; --azur-veil-max: 0; --azur-rise-k: .5; --azur-shadow: none; }
   .shopify-section:has(> .azur[data-hero]) { background: #0b0b0c; }
