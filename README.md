@@ -12,6 +12,7 @@ Alles liegt im Ordner [`azur/`](azur):
 
 | Ordner / Datei | Inhalt |
 |---|---|
+| `azur/UEBERGABE.md` | Zuerst lesen in einer neuen Sitzung: Marke, Produkte, Stand, Regeln des Owners, offene Punkte |
 | `azur/BRIEF.md` | Die Idee und die festen Entscheidungen (Farben, Texte, Stil) |
 | `azur/STATUS.md` | Stand der Arbeit, Entscheidungen des Owners, Runde für Runde |
 | `azur/theme/` | Das Shopify-Theme (Sections, Snippets, CSS, JS), so wie es in den Shop hochgeladen wird |

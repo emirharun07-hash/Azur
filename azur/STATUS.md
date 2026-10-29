@@ -569,7 +569,12 @@ on every device without losing quality.
 - **Shopify draft for the fix**: "Azur Zimmer Runde 26b (Entwurf)", gid://shopify/OnlineStoreTheme/210548228435, a
   themeDuplicate of MAIN (its `azur-room.js` checked equal to 278efae first) plus `assets/azur-room.js` from f7ec215
   (URL upload, MD5 checked equal, as are azur-fall.js, azur.css and azur-variants.liquid). Preview:
-  https://azurclothing.com/?preview_theme_id=210548228435 (17 of 20 themes).
+  https://azurclothing.com/?preview_theme_id=210548228435 (17 of 20 themes). The owner published it the same day:
+  Runde 26b (210548228435) is MAIN.
+- **Storefront open** (checked 2026-10-29 from outside): the homepage serves the room without a password and
+  `/password` redirects to `/`. The owner changed that, not Claude; whether it stays open is the owner's call.
+- **Handover** for new sessions: `azur/UEBERGABE.md` (brand, products, rules, open points, a starting point for ads
+  and search).
 
 ## Runde 26 (owner 2026-10-29: desktop transition, phone hang, BRA/GER/TUR labels, white areas on phones, logo, a Tinder-style choice)
 
