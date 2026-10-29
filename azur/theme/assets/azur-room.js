@@ -509,11 +509,12 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
        after the room appeared, or after a pause, hung; a strip of half a million pixels takes a few milliseconds.
        The plate is decoded once from its file, off the main thread (createImageBitmap of a Blob), and the strips are
        cut from that: cut straight from the <img>, every strip decoded the whole picture again on the main thread.
-       Without createImageBitmap the plate goes up whole. */
-    async texSoon(img) {
+       Without createImageBitmap the plate goes up whole. v: the view it is for (a view the visitor waits for, rush,
+       does not wait for idle moments). */
+    async texSoon(img, v) {
       const gl = this.gl, w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
       const rows = Math.max(32, Math.floor(5e5 / Math.max(1, w)));
-      await this.idle();
+      await this.idle(v);
       if (!window.createImageBitmap || h <= rows) return this.texture(img);
       const opt = { premultiplyAlpha: 'none', colorSpaceConversion: 'default' };
       let src = img;
@@ -530,7 +531,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         let strip;
         try { strip = await createImageBitmap(src, 0, y, w, Math.min(rows, h - y), opt); }
         catch (e) { gl.deleteTexture(t); if (src !== img) src.close(); return this.texture(img); }
-        await this.idle();
+        await this.idle(v);
         gl.bindTexture(gl.TEXTURE_2D, t);
         gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, y, gl.RGBA, gl.UNSIGNED_BYTE, strip);
         strip.close && strip.close();
@@ -570,7 +571,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
         if (imgs.every(Boolean)) {
           for (let i = 0; i < list.length; i++) {      // a background load uploads in idle moments
-            const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i]);
+            const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i], v);
             v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
           }
           v.size = [imgs[0].naturalWidth, imgs[0].naturalHeight]; v.mode = 'passes';
@@ -642,11 +643,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       (async () => {
         for (const p of PASSES) {
           if (!v.imgs[p] || v.tex[p]) continue;
-          await this.idle();
+          await this.idle(v);
           if (v.restoring !== run) return;             // given back again meanwhile
           await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
           if (v.restoring !== run) return;
-          const t = await this.texSoon(v.imgs[p]);
+          const t = await this.texSoon(v.imgs[p], v);
           if (v.restoring !== run || v.tex[p]) { this.gl.deleteTexture(t); return; }
           v.tex[p] = t;
         }
@@ -656,10 +657,15 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     }
     /* Resolves in an idle moment, never while a camera move plays (hold). Runde 26: nor while the visitor scrolls, touches
        or is away from the room (busy, set by the app): each upload of a big plate blocks the page for a frame or more,
-       on a phone up to a second, and Safari has no requestIdleCallback; a scroll right after the room appeared hung. */
-    idle() {
+       on a phone up to a second, and Safari has no requestIdleCallback; a scroll right after the room appeared hung.
+       Only for work in the background: the view the visitor asked for (rush, set by the app while a chip's move waits
+       for it) goes on at once, one strip per task. Waiting for quiet there held a chip for seconds: its own tap counts
+       as a touch, and a view half loaded in the background stood still until then. */
+    idle(v) {
+      if (v && v.key === this.rush) return new Promise(res => setTimeout(res, 0));
       const ric = window.requestIdleCallback || (f => setTimeout(f, 32));
-      return new Promise(res => { const go = () => ric(() => (this.hold || (this.busy && this.busy()) ? setTimeout(go, 250) : res()), { timeout: 400 }); go(); });
+      const quiet = () => (v && v.key === this.rush) || !(this.hold || (this.busy && this.busy()));   // (asked for while it waited)
+      return new Promise(res => { const go = () => ric(() => (quiet() ? res() : setTimeout(go, 250)), { timeout: 400 }); go(); });
     }
     /* A patch rectangle (plate pixels of the state's render) in the view's texture: scaled to the loaded copy and kept
        inside it. On the 2400 and 1200 copies a rectangle reaching the plate's edge rounded one pixel past the texture,
@@ -703,7 +709,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         for (let i = 0; i < list.length; i++) {        // in idle moments (texSoon); the picture is mixed again at the end
           const p = list[i];
           if (v.tex[p]) {
-            const t = await this.texSoon(imgs[i]);
+            const t = await this.texSoon(imgs[i], v);
             if (v.tex[p]) { gl.deleteTexture(v.tex[p]); v.tex[p] = t; } else gl.deleteTexture(t);
           }
           v.imgs[p] = imgs[i];
@@ -2076,7 +2082,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const from = this.viewKey, back = to === 'room';
       const focus = opts.focus || [this.stage.clientWidth / 2, this.stage.clientHeight / 2];
       const slow = setTimeout(() => this.root.classList.add('is-loading'), 250);   // a view not loaded yet (phones load on demand)
-      await this.comp.load(to, this.passes, false);
+      this.comp.rush = to;                             // its uploads do not wait for quiet (compositor idle())
+      try { await this.comp.load(to, this.passes, false); }
+      finally { if (this.comp.rush === to) this.comp.rush = null; }
       clearTimeout(slow); this.root.classList.remove('is-loading');
       const mv = this.findMove(from, to);
       if (mv && !this.reduced) {

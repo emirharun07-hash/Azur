@@ -198,7 +198,9 @@
       const from = this.viewKey, back = to === 'room';
       const focus = opts.focus || [this.stage.clientWidth / 2, this.stage.clientHeight / 2];
       const slow = setTimeout(() => this.root.classList.add('is-loading'), 250);   // a view not loaded yet (phones load on demand)
-      await this.comp.load(to, this.passes, false);
+      this.comp.rush = to;                             // its uploads do not wait for quiet (compositor idle())
+      try { await this.comp.load(to, this.passes, false); }
+      finally { if (this.comp.rush === to) this.comp.rush = null; }
       clearTimeout(slow); this.root.classList.remove('is-loading');
       const mv = this.findMove(from, to);
       if (mv && !this.reduced) {
