@@ -559,7 +559,17 @@ on every device without losing quality.
   MAIN (Runde 25, its six files checked equal to f1e7df7 first) plus the six changed files from 278efae (URL upload
   from raw.githubusercontent.com, all MD5 checked equal). Preview: https://azurclothing.com/?preview_theme_id=210545869139
   (shop stays behind its password). `config/preview` on the choice page is left unset: its links name variants that
-  are gone.
+  are gone. The owner then published it: Runde 26 (210545869139) is MAIN.
+- **View buttons** (owner after publishing: "die Tasten „Bett, Zimmer, Ständer" funktioniert nicht mehr. Wenn man
+  raufklickt passiert einfach nichts"): they did work, but slowly. A view not on the GPU yet had to wait for a quiet
+  moment before each texture strip was uploaded, and the tap itself counts as input, so the camera move started only
+  after 5–10 s. Now `fly()` marks the view it waits for (`comp.rush`). `idle(v)` lets that view's strips go up at once,
+  one strip per task, while background loads still wait. Harness (software GL): loading takes 0.7–1.7 s (was 2.3–5.8 s);
+  the transition and scroll tests and the phone with CPU ×4 run without errors. Commit f7ec215.
+- **Shopify draft for the fix**: "Azur Zimmer Runde 26b (Entwurf)", gid://shopify/OnlineStoreTheme/210548228435, a
+  themeDuplicate of MAIN (its `azur-room.js` checked equal to 278efae first) plus `assets/azur-room.js` from f7ec215
+  (URL upload, MD5 checked equal, as are azur-fall.js, azur.css and azur-variants.liquid). Preview:
+  https://azurclothing.com/?preview_theme_id=210548228435 (17 of 20 themes).
 
 ## Runde 26 (owner 2026-10-29: desktop transition, phone hang, BRA/GER/TUR labels, white areas on phones, logo, a Tinder-style choice)
 
