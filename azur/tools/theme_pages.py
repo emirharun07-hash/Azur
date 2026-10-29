@@ -171,6 +171,13 @@ def render_header(**page):
     return section('header', **dict({'collection': {'handle': ''}, 'product': None}, **page))
 
 
+def head_extra():
+    """what layout/theme.liquid puts in the head besides the styles: theme-color and the Runde 26 variants script"""
+    src = open(os.path.join(THEME, 'snippets', 'azur-variants.liquid')).read()
+    src = re.sub(r'{%-? comment -?%}.*?{%-? endcomment -?%}\n?', '', src, flags=re.S)
+    return '<meta name="theme-color" content="#ffffff">' + src
+
+
 def chrome(template, body, query='', cart_count=0, drawer='', **page):
     """bar, header, page body, footer and cart drawer, like layout/theme.liquid"""
     form = signup_state(query)
@@ -180,7 +187,7 @@ def chrome(template, body, query='', cart_count=0, drawer='', **page):
     header = render_header(template=t, cart=cart, **page)
     footer = section('footer', template=t, form=form)
     return f"""<!doctype html><html lang="de" class="js"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Harness {template}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">{head_extra()}<title>Harness {template}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Caveat:wght@500;700&display=swap">
 <style>@font-face{{font-family:"Martian Mono";font-style:normal;font-weight:300 600;font-stretch:75% 112.5%;src:url(/theme/assets/azur-martian-mono.woff2) format("woff2")}}</style>
 <link rel="stylesheet" href="/theme/assets/azur.css">

@@ -24,35 +24,70 @@
     src: url("{{ 'azur-caveat.woff2' | asset_url }}") format("woff2"); }
   /* Runde 12: der Ton-Schalter des Zimmers steht unter dem Header */
   .azur[data-hero] { --azur-top: var(--header-h); }
-  /* Runde 23/25 (Owner: cleaner, kein Schwarz, nicht mittendrin anhalten, beide Teile verbunden): vom Zimmer zur Seite
-     ist es ein Wisch wie am Handy. Ab einer kleinen Strecke gleitet die Seite von selbst zu den Trikots (azur-room.js,
-     bindScrollAway); zurück ins Zimmer erst, wenn man weit hochzieht, sonst gleitet sie zurück zu den Trikots.
-     Die Seite kommt als weißes Blatt mit runden Ecken und weichem Schatten über das Zimmer; das Zimmer bleibt zurück
-     (rutscht langsamer: Tiefe) und dunkelt leicht ab; die Trikots steigen etwas schneller als das Blatt nach oben und
-     kommen versetzt an. Alles bewegt der Browser mit dem Scrollen selbst (flüssig), ohne diese Technik azur-room.js
-     über --azur-t. Am Handy hat das Blatt oben etwas mehr Platz, damit das erste Trikot unter Header und Leiste frei steht. */
-  .azur-fall { --azur-lip: 28px; position: relative; z-index: 4; display: block; height: var(--azur-lip); margin-top: calc(-1 * var(--azur-lip));
-    background: var(--c-paper); border-radius: var(--azur-lip) var(--azur-lip) 0 0 !important;
-    box-shadow: 0 -26px 48px -18px rgb(0 0 0 / .55), 0 -1px 0 rgb(255 255 255 / .35); pointer-events: none; }
+  /* Runde 26: der Weg vom Zimmer zur Seite in Varianten zum Ausprobieren (snippets/azur-variants.liquid setzt data-azt
+     am <html>, assets/azur-fall.js misst und schaltet). Gemeinsam für alle: das Zimmer ist so hoch wie der Bildschirm
+     ohne Browserleisten (lvh), damit unter einer durchsichtigen oder einfahrenden Leiste kein Weiß steht; Bedienung und
+     Bild bleiben so hoch wie der kleinste Bildschirm (svh). Den Streifen dazwischen füllt das gespiegelte untere Ende
+     des Bildes, sanft auslaufend (kein schwarzer Balken). Die Seite kommt als Blatt (.azur-fall) über das Zimmer; ihre
+     Lippe (runde Ecken) liegt im Ruhezustand unter dem Bildrand, nur bei „jetzt“ schaut sie wie bisher heraus.
+       jetzt     Stand Runde 25: Zimmer bleibt etwas zurück und dunkelt ab, Blatt mit dunklem Schatten
+       blende    weiche Überblendung: das Zimmer verblasst ins Weiß, die Kante des Blatts löst sich in Nebel auf
+       blatt     das Zimmer steht still, das Blatt schiebt sich mit runden Ecken und leichtem Schatten darüber
+       kamera    die Kamera fährt leicht ins Zimmer hinein, dann geht es ohne Kante ins Weiß
+       schlicht  ganz normales Scrollen, ohne jede Bewegung
+       leicht    Handy: kaum Bewegung (Zimmer bleibt ein wenig zurück), runde Ecken, kein Schatten
+     Alles bewegt der Browser mit dem Scrollen selbst; ohne diese Technik rechnet azur-fall.js über --azur-t nach. */
+  :root { --azur-lip: 28px; --azur-peek: var(--azur-lip); --azur-drift: .4; --azur-zoom: 1; --azur-veil: #000;
+    --azur-veil-max: .45; --azur-veil-a: 0; --azur-veil-b: 1; --azur-mist: 0; --azur-rise-k: 1; --azur-fade: 0;
+    --azur-shadow: 0 -26px 48px -18px rgb(0 0 0 / .55), 0 -1px 0 rgb(255 255 255 / .35); }
+  html[data-azt="blende"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: .6; --azur-veil: var(--c-paper); --azur-veil-max: 1;
+    --azur-veil-a: .15; --azur-veil-b: .85; --azur-mist: 1; --azur-rise-k: .6; --azur-fade: 1; --azur-shadow: none; }
+  html[data-azt="blatt"] { --azur-peek: 0px; --azur-drift: 1; --azur-veil: var(--c-paper); --azur-veil-max: .3; --azur-rise-k: .5;
+    --azur-shadow: 0 -14px 36px -16px rgb(0 0 0 / .12); }
+  html[data-azt="kamera"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: 1; --azur-zoom: 1.2; --azur-veil: var(--c-paper);
+    --azur-veil-max: 1; --azur-veil-a: .3; --azur-veil-b: .9; --azur-mist: 1; --azur-rise-k: .6; --azur-fade: 1; --azur-shadow: none; }
+  html[data-azt="schlicht"] { --azur-lip: 0px; --azur-peek: 0px; --azur-drift: 0; --azur-veil-max: 0; --azur-rise-k: 0; --azur-shadow: none; }
+  html[data-azt="leicht"] { --azur-lip: 20px; --azur-peek: 0px; --azur-drift: .3; --azur-veil-max: 0; --azur-rise-k: .5; --azur-shadow: none; }
+  .shopify-section:has(> .azur[data-hero]) { background: #0b0b0c; }
+  .azur[data-hero] { height: calc(100vh + var(--azur-lip) - var(--azur-peek)); height: calc(100lvh + var(--azur-lip) - var(--azur-peek)); }
+  .azur[data-hero] > .azur-stage { bottom: auto; height: 100vh; height: 100svh; min-height: 30rem; }
+  .azur[data-hero] .azur-canvas { -webkit-box-reflect: below 0 linear-gradient(transparent calc(100% - 22vh), rgb(0 0 0 / .85)); }
+  .azur-fall { position: relative; z-index: 4; display: block; height: var(--azur-lip); margin-top: calc(-1 * var(--azur-lip));
+    background: var(--c-paper); border-radius: var(--azur-lip) var(--azur-lip) 0 0 !important; box-shadow: var(--azur-shadow); pointer-events: none; }
   @media (max-width: 47.99em) { .azur-fall { height: calc(var(--azur-lip) + 3rem); } }
-  .js .azur[data-hero]::after { content: ""; position: absolute; inset: 0; z-index: 3; background: #000; opacity: var(--azur-dim, 0);
-    pointer-events: none; }
-  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li { --azur-rise: 10vh; }
-  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(2) { --azur-rise: 16vh; }
-  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(n + 3) { --azur-rise: 22vh; }
+  .azur-fall::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 45vh; opacity: 0;
+    background: linear-gradient(to top, var(--c-paper), rgb(255 255 255 / 0)); pointer-events: none; }
+  .js .azur[data-hero]::after { content: ""; position: absolute; inset: 0; z-index: 3; background: var(--azur-veil); opacity: 0; pointer-events: none; }
+  .js .azur[data-hero] .azur-world { transform-origin: 55% 32%; }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li { --azur-rise: calc(10vh * var(--azur-rise-k)); }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(2) { --azur-rise: calc(16vh * var(--azur-rise-k)); }
+  .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li:nth-child(n + 3) { --azur-rise: calc(22vh * var(--azur-rise-k)); }
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: scroll()) {
-      .js .azur[data-hero] .azur-world { animation: azur-cam linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
-      .js .azur[data-hero]::after { animation: azur-dim linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+      .js .azur[data-hero] .azur-world { animation: azur-world linear both; animation-timeline: scroll(root); animation-range: 0 var(--azur-end, 100vh); }
+      .js .azur[data-hero]::after { animation: azur-veil linear both; animation-timeline: scroll(root);
+        animation-range: calc(var(--azur-end, 100vh) * var(--azur-veil-a)) calc(var(--azur-end, 100vh) * var(--azur-veil-b)); }
+      .js .azur-fall::before { animation: azur-mist linear both; animation-timeline: scroll(root); animation-range: 0 calc(var(--azur-end, 100vh) * .3); }
       .js .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li {
         animation: azur-rise linear both; animation-timeline: scroll(root); animation-range: 0 var(--azur-end, 100vh); }
     }
+    html.azur-slide-js .azur[data-hero] .azur-world {
+      translate: 0 calc(var(--azur-t, 0) * var(--azur-end, 100vh) * var(--azur-drift)); scale: calc(1 + (var(--azur-zoom) - 1) * var(--azur-t, 0)); }
+    html.azur-slide-js .azur[data-hero]::after {
+      opacity: calc(var(--azur-veil-max) * clamp(0, (var(--azur-t, 0) - var(--azur-veil-a)) / (var(--azur-veil-b) - var(--azur-veil-a)), 1)); }
+    html.azur-slide-js .azur-fall::before { opacity: calc(var(--azur-mist) * min(1, var(--azur-t, 0) / .3)); }
     html.azur-slide-js .shopify-section:has(.azur-fall) ~ .shopify-section .yz__grid > li {
-      transform: translateY(calc((1 - var(--azur-t, 1)) * var(--azur-rise))); }
+      transform: translateY(calc((1 - var(--azur-t, 1)) * var(--azur-rise))); opacity: calc(1 - var(--azur-fade) * (1 - var(--azur-t, 1))); }
   }
-  @keyframes azur-cam { to { translate: 0 40vh; } }
-  @keyframes azur-dim { to { opacity: .45; } }
-  @keyframes azur-rise { from { transform: translateY(var(--azur-rise)); } to { transform: none; } }
+  @keyframes azur-world { to { translate: 0 calc(var(--azur-end, 100vh) * var(--azur-drift)); scale: var(--azur-zoom); } }
+  @keyframes azur-veil { from { opacity: 0; } to { opacity: var(--azur-veil-max); } }
+  @keyframes azur-mist { to { opacity: var(--azur-mist); } }
+  @keyframes azur-rise { from { transform: translateY(var(--azur-rise)); opacity: calc(1 - var(--azur-fade)); } to { transform: none; opacity: 1; } }
+  /* Browserleisten (Runde 26): über dem Zimmer ist der Grund der Seite dunkel, auch dort, wo man über den Rand hinaus
+     zieht; erst im Shop (azur-light) wieder weiß. Safari ab iOS 26 färbt seine Leisten nach diesem Grund
+     (theme-color nimmt es nicht mehr), Chrome am Handy nach theme-color (azur-fall.js). */
+  html:has(.azur[data-hero]):not(.azur-light), html:has(.azur[data-hero]):not(.azur-light) body {
+    background: linear-gradient(var(--c-paper), var(--c-paper)) 0 var(--azur-end, 100lvh) / 100% 100% no-repeat #0b0b0c; }
   html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views, .azur-dots) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--paper { display: none !important; }
@@ -101,6 +136,8 @@
 <div class="azur-fall" aria-hidden="true"></div>
 
 <script>
+  /* Runde 26: über dem Zimmer ist die Browserleiste dunkel (Chrome am Handy), gleich beim ersten Bild; azur-fall.js schaltet um */
+  (function (m) { if (m) m.setAttribute('content', '#0b0b0c'); })(document.querySelector('meta[name="theme-color"]'));
   /* runs inside assets/azur-room.js right after the scene configuration */
   window.AZUR_SETUP = function (A) {
     var files = {{ files_base | json }};
@@ -164,6 +201,7 @@
     ];
   };
 </script>
+<script src="{{ 'azur-fall.js' | asset_url }}" defer></script>
 <script src="{{ 'azur-room.js' | asset_url }}" defer></script>
 
 {% schema %}

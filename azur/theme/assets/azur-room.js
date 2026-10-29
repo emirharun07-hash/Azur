@@ -504,6 +504,40 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
       return t;
     }
+    /* Runde 26: a new texture for a big plate, filled in strips in idle moments (idle(): never while the visitor
+       scrolls or touches). One texImage2D of a 2400 px plate blocked a phone for up to a second, so the first swipe
+       after the room appeared, or after a pause, hung; a strip of half a million pixels takes a few milliseconds.
+       The plate is decoded once from its file, off the main thread (createImageBitmap of a Blob), and the strips are
+       cut from that: cut straight from the <img>, every strip decoded the whole picture again on the main thread.
+       Without createImageBitmap the plate goes up whole. */
+    async texSoon(img) {
+      const gl = this.gl, w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      const rows = Math.max(32, Math.floor(5e5 / Math.max(1, w)));
+      await this.idle();
+      if (!window.createImageBitmap || h <= rows) return this.texture(img);
+      const opt = { premultiplyAlpha: 'none', colorSpaceConversion: 'default' };
+      let src = img;
+      try {
+        const r = await fetch(img.currentSrc || img.src, { cache: 'force-cache' });   // from the browser's cache
+        if (!r.ok) throw new Error(r.status);
+        const b = await createImageBitmap(await r.blob(), opt);
+        if (b.width === w && b.height === h) src = b; else b.close();
+      } catch (e) { }                                     // then the strips come from the <img> (slower, still in pieces)
+      const t = this.texture(null);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      for (let y = 0; y < h; y += rows) {
+        let strip;
+        try { strip = await createImageBitmap(src, 0, y, w, Math.min(rows, h - y), opt); }
+        catch (e) { gl.deleteTexture(t); if (src !== img) src.close(); return this.texture(img); }
+        await this.idle();
+        gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, y, gl.RGBA, gl.UNSIGNED_BYTE, strip);
+        strip.close && strip.close();
+      }
+      if (src !== img) src.close();
+      return t;
+    }
 
     /* Load a view. Resolves to 'passes', 'beauty' or 'none'. Textures are cached per view.
        With low-resolution copies (passes.json _lo, published builds) those come first and the full plates follow. */
@@ -535,9 +569,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const list = PASSES.filter(p => scales[FILES[p]]);
         const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
         if (imgs.every(Boolean)) {
-          for (let i = 0; i < list.length; i++) {      // a background load uploads one pass per idle moment
-            if (!activate) await this.idle();
-            const p = list[i]; v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
+          for (let i = 0; i < list.length; i++) {      // a background load uploads in idle moments
+            const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i]);
+            v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
           }
           v.size = [imgs[0].naturalWidth, imgs[0].naturalHeight]; v.mode = 'passes';
           v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = 1;
@@ -601,7 +635,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       }
       v.evicted = false; v.restoring = null; v.version = (v.version || 0) + 1;
     }
-    /* The same, one pass per idle moment (each upload of a 2400 px plate blocks the page for a frame or more). */
+    /* The same in idle moments (texSoon). */
     restoreSoon(v) {
       if (v.restoring) return;
       const run = v.restoring = {};
@@ -612,16 +646,20 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           if (v.restoring !== run) return;             // given back again meanwhile
           await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
           if (v.restoring !== run) return;
-          v.tex[p] = this.texture(v.imgs[p]);
+          const t = await this.texSoon(v.imgs[p]);
+          if (v.restoring !== run || v.tex[p]) { this.gl.deleteTexture(t); return; }
+          v.tex[p] = t;
         }
         this.restored(v);
         this.onChange && this.onChange();
       })();
     }
-    /* Resolves in an idle moment, never while a camera move plays (hold). */
+    /* Resolves in an idle moment, never while a camera move plays (hold). Runde 26: nor while the visitor scrolls, touches
+       or is away from the room (busy, set by the app): each upload of a big plate blocks the page for a frame or more,
+       on a phone up to a second, and Safari has no requestIdleCallback; a scroll right after the room appeared hung. */
     idle() {
       const ric = window.requestIdleCallback || (f => setTimeout(f, 32));
-      return new Promise(res => { const go = () => ric(() => (this.hold ? setTimeout(go, 120) : res()), { timeout: 400 }); go(); });
+      return new Promise(res => { const go = () => ric(() => (this.hold || (this.busy && this.busy()) ? setTimeout(go, 250) : res()), { timeout: 400 }); go(); });
     }
     /* A patch rectangle (plate pixels of the state's render) in the view's texture: scaled to the loaded copy and kept
        inside it. On the 2400 and 1200 copies a rectangle reaching the plate's edge rounded one pixel past the texture,
@@ -662,9 +700,12 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
         if (v.tier !== tier) return;                   // a sharper tier was asked for meanwhile
-        for (let i = 0; i < list.length; i++) {        // one pass per idle moment; the picture is mixed again at the end
+        for (let i = 0; i < list.length; i++) {        // in idle moments (texSoon); the picture is mixed again at the end
           const p = list[i];
-          if (v.tex[p]) { await this.idle(); if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); } }
+          if (v.tex[p]) {
+            const t = await this.texSoon(imgs[i]);
+            if (v.tex[p]) { gl.deleteTexture(v.tex[p]); v.tex[p] = t; } else gl.deleteTexture(t);
+          }
           v.imgs[p] = imgs[i];
         }
         v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = (v.version || 0) + 1;
@@ -1848,7 +1889,6 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
   const getJSON = p => (A.config.inline && A.config.inline[p]) ? Promise.resolve(A.config.inline[p]) : fetchJSON(A.url(p));
   const lin2srgb = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
   const DEPTH = { near: 0.4, far: 6.5 };
-  const CAM_DEPTH = 0.1;     // Runde 20: how far near things lift over the first screen of scrolling (uv, see frame())
 
   class App {
     async init() {
@@ -1884,6 +1924,12 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.buildChrome();
       if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
+      // Runde 26: big texture uploads wait for a quiet moment at the room (compositor idle()): not while the visitor
+      // scrolls or touches, not while the page has left the room
+      this.inputAt = 0;
+      const touched = () => { this.inputAt = performance.now(); };
+      ['scroll', 'touchstart', 'touchmove', 'wheel', 'keydown'].forEach(n => window.addEventListener(n, touched, { passive: true }));
+      this.comp.busy = () => this.diving || performance.now() - this.inputAt < 900;
       // phones fire resize while the address bar comes and goes during a scroll: at most once a frame, and only when
       // the stage really changed size (the room is 100svh, so mostly it did not)
       let rq = false;
@@ -2418,94 +2464,20 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       }
       this.initSound();
     }
-    /* Shopify (round 9): scrolling from the room down into the shop. The shop slides over the room like a sheet (its
-       shadow: sections/azur-room.liquid); the room stays a little behind, shrinks a touch and darkens. Only transform
-       and opacity of the stage change: the section keeps its box, so the theme header still sees where the room ends,
-       and once the room is out of the window the IntersectionObserver stops its drawing as before. */
-    /* Runde 20 (owner): scrolling down, a camera goes down in the room and dips through a black plane to the jerseys.
-       The room stays (sticky) and slides up slower than the page (.azur-world: 0.75 of the first screen, no zoom); like
-       a camera that sinks, near things (floor, bed, rail) also lift more than the far wall (the pointer's depth
-       parallax, vertical and driven by the scroll: frame() reads scrollY each frame, CAM_DEPTH). The slide is a CSS
-       scroll-driven animation where the browser has them (azur-room.liquid), so it runs with the scroll itself; else
-       the scroll handler moves it. The plane (.azur-fall: a low sandy edge, black long enough to fill the window once,
-       the same edge mirrored into white, then white room for the jerseys) scrolls with the page. The scroll handler
-       only reads scrollY against offsets measured on resize (no layout while scrolling) and sets the classes: html.azur-
-       diving hides the room's hints, chips and dots, html.azur-light gives the header dark type over the white,
-       html.azur-past makes it solid (azur.js listens for `azur-hero`); while the plane covers the room it is not drawn. */
-    /* Runde 23 (owner: cleaner, no black, never stop halfway): room -> shop is one swipe. Once the visitor has scrolled
-       a little way (SNAP_GO of the room) and lets go, the page glides on to the shop by itself (and back up the same
-       way); a stop in between never stays. The room stays a little behind (.azur-world slides down 0.4 of the window
-       while the page goes up one: depth) and dims (::after), both CSS scroll-driven animations where the browser has
-       them, else this handler moves the world. html.azur-diving hides the room's hints, chips and dots, html.azur-light
-       gives the header dark type over the white, html.azur-past makes it solid (azur.js listens for `azur-hero`). */
+    /* Shopify: the way from the room down to the shop. Runde 26: the transition, its variants, the swipe and the header
+       colours live in the theme's azur-fall.js (they also run where the room is a still picture, and none of it waits
+       for the room's work); the room only listens: html.azur-diving (the page has left the top: hints, chips and dots
+       hide, background downloads wait) and html.azur-away (the room is out of sight: nothing to draw). Runde 20's
+       scroll camera (WebGL depth parallax while scrolling) is gone: it redrew the whole room on every scroll frame. */
     bindScrollAway() {
-      const html = document.documentElement, mark = this.root.parentElement.querySelector('.azur-fall');
-      if (!mark) return;
-      const slideByCss = !!(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'));
-      const f = this.fall = {};
-      const measure = () => {
-        f.vh = window.innerHeight || 1;
-        // where the room has gone (the page's lip overlaps its foot), or as far as the page goes (a short shop on a tall iPad)
-        const lip = -parseFloat(getComputedStyle(mark).marginTop) || 0;
-        f.end = Math.min(mark.getBoundingClientRect().top + window.scrollY + lip, document.documentElement.scrollHeight - f.vh);
-        html.style.setProperty('--azur-end', Math.max(1, Math.round(f.end)) + 'px');     // the jerseys rise in over this stretch
-        update();
-      };
-      const flag = (c, on) => { if (html.classList.contains(c) !== on) { html.classList.toggle(c, on); return true; } return false; };
-      if (!slideByCss) html.classList.add('azur-slide-js');
-      const update = () => {
-        const y = window.scrollY, hb = parseFloat(html.style.getPropertyValue('--header-bottom')) || 0;
-        this.diving = y > 4; flag('azur-diving', this.diving);
-        flag('azur-light', f.end - y - hb / 2 < 40);
-        if (flag('azur-past', f.end - y <= hb + 1)) window.dispatchEvent(new Event('azur-hero'));
-        const away = y >= f.end - 1;
+      const html = document.documentElement;
+      const sync = () => {
+        this.diving = html.classList.contains('azur-diving');
+        const away = html.classList.contains('azur-away');
         if (away !== this.away) { this.away = away; if (!away) this.kick(); }
-        if (!slideByCss && !this.reduced && (!away || f.t < 1)) {
-          const t = f.t = Math.min(1, y / f.vh); this.world.style.translate = `0 ${Math.round(0.4 * f.vh * t)}px`;
-          this.root.style.setProperty('--azur-dim', (0.45 * t).toFixed(3));
-          html.style.setProperty('--azur-t', Math.min(1, y / f.end).toFixed(3));
-        }
       };
-      /* The swipe (Runde 25): where the page rests between the room (0) and the shop (f.end) it glides on by itself.
-         Down from the room a short stretch is enough; up from the shop it only goes back into the room once the visitor
-         pulled well into it, otherwise it glides back to the jerseys (on a phone, looking at the top jersey must not
-         drop you into the room). The glide eases out of the visitor's own motion; a touch, the wheel or a key stops it. */
-      const GO_DOWN = 90, GO_UP = 0.4;
-      let lastY = window.scrollY, dir = 0, touching = false, glide = 0, idle = 0;
-      const stopGlide = () => { if (glide) { cancelAnimationFrame(glide); glide = 0; } };
-      const glideTo = top => {
-        stopGlide();
-        const y0 = window.scrollY, d = top - y0;
-        if (this.reduced || Math.abs(d) < 2) { window.scrollTo(0, top); return; }
-        const dur = Math.min(950, 560 + Math.abs(d) * 0.4), t0 = performance.now();
-        const step = now => {
-          const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-          window.scrollTo(0, Math.round(y0 + d * e));
-          glide = k < 1 ? requestAnimationFrame(step) : 0;
-        };
-        glide = requestAnimationFrame(step);
-      };
-      const settle = () => {
-        if (touching || glide) return;
-        const y = window.scrollY, end = f.end;
-        if (y <= 1 || y >= end - 1) return;
-        glideTo(dir >= 0 ? (y > Math.min(0.1 * end, GO_DOWN) ? end : 0) : (y < end * (1 - GO_UP) ? 0 : end));
-      };
-      const onScroll = () => {
-        const y = window.scrollY;
-        if (y !== lastY && !glide) dir = y > lastY ? 1 : -1;
-        lastY = y; update();
-        clearTimeout(idle); if (!glide) idle = setTimeout(settle, 110);
-      };
-      window.addEventListener('scroll', onScroll, { passive: true });
-      if ('onscrollend' in window) window.addEventListener('scrollend', () => { clearTimeout(idle); if (!glide) idle = setTimeout(settle, 30); });
-      window.addEventListener('touchstart', () => { touching = true; stopGlide(); }, { passive: true });
-      window.addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(settle, 110); }, { passive: true });
-      window.addEventListener('wheel', stopGlide, { passive: true });
-      window.addEventListener('keydown', stopGlide);
-      let mq = false;
-      window.addEventListener('resize', () => { if (!mq) { mq = true; requestAnimationFrame(() => { mq = false; measure(); }); } });
-      window.addEventListener('load', measure); measure();
+      window.addEventListener('azur-fall', sync); sync();
+      Object.defineProperty(this, 'fall', { get: () => window.AZUR_FALL || {} });   // (tests read app.fall.end)
     }
 
     /* ---------------------------------------------------------------- outside the window (round 4) */
@@ -2552,8 +2524,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           if (this.soundOn) this.kickSound(0.6);
         });
       }
-      const unlock = () => this.unlockAudio();
-      ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, unlock, { once: true, passive: true }));
+      // Runde 26: the sound wakes on a tap or a key, not when a finger lands to scroll: starting the audio took a moment
+      // on the main thread, and Chrome on a phone starts scrolling only after the page has taken the first touch.
+      // After a scroll the finger lifts without user activation, then nothing is started.
+      const unlock = () => { if (!navigator.userActivation || navigator.userActivation.isActive) this.unlockAudio(); };
+      ['pointerup', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
       const far = () => {
         this.farTimer = setTimeout(far, 45000 + Math.random() * 75000);
         if (!document.hidden && !this.offscreen && this.light && this.light.window > 0.6 && !(this.video && !this.video.paused)) this.kickSound(0.45);
@@ -2561,7 +2536,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.farTimer = setTimeout(far, 30000 + Math.random() * 40000);
     }
     unlockAudio() {
-      if (!this.soundOn) return;
+      if (!this.soundOn || (this.audio && this.audio.state === 'running')) return;
       try {
         this.audio = this.audio || new (window.AudioContext || window.webkitAudioContext)();
         if (this.audio.state === 'suspended') this.audio.resume();
@@ -2794,10 +2769,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const e = 1 - Math.exp(-dt * cfg.motion.parallaxEase);      // the same glide at 60, 120 or 144 Hz
       const nx = this.parallax[0] + (-tx * k - this.parallax[0]) * e, ny = this.parallax[1] + (-ty * k * 0.6 - this.parallax[1]) * e;
       const pmove = Math.abs(nx - this.parallax[0]) + Math.abs(ny - this.parallax[1]) > 1e-6;
-      // + the scroll's camera (Runde 20): near things lift more than the wall over the first screen of scrolling
-      const sp = this.fall && !this.reduced && !this.coarse ? Math.round(Math.min(1, window.scrollY / this.fall.vh) * CAM_DEPTH * 2000) / 2000 : 0;
-      if (sp !== this.scrollPar) { this.scrollPar = sp; this.dirty = true; }
-      this.parallax = [nx, ny]; this.comp.parallax = sp ? [nx, ny + sp] : this.parallax;
+      this.parallax = [nx, ny]; this.comp.parallax = this.parallax;
       // phones: momentum after a swipe along the rail, then the rail settles with a garment in the middle
       if (this.viewKey === 'rail_m' && !this.dragging) {
         const W = this.stage.clientWidth;

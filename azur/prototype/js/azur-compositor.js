@@ -218,6 +218,40 @@
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
       return t;
     }
+    /* Runde 26: a new texture for a big plate, filled in strips in idle moments (idle(): never while the visitor
+       scrolls or touches). One texImage2D of a 2400 px plate blocked a phone for up to a second, so the first swipe
+       after the room appeared, or after a pause, hung; a strip of half a million pixels takes a few milliseconds.
+       The plate is decoded once from its file, off the main thread (createImageBitmap of a Blob), and the strips are
+       cut from that: cut straight from the <img>, every strip decoded the whole picture again on the main thread.
+       Without createImageBitmap the plate goes up whole. */
+    async texSoon(img) {
+      const gl = this.gl, w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      const rows = Math.max(32, Math.floor(5e5 / Math.max(1, w)));
+      await this.idle();
+      if (!window.createImageBitmap || h <= rows) return this.texture(img);
+      const opt = { premultiplyAlpha: 'none', colorSpaceConversion: 'default' };
+      let src = img;
+      try {
+        const r = await fetch(img.currentSrc || img.src, { cache: 'force-cache' });   // from the browser's cache
+        if (!r.ok) throw new Error(r.status);
+        const b = await createImageBitmap(await r.blob(), opt);
+        if (b.width === w && b.height === h) src = b; else b.close();
+      } catch (e) { }                                     // then the strips come from the <img> (slower, still in pieces)
+      const t = this.texture(null);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      for (let y = 0; y < h; y += rows) {
+        let strip;
+        try { strip = await createImageBitmap(src, 0, y, w, Math.min(rows, h - y), opt); }
+        catch (e) { gl.deleteTexture(t); if (src !== img) src.close(); return this.texture(img); }
+        await this.idle();
+        gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, y, gl.RGBA, gl.UNSIGNED_BYTE, strip);
+        strip.close && strip.close();
+      }
+      if (src !== img) src.close();
+      return t;
+    }
 
     /* Load a view. Resolves to 'passes', 'beauty' or 'none'. Textures are cached per view.
        With low-resolution copies (passes.json _lo, published builds) those come first and the full plates follow. */
@@ -249,9 +283,9 @@
         const list = PASSES.filter(p => scales[FILES[p]]);
         const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
         if (imgs.every(Boolean)) {
-          for (let i = 0; i < list.length; i++) {      // a background load uploads one pass per idle moment
-            if (!activate) await this.idle();
-            const p = list[i]; v.tex[p] = this.texture(imgs[i]); v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
+          for (let i = 0; i < list.length; i++) {      // a background load uploads in idle moments
+            const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i]);
+            v.scales[p] = scales[FILES[p]]; v.imgs[p] = imgs[i];
           }
           v.size = [imgs[0].naturalWidth, imgs[0].naturalHeight]; v.mode = 'passes';
           v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = 1;
@@ -315,7 +349,7 @@
       }
       v.evicted = false; v.restoring = null; v.version = (v.version || 0) + 1;
     }
-    /* The same, one pass per idle moment (each upload of a 2400 px plate blocks the page for a frame or more). */
+    /* The same in idle moments (texSoon). */
     restoreSoon(v) {
       if (v.restoring) return;
       const run = v.restoring = {};
@@ -326,16 +360,20 @@
           if (v.restoring !== run) return;             // given back again meanwhile
           await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
           if (v.restoring !== run) return;
-          v.tex[p] = this.texture(v.imgs[p]);
+          const t = await this.texSoon(v.imgs[p]);
+          if (v.restoring !== run || v.tex[p]) { this.gl.deleteTexture(t); return; }
+          v.tex[p] = t;
         }
         this.restored(v);
         this.onChange && this.onChange();
       })();
     }
-    /* Resolves in an idle moment, never while a camera move plays (hold). */
+    /* Resolves in an idle moment, never while a camera move plays (hold). Runde 26: nor while the visitor scrolls, touches
+       or is away from the room (busy, set by the app): each upload of a big plate blocks the page for a frame or more,
+       on a phone up to a second, and Safari has no requestIdleCallback; a scroll right after the room appeared hung. */
     idle() {
       const ric = window.requestIdleCallback || (f => setTimeout(f, 32));
-      return new Promise(res => { const go = () => ric(() => (this.hold ? setTimeout(go, 120) : res()), { timeout: 400 }); go(); });
+      return new Promise(res => { const go = () => ric(() => (this.hold || (this.busy && this.busy()) ? setTimeout(go, 250) : res()), { timeout: 400 }); go(); });
     }
     /* A patch rectangle (plate pixels of the state's render) in the view's texture: scaled to the loaded copy and kept
        inside it. On the 2400 and 1200 copies a rectangle reaching the plate's edge rounded one pixel past the texture,
@@ -376,9 +414,12 @@
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
         if (v.tier !== tier) return;                   // a sharper tier was asked for meanwhile
-        for (let i = 0; i < list.length; i++) {        // one pass per idle moment; the picture is mixed again at the end
+        for (let i = 0; i < list.length; i++) {        // in idle moments (texSoon); the picture is mixed again at the end
           const p = list[i];
-          if (v.tex[p]) { await this.idle(); if (v.tex[p]) { gl.bindTexture(gl.TEXTURE_2D, v.tex[p]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgs[i]); } }
+          if (v.tex[p]) {
+            const t = await this.texSoon(imgs[i]);
+            if (v.tex[p]) { gl.deleteTexture(v.tex[p]); v.tex[p] = t; } else gl.deleteTexture(t);
+          }
           v.imgs[p] = imgs[i];
         }
         v.texW = imgs[0].naturalWidth; v.texH = imgs[0].naturalHeight; v.version = (v.version || 0) + 1;
