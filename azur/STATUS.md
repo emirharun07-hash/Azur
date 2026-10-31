@@ -561,6 +561,10 @@ on every device without losing quality.
   turning back, room, rail again) differ by a mean of 0.04–1.15 of 255; at the same rail position 0.04. No page errors.
 - **Not tested**: a real iPhone or Android; the harness runs software GL, the memory limit of a real phone is not
   emulated. The owner tests the draft on real phones.
+- **Shopify draft**: "Azur Zimmer Runde 27 (Entwurf)", gid://shopify/OnlineStoreTheme/210739691859, a
+  themeDuplicate of MAIN (Runde 26b, its `azur-room.js` and `azur-room.css` checked equal to 16a8798 first) plus
+  those two files from dc2754e (URL upload, MD5 checked equal). Preview:
+  https://azurclothing.com/?preview_theme_id=210739691859 (18 of 20 themes). Publishing is the owner's step.
 
 ## Runde 26b (owner 2026-10-29, after the choice: "Mach das Wischprinzip vom PC auch für iPad und Handy")
 
