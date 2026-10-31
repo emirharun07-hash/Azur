@@ -145,11 +145,14 @@
     outColor = vec4(c, 1.0);
   }`;
 
-  function loadImage(src) {
+  /* decode: the pixels decoded off the main thread before the image is used. Not for plates that go to the GPU through
+     texSoon (Runde 27): it decodes its own copy from the file and frees it after the upload, and a decoded <img> kept
+     a second copy of every plate in memory (on a phone up to 100 MB per view). */
+  function loadImage(src, decode = true) {
     return new Promise((res) => {
       const im = new Image();
       im.decoding = 'async';
-      im.onload = () => (im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
+      im.onload = () => (decode && im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
       im.onerror = () => res(null);
       im.src = A.url(src);
     });
@@ -210,6 +213,23 @@
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       if (img) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+      return t;
+    }
+    /* Runde 27: the masks (garment ids, outlines, window) smaller on touch screens (A.config.maskScale). At 3200 px a mask
+       took 22 MB of GPU memory, three of them per view, and they stay for every view once seen. Outlines and the window
+       are soft, the ids are read per garment (nearest): at half size nothing changes at a phone's scale. The masks are
+       opaque (grey or RGB PNGs), so the trip through a canvas keeps their values. */
+    maskTexture(img, nearest) {
+      const s = A.config.maskScale || 1, w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (s >= 1 || w * h < 1e6) return this.texture(img, nearest);
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+      const g = c.getContext('2d');
+      if (!g) return this.texture(img, nearest);
+      g.imageSmoothingEnabled = !nearest;                // ids: never a blend of two garments' numbers
+      if (!nearest) g.imageSmoothingQuality = 'high';
+      g.drawImage(img, 0, 0, c.width, c.height);
+      const t = this.texture(c, nearest);
+      c.width = c.height = 0;                            // the canvas memory back at once (Safari counts all canvases)
       return t;
     }
     dataTexture(w, h, data) {
@@ -282,7 +302,7 @@
       if (have && this.gl) {
         const lo = meta && meta._lo && !key.includes('@');
         const list = PASSES.filter(p => scales[FILES[p]]);
-        const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
+        const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp', activate || !window.createImageBitmap)));
         if (imgs.every(Boolean)) {
           for (let i = 0; i < list.length; i++) {      // a background load uploads in idle moments
             const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i], v);
@@ -298,11 +318,11 @@
           }
         }
       }
-      if (ids && this.gl) v.ids = this.texture(ids, true);
+      if (ids && this.gl) v.ids = this.maskTexture(ids, true);
       v.idsImg = ids; v.masksImg = masks; v.masksDay = masks;
-      if (glow && this.gl) { v.glow = v.glowDay = this.texture(glow); }
+      if (glow && this.gl) { v.glow = v.glowDay = this.maskTexture(glow); }
       const winBox = win && this.gl ? Compositor.maskBox(win) : null;   // no window in this view (the phone rail): no video
-      if (winBox) { v.win = this.texture(win); v.winBox = winBox; }
+      if (winBox) { v.win = this.maskTexture(win); v.winBox = winBox; }
       const vd = this.viewsData && this.viewsData[baseKey];
       v.platePx = (vd && vd.res) || v.size;            // full plate size (the textures may be the low-resolution copies)
       if (v.mode === 'none') {
@@ -359,7 +379,9 @@
           if (!v.imgs[p] || v.tex[p]) continue;
           await this.idle(v);
           if (v.restoring !== run) return;             // given back again meanwhile
-          await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
+          // the browser may have dropped the decoded pixels; texSoon decodes its own copy from the file and frees it after
+          // the upload, so only without createImageBitmap (Runde 27: the extra decode kept a second copy of every plate)
+          if (!window.createImageBitmap) await v.imgs[p].decode().catch(() => { });
           if (v.restoring !== run) return;
           const t = await this.texSoon(v.imgs[p], v);
           if (v.restoring !== run || v.tex[p]) { this.gl.deleteTexture(t); return; }
@@ -415,7 +437,7 @@
       tier = tier || ((v.meta && v.meta._md || []).includes(v.key) && this.platePxNeeded() < MD_MAX ? 'md' : 'full');
       if (tier === v.tier) return;
       v.tier = tier;
-      const imgs = await Promise.all(list.map(p => loadImage(base + (tier === 'md' ? 'md/' : '') + FILES[p] + '.webp')));
+      const imgs = await Promise.all(list.map(p => loadImage(base + (tier === 'md' ? 'md/' : '') + FILES[p] + '.webp', !window.createImageBitmap)));
       if (!imgs.every(Boolean)) return;
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
@@ -485,7 +507,7 @@
       }
       v.version = (v.version || 0) + 1;
       if (masksN) v.masksNight = masksN;
-      if (glowN) v.glowNight = this.texture(glowN);
+      if (glowN) v.glowNight = this.maskTexture(glowN);
       // night outlines only when the night picture is really there (its patches loaded), so dots and image agree
       const nightShown = night && !!v.patched;
       v.masksImg = nightShown && v.masksNight ? v.masksNight : v.masksDay;

@@ -404,6 +404,9 @@ html.azur-pdp-open { overflow: hidden; }
 .is-single .azur-mag__sheet.is-flipped { opacity: 0; pointer-events: none; }
 .is-single .azur-mag__sheet:not(.is-flipped) { transition-delay: 0s; }
 .azur-mag__book.is-instant, .azur-mag__book.is-instant .azur-mag__sheet { transition: none !important; }
+/* Runde 27: sheets out of sight are not drawn (each face is a layer of about 12 MB on a phone); on phones the blank back
+   of a page only while it turns */
+.azur-mag__sheet.is-far, .is-single .azur-mag__sheet:not(.is-turning) .azur-mag__face--back { visibility: hidden; }
 .azur-mag__face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--paper); color: var(--char);
   box-shadow: 0 30px 70px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .25); }
 .azur-mag__face--back { transform: rotateY(180deg); }

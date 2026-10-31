@@ -22,6 +22,11 @@
       this.reduced = this.reducedQuery.matches;
       this.isMobile = matchMedia(cfg.mobileQuery).matches;
       this.coarse = matchMedia('(pointer: coarse)').matches;      // touch screens (phones, iPads): lighter drawing
+      // Runde 27: on touch screens only the view on screen keeps its light passes on the GPU; the others keep their
+      // mixed picture (a change of view still shows at once). Two views were 300 MB of textures on a phone (rail_m and
+      // the bed), 400 MB after a visit to the room, and phones crashed on the bed and in the magazine.
+      // The masks go to the GPU at half size there too (compositor maskTexture).
+      if (this.isMobile || this.coarse) { cfg.gpuViews = 1; cfg.maskScale = 0.5; }
       this.root.classList.toggle('is-mobile', this.isMobile);
       this.applyPalette();
 
@@ -469,6 +474,9 @@
     afterProductClose() { const s = this.rail.selected; if (s >= 0) this.rail.items[s].hit.focus({ preventScroll: true }); }
     setWorldDim(d = 1, blur = 0) {
       this.dimTarget = d;
+      // Runde 27: no blur on touch screens; a filtered WebGL canvas needs another full-screen buffer at the screen's
+      // own resolution, and the dark scrim of the magazine and the product view hides the room enough
+      if (this.isMobile || this.coarse) blur = 0;
       this.canvas.style.filter = blur ? `blur(${blur}px)` : '';
       this.fallbackImg.style.filter = this.canvas.style.filter;
       this.kick();

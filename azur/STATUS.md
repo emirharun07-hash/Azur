@@ -539,6 +539,29 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 27 (owner 2026-10-31: "Am Handy ist das Bett nicht so gut. Wenn man es anklickt und blätter etc., stürzt die Seite oft ab.")
+
+- **Likely cause** (not seen on a real phone): graphics memory. A phone tab is closed by the system when the GPU memory gets too high, and Safari reloads
+  it ("a problem repeatedly occurred"). Measured in the harness (iPhone 390×844, DSF 3, WebGL texture bytes):
+  start on the rail 162 MB, the bed 304 MB, after a visit to the room 396 MB. Two views kept all eight light passes
+  on the GPU (`gpuViews` 2), the masks went up at full size, the blur behind the magazine filtered the WebGL canvas
+  (one more full-screen buffer), and the magazine drew all 20 page faces as 3D layers (about 12 MB each at DSF 3).
+- **Fixed** (only on touch screens, `isMobile || coarse`; the PC stays as it was):
+  - `azur-app.js`: `gpuViews` 1, so only the view on screen keeps its light passes; the others keep their mixed
+    picture, and a change of view still shows at once. `maskScale` 0.5 for the masks (ids, glow, window, night glow).
+    `setWorldDim()` sets no blur; the dark scrim of the magazine and the product view is enough.
+  - `azur-compositor.js`: `maskTexture()` scales a mask down on a canvas before upload (ids with nearest sampling,
+    so a garment's number never blends), and frees the canvas at once. Plates that go through `texSoon` are not
+    pre-decoded any more (`loadImage(src, decode)`), only the plate that is shown at once is.
+  - `azur-mag.js` + `azur-room.css`: sheets out of sight get `is-far` (`visibility: hidden`), so only the open spread
+    and the sheets that are turning are drawn; on phones the blank back of a page only while it turns.
+- **After** (same walk): start 141 MB, the bed 158 MB, worst case 221 MB for a moment while the room comes in,
+  then 200 MB. The magazine draws 1–2 faces instead of 20.
+- **Look**: phone screenshots of the old and new build (rail, bed outline, magazine cover, mid-turn, pages 3 and 4,
+  turning back, room, rail again) differ by a mean of 0.04–1.15 of 255; at the same rail position 0.04. No page errors.
+- **Not tested**: a real iPhone or Android; the harness runs software GL, the memory limit of a real phone is not
+  emulated. The owner tests the draft on real phones.
+
 ## Runde 26b (owner 2026-10-29, after the choice: "Mach das Wischprinzip vom PC auch für iPad und Handy")
 
 - **Owner's picks** (artifact db `picks/<id>`): transition kept jetzt, blende, kamera, favourite **kamera**; phone

@@ -146,7 +146,7 @@
           <div class="azur-mag__face azur-mag__face--front">${f}</div>
           <div class="azur-mag__face azur-mag__face--back">${b}</div>
         </div>`).join('');
-      this.sheets = [...this.book.querySelectorAll('.azur-mag__sheet')];
+      this.sheets = [...this.book.querySelectorAll('.azur-mag__sheet')]; this.span = null;
       // keep the reader on the same page when the layout switches
       const page = this.page != null ? this.page : 0;
       this.n = single ? Math.min(page, P.length - 1) : Math.ceil(page / 2);
@@ -158,9 +158,15 @@
     place(instant) {
       const S = this.sheets, n = this.n, single = this.single;
       if (instant) this.book.classList.add('is-instant');
+      /* Runde 27: only the sheets that can show are drawn (is-far: visibility hidden, no picture in memory). Every face is
+         its own 3D layer at the screen's resolution, about 12 MB on a phone; with all ten pages drawn, flipping through
+         crashed phones. Drawn: the open page(s), the sheets turning now (span) and the next page on each side, ready
+         before it turns into view. */
+      const [a, b] = this.span || [n, n];
       S.forEach((s, k) => {
         const flipped = k < n;
         s.classList.toggle('is-flipped', flipped);
+        s.classList.toggle('is-far', single ? k < a || k > b + 1 : k < a - 2 || k > b + 1);
         s.style.zIndex = flipped ? k + 1 : S.length - k + 1;
       });
       // the closed book sits centred (cover or back cover alone), open spreads centre on the spine
@@ -185,6 +191,7 @@
       const n = Math.max(0, Math.min(this.max, this.n + d));
       if (n === this.n) return;
       const lo = Math.min(n, this.n), hi = Math.max(n, this.n), turning = this.sheets.slice(lo, hi);
+      this.span = this.span ? [Math.min(this.span[0], lo), Math.max(this.span[1], hi)] : [lo, hi];   // still drawn while they move
       this.n = n; this.place(false);
       turning.forEach((s, j) => {                                 // the turning sheets stay on top while they move
         s.style.zIndex = this.sheets.length + 5 + (d > 0 ? turning.length - j : j);
@@ -192,7 +199,7 @@
       });
       if (this.el.contains(document.activeElement) && document.activeElement.disabled || !this.el.contains(document.activeElement))
         this.el.querySelector(n >= this.max ? '[data-act="prev"]' : '[data-act="next"]').focus({ preventScroll: true });
-      clearTimeout(this.zt); this.zt = setTimeout(() => this.place(true), this.app.reduced ? 0 : 760);
+      clearTimeout(this.zt); this.zt = setTimeout(() => { this.span = null; this.place(true); }, this.app.reduced ? 0 : 760);
     }
 
     goto(page) { this.turn((this.single ? page : Math.ceil(page / 2)) - this.n); }
@@ -210,7 +217,7 @@
     open(fromRect) {
       if (this.isOpen) return;
       this.isOpen = true; this.returnFocus = document.activeElement;
-      this.n = 0; this.page = 0;                                   // a magazine picked up again starts at its cover
+      this.n = 0; this.page = 0; this.span = null;                 // a magazine picked up again starts at its cover
       this.el.hidden = false; this.layout(); this.fit();
       this.app.root.classList.add('is-reading'); document.documentElement.classList.add('azur-mag-open');
       requestAnimationFrame(() => this.el.classList.add('is-on'));

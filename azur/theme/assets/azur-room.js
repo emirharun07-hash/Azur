@@ -431,11 +431,14 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     outColor = vec4(c, 1.0);
   }`;
 
-  function loadImage(src) {
+  /* decode: the pixels decoded off the main thread before the image is used. Not for plates that go to the GPU through
+     texSoon (Runde 27): it decodes its own copy from the file and frees it after the upload, and a decoded <img> kept
+     a second copy of every plate in memory (on a phone up to 100 MB per view). */
+  function loadImage(src, decode = true) {
     return new Promise((res) => {
       const im = new Image();
       im.decoding = 'async';
-      im.onload = () => (im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
+      im.onload = () => (decode && im.decode ? im.decode().catch(() => { }) : Promise.resolve()).then(() => res(im));   // decoded off the main thread
       im.onerror = () => res(null);
       im.src = A.url(src);
     });
@@ -496,6 +499,23 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       if (img) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+      return t;
+    }
+    /* Runde 27: the masks (garment ids, outlines, window) smaller on touch screens (A.config.maskScale). At 3200 px a mask
+       took 22 MB of GPU memory, three of them per view, and they stay for every view once seen. Outlines and the window
+       are soft, the ids are read per garment (nearest): at half size nothing changes at a phone's scale. The masks are
+       opaque (grey or RGB PNGs), so the trip through a canvas keeps their values. */
+    maskTexture(img, nearest) {
+      const s = A.config.maskScale || 1, w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (s >= 1 || w * h < 1e6) return this.texture(img, nearest);
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+      const g = c.getContext('2d');
+      if (!g) return this.texture(img, nearest);
+      g.imageSmoothingEnabled = !nearest;                // ids: never a blend of two garments' numbers
+      if (!nearest) g.imageSmoothingQuality = 'high';
+      g.drawImage(img, 0, 0, c.width, c.height);
+      const t = this.texture(c, nearest);
+      c.width = c.height = 0;                            // the canvas memory back at once (Safari counts all canvases)
       return t;
     }
     dataTexture(w, h, data) {
@@ -568,7 +588,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       if (have && this.gl) {
         const lo = meta && meta._lo && !key.includes('@');
         const list = PASSES.filter(p => scales[FILES[p]]);
-        const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp')));
+        const imgs = await Promise.all(list.map(p => loadImage(base + (lo ? 'lo/' : '') + FILES[p] + '.webp', activate || !window.createImageBitmap)));
         if (imgs.every(Boolean)) {
           for (let i = 0; i < list.length; i++) {      // a background load uploads in idle moments
             const p = list[i]; v.tex[p] = activate ? this.texture(imgs[i]) : await this.texSoon(imgs[i], v);
@@ -584,11 +604,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           }
         }
       }
-      if (ids && this.gl) v.ids = this.texture(ids, true);
+      if (ids && this.gl) v.ids = this.maskTexture(ids, true);
       v.idsImg = ids; v.masksImg = masks; v.masksDay = masks;
-      if (glow && this.gl) { v.glow = v.glowDay = this.texture(glow); }
+      if (glow && this.gl) { v.glow = v.glowDay = this.maskTexture(glow); }
       const winBox = win && this.gl ? Compositor.maskBox(win) : null;   // no window in this view (the phone rail): no video
-      if (winBox) { v.win = this.texture(win); v.winBox = winBox; }
+      if (winBox) { v.win = this.maskTexture(win); v.winBox = winBox; }
       const vd = this.viewsData && this.viewsData[baseKey];
       v.platePx = (vd && vd.res) || v.size;            // full plate size (the textures may be the low-resolution copies)
       if (v.mode === 'none') {
@@ -645,7 +665,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           if (!v.imgs[p] || v.tex[p]) continue;
           await this.idle(v);
           if (v.restoring !== run) return;             // given back again meanwhile
-          await v.imgs[p].decode().catch(() => { });   // the browser may have dropped the decoded pixels
+          // the browser may have dropped the decoded pixels; texSoon decodes its own copy from the file and frees it after
+          // the upload, so only without createImageBitmap (Runde 27: the extra decode kept a second copy of every plate)
+          if (!window.createImageBitmap) await v.imgs[p].decode().catch(() => { });
           if (v.restoring !== run) return;
           const t = await this.texSoon(v.imgs[p], v);
           if (v.restoring !== run || v.tex[p]) { this.gl.deleteTexture(t); return; }
@@ -701,7 +723,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       tier = tier || ((v.meta && v.meta._md || []).includes(v.key) && this.platePxNeeded() < MD_MAX ? 'md' : 'full');
       if (tier === v.tier) return;
       v.tier = tier;
-      const imgs = await Promise.all(list.map(p => loadImage(base + (tier === 'md' ? 'md/' : '') + FILES[p] + '.webp')));
+      const imgs = await Promise.all(list.map(p => loadImage(base + (tier === 'md' ? 'md/' : '') + FILES[p] + '.webp', !window.createImageBitmap)));
       if (!imgs.every(Boolean)) return;
       const gl = this.gl;
       v.chain = (v.chain || Promise.resolve()).then(async () => {
@@ -771,7 +793,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       }
       v.version = (v.version || 0) + 1;
       if (masksN) v.masksNight = masksN;
-      if (glowN) v.glowNight = this.texture(glowN);
+      if (glowN) v.glowNight = this.maskTexture(glowN);
       // night outlines only when the night picture is really there (its patches loaded), so dots and image agree
       const nightShown = night && !!v.patched;
       v.masksImg = nightShown && v.masksNight ? v.masksNight : v.masksDay;
@@ -1751,7 +1773,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           <div class="azur-mag__face azur-mag__face--front">${f}</div>
           <div class="azur-mag__face azur-mag__face--back">${b}</div>
         </div>`).join('');
-      this.sheets = [...this.book.querySelectorAll('.azur-mag__sheet')];
+      this.sheets = [...this.book.querySelectorAll('.azur-mag__sheet')]; this.span = null;
       // keep the reader on the same page when the layout switches
       const page = this.page != null ? this.page : 0;
       this.n = single ? Math.min(page, P.length - 1) : Math.ceil(page / 2);
@@ -1763,9 +1785,15 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     place(instant) {
       const S = this.sheets, n = this.n, single = this.single;
       if (instant) this.book.classList.add('is-instant');
+      /* Runde 27: only the sheets that can show are drawn (is-far: visibility hidden, no picture in memory). Every face is
+         its own 3D layer at the screen's resolution, about 12 MB on a phone; with all ten pages drawn, flipping through
+         crashed phones. Drawn: the open page(s), the sheets turning now (span) and the next page on each side, ready
+         before it turns into view. */
+      const [a, b] = this.span || [n, n];
       S.forEach((s, k) => {
         const flipped = k < n;
         s.classList.toggle('is-flipped', flipped);
+        s.classList.toggle('is-far', single ? k < a || k > b + 1 : k < a - 2 || k > b + 1);
         s.style.zIndex = flipped ? k + 1 : S.length - k + 1;
       });
       // the closed book sits centred (cover or back cover alone), open spreads centre on the spine
@@ -1790,6 +1818,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const n = Math.max(0, Math.min(this.max, this.n + d));
       if (n === this.n) return;
       const lo = Math.min(n, this.n), hi = Math.max(n, this.n), turning = this.sheets.slice(lo, hi);
+      this.span = this.span ? [Math.min(this.span[0], lo), Math.max(this.span[1], hi)] : [lo, hi];   // still drawn while they move
       this.n = n; this.place(false);
       turning.forEach((s, j) => {                                 // the turning sheets stay on top while they move
         s.style.zIndex = this.sheets.length + 5 + (d > 0 ? turning.length - j : j);
@@ -1797,7 +1826,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       });
       if (this.el.contains(document.activeElement) && document.activeElement.disabled || !this.el.contains(document.activeElement))
         this.el.querySelector(n >= this.max ? '[data-act="prev"]' : '[data-act="next"]').focus({ preventScroll: true });
-      clearTimeout(this.zt); this.zt = setTimeout(() => this.place(true), this.app.reduced ? 0 : 760);
+      clearTimeout(this.zt); this.zt = setTimeout(() => { this.span = null; this.place(true); }, this.app.reduced ? 0 : 760);
     }
 
     goto(page) { this.turn((this.single ? page : Math.ceil(page / 2)) - this.n); }
@@ -1815,7 +1844,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     open(fromRect) {
       if (this.isOpen) return;
       this.isOpen = true; this.returnFocus = document.activeElement;
-      this.n = 0; this.page = 0;                                   // a magazine picked up again starts at its cover
+      this.n = 0; this.page = 0; this.span = null;                 // a magazine picked up again starts at its cover
       this.el.hidden = false; this.layout(); this.fit();
       this.app.root.classList.add('is-reading'); document.documentElement.classList.add('azur-mag-open');
       requestAnimationFrame(() => this.el.classList.add('is-on'));
@@ -1906,6 +1935,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.reduced = this.reducedQuery.matches;
       this.isMobile = matchMedia(cfg.mobileQuery).matches;
       this.coarse = matchMedia('(pointer: coarse)').matches;      // touch screens (phones, iPads): lighter drawing
+      // Runde 27: on touch screens only the view on screen keeps its light passes on the GPU; the others keep their
+      // mixed picture (a change of view still shows at once). Two views were 300 MB of textures on a phone (rail_m and
+      // the bed), 400 MB after a visit to the room, and phones crashed on the bed and in the magazine.
+      // The masks go to the GPU at half size there too (compositor maskTexture).
+      if (this.isMobile || this.coarse) { cfg.gpuViews = 1; cfg.maskScale = 0.5; }
       this.root.classList.toggle('is-mobile', this.isMobile);
       this.applyPalette();
 
@@ -2353,6 +2387,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
     afterProductClose() { const s = this.rail.selected; if (s >= 0) this.rail.items[s].hit.focus({ preventScroll: true }); }
     setWorldDim(d = 1, blur = 0) {
       this.dimTarget = d;
+      // Runde 27: no blur on touch screens; a filtered WebGL canvas needs another full-screen buffer at the screen's
+      // own resolution, and the dark scrim of the magazine and the product view hides the room enough
+      if (this.isMobile || this.coarse) blur = 0;
       this.canvas.style.filter = blur ? `blur(${blur}px)` : '';
       this.fallbackImg.style.filter = this.canvas.style.filter;
       this.kick();

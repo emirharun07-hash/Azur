@@ -103,6 +103,8 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 
 ## Offen
 
+- Absturz am Handy beim Bett und im Heft (Runde 27, 31.10.): Der Owner veröffentlicht den Entwurf und testet auf
+  echtem iPhone und Android (siehe STATUS „Runde 27“).
 - Der Owner testet die Ansichts-Knöpfe „Bett, Zimmer, Ständer“ auf echtem iPad, iPhone und Android (in 26b
   repariert, siehe STATUS „Runde 26b“).
 - Code vereinfachen: Die Übergangsvarianten `?ad=jetzt` und `?ad=blende` und der Gleit-Code können raus, wenn der
