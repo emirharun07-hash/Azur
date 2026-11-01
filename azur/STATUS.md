@@ -566,6 +566,19 @@ on every device without losing quality.
   those two files from dc2754e (URL upload, MD5 checked equal). Preview:
   https://azurclothing.com/?preview_theme_id=210739691859 (18 of 20 themes). Publishing is the owner's step.
 
+## Runde 27 (owner 2026-11-01: Google search, Meta, "Mach den shop auf, aber mach ganzen bestand auf 0")
+
+- **Stock set to 0** by Claude on the owner's request: all 20 variants (5 jerseys x S-XL, location "Shop-Standort"
+  gid://shopify/Location/126907744595) went from 10 available to 0 (inventorySetQuantities, reason correction).
+  Policy stays DENY, so every jersey shows "Ausverkauft". To restore: set each back to 10.
+- **Shop opened by the owner** (password protection off, 2026-11-01); checked from outside: `/` serves the room,
+  product pages 200, `/password` redirects to `/`.
+- **Google**: Search Console is set up by the owner (moving it to a new business mail via "Nutzer und
+  Berechtigungen"). Product SEO title/description are still empty; image alt texts exist. Proposed texts are in the
+  chat, not entered yet.
+- **PayPal**: adding the new business mail fails on PayPal's side (saves nothing after the code); owner to ask PayPal
+  support. Shopify mail forwarding for the business address works.
+
 ## Runde 26b (owner 2026-10-29, after the choice: "Mach das Wischprinzip vom PC auch für iPad und Handy")
 
 - **Owner's picks** (artifact db `picks/<id>`): transition kept jetzt, blende, kamera, favourite **kamera**; phone
