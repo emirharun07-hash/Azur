@@ -549,6 +549,30 @@ on every device without losing quality.
 - „Retro“ entfernt (Wunsch Inhaber): Produkttexte Frankfurt („Klassischer Schnitt“) und Berlin („Lockerer Schnitt“), Tag „Retro“ bei beiden entfernt, Metafeld custom.fit gesetzt (überschreibt den Fallback in snippets/azur-pdp-item.liquid). Theme: Kopie „Azur Zimmer Runde 28 – ohne Retro“ (gid://shopify/OnlineStoreTheme/210813092179) von Runde 27 erstellt. Darin seo_home_title = „AZUR Clothing – Trikots: Türkei, Deutschland, Brasilien“ und im Zimmer fit_1 = „Klassischer Schnitt“, fit_2 = „Lockerer Schnitt“. Der Inhaber veröffentlicht. Shop hatte zu dem Zeitpunkt Passwortschutz (302).
 - Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Startseiten-Titel ist inzwischen ohne „Retro“ (Runde 28 ist MAIN).
 
+## Runde 30 – Englisch: alle Theme-Texte übersetzbar, Versandgrenze 90 € (2026-11-01)
+
+- **Theme „Azur Zimmer Runde 30 – Englisch (Entwurf)“**, `gid://shopify/OnlineStoreTheme/210816762195`, UNPUBLISHED.
+  - Live ist zurzeit „Runde 29 – Englisch (Entwurf)“ (210814697811). Der Inhaber hat sie veröffentlicht, als sie noch genau Runde 28 war. Deshalb wurde nichts ins Live-Theme geschrieben, sondern eine neue Kopie angelegt.
+- **Dateien:** Die 41 geänderten bzw. neuen Dateien liegen in `azur/theme-runde29/` (Commit e392dc8). Hochgeladen per URL, MD5 bei 40 von 41 gleich. `settings_data.json` normalisiert Shopify, der Inhalt ist geprüft (Schwelle 90).
+- **Was geändert ist:**
+  - Alle fest eingebauten deutschen Texte in Liquid laufen jetzt über `{{ 'azur.*' | t }}` (Schlüssel in `locales/de.default.json` und `en.json`).
+  - Zimmer und Produktseite: `snippets/azur-copy-en.liquid` legt für Nicht-Deutsch englische Texte über `A.config.copy`.
+  - `assets/azur.js`: `snippets/azur-i18n.liquid` setzt `window.AZUR_T`.
+  - Deutsch sieht genauso aus wie vorher.
+  - `free_shipping_threshold` 79 → 90 (Warenkorb-Hinweis „noch X € bis versandkostenfrei“).
+- **Übersetzungen registriert:**
+  - Theme 210816762195: drop_title/drop_text, tax_note, returns_note (die 43 älteren waren durch die Kopie schon da).
+  - Shop-weit: Schnitt-Metafelder („Classic fit“/„Relaxed fit“) und Option „Größe“ → „Size“ bei allen 5 Produkten.
+  - Englisch ist im Shop noch **nicht veröffentlicht**, Kunden sehen davon nichts.
+- **Land → Sprache:** Automatisch umleiten nach Land kann nur Shopify Plus. Auf Basic:
+  - hreflang macht Shopify selbst, Google zeigt englischen Suchern /en/.
+  - Optional ein Hinweis-Banner (browsing_context_suggestions.json), noch nicht gebaut.
+  - Damit UK-Kunden kaufen können, braucht es einen neuen Markt (derzeit nur „Deutschland“). Wegen Steuer (UK-VAT-Registrierung schon unter £135, auch als Kleinunternehmer) erst mit Steuerberater klären.
+- **Offen beim Inhaber:**
+  - Runde 30 in der Vorschau prüfen (Sprache im Theme-Editor umschalten) und veröffentlichen.
+  - Danach Englisch unter Einstellungen → Sprachen veröffentlichen.
+  - Entscheiden: nur EU, EU + Schweiz oder auch UK.
+
 ## Runde 28b – Englisch (Schritt 4) und Google Merchant Center (Schritt 5) (2026-11-01)
 
 - **Englisch** (shopLocaleEnable en, **nicht veröffentlicht**, Besucher sehen nichts): Übersetzungen registriert für
