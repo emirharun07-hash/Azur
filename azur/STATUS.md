@@ -541,14 +541,12 @@ on every device without losing quality.
 
 ## Runde 27b – Blogbeiträge (2026-11-01)
 
-- 4 Blogbeiträge im Blog „Neuigkeiten“ als **versteckte Entwürfe** angelegt (mit SEO-Titel und -Beschreibung, Links zu den Trikots):
-  - retro-trikots-streetwear-styling
-  - berlin-030-trikot
-  - frankfurt-069-trikot
-  - tuerkei-deutschland-brasilien-retro-trikot (mit Hinweis: eigene Designs, keine offiziellen Verbandstrikots)
-- Dazu 3 Einzel-Beiträge (versteckt): tuerkei-trikot-retro, brasilien-trikot-retro, deutschland-trikot-retro (Produktdetails aus den Produktbeschreibungen).
+- Erste 7 Entwürfe wurden von außen gelöscht (nicht von Claude). Auf Wunsch neu angelegt, **ohne das Wort „Retro“**, als versteckte Entwürfe im Blog „Neuigkeiten“, mit SEO-Titel/-Beschreibung:
+  - tuerkei-trikot, deutschland-trikot, brasilien-trikot, tuerkei-deutschland-brasilien-trikot
+  - Jeweils Hinweis: eigene Designs, keine offiziellen Verbandstrikots.
+- Streetwear-, Berlin- und Frankfurt-Beitrag nicht neu angelegt (nicht gewünscht).
 - Der Inhaber prüft sie und schaltet sie selbst auf „Sichtbar“.
-- Offen: Rechtliche Seiten (Widerruf, AGB) fehlen als Shop-Richtlinie. Die Seiten FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht.
+- Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Der Startseiten-Titel enthält noch „Retro“.
 
 ## Runde 27 (owner 2026-10-31: "Am Handy ist das Bett nicht so gut. Wenn man es anklickt und blätter etc., stürzt die Seite oft ab.")
 
