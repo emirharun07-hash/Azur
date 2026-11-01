@@ -546,6 +546,7 @@ on every device without losing quality.
   - berlin-030-trikot
   - frankfurt-069-trikot
   - tuerkei-deutschland-brasilien-retro-trikot (mit Hinweis: eigene Designs, keine offiziellen Verbandstrikots)
+- Dazu 3 Einzel-Beiträge (versteckt): tuerkei-trikot-retro, brasilien-trikot-retro, deutschland-trikot-retro (Produktdetails aus den Produktbeschreibungen).
 - Der Inhaber prüft sie und schaltet sie selbst auf „Sichtbar“.
 - Offen: Rechtliche Seiten (Widerruf, AGB) fehlen als Shop-Richtlinie. Die Seiten FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht.
 
