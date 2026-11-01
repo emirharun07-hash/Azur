@@ -103,6 +103,15 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 
 ## Offen
 
+- **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
+  Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
+  (Seitentitel), „Azurclo“ und im Newsletter-Text „Azurclothing“. Instagram heißt @azurcloothing, TikTok
+  @www.azurclo.com. Das Impressum ist leer, und im Schweizer Handelsregister (Zefix) gibt es keinen Eintrag zu
+  „Azurclo“. **Die sind älter als wir**: Ihre Domain gibt es seit 12.04.2025, Produkte seit 19.10.2025. Unser
+  Shopify-Shop besteht seit 16.09.2026, unsere Domain azurclothing.com seit 29.09.2026. Für Suche und Werbung sind
+  sie ein direkter Konkurrent um „Azur Clothing“. Die Markenregister (DPMA, EUIPO/TMview, Swissreg) für „Azur“ in
+  Klasse 25 sind noch nicht geprüft; TMview blockt Abfragen aus der Cloud. Der Owner prüft das, am besten mit einem
+  Markenanwalt, bevor Geld in Werbung oder Marke fließt.
 - Absturz am Handy beim Bett und im Heft (Runde 27, 31.10.): Der Owner veröffentlicht den Entwurf und testet auf
   echtem iPhone und Android (siehe STATUS „Runde 27“).
 - Der Owner testet die Ansichts-Knöpfe „Bett, Zimmer, Ständer“ auf echtem iPad, iPhone und Android (in 26b
