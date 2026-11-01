@@ -546,6 +546,7 @@ on every device without losing quality.
   - Jeweils Hinweis: eigene Designs, keine offiziellen Verbandstrikots.
 - Streetwear-, Berlin- und Frankfurt-Beitrag nicht neu angelegt (nicht gewünscht).
 - Der Inhaber prüft sie und schaltet sie selbst auf „Sichtbar“.
+- „Retro“ entfernt (Wunsch Inhaber): Produkttexte Frankfurt („Klassischer Schnitt“) und Berlin („Lockerer Schnitt“), Tag „Retro“ bei beiden entfernt, Metafeld custom.fit gesetzt (überschreibt den Fallback in snippets/azur-pdp-item.liquid). Noch im Live-Theme, macht der Inhaber selbst im Theme-Editor: seo_home_title und Zimmer-Abschnitt fit_1/fit_2 (Defaults in sections/azur-room.liquid).
 - Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Der Startseiten-Titel enthält noch „Retro“.
 
 ## Runde 27 (owner 2026-10-31: "Am Handy ist das Bett nicht so gut. Wenn man es anklickt und blätter etc., stürzt die Seite oft ab.")
