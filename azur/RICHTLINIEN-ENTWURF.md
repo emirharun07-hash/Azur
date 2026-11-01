@@ -1,6 +1,6 @@
 # Entwurf: Shop-Richtlinien (Widerruf, Versand, AGB)
 
-Stand 2026-11-01. **Noch nicht in Shopify eingetragen.** Der Inhaber muss die Texte freigeben. Eingetragen werden sie unter Shopify → Einstellungen → Richtlinien. Vorher am besten rechtlich prüfen lassen, zum Beispiel über einen kostenlosen Rechtstexte-Check der IHK oder Händlerbund-Angebote. Das hier ist keine Rechtsberatung.
+Stand 2026-11-01. **Vom Inhaber freigegeben (2026-11-01), Lieferzeit 2–5 Werktage bestätigt.** Claude hat keine Berechtigung (write_legal_policies), der Inhaber fügt sie ein; Vorlage: `RICHTLINIEN-ZUM-KOPIEREN.html`. Eingetragen werden sie unter Shopify → Einstellungen → Richtlinien. Vorher am besten rechtlich prüfen lassen, zum Beispiel über einen kostenlosen Rechtstexte-Check der IHK oder Händlerbund-Angebote. Das hier ist keine Rechtsberatung.
 
 Offene Punkte für den Inhaber:
 - **Lieferzeit:** Im Theme steht „2–5 Werktage“. Stimmt das?
@@ -61,7 +61,9 @@ Wir versenden aus Berlin, Deutschland.
 | EU | Standard International | 13,99 € |
 | Weitere Länder (u. a. Schweiz, Großbritannien, USA) | Standard International | 19,99 € |
 
-Lieferzeit in Deutschland: **2–5 Werktage** nach Zahlungseingang *(bitte bestätigen)*.
+Außerhalb des Euroraums wird der Versandpreis im Checkout in der Landeswährung angezeigt. Bei Lieferungen außerhalb der EU können Zölle und Einfuhrabgaben anfallen, die der Empfänger trägt.
+
+Lieferzeit in Deutschland: **2–5 Werktage** nach Zahlungseingang.
 
 Rückgabe: 14 Tage, kostenloser Rückversand. Details stehen in der Widerrufsbelehrung.
 
@@ -81,7 +83,7 @@ Die Darstellung der Produkte im Shop ist kein bindendes Angebot. Mit dem Klick a
 Vertragssprache ist Deutsch. Den Vertragstext speichern wir. Sie erhalten die Bestelldaten per E-Mail.
 
 **4. Preise und Zahlung**
-Alle Preise sind Endpreise in Euro. Gemäß § 19 UStG weisen wir keine Umsatzsteuer aus (Kleinunternehmerregelung). Versandkosten werden im Bestellprozess angezeigt. Es gelten die im Checkout angebotenen Zahlungsarten.
+Alle Preise sind Endpreise in der im Shop angezeigten Währung (Euro; in der Schweiz Schweizer Franken, in den USA US-Dollar, im Vereinigten Königreich Britische Pfund). Gemäß § 19 UStG weisen wir keine Umsatzsteuer aus (Kleinunternehmerregelung). Versandkosten werden im Bestellprozess angezeigt. Es gelten die im Checkout angebotenen Zahlungsarten.
 
 **5. Lieferung**
 Es gelten die Angaben in unserer Versandrichtlinie.
