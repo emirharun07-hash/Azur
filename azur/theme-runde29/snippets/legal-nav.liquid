@@ -1,0 +1,24 @@
+{%- comment -%} Seitenleiste "Service & Rechtliches": Seiten aus settings.legal_pages (nur veröffentlichte) plus Shopify-Richtlinien. {%- endcomment -%}
+{%- assign legal = settings.legal_pages | split: ',' -%}
+<aside class="legal__side">
+  <p class="legal__side-head" id="legal-nav-title">{{ 'azur.legal.title' | t }}</p>
+  <nav aria-labelledby="legal-nav-title">
+    <ul class="legal__nav">
+      {%- assign listed = '|' -%}
+      {%- for handle in legal -%}
+        {%- assign h = handle | strip -%}
+        {%- assign lp = pages[h] -%}
+        {%- if lp.url != blank -%}
+          <li><a href="{{ lp.url }}"{% if page.id == lp.id %} aria-current="page"{% endif %}>{{ lp.title }}</a></li>
+          {%- assign listed = listed | append: lp.title | append: '|' -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- for policy in shop.policies -%}
+        {%- assign key = '|' | append: policy.title | append: '|' -%}
+        {%- unless listed contains key -%}
+          <li><a href="{{ policy.url }}"{% if request.path == policy.url %} aria-current="page"{% endif %}>{{ policy.title }}</a></li>
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+  </nav>
+</aside>

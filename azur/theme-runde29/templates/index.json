@@ -1,0 +1,79 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "room": {
+      "type": "azur-room",
+      "settings": {
+        "product_1": "frankfurt-trikot-azur-collection",
+        "fit_1": "Klassischer Schnitt",
+        "product_2": "berlin-trikot-azur-collection",
+        "fit_2": "Lockerer Schnitt",
+        "product_3": "brasilien-trikot-azur-collection",
+        "product_4": "deutschland-trikot-azur-collection",
+        "product_5": "turkei-trikot-azur-collection",
+        "drop_title": "Nächster Drop",
+        "drop_text": "Noch unter Verschluss."
+      }
+    },
+    "campaign": {
+      "type": "campaign",
+      "disabled": true,
+      "settings": {
+        "product": "frankfurt-trikot-azur-collection",
+        "motif": "frankfurt",
+        "view": "back",
+        "scheme": "light",
+        "headline": "Frankfurt 069",
+        "link_label": "Zum Trikot"
+      }
+    },
+    "products": {
+      "type": "product-pair",
+      "settings": {
+        "products": [
+          "frankfurt-trikot-azur-collection",
+          "berlin-trikot-azur-collection",
+          "turkei-trikot-azur-collection",
+          "deutschland-trikot-azur-collection",
+          "brasilien-trikot-azur-collection"
+        ],
+        "large": 2,
+        "label": "Trikots",
+        "link_label": "Alle ansehen"
+      },
+      "disabled": true
+    },
+    "service": {
+      "type": "service-line",
+      "settings": {
+        "note": "14 Tage Rückgabe, kostenloser Rückversand"
+      }
+    },
+    "cards": {
+      "type": "azur-cards",
+      "settings": {
+        "products": [
+          "brasilien-trikot-azur-collection",
+          "deutschland-trikot-azur-collection",
+          "turkei-trikot-azur-collection"
+        ],
+        "heading": "Trikots"
+      }
+    }
+  },
+  "order": [
+    "room",
+    "campaign",
+    "cards",
+    "products",
+    "service"
+  ]
+}

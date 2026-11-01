@@ -1,0 +1,170 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "general": {
+    "password_page": {
+      "login_form_heading": "Enter shop",
+      "login_password_button": "Open"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Cart",
+      "empty": "Still empty."
+    }
+  },
+  "products": {
+    "product": {
+      "sold_out": "Sold out",
+      "add_to_cart": "Add to cart"
+    }
+  },
+  "azur": {
+    "general": {
+      "skip": "Skip to content",
+      "page": "Page {{ n }}",
+      "home": "Home",
+      "close": "Close",
+      "next": "Next",
+      "previous": "Previous",
+      "pages": "Pages",
+      "to_shop": "Go to shop",
+      "view_all": "View all",
+      "view_label": "View {{ label }}",
+      "new_window": " (opens in a new window)",
+      "pay_with": "Pay with {{ list }}",
+      "sold_out_sr": " – sold out",
+      "collections": "Collections",
+      "not_found": "This page does not exist.",
+      "no_posts": "No posts yet.",
+      "gift_card": "Gift card",
+      "expired_on": "Expired on {{ date }}.",
+      "og_locale": "en_GB"
+    },
+    "shipping": {
+      "germany": "Shipping in Germany",
+      "cost": "Shipping {{ cost }}",
+      "delivery": "Delivery in {{ days }} working days"
+    },
+    "trust": {
+      "shipping": "Shipping",
+      "delivery": "Delivery",
+      "delivery_days": "in {{ days }} working days",
+      "returns": "Returns"
+    },
+    "header": {
+      "cart": "Cart,",
+      "items": "items"
+    },
+    "footer": {
+      "all_jerseys": "All jerseys",
+      "about": "About Azur",
+      "legal": "Legal"
+    },
+    "cart": {
+      "rest_html": "<b>{{ amount }}</b> more for free shipping in Germany",
+      "free": "Free shipping in Germany ✓",
+      "size": "Size",
+      "quantity": "Quantity",
+      "quantity_for": "Quantity {{ label }}, {{ size }}",
+      "one_less": "One less",
+      "one_more": "One more",
+      "remove": "Remove",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "empty": "Your cart is empty.",
+      "update": "Update"
+    },
+    "product": {
+      "crumbs": "Breadcrumb",
+      "images": "Images: {{ label }}",
+      "prev_image": "Previous image",
+      "next_image": "Next image",
+      "track": "Product images. Use the arrow keys to switch.",
+      "image_n": "Image {{ n }}",
+      "view_side": "Side",
+      "view_back": "Back",
+      "view_front": "Front",
+      "slide": "{{ index }} of {{ count }}: {{ view }}",
+      "zoom": "Zoom in",
+      "choose_image": "Choose image",
+      "notes": "Details on the jersey",
+      "care": "Care",
+      "description": "Description",
+      "zoomed": "Enlarged image",
+      "size_chart": "Size chart",
+      "chest": "Chest width (cm)",
+      "length": "Length (cm)"
+    },
+    "collection": {
+      "jerseys": "Jerseys",
+      "countries": "Countries",
+      "cities": "Cities",
+      "empty": "Nothing here right now."
+    },
+    "search": {
+      "title": "Search",
+      "term": "Search term",
+      "placeholder": "Berlin, Frankfurt, size …",
+      "button": "Search",
+      "results": "{{ count }} results",
+      "none": "Nothing found."
+    },
+    "contact": {
+      "or_email": "Or email us directly:",
+      "thanks": "Thanks. Your message has arrived.",
+      "name": "Name",
+      "email": "Email",
+      "order": "Order number (optional)",
+      "message": "Message",
+      "required": "* Required field",
+      "send": "Send"
+    },
+    "password": {
+      "wrong": "That password is not right.",
+      "label": "Password",
+      "have": "Got a password?"
+    },
+    "signup": {
+      "done": "You are signed up.",
+      "success": "If you get a confirmation email, please click the link in it.",
+      "label": "Email address",
+      "placeholder": "name@example.com",
+      "button": "Sign up",
+      "legal": "Emails from {{ shop }} about new drops and news. You can unsubscribe at any time with the link in every email.",
+      "privacy": "Privacy"
+    },
+    "support": {
+      "contact_form": "Contact form",
+      "orders": "Orders and returns",
+      "shipping": "Shipping and returns"
+    },
+    "legal": {
+      "title": "Service & legal"
+    },
+    "alt": {
+      "signature": "The Azur signature, embroidered in white on black fabric",
+      "teaser": "Frankfurt jersey from the front: eagle, Azur signature, green FRANKFURT band",
+      "room": "A kid’s bedroom full of football posters, a clothes rail with AZUR jerseys and an AZUR neon sign."
+    },
+    "room": {
+      "sound_off": "Sound off",
+      "stage": "The room",
+      "views": "Choose view",
+      "bed": "Bed",
+      "room": "Room",
+      "rail": "Rail",
+      "missing": "The room is not loading. You will find all jerseys further down.",
+      "ghost": "AZUR, back to the room",
+      "to_product_page": "Go to product page",
+      "adding": "Adding …"
+    }
+  }
+}

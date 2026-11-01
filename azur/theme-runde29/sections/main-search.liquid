@@ -1,0 +1,33 @@
+<div class="search-page">
+  <header class="page-head wrap">
+    <p class="page-kicker">{{ 'azur.search.title' | t }}</p>
+    <h1 class="page-title">{% if search.performed %}„{{ search.terms | escape }}“{% else %}{{ 'azur.search.title' | t }}{% endif %}</h1>
+    <form class="search" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="sr-only" for="search-q">{{ 'azur.search.term' | t }}</label>
+      <input class="form__input" id="search-q" type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'azur.search.placeholder' | t }}">
+      <input type="hidden" name="type" value="product">
+      <button class="btn btn--solid" type="submit">{{ 'azur.search.button' | t }}</button>
+    </form>
+    {%- if search.performed -%}
+      <p class="page-meta" role="status">{{ 'azur.search.results' | t: count: search.results_count }}</p>
+    {%- endif -%}
+  </header>
+  {%- if search.performed -%}
+    <div class="grid wrap">
+      {%- for item in search.results -%}
+        {%- if item.object_type == 'product' -%}
+          {% render 'product-card', product: item, size: 'small' %}
+        {%- endif -%}
+      {%- else -%}
+        <p class="grid__empty">{{ 'azur.search.none' | t }}</p>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Suche",
+  "settings": []
+}
+{% endschema %}

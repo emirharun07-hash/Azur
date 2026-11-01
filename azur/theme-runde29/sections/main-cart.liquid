@@ -1,0 +1,72 @@
+{%- comment -%} Warenkorbseite (ohne JavaScript und bei direktem Aufruf von /cart). {%- endcomment -%}
+{%- liquid
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+  capture ship
+    render 'shipping-line'
+  endcapture
+  capture payments
+    render 'payment-types'
+  endcapture
+-%}
+<div class="cartpage wrap">
+  <h1 class="page-title">{{ 'cart.general.title' | t }}</h1>
+  {%- if cart.item_count > 0 -%}
+    <form action="{{ routes.cart_url }}" method="post" class="cartpage__form">
+      <ul class="lines">
+        {%- for item in cart.items -%}
+          {%- capture label -%}{% render 'product-field', product: item.product, field: 'label' %}{%- endcapture -%}
+          <li class="line">
+            <a class="line__img" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+              {%- if item.image -%}
+                {{ item.image | image_url: width: 240 | image_tag: widths: '120, 240', sizes: '6rem', alt: '', loading: 'lazy' }}
+              {%- endif -%}
+            </a>
+            <div class="line__info">
+              <p class="line__name"><a href="{{ item.url }}">{{ label }}</a></p>
+              <p class="line__meta">{{ 'azur.cart.size' | t }} {{ item.variant.option1 }}</p>
+              <label class="line__meta" for="qty-{{ forloop.index }}">{{ 'azur.cart.quantity' | t }}</label>
+              <input class="cartpage__qty" id="qty-{{ forloop.index }}" type="number" name="updates[]" value="{{ item.quantity }}" min="0" max="99" inputmode="numeric">
+            </div>
+            <div class="line__side">
+              <p class="line__price">{% render 'price', amount: item.final_line_price %}</p>
+              <a class="line__remove link" href="{{ item.url_to_remove }}">{{ 'azur.cart.remove' | t }}<span class="sr-only">: {{ label }}, {{ item.variant.option1 }}</span></a>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+      <div class="cartpage__foot">
+        <p class="drawer__total">
+          <span>{{ 'azur.cart.subtotal' | t }}</span>
+          <span class="drawer__sum">{% render 'price', amount: cart.total_price %}</span>
+        </p>
+        <p class="drawer__note">
+          {{- settings.tax_note -}}
+          {%- if ship != blank %}<br>{{ ship }}{% endif -%}
+          {%- if payments != blank %}<br>{{ 'azur.general.pay_with' | t: list: payments }}{% endif -%}
+        </p>
+        <div class="cartpage__actions">
+          <button class="btn btn--line" type="submit" name="update">{{ 'azur.cart.update' | t }}</button>
+          <button class="btn btn--solid" type="submit" name="checkout">{{ 'azur.cart.checkout' | t }} <span class="arrow" aria-hidden="true">→</span></button>
+        </div>
+        {%- if additional_checkout_buttons -%}
+          <div class="drawer__express">{{ content_for_additional_checkout_buttons }}</div>
+        {%- endif -%}
+      </div>
+    </form>
+  {%- else -%}
+    <div class="cartpage__empty">
+      <p class="drawer__empty-title">{{ 'azur.cart.empty' | t }}</p>
+      <a class="btn btn--solid" href="{{ shop_coll.url }}">{{ 'azur.general.to_shop' | t }} <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Warenkorb",
+  "settings": []
+}
+{% endschema %}

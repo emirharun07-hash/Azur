@@ -1,0 +1,19 @@
+<div class="wrap">
+  <header class="page-head">
+    <h1 class="page-title">{{ 'azur.general.collections' | t }}</h1>
+  </header>
+  <ul class="list">
+    {%- for c in collections -%}
+      {%- if c.products_count > 0 -%}
+        <li><a class="list__item" href="{{ c.url }}"><span>{{ c.title }}</span><span class="list__meta">{{ c.products_count }}</span></a></li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% schema %}
+{
+  "name": "Kollektionen",
+  "settings": []
+}
+{% endschema %}

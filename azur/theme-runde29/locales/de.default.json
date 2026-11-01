@@ -1,0 +1,170 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "general": {
+    "password_page": {
+      "login_form_heading": "Shop betreten",
+      "login_password_button": "Öffnen"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Warenkorb",
+      "empty": "Noch leer."
+    }
+  },
+  "products": {
+    "product": {
+      "sold_out": "Ausverkauft",
+      "add_to_cart": "In den Warenkorb"
+    }
+  },
+  "azur": {
+    "general": {
+      "skip": "Zum Inhalt springen",
+      "page": "Seite {{ n }}",
+      "home": "Startseite",
+      "close": "Schließen",
+      "next": "Weiter",
+      "previous": "Zurück",
+      "pages": "Seiten",
+      "to_shop": "Zum Shop",
+      "view_all": "Alle ansehen",
+      "view_label": "{{ label }} ansehen",
+      "new_window": " (neues Fenster)",
+      "pay_with": "Zahlung mit {{ list }}",
+      "sold_out_sr": " – ausverkauft",
+      "collections": "Kollektionen",
+      "not_found": "Diese Seite gibt es nicht.",
+      "no_posts": "Noch keine Beiträge.",
+      "gift_card": "Geschenkkarte",
+      "expired_on": "Abgelaufen am {{ date }}.",
+      "og_locale": "de_DE"
+    },
+    "shipping": {
+      "germany": "Versand in Deutschland",
+      "cost": "Versand {{ cost }}",
+      "delivery": "Lieferung in {{ days }} Werktagen"
+    },
+    "trust": {
+      "shipping": "Versand",
+      "delivery": "Lieferung",
+      "delivery_days": "in {{ days }} Werktagen",
+      "returns": "Rückgabe"
+    },
+    "header": {
+      "cart": "Warenkorb,",
+      "items": "Artikel"
+    },
+    "footer": {
+      "all_jerseys": "Alle Trikots",
+      "about": "Über Azur",
+      "legal": "Rechtliches"
+    },
+    "cart": {
+      "rest_html": "Noch <b>{{ amount }}</b> bis zum kostenlosen Versand in Deutschland",
+      "free": "Kostenloser Versand in Deutschland ✓",
+      "size": "Größe",
+      "quantity": "Menge",
+      "quantity_for": "Menge {{ label }}, {{ size }}",
+      "one_less": "Eins weniger",
+      "one_more": "Eins mehr",
+      "remove": "Entfernen",
+      "subtotal": "Zwischensumme",
+      "checkout": "Zur Kasse",
+      "empty": "Dein Warenkorb ist leer.",
+      "update": "Aktualisieren"
+    },
+    "product": {
+      "crumbs": "Brotkrumen",
+      "images": "Bilder: {{ label }}",
+      "prev_image": "Vorheriges Bild",
+      "next_image": "Nächstes Bild",
+      "track": "Produktbilder. Mit den Pfeiltasten wechseln.",
+      "image_n": "Bild {{ n }}",
+      "view_side": "Seite",
+      "view_back": "Hinten",
+      "view_front": "Vorne",
+      "slide": "{{ index }} von {{ count }}: {{ view }}",
+      "zoom": "Vergrößern",
+      "choose_image": "Bild wählen",
+      "notes": "Details am Trikot",
+      "care": "Pflege",
+      "description": "Beschreibung",
+      "zoomed": "Bild vergrößert",
+      "size_chart": "Größentabelle",
+      "chest": "Brustbreite (cm)",
+      "length": "Länge (cm)"
+    },
+    "collection": {
+      "jerseys": "Trikots",
+      "countries": "Länder",
+      "cities": "Städte",
+      "empty": "Hier ist gerade nichts."
+    },
+    "search": {
+      "title": "Suche",
+      "term": "Suchbegriff",
+      "placeholder": "Berlin, Frankfurt, Größe …",
+      "button": "Suchen",
+      "results": "{{ count }} Treffer",
+      "none": "Nichts gefunden."
+    },
+    "contact": {
+      "or_email": "Oder direkt per E-Mail:",
+      "thanks": "Danke. Deine Nachricht ist angekommen.",
+      "name": "Name",
+      "email": "E-Mail",
+      "order": "Bestellnummer (optional)",
+      "message": "Nachricht",
+      "required": "* Pflichtfeld",
+      "send": "Senden"
+    },
+    "password": {
+      "wrong": "Das Passwort stimmt nicht.",
+      "label": "Passwort",
+      "have": "Du hast ein Passwort?"
+    },
+    "signup": {
+      "done": "Du bist eingetragen.",
+      "success": "Kommt eine Bestätigungsmail, klick bitte auf den Link darin.",
+      "label": "E-Mail-Adresse",
+      "placeholder": "name@beispiel.de",
+      "button": "Eintragen",
+      "legal": "Mails von {{ shop }} zu neuen Drops und Neuigkeiten. Abmelden geht jederzeit über den Link in jeder Mail.",
+      "privacy": "Datenschutz"
+    },
+    "support": {
+      "contact_form": "Kontaktformular",
+      "orders": "Bestellungen und Rücksendungen",
+      "shipping": "Versand und Rückgabe"
+    },
+    "legal": {
+      "title": "Service & Rechtliches"
+    },
+    "alt": {
+      "signature": "Die Azur-Signatur, weiß auf schwarzen Stoff gestickt",
+      "teaser": "Frankfurt-Trikot von vorne: Adler, Azur-Signatur, grünes FRANKFURT-Band",
+      "room": "Ein Kinderzimmer voller Fußballposter, ein Kleiderständer mit AZUR-Trikots, ein AZUR-Neonschild."
+    },
+    "room": {
+      "sound_off": "Ton aus",
+      "stage": "Das Zimmer",
+      "views": "Ansicht wählen",
+      "bed": "Bett",
+      "room": "Zimmer",
+      "rail": "Ständer",
+      "missing": "Das Zimmer lädt nicht. Alle Trikots findest du weiter unten.",
+      "ghost": "AZUR, zurück ins Zimmer",
+      "to_product_page": "Zur Produktseite",
+      "adding": "Wird hinzugefügt …"
+    }
+  }
+}

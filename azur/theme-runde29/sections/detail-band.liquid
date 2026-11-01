@@ -1,0 +1,37 @@
+{%- comment -%} Ein Detailmotiv mit einem Satz. Ohne eigenes Bild: gestickte Azur-Signatur (assets/campaign-detail.jpg). {%- endcomment -%}
+{%- liquid
+  assign about = settings.about_page
+  if about.url == blank
+    assign about = pages['ueber-azur']
+  endif
+-%}
+<section class="detail wrap" aria-label="{{ 'azur.footer.about' | t }}">
+  <figure class="detail__media">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 1800 | image_tag: widths: '800, 1200, 1800', sizes: '(min-width: 1024px) 60vw, 100vw', loading: 'lazy', class: 'detail__img' }}
+    {%- else -%}
+      <img class="detail__img" src="{{ 'campaign-detail.jpg' | asset_url }}" width="1200" height="800" loading="lazy" decoding="async"
+        alt="{{ 'azur.alt.signature' | t }}">
+    {%- endif -%}
+  </figure>
+  <div class="detail__text">
+    {%- if section.settings.text != blank -%}<div class="detail__copy">{{ section.settings.text }}</div>{%- endif -%}
+    {%- if about.url != blank and section.settings.link_label != blank -%}
+      <a class="link detail__link" href="{{ about.url }}">{{ section.settings.link_label }}</a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Detail mit Satz",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Leer = gestickte Signatur" },
+    { "type": "richtext", "id": "text", "label": "Satz", "default": "<p>Azur ist ein Label aus Berlin. Trikots mit Retrokragen, Paspeln und lockerem Schnitt.</p>" },
+    { "type": "text", "id": "link_label", "label": "Link zur Über-Seite", "default": "Über Azur" }
+  ],
+  "presets": [
+    { "name": "Detail mit Satz" }
+  ]
+}
+{% endschema %}

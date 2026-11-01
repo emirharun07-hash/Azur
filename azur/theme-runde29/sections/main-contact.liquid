@@ -1,0 +1,56 @@
+{%- comment -%} Kontaktseite: Seiteninhalt, Support-E-Mail + Shopify-Kontaktformular (landet bei der Absender-E-Mail des Shops). {%- endcomment -%}
+<div class="legal wrap">
+  {% render 'legal-nav' %}
+  <article class="legal__body">
+    <h1 class="page-title">{{ page.title }}</h1>
+    {%- if page.content != blank -%}
+      <div class="legal__text rte">{{ page.content }}</div>
+    {%- elsif section.settings.intro != blank -%}
+      <div class="legal__text rte">{{ section.settings.intro }}</div>
+    {%- endif -%}
+    {%- if settings.support_email != blank -%}
+      <p class="legal__text">{{ 'azur.contact.or_email' | t }} <a class="link" href="mailto:{{ settings.support_email }}">{{ settings.support_email }}</a></p>
+    {%- endif -%}
+
+    {%- form 'contact', class: 'form' -%}
+      {%- if form.posted_successfully? -%}
+        <p class="form__ok" role="status">{{ 'azur.contact.thanks' | t }}</p>
+      {%- endif -%}
+      {%- if form.errors -%}
+        <div class="form__error" role="alert">{{ form.errors | default_errors }}</div>
+      {%- endif -%}
+      <div class="form__row">
+        <label class="form__label" for="contact-name">{{ 'azur.contact.name' | t }}</label>
+        <input class="form__input" id="contact-name" type="text" name="contact[name]" autocomplete="name" value="{{ form.name }}">
+      </div>
+      <div class="form__row">
+        <label class="form__label" for="contact-email">{{ 'azur.contact.email' | t }} <span aria-hidden="true">*</span></label>
+        <input class="form__input" id="contact-email" type="email" name="contact[email]" autocomplete="email" required value="{{ form.email }}">
+      </div>
+      <div class="form__row">
+        <label class="form__label" for="contact-order">{{ 'azur.contact.order' | t }}</label>
+        <input class="form__input" id="contact-order" type="text" name="contact[Bestellnummer]">
+      </div>
+      <div class="form__row">
+        <label class="form__label" for="contact-body">{{ 'azur.contact.message' | t }} <span aria-hidden="true">*</span></label>
+        <textarea class="form__input" id="contact-body" name="contact[body]" rows="6" required>{{ form.body }}</textarea>
+      </div>
+      <p class="form__hint">{{ 'azur.contact.required' | t }}</p>
+      <button class="btn btn--solid" type="submit">{{ 'azur.contact.send' | t }} <span class="arrow" aria-hidden="true">→</span></button>
+    {%- endform -%}
+  </article>
+</div>
+
+{% schema %}
+{
+  "name": "Kontakt",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Text (wenn die Seite keinen Inhalt hat)",
+      "default": "<p>Fragen zu Größen, Bestellungen, Rücksendungen, Kooperationen oder Presse. Bei Bestellungen bitte die Bestellnummer mitschicken.</p>"
+    }
+  ]
+}
+{% endschema %}
