@@ -547,7 +547,21 @@ on every device without losing quality.
 - Streetwear-, Berlin- und Frankfurt-Beitrag nicht neu angelegt (nicht gewünscht).
 - Der Inhaber prüft sie und schaltet sie selbst auf „Sichtbar“.
 - „Retro“ entfernt (Wunsch Inhaber): Produkttexte Frankfurt („Klassischer Schnitt“) und Berlin („Lockerer Schnitt“), Tag „Retro“ bei beiden entfernt, Metafeld custom.fit gesetzt (überschreibt den Fallback in snippets/azur-pdp-item.liquid). Theme: Kopie „Azur Zimmer Runde 28 – ohne Retro“ (gid://shopify/OnlineStoreTheme/210813092179) von Runde 27 erstellt. Darin seo_home_title = „AZUR Clothing – Trikots: Türkei, Deutschland, Brasilien“ und im Zimmer fit_1 = „Klassischer Schnitt“, fit_2 = „Lockerer Schnitt“. Der Inhaber veröffentlicht. Shop hatte zu dem Zeitpunkt Passwortschutz (302).
-- Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Der Startseiten-Titel enthält noch „Retro“.
+- Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Startseiten-Titel ist inzwischen ohne „Retro“ (Runde 28 ist MAIN).
+
+## Runde 28b – Englisch (Schritt 4) und Google Merchant Center (Schritt 5) (2026-11-01)
+
+- **Englisch** (shopLocaleEnable en, **nicht veröffentlicht**, Besucher sehen nichts): Übersetzungen registriert für
+  5 Produkte (Titel, Text, Typ „Football jersey“), 4 Kollektionen, 4 Blog-Entwürfe (Handles turkey-jersey, germany-jersey,
+  brazil-jersey, turkey-germany-brazil-jersey), Seiten Kontakt/Über Azur und 43 Theme-Texte am Theme 210813092179.
+  Produkt-/Kollektions-Handles bewusst nicht übersetzt (azur-pdp-item.liquid leitet aus dem Handle einen Schlüssel ab).
+- **Grenze:** viele Texte stehen fest im Liquid/JS (z. B. „Trikot ansehen“, „Größe wählen“, „Benachrichtige mich“).
+  Die bleiben unter /en/ deutsch, bis das Theme in einer neuen Kopie auf Übersetzungsschlüssel umgebaut wird.
+- **Fehler gefunden:** Theme-Einstellung free_shipping_threshold = 79, echtes Versandprofil: kostenlos ab 90 €.
+  Der Warenkorb zeigt deshalb die falsche Grenze. Nicht geändert (Theme nur in Kopie, Inhaber fragen).
+- **Merchant Center Voraussetzungen offen:** Widerruf/Versand/AGB fehlen (Entwurf in azur/RICHTLINIEN-ENTWURF.md,
+  nicht hochgeladen, Freigabe + Lieferzeit fehlen), Passwortschutz an, Bestand 0, FAQ/Versand-Seite enthält
+  „[Lieferzeit ergänzen]“. Risiko: Stern-Embleme bei Deutschland/Brasilien können als Fälschung markiert werden.
 
 ## Runde 27 (owner 2026-10-31: "Am Handy ist das Bett nicht so gut. Wenn man es anklickt und blätter etc., stürzt die Seite oft ab.")
 
