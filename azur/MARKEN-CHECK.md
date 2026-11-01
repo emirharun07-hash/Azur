@@ -1,48 +1,54 @@
-# Marken-Check „Azur“ (1.11.2026)
+# Marken-Check „Azur“ (Stand 1.11.2026)
 
-Eine erste Suche im Internet durch vier Agenten. Sie ersetzt keine Prüfung durch einen Markenanwalt.
-Die Register von EUIPO (EU) und DPMA (Deutschland) waren für die Agenten nicht erreichbar. Was dort steht, ist also
-**nicht geprüft**. Viele Angaben stammen aus Vorschautexten von Suchergebnissen, nicht von den Registerseiten selbst.
+Eine erste Prüfung, **kein Ersatz für einen Markenanwalt**.
 
-## Am wichtigsten
+## Was geprüft wurde
 
-| Marke | Wo | Was | Warum wichtig | Risiko |
+- **Im Register geprüft (sicher):** DPMAregister, Abfrage am 1.11.2026. Es enthält deutsche Marken, EU-Marken und
+  internationale Marken mit Schutz in Deutschland oder der EU. Gesucht wurde nach „Azur“ als Wortanfang (auch „Côte
+  d'Azur“, „Club Azur“ usw.) in den Klassen 25 (Kleidung), 28 (Sportartikel) und 35 (Handel, Online-Shop).
+  Gefunden: 44 / 14 / 57 Treffer. Alle gültigen Marken wurden einzeln angesehen.
+- **Nicht im Register geprüft:** „Azure“ und „Azzur…“ (die Abfrage lief nicht durch), Bildmarken ohne das Wort
+  „Azur“ im Text, Marken außerhalb von DE/EU. Die Angaben zu den USA, UK, Kanada und Australien stammen nur aus
+  Suchergebnissen im Internet.
+
+## Ergebnis Deutschland und EU
+
+**Es gibt keine gültige Marke, die nur „AZUR“ heißt und für Kleidung gilt.** Die einzigen Marken nur „AZUR“ gelten
+für Chemie, Farben, Möbel, Medizintechnik und Ähnliches, nicht für Kleidung.
+
+Gültige Marken mit „Azur“ **für Kleidung** (Klasse 25), die man im Blick behalten sollte:
+
+| Marke | Register | Inhaber | Wofür | Einschätzung |
 |---|---|---|---|---|
-| AZUR (Label von „Lisa & Lisa“) | Marseille, Frankreich, seit 2019 | Damenmode aus Seide, 270–590 $, über Läden in Tokio und den USA | Gleicher Name, Kleidung, in der EU. Ob sie eine Marke eingetragen haben: unbekannt. Stil und Preis sind sehr weit weg von Trikots. | mittel |
-| Azur Deluxe (azurdeluxe.com) | unklar, Trustpilot in AT, FR, DK | Online-Modeshop für Damen und Herren | Fast gleicher Name, verkauft in Europa. Kein Impressum gefunden. | mittel |
-| AZUR AZUL, UK00004361954 | Großbritannien, Anmeldung April 2026 | Klassen 18, 24, 25 (Kleidung), 35 (Handel) | Neue Anmeldung für Kleidung. Nur UK, aber prüfen, ob es auch eine EU-Anmeldung gibt. Inhaber unbekannt. | mittel |
-| AZUR, Reg. 5219194 | USA, eingetragen 2017 | Klasse 25: T-Shirts, Unterwäsche, Socken, Sweatshirts | Gleiches Wort, gleiche Waren. Gilt nur in den USA. Wichtig, falls ihr in die USA verkauft. Inhaber unbekannt. | niedrig (DE), mittel (USA) |
-| Azur Fit (azurfit.com) | Toronto, Kanada | Sportbekleidung für Frauen | Gleiche Nische (Sport), aber Kanada. Versand nach Europa unklar. | niedrig |
+| **AZUR GANG** (Wort) | EU 017887418 | Privatperson, Rom | Kleidung, Schuhe, Kopfbedeckungen | am nächsten dran: Anfang „AZUR“, Kleidung, nur Kleidung |
+| **Atelier d'Azur** (Schriftzug) | IR 1762433, Schutz in der EU seit 2024 | Depar Group, Türkei | Kleidung, Schuhe, Mützen; Handel | gleiche Waren, Online-Handel; „Atelier d'…“ unterscheidet aber |
+| **ROUGE AZUR** / ROUGE AZUR CLUB (Wort) | EU 019034081 / 019034129 | Rouge Azur, Nizza | Kleidung, **Sportbekleidung**, Bademode, Sportartikel | gleiche Nische (Sport) |
+| **CLUB AZUR** (Wort und Logo) | EU 018473525 / 018473530 | Val Production, Marseille | Mützen, Bandanas, **Sportartikel** (Kl. 28) | „Club“ klingt nach Fußball, nur Kopfbedeckungen |
+| **M'AZUR** (Logo) | EU 019238210 | SAS Rudniq, Nizza | Strick, Sweater, Sportschuhe, Bademode | ähnlicher Klang |
+| **SAINT AZUR** (Wort) | EU 019180248 | Privatperson, Bayern | Kopfbedeckungen, Schuhe | niedrig |
+| **ROC D'AZUR** (Logo) | IR 1146025, EU | Amaury Sport Organisation (Tour de France) | Rad- und Sportbekleidung | großer Sportveranstalter, aber „Roc d'…“ klar anders |
 
-## Weniger wichtig
+Weitere gültige Kleidungsmarken, eher harmlos, weil „Côte d'Azur“ ein Ortsname ist oder der Name klar anders klingt:
+Carré d'Azur, Val d'Azur, Anne d'Azur, Corniche-Azur, Perle d'Azur Swimsweets, Nice Côte d'Azur, by Côte d'Azur,
+Université Côte d'Azur, Terres d'Azur, Core d'Azur, Coeur d'Azur; neu angemeldet: Ilva Azur, Ville d'Azur.
 
-- AZUR, US 97737042 (Depar Group, Istanbul), Schuhe, Taschen, Kleidung, 2022, wohl erloschen.
-- AZUR ATELIER, Australien, Kleidung, 2025.
-- AZURE, US 5747730, Kleidung (anderes Wort).
-- Azuri (Ukraine), Damenmode. Perle d'Azur (Griechenland), Bademode für Kinder. Azura (USA), Bademode.
-- Erloschen: L'AZUR (USA), Côte d'Azur / D'Azur (USA), AZUR (Österreich, Sport, 1983 gelöscht).
-- Andere Branchen: AZURSOLAR (EU, Solar), Azur Air (Fluglinie), Azur Fragrances (Parfüm), Microsoft Azure (Software).
-  Keine Gefahr für Kleidung.
+## Außerhalb der EU (nur aus dem Internet, nicht geprüft)
 
-## Fußball
+- **USA:** Wortmarke „AZUR“ Nr. 5219194 für T-Shirts, Sweatshirts, Socken, Unterwäsche (eingetragen 2017). Wichtig
+  nur, wenn ihr in die USA verkauft.
+- **UK:** Anmeldung „AZUR AZUL“ UK00004361954 (April 2026), u. a. Kleidung.
+- **Marken ohne Eintrag:** ein Damenmode-Label „AZUR“ aus Marseille (Seide, 270–590 $). Gleicher Name, aber
+  Stil und Preis sind weit weg von Trikots. Ohne Eintrag in der EU hat es nur schwache Rechte. Außerdem: Azur
+  Deluxe (Online-Modeshop) und Azur Fit (Toronto, Sportbekleidung für Frauen).
+- **Fußball:** „Azzurri“ / „Azzurra“ (Italien, FIGC/adidas) nicht für eure Produkte verwenden. Keinen Verein
+  namens „Azur“ gefunden.
 
-- **Azzurri / Azzurra**: Spitzname und Name des Trikots der italienischen Nationalmannschaft (FIGC und adidas).
-  Kein Problem für den Namen AZUR. Aber „Azzurri“ nicht für Produkte benutzen und kein Italien-Trikot mit
-  italienischem Wappen machen.
-- Olympique Marseille „Bleu Azur“ (Puma) ist nur ein Farbname.
-- Keinen Verein und keine Sportmarke namens „Azur“ gefunden.
+## Was das heißt
 
-## Einschätzung
-
-- „Azur“ ist ein normales Wort für eine Farbe. Eine Marke, die nur „Azur“ heißt, ist darum eher schwach geschützt.
-  Das hilft euch, schützt euch aber auch selbst weniger.
-- Weder eine eingetragene deutsche noch eine EU-Marke „AZUR“ für Kleidung wurde gefunden. Das ist aber **nicht geprüft**.
-- Keine Abmahnung und keinen Rechtsstreit zu „Azur“ bei Mode gefunden.
-
-## Nächste Schritte (kostenlos)
-
-1. DPMA: https://register.dpma.de → Marken → Einsteigerrecherche → „Azur“ eingeben, Klasse 25. Auch „Azure“ und „Azzur“.
-2. EUIPO: https://euipo.europa.eu/eSearch → „AZUR“, Filter Klasse 25, 28 und 35.
-3. TMview (alle EU-Länder auf einmal): https://www.tmdn.org/tmview → „AZUR“, Klasse 25.
-4. Wenn dort nichts Gefährliches steht: überlegen, „AZUR Clothing“ selbst beim DPMA anzumelden
-   (kostet Geld: ab 290 € online, 3 Klassen). Vorher von einem Anwalt beraten lassen.
+- Die Gefahr ist **eher gering**. Keiner hat „AZUR“ allein für Kleidung in DE/EU eingetragen. Die Marken oben
+  sind alle zusammengesetzt (AZUR GANG, ROUGE AZUR …).
+- Andersherum heißt das auch: „Azur“ ist ein Farbwort. Eine Anmeldung von nur „AZUR“ für Kleidung könnte das Amt als
+  beschreibend ablehnen, und die Inhaber oben könnten Widerspruch einlegen (vor allem AZUR GANG). Ein eigenes Logo
+  oder ein fester Zusatz wie „AZUR Clothing“ mit Logo ist eher schützbar.
+- **Vor einer eigenen Anmeldung** (DPMA ab 290 €, kostet Geld): kurz einen Markenanwalt fragen.
