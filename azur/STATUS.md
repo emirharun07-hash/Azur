@@ -549,6 +549,19 @@ on every device without losing quality.
 - „Retro“ entfernt (Wunsch Inhaber): Produkttexte Frankfurt („Klassischer Schnitt“) und Berlin („Lockerer Schnitt“), Tag „Retro“ bei beiden entfernt, Metafeld custom.fit gesetzt (überschreibt den Fallback in snippets/azur-pdp-item.liquid). Theme: Kopie „Azur Zimmer Runde 28 – ohne Retro“ (gid://shopify/OnlineStoreTheme/210813092179) von Runde 27 erstellt. Darin seo_home_title = „AZUR Clothing – Trikots: Türkei, Deutschland, Brasilien“ und im Zimmer fit_1 = „Klassischer Schnitt“, fit_2 = „Lockerer Schnitt“. Der Inhaber veröffentlicht. Shop hatte zu dem Zeitpunkt Passwortschutz (302).
 - Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Startseiten-Titel ist inzwischen ohne „Retro“ (Runde 28 ist MAIN).
 
+## Runde 31 – Seitentitel nur „Azur“, Rechtstexte, Meta (2026-11-01/02)
+
+- Live ist Runde 30 (210816762195), vom Inhaber veröffentlicht.
+- **Theme „Azur Zimmer Runde 31 – Titel Azur (Entwurf)“** `gid://shopify/OnlineStoreTheme/210820956499`, Kopie von Runde 30. Nur `seo_home_title` = „Azur“ (de) und en-Übersetzung „Azur“. Vorschau geprüft: `<title>Azur</title>`. Der Inhaber veröffentlicht.
+- **Märkte:** Der Inhaber hat EU, Schweiz, USA und UK angelegt. Feste Preise: CHF 50, $60, £44,99. Berlin 030 und Frankfurt 069 sind nicht in den Katalogen CH/US/UK. Die Kataloge haben autoPublish an.
+- **Rechtstexte:** freigegeben, Lieferzeit 2–5 Werktage. Claude fehlt `write_legal_policies`, darum fügt der Inhaber sie selbst ein; Vorlage `azur/RICHTLINIEN-ZUM-KOPIEREN.html`, inkl. Kontaktinformationen.
+- **Bestand:** bleibt 0 (Variante B). Anzeigen sollen Drop-Anmeldungen sammeln.
+- **Meta:** Der Inhaber richtet die App „Facebook & Instagram“ ein.
+  - Erledigt: Profil, Business-Portfolio, neuer Katalog, Datenfreigabe „Maximal“.
+  - In Arbeit: Pixel und die Facebook-Seite „AZUR Clothing“.
+  - Ohne Zahlungsmethode.
+- Shop ist offen (kein Passwort).
+
 ## Runde 30 – Englisch: alle Theme-Texte übersetzbar, Versandgrenze 90 € (2026-11-01)
 
 - **Theme „Azur Zimmer Runde 30 – Englisch (Entwurf)“**, `gid://shopify/OnlineStoreTheme/210816762195`, UNPUBLISHED.
