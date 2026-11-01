@@ -539,6 +539,16 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 27b – Blogbeiträge (2026-11-01)
+
+- 4 Blogbeiträge im Blog „Neuigkeiten“ als **versteckte Entwürfe** angelegt (mit SEO-Titel und -Beschreibung, Links zu den Trikots):
+  - retro-trikots-streetwear-styling
+  - berlin-030-trikot
+  - frankfurt-069-trikot
+  - tuerkei-deutschland-brasilien-retro-trikot (mit Hinweis: eigene Designs, keine offiziellen Verbandstrikots)
+- Der Inhaber prüft sie und schaltet sie selbst auf „Sichtbar“.
+- Offen: Rechtliche Seiten (Widerruf, AGB) fehlen als Shop-Richtlinie. Die Seiten FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht.
+
 ## Runde 27 (owner 2026-10-31: "Am Handy ist das Bett nicht so gut. Wenn man es anklickt und blätter etc., stürzt die Seite oft ab.")
 
 - **Likely cause** (not seen on a real phone): graphics memory. A phone tab is closed by the system when the GPU memory gets too high, and Safari reloads
