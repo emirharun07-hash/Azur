@@ -7,6 +7,7 @@ Hier liegt alles, was für Reels und TikToks von AZUR dauerhaft gebraucht wird.
 | Regeln, Marke, Ablauf für ein Reel | `.claude/skills/azur-reels/SKILL.md` |
 | Schnitt im Takt der Musik (Anleitung) | `.claude/skills/azur-beat-schnitt/SKILL.md` |
 | Werkzeug für den Schnitt | `azur/content/tools/beat_cut.py` |
+| Plan für Kamerafahrten aus Blender | `azur/content/KAMERAFAHRTEN.md` |
 | Allgemeine Content-Skills (MIT, Ootto) | `.claude/skills/<name>/SKILL.md` |
 
 Claude Code lädt die Skills im Ordner `.claude/skills/` automatisch, in der Cloud und am PC, sobald dieses Repo offen ist.
