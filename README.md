@@ -20,6 +20,7 @@ Alles liegt im Ordner [`azur/`](azur):
 | `azur/scene/` | Die 3D-Szene in Blender (Zimmer, Trikots, Licht) und die Render-Warteschlange |
 | `azur/tools/` | Bauen, Testen und Rendern (z. B. `render_on_windows.ps1` für den PC) |
 | `azur/render_request.json` | Render-Auftrag für den PC; `azur/render_status.json` meldet den Fortschritt zurück |
+| `azur/content/` und `.claude/skills/` | Content für Reels und TikToks: Skills für Claude und das Werkzeug für den Schnitt im Takt der Musik. Anleitung in `azur/content/README.md` |
 | `azur/kampagnen-board/` | Kampagnen Board: gemeinsame Arbeitsfläche für die Kampagnen (App für Windows und Mac mit eigener Cloud, dazu eine claude.ai-Fassung). Anleitung in der README dort |
 | `azur/admin/` | Kleiner Worker für die Textbearbeitung direkt auf der Website (Anleitung in `ANLEITUNG.md`) |
 | `azur/design/` | Design-Runden (Vorschläge zum Durchwischen) |
