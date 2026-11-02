@@ -24,6 +24,11 @@ Diese Skill gilt für jede Content-Arbeit für AZUR. Lies zuerst `azur/UEBERGABE
 - Welt der Marke: das 3D-Kinderzimmer („Ein Kind, das es noch nicht geschafft hat, aber fest daran glaubt“),
   Neon-Logo, Magazin „ANSTOSS“, verdeckter Kleidersack = „Nächster Drop“.
 - Farbe: Azur Electric nur als Akzent (Glow #16B8FF, Highlight #8DEBFF, Ink #0A6A9A, Night #07131D).
+- Accounts: Instagram **@azur_clothing3**, TikTok **@azurclothing**. Muster-Trikots sind vorhanden.
+  Achtung: Ein Schweizer Shop (azurclo.com) nutzt Instagram @azurcloothing, nicht verwechseln.
+- Qualität vor Menge: Der Owner will so gute Videos wie möglich, das 3D-Zimmer soll richtig zur Geltung kommen.
+  Einfache Zoom-Fahrten über Standbilder reichen nicht. Besser: echte Kamerafahrten aus Blender, Aufnahmen der echten
+  Website, echte Clips mit den Muster-Trikots.
 - Der Hebel ist Marketing, nicht Rabatt. Keine Preissenkungen als Content-Idee vorschlagen.
 
 ## Feste Regeln des Owners
