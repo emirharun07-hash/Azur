@@ -549,6 +549,13 @@ on every device without losing quality.
 - „Retro“ entfernt (Wunsch Inhaber): Produkttexte Frankfurt („Klassischer Schnitt“) und Berlin („Lockerer Schnitt“), Tag „Retro“ bei beiden entfernt, Metafeld custom.fit gesetzt (überschreibt den Fallback in snippets/azur-pdp-item.liquid). Theme: Kopie „Azur Zimmer Runde 28 – ohne Retro“ (gid://shopify/OnlineStoreTheme/210813092179) von Runde 27 erstellt. Darin seo_home_title = „AZUR Clothing – Trikots: Türkei, Deutschland, Brasilien“ und im Zimmer fit_1 = „Klassischer Schnitt“, fit_2 = „Lockerer Schnitt“. Der Inhaber veröffentlicht. Shop hatte zu dem Zeitpunkt Passwortschutz (302).
 - Offen: Widerruf/AGB fehlen als Shop-Richtlinie. FAQ, Berlin 030, Frankfurt 069 und Nationaltrikots sind nicht veröffentlicht. Startseiten-Titel ist inzwischen ohne „Retro“ (Runde 28 ist MAIN).
 
+## Runde 33 – Versand ab 79,99 in allen Märkten (2026-11-02)
+
+- Versand steht jetzt in den Märkten (nicht mehr im Versandprofil): DE 1,99 € / Express 9,99 €, EU 2,99 €, CH 2,99 CHF, UK 2,99 £, USA 3,99 $; überall kostenlos ab 79,99 (Währung des Markts). DE-Grenze per marketUpdate von 90 auf 79,99 gesetzt.
+- Theme „Azur Zimmer Runde 33 – Versand ab 79,99 (Entwurf)“ (gid 210859917651), Kopie von Runde 32: settings_schema (free_shipping_threshold jetzt Text, Shopify rundete die Zahl auf 80), settings_data, templates/index.json (free_shipping_from 79.99), templates/product.json (Versandblock), cart-drawer (| round), Locales ohne „in Deutschland“. Commits 4f319f8, 93fc2ef. Vorschau geprüft.
+- en-Übersetzungen neu: Ankündigung, general.shipping_cost, Versandblock der Produktseite.
+- RICHTLINIEN-ZUM-KOPIEREN.html: Versandrichtlinie mit den neuen Preisen; Inhaber muss sie noch einfügen.
+
 ## Runde 32 – Meta-Domain-Bestätigung (2026-11-02)
 
 - Neues Theme „Azur Zimmer Runde 32 – Meta Domain (Entwurf)“ (gid 210858508627) als Kopie von Runde 31 (MAIN).
