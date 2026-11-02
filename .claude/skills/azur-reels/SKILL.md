@@ -45,7 +45,8 @@ Diese Skill gilt für jede Content-Arbeit für AZUR. Lies zuerst `azur/UEBERGABE
 ## Ablauf für ein Reel
 
 1. **Idee und Ziel**: Ein Reel, ein Ziel (Reichweite, Follow, Newsletter-Eintrag für den Drop, Kauf).
-2. **Hook** (erste 1–3 s): 10 Varianten, je unter 12 Wörtern, mit 3–5 Wörtern Text auf dem Bild.
+2. **Hook** (erste 1–3 s): immer mit der Skill `azur-hook-stratege` (fester Prompt des Owners, 15 Varianten).
+   Dazu als Ergänzung: 10 Varianten, je unter 12 Wörtern, mit 3–5 Wörtern Text auf dem Bild.
    Winkel mischen: starke Aussage, „Wenn du … bist“, Frage, die den Nerv trifft, Ergebnis zuerst, offene Frage.
    Die 3 besten markieren. Gute AZUR-Winkel: „Zwei Heimaten, ein Trikot“, „Welches Land trägst du?“,
    „030 oder 069?“, „Kein Verein. Dein Land.“
