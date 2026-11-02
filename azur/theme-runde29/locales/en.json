@@ -69,8 +69,8 @@
       "legal": "Legal"
     },
     "cart": {
-      "rest_html": "<b>{{ amount }}</b> more for free shipping in Germany",
-      "free": "Free shipping in Germany ✓",
+      "rest_html": "<b>{{ amount }}</b> more for free shipping",
+      "free": "Free shipping ✓",
       "size": "Size",
       "quantity": "Quantity",
       "quantity_for": "Quantity {{ label }}, {{ size }}",

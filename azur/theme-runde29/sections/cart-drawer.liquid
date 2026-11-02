@@ -30,8 +30,8 @@
     <div class="drawer__content" data-cart-content data-count="{{ cart.item_count }}">
       {%- if cart.item_count > 0 -%}
         {%- liquid
-          # Kostenloser Versand in Deutschland: echte Rechnung aus dem Warenkorb, keine Zeitgrenzen
-          assign threshold = settings.free_shipping_threshold | times: 100
+          # Kostenloser Versand (alle Märkte, Grenze in der Währung des Markts): echte Rechnung aus dem Warenkorb, keine Zeitgrenzen
+          assign threshold = settings.free_shipping_threshold | times: 100 | round
           assign rest = threshold | minus: cart.total_price
           assign pct = 100
           if threshold > 0 and rest > 0

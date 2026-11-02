@@ -15,16 +15,16 @@
     "nav_collection": "nationaltrikots",
     "about_page": "ueber-azur",
     "support_email": "kontakt@azurclothing.com",
-    "shipping_cost": "in Deutschland 1,99 €, ab 90 € kostenlos",
+    "shipping_cost": "in Deutschland 1,99 €, ab 79,99 € kostenlos",
     "delivery_days": "2-5",
-    "free_shipping_threshold": 90,
-    "seo_home_title": "AZUR Clothing – Trikots: Türkei, Deutschland, Brasilien",
+    "free_shipping_threshold": 79.99,
+    "seo_home_title": "Azur",
     "seo_home_description": "Trikots: Türkei, Deutschland, Brasilien, Berlin 030 und Frankfurt 069. Ab 54,99 €, Größen S–XL.",
     "sections": {
       "announcement": {
         "type": "announcement",
         "settings": {
-          "messages": "14 Tage kostenlose Rückgabe\nVersand ab 90 € kostenlos",
+          "messages": "14 Tage kostenlose Rückgabe\nVersand ab 79,99 € kostenlos",
           "link": ""
         }
       },

@@ -69,8 +69,8 @@
       "legal": "Rechtliches"
     },
     "cart": {
-      "rest_html": "Noch <b>{{ amount }}</b> bis zum kostenlosen Versand in Deutschland",
-      "free": "Kostenloser Versand in Deutschland ✓",
+      "rest_html": "Noch <b>{{ amount }}</b> bis zum kostenlosen Versand",
+      "free": "Kostenloser Versand ✓",
       "size": "Größe",
       "quantity": "Menge",
       "quantity_for": "Menge {{ label }}, {{ size }}",
