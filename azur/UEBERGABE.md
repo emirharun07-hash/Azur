@@ -141,3 +141,11 @@ Meta Ads sprechen. Noch nichts davon ist eingerichtet. Ideen zum Prüfen, nicht 
   - Gibt es schon ein Instagram- oder TikTok-Profil, eine Meta Business Suite oder ein Werbekonto?
   - Welches Budget ist geplant?
   - Ist der offene Shop gewollt?
+
+## Content: Reels und TikToks (eigener Chat, Stand 02.11.2026)
+
+Alles zu Content steht in **`azur/content/UEBERSICHT.md`**: Ziel, Accounts (Instagram @azur_clothing3, TikTok
+@azurclothing), Entscheidungen des Owners, Ablauf (Drehtag mit Muster-Trikots, dann ein Monat Higgsfield Plus,
+Blender-Kamerafahrten, Schnitt im Takt der Musik), Ideen mit dem 3D-Zimmer und offene Punkte. Skills dafür liegen in
+`.claude/skills/` (`azur-reels`, `azur-hook-stratege`, `azur-beat-schnitt`). Kamerafahrten für Reels werden mit dem
+Chat abgestimmt, der die Szene und die Render-Aufträge macht.

@@ -9,7 +9,7 @@ description: >
 
 # AZUR Reels
 
-Diese Skill gilt für jede Content-Arbeit für AZUR. Lies zuerst `azur/UEBERGABE.md` und `azur/content/README.md`.
+Diese Skill gilt für jede Content-Arbeit für AZUR. Lies zuerst `azur/content/UEBERSICHT.md` (Stand und Entscheidungen), dann `azur/UEBERGABE.md`.
 
 ## Die Marke in Kürze
 

@@ -4,6 +4,7 @@ Hier liegt alles, was für Reels und TikToks von AZUR dauerhaft gebraucht wird.
 
 | Was | Wo |
 |---|---|
+| **Überblick: Stand, Entscheidungen, Ideen (zuerst lesen)** | `azur/content/UEBERSICHT.md` |
 | Regeln, Marke, Ablauf für ein Reel | `.claude/skills/azur-reels/SKILL.md` |
 | Schnitt im Takt der Musik (Anleitung) | `.claude/skills/azur-beat-schnitt/SKILL.md` |
 | Werkzeug für den Schnitt | `azur/content/tools/beat_cut.py` |
