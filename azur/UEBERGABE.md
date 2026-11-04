@@ -103,6 +103,13 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 
 ## Offen
 
+- **Verpackungsregister LUCID** (4.11.2026): Die Trikots kommen aus dem Ausland, jedes in einer Plastiktüte.
+  Damit ist Azur sehr wahrscheinlich für diese Tüten zuständig (seit 12.08.2026 EU-Verpackungsverordnung).
+  - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
+    und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
+  - Name wie beim Finanzamt und bei PayPal. Markenname „Azur“.
+  - Noch offen: Worin wird verschickt (Karton oder Tasche, mit oder ohne Logo, woher)?
+  - Der Owner macht das selbst; Claude erklärt.
 - **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
   Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
   (Seitentitel), „Azurclo“ und im Newsletter-Text „Azurclothing“. Instagram heißt @azurcloothing, TikTok
