@@ -107,7 +107,10 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   Damit ist Azur sehr wahrscheinlich für diese Tüten zuständig (seit 12.08.2026 EU-Verpackungsverordnung).
   - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
     und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
-  - Name wie beim Finanzamt und bei PayPal. Markenname „Azur“.
+  - Name wie beim Finanzamt und bei PayPal. Markennamen „Azur“ und der Firmenname (Verpackung ist neutral).
+  - Stand 4.11.: Der Owner registriert gerade in LUCID. Verkauf ist erst ab etwa Januar 2027 geplant, darum
+    den Systemvertrag im Dezember für 2027 abschließen und danach die Mengen in LUCID melden. Der Shop ist
+    aber offen: Kommt vorher eine Bestellung, braucht es den Vertrag schon dann.
   - Lieferant sitzt in China und hat nichts gemeldet; das ist normal, Azur ist als Importeur zuständig.
     Geplant: die durchsichtige Tüte bleibt, darum kommt eine eigene Versandtüte oder ein Karton (noch nicht
     entschieden). Zu melden: alles, was beim Kunden ankommt, und am sichersten auch die großen
