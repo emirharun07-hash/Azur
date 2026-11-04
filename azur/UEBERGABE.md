@@ -42,9 +42,9 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 
 - **Live-Theme** ist „Azur Zimmer Runde 26b (Entwurf)“, `gid://shopify/OnlineStoreTheme/210548228435`. Der Owner hat
   es selbst veröffentlicht. Es gibt 17 Themes, Shopify erlaubt 20.
-- **Der Shop ist ohne Passwort erreichbar.** Am 29.10. geprüft: Die Startseite lädt das Zimmer, und `/password`
-  leitet auf `/` um. Früher wollte der Owner den Shop geschlossen haben. Ob das jetzt so gewollt ist, muss der Owner
-  bestätigen. Nicht selbst ändern.
+- **Der Shop ist mit Passwort geschlossen** (am 4.11.2026 geprüft und vom Owner bestätigt): `/` und die
+  Produktseiten leiten auf `/password` um. Am 29.10. war er kurz offen. Verkauf ist erst ab etwa Januar 2027
+  geplant. Nicht selbst ändern.
 - **Was Suchmaschinen sehen** (am 29.10. von außen geprüft):
   - Titel der Startseite: „Azur – Trikots aus Berlin: Berlin 030, Frankfurt 069“. Die Beschreibung nennt auch
     die Ländertrikots. Beide kommen aus Shopify → Onlineshop → Einstellungen; ohne Eintrag dort aus den
@@ -110,7 +110,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Name wie beim Finanzamt und bei PayPal. Markennamen „Azur“ und der Firmenname (Verpackung ist neutral).
   - Stand 4.11.: Der Owner registriert gerade in LUCID. Verkauf ist erst ab etwa Januar 2027 geplant, darum
     den Systemvertrag im Dezember für 2027 abschließen und danach die Mengen in LUCID melden. Der Shop ist
-    aber offen: Kommt vorher eine Bestellung, braucht es den Vertrag schon dann.
+    bis dahin mit Passwort zu. Wird er früher geöffnet, braucht es den Vertrag schon vor dem ersten Paket.
   - Lieferant sitzt in China und hat nichts gemeldet; das ist normal, Azur ist als Importeur zuständig.
     Geplant: die durchsichtige Tüte bleibt, darum kommt eine eigene Versandtüte oder ein Karton (noch nicht
     entschieden). Zu melden: alles, was beim Kunden ankommt, und am sichersten auch die großen
@@ -153,7 +153,7 @@ Meta Ads sprechen. Noch nichts davon ist eingerichtet. Ideen zum Prüfen, nicht 
 - **Zuerst fragen:**
   - Gibt es schon ein Instagram- oder TikTok-Profil, eine Meta Business Suite oder ein Werbekonto?
   - Welches Budget ist geplant?
-  - Ist der offene Shop gewollt?
+  - Wann geht der Shop auf? (Stand 4.11.: zu, Verkauf ab etwa Januar 2027.)
 
 ## Content: Reels und TikToks (eigener Chat, Stand 02.11.2026)
 
