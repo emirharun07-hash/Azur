@@ -108,7 +108,10 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
     und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
   - Name wie beim Finanzamt und bei PayPal. Markenname „Azur“.
-  - Noch offen: Worin wird verschickt (Karton oder Tasche, mit oder ohne Logo, woher)?
+  - Lieferant sitzt in China und hat nichts gemeldet; das ist normal, Azur ist als Importeur zuständig.
+    Geplant: die durchsichtige Tüte bleibt, darum kommt eine eigene Versandtüte oder ein Karton (noch nicht
+    entschieden). Zu melden: alles, was beim Kunden ankommt, und am sichersten auch die großen
+    Lieferkartons aus China, die Azur auspackt.
   - Der Owner macht das selbst; Claude erklärt.
 - **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
   Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
