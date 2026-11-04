@@ -117,6 +117,9 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
     Geplant: die durchsichtige Tüte bleibt, darum kommt eine eigene Versandtüte oder ein Karton (noch nicht
     entschieden). Zu melden: alles, was beim Kunden ankommt, und am sichersten auch die großen
     Lieferkartons aus China, die Azur auspackt.
+  - Kosten (Vergleich vom 15.10.2026, Lizenzjahr 2027, netto, plus 19 % MwSt): EASY-LIZE 28,90 €, activate by
+    Reclay 37,05 €, VerpackGo 44,84 €. Für Azur zählt vor allem die Grundgebühr.
+  - Erinnerung für den Owner am 21.12.2026, 10 Uhr, in der Sitzung „Shopify Shop Benachrichtigungsseite“.
   - Der Owner macht das selbst; Claude erklärt.
 - **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
   Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
