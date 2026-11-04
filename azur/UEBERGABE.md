@@ -109,8 +109,8 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
     und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
   - Name wie beim Finanzamt und bei PayPal. Markennamen „Azur“ und der Firmenname (Verpackung ist neutral).
   - Stand 4.11.: In LUCID registriert, Registrierungsnummer DE1483502731285 (steht ohnehin im öffentlichen
-    Register). Im Dashboard steht als Unternehmensname nur „Azur“; der Owner prüft, ob er den vollen GbR-Namen
-    in den Stammdaten nachträgt. Verkauf ist erst ab etwa Januar 2027 geplant, darum
+    Register). Unternehmensname dort: „Azur“. Das ist richtig: Nicht eingetragene GbRs geben laut LUCID ihre
+    Geschäftsbezeichnung an, und die ist laut Gewerbeanmeldung „Azur“. Verkauf ist erst ab etwa Januar 2027 geplant, darum
     den Systemvertrag im Dezember für 2027 abschließen und danach die Mengen in LUCID melden. Der Shop ist
     bis dahin mit Passwort zu. Wird er früher geöffnet, braucht es den Vertrag schon vor dem ersten Paket.
   - Lieferant sitzt in China und hat nichts gemeldet; das ist normal, Azur ist als Importeur zuständig.
