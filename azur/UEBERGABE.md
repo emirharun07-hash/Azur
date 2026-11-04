@@ -108,7 +108,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
     und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
   - Name wie beim Finanzamt und bei PayPal. Markennamen „Azur“ und der Firmenname (Verpackung ist neutral).
-  - Stand 4.11.: Der Owner registriert gerade in LUCID. Verkauf ist erst ab etwa Januar 2027 geplant, darum
+  - Stand 4.11.: Registrierung in LUCID abgeschickt; der Bescheid mit der Registrierungsnummer kommt per Mail. Verkauf ist erst ab etwa Januar 2027 geplant, darum
     den Systemvertrag im Dezember für 2027 abschließen und danach die Mengen in LUCID melden. Der Shop ist
     bis dahin mit Passwort zu. Wird er früher geöffnet, braucht es den Vertrag schon vor dem ersten Paket.
   - Lieferant sitzt in China und hat nichts gemeldet; das ist normal, Azur ist als Importeur zuständig.
