@@ -103,6 +103,17 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 
 ## Offen
 
+- **Rückgabe im Kundenkonto und Widerrufsbutton** (5.11.2026, vor dem Start erledigen):
+  - Geprüft: Neue Kundenkonten sind aktiv (Login mit E-Mail-Code). Der Footer-Link „Bestellungen und Rücksendungen“
+    führt dorthin. Rückgaberegel: 14 Tage ab Lieferung des letzten Artikels, auf Werktag verlängert.
+  - Owner schaltet ein: Einstellungen > Kundenkonten > Rückgabe und Stornieren durch Kunden. Dazu Stornierung
+    „bis der Artikel versendet ist“ unter Einstellungen > Richtlinien. Ob der Schalter schon an ist, sieht Claude
+    über die Schnittstelle nicht.
+  - Nicht automatisch: Genehmigen, Rücksendeetikett (Shopify macht in DE keins, also hochladen oder DHL-Retourenportal)
+    und Erstatten. Mails an den Kunden kommen automatisch.
+  - Pflicht seit 19.06.2026: Button „Vertrag widerrufen“, ohne Login, mit Formular, „Widerruf bestätigen“ und
+    sofortiger Eingangsbestätigung per Mail. Die Rückgabe im Kundenkonto reicht dafür nicht, weil sie ein Login braucht.
+    Lösung offen (App oder eigener Bau). Die Widerrufsbelehrung prüfen lassen.
 - **Verpackungsregister LUCID** (4.11.2026): Die Trikots kommen aus dem Ausland, jedes in einer Plastiktüte.
   Damit ist Azur sehr wahrscheinlich für diese Tüten zuständig (seit 12.08.2026 EU-Verpackungsverordnung).
   - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
