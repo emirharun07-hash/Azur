@@ -1,4 +1,4 @@
-# Übergabe für eine neue Sitzung (Stand 29.10.2026)
+# Übergabe für eine neue Sitzung (Stand 06.11.2026)
 
 Eine neue Claude-Sitzung sieht den alten Chat nicht. Sie weiß nur, was in diesem Repo steht. Diese Datei fasst
 das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.md`, die Idee in `azur/BRIEF.md`.
@@ -17,7 +17,8 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   | Berlin 030 | 64,99 € | `/products/berlin-trikot-azur-collection` |
   | Frankfurt 069 | 64,99 € | `/products/frankfurt-trikot-azur-collection` |
 
-  Versand in Deutschland 1,99 €, ab 90 € kostenlos. Die Städtetrikots sind nicht mehr auf der Startseite, sie haben
+  Versand in Deutschland 1,99 € (Express 9,99 €), ab 79,99 € kostenlos (seit Runde 33, 2.11.; vorher 90 €). EU,
+  Schweiz, UK und USA haben eigene Preise, ebenfalls kostenlos ab 79,99 in der Währung des Markts. Die Städtetrikots sind nicht mehr auf der Startseite, sie haben
   eine eigene Seite (Runde 19).
 - **Idee:** Trikots im Retro-Fußball-Look als Streetwear. Man trägt sein Land oder seine Stadt, keinen Verein.
   Satz der Marke: „Getragen auf dem Platz und danach.“
@@ -38,10 +39,14 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Fans von Retro-Trikots, Streetwear und Drops.
   - Verkauf direkt an Endkunden (B2C). Start in Deutschland.
 
-## Stand am 29.10.2026
+## Stand am 06.11.2026
 
-- **Live-Theme** ist „Azur Zimmer Runde 26b (Entwurf)“, `gid://shopify/OnlineStoreTheme/210548228435`. Der Owner hat
-  es selbst veröffentlicht. Es gibt 17 Themes, Shopify erlaubt 20.
+- **Live-Theme** ist „Azur Zimmer Runde 33 – Versand ab 79,99 (Entwurf)“,
+  `gid://shopify/OnlineStoreTheme/210859917651` (am 6.11. geprüft). Der Owner hat es selbst veröffentlicht. Es gibt
+  15 Themes, Shopify erlaubt 20.
+- **Preis offen:** Claude hat 49,99 € statt 54,99 € für die Ländertrikots empfohlen. Der Owner hat noch nicht
+  entschieden. Wenn ja: Preise in Shopify, den SEO-Text „Ab 54,99 €“ (nur im Entwurfs-Theme) und die
+  Gründungs-Excel anpassen.
 - **Der Shop ist mit Passwort geschlossen** (am 4.11.2026 geprüft und vom Owner bestätigt): `/` und die
   Produktseiten leiten auf `/password` um. Am 29.10. war er kurz offen. Verkauf ist erst ab etwa Januar 2027
   geplant. Nicht selbst ändern.
@@ -71,15 +76,18 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Keine Passwörter oder Schlüssel im Chat oder im Repo. Das Repo ist öffentlich lesbar.
   - Nichts, was Geld kostet (Werbebudget, Apps, Abos), ohne ausdrückliche Zusage des Owners.
   - In Konten wie Meta oder Google klickt der Owner selbst; Claude erklärt Schritt für Schritt.
-- **Zwei Sitzungen gleichzeitig:**
-  - Nur eine Sitzung lädt etwas in Shopify hoch.
+- **Mehrere Sitzungen gleichzeitig:**
+  - Nur eine Sitzung lädt etwas in Shopify hoch: ab 6.11.2026 die Sitzung „Azur Shop & Theme“. Die anderen
+    Azur-Sitzungen (Werbung & Google, Gründung & Controlling, Content) lesen in Shopify nur.
+  - Keine Fragen als Auswahl-Dialog stellen; der Owner will normale Fragen im Text.
   - Vor jedem Push `git pull --rebase`.
   - Keine zerstörerischen Git-Befehle.
 
 ## Wo was liegt
 
 - **Repo:** `emirharun07-hash/Azur` (hieß früher `S-per-Lig-Fantasy-Manager`, alte Links leiten weiter). Der Ordner
-  auf dem PC des Owners heißt noch `S-per-Lig-Fantasy-Manager`, so bleibt es.
+  auf dem PC des Owners heißt noch `S-per-Lig-Fantasy-Manager`, so bleibt es. Achtung: Das Repo
+  `azur-shopify-theme` hat mit Azur nichts zu tun. Es ist der alte Name von `kilic.berlin` (leer).
 - **Branches:** Der Startzweig ist `main`. Der neueste Stand liegt im Arbeitszweig
   `claude/shopify-notification-signup-o5avym`; `main` hinkt hinterher. Diesen Zweig nicht löschen, der PC des Owners
   rendert darüber.
@@ -130,7 +138,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
     Lieferkartons aus China, die Azur auspackt.
   - Kosten (Vergleich vom 15.10.2026, Lizenzjahr 2027, netto, plus 19 % MwSt): EASY-LIZE 28,90 €, activate by
     Reclay 37,05 €, VerpackGo 44,84 €. Für Azur zählt vor allem die Grundgebühr.
-  - Erinnerung für den Owner am 21.12.2026, 10 Uhr, in der Sitzung „Shopify Shop Benachrichtigungsseite“.
+  - Erinnerung für den Owner am 21.12.2026, 10 Uhr, in der Sitzung „Azur Shop & Theme“ (am 6.11. dorthin verlegt).
   - Der Owner macht das selbst; Claude erklärt.
 - **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
   Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
