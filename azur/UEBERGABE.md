@@ -77,8 +77,10 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Nichts, was Geld kostet (Werbebudget, Apps, Abos), ohne ausdrückliche Zusage des Owners.
   - In Konten wie Meta oder Google klickt der Owner selbst; Claude erklärt Schritt für Schritt.
 - **Mehrere Sitzungen gleichzeitig:**
-  - Nur eine Sitzung lädt etwas in Shopify hoch: ab 6.11.2026 die Sitzung „Azur Shop & Theme“. Die anderen
-    Azur-Sitzungen (Werbung & Google, Gründung & Controlling, Content) lesen in Shopify nur.
+  - Nur eine Sitzung lädt etwas in Shopify hoch: die Sitzung „Azur Shopify Theme“ (hieß bis 6.11.2026
+    „Shopify Shop Benachrichtigungsseite“; im Menü steht daneben noch der alte Repo-Name S-per-Lig-Fantasy-Manager,
+    der lässt sich nicht ändern). Die anderen Azur-Sitzungen (Werbung & Google, Gründung & Controlling, Content)
+    lesen in Shopify nur.
   - Keine Fragen als Auswahl-Dialog stellen; der Owner will normale Fragen im Text.
   - Vor jedem Push `git pull --rebase`.
   - Keine zerstörerischen Git-Befehle.
@@ -138,7 +140,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
     Lieferkartons aus China, die Azur auspackt.
   - Kosten (Vergleich vom 15.10.2026, Lizenzjahr 2027, netto, plus 19 % MwSt): EASY-LIZE 28,90 €, activate by
     Reclay 37,05 €, VerpackGo 44,84 €. Für Azur zählt vor allem die Grundgebühr.
-  - Erinnerung für den Owner am 21.12.2026, 10 Uhr, in der Sitzung „Azur Shop & Theme“ (am 6.11. dorthin verlegt).
+  - Erinnerung für den Owner am 21.12.2026, 10 Uhr, in der Sitzung „Azur Shopify Theme“.
   - Der Owner macht das selbst; Claude erklärt.
 - **Fast gleicher Name: azurclo.com** (am 1.11.2026 geprüft). Ein Shopify-Shop aus der Schweiz (CHF, Deutsch) mit
   Streetwear: Hoodies, Jogger, Shorts, Shirt und Trainingsanzug für 30–60 CHF, 7 Produkte. Er nennt sich „Azur“
