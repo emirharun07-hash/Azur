@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "blotato-skills": {
+      "source": {
+        "source": "github",
+        "repo": "Blotato-Inc/blotato-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "blotato@blotato-skills": true
+  }
+}

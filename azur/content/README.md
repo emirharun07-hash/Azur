@@ -8,6 +8,9 @@ Hier liegt alles, was für Reels und TikToks von AZUR dauerhaft gebraucht wird.
 | Regeln, Marke, Ablauf für ein Reel | `.claude/skills/azur-reels/SKILL.md` |
 | Schnitt im Takt der Musik (Anleitung) | `.claude/skills/azur-beat-schnitt/SKILL.md` |
 | Werkzeug für den Schnitt | `azur/content/tools/beat_cut.py` |
+| KI-Video aus eigenen Fotos/Clips (Anleitung) | `.claude/skills/azur-ki-video/SKILL.md` |
+| Werkzeug eigene Medien für kie.ai | `azur/content/tools/kie_medien.py` |
+| Plugin „generate“ (Blotato) für jede Sitzung | `.claude/settings.json` |
 | Plan für Kamerafahrten aus Blender | `azur/content/KAMERAFAHRTEN.md` |
 | Allgemeine Content-Skills (MIT, Ootto) | `.claude/skills/<name>/SKILL.md` |
 

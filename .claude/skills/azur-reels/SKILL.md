@@ -54,6 +54,7 @@ Diese Skill gilt für jede Content-Arbeit für AZUR. Lies zuerst `azur/content/U
    (die meisten schauen stumm). Eine einzige Handlungsaufforderung am Ende.
 4. **Drehliste**: in Dreh-Reihenfolge, nach Ort gruppiert, jede Einstellung mit Zweck. Wichtig / optional markieren.
    Immer 9:16, Handy senkrecht, 4K/30 fps wenn möglich, Licht von vorn.
+4b. **KI-Szenen** (nur wenn nötig): Skill `azur-ki-video` (Blotato „generate“ + eigene Fotos/Clips), nie ohne Ja zum Preis.
 5. **Schnitt im Takt**: mit der Skill `azur-beat-schnitt` (Werkzeug `azur/content/tools/beat_cut.py`).
    Schnitt im Takt der Musik ist für den Owner sehr wichtig. Jeder Schnitt liegt auf einem Beat, harte Wechsel auf der Eins
    oder dem Drop.

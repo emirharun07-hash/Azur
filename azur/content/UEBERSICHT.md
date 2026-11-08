@@ -29,6 +29,11 @@ Der Owner will **so gute Videos wie möglich**, und das 3D-Zimmer soll richtig z
    ausgenutzt. Vieles wird selbst gedreht, KI nur für Szenen, die man nicht filmen kann.
 5. **ootto.ai wird nicht gebraucht.** Die Skills sind kostenlos im Repo, posten macht der Owner selbst.
 6. Der Owner postet selbst. Claude postet nicht, meldet sich nirgends an und gibt kein Geld aus.
+7. **KI direkt aus Claude (08.11.):** Plugin „generate“ von Blotato ist im Repo eingetragen (`.claude/settings.json`,
+   lädt in jeder Sitzung). Bezahlt über kie.ai pro Nutzung (10-s-Video 1080p ca. 0,70 $). Dazu das eigene Werkzeug
+   `azur/content/tools/kie_medien.py` für **eigene Fotos und Clips** als Startbild. Anleitung: Skill `azur-ki-video`.
+   Noch offen: kie.ai-Konto und Guthaben (kauft der Owner), Schlüssel sicher hinterlegen. Vorschlag: nach dem Drehtag
+   mit 5–10 $ bei kie.ai testen, dann zwischen kie.ai und Higgsfield Plus entscheiden.
 
 ## Wie ein gutes AZUR-Video entsteht
 
@@ -80,6 +85,7 @@ Frankfurt (4), Ganzkörper-Fotos für die KI (6), Cover-Foto (9).
 | Fester Hook-Prompt des Owners | `.claude/skills/azur-hook-stratege/SKILL.md` |
 | Schnitt im Takt (Anleitung + Werkzeug) | `.claude/skills/azur-beat-schnitt/SKILL.md`, `azur/content/tools/beat_cut.py` |
 | Plan Kamerafahrten | `azur/content/KAMERAFAHRTEN.md` |
+| KI-Bilder/-Videos, auch aus eigenen Fotos (Blotato „generate“ + kie.ai) | `.claude/skills/azur-ki-video/SKILL.md`, `azur/content/tools/kie_medien.py`, Plugin in `.claude/settings.json` |
 | Allgemeine Content-Skills (MIT, Ootto) | `.claude/skills/<name>/` |
 
 Claude Code lädt alles in `.claude/skills/` automatisch, wenn dieses Repo offen ist. Für normale claude.ai-Chats
