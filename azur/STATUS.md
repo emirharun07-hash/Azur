@@ -559,6 +559,11 @@ on every device without losing quality.
   - Die Tasche „Nächster Drop“ bleibt rechts an der Stange: dunkelgrauer Kleidersack, weißes AZUR-Logo, Reißverschluss,
     weißer Anhänger mit „Nächster Drop“.
   - Das Deutschland-Trikot bekommt das Stoffmuster vom Brasilien-Trikot (die diagonalen Streifen). Die Blätter bleiben genau gleich.
+- Update 2026-11-10: beste Zimmer-Vorlage jetzt Job b4b4ac07-d150-4a65-83ec-ccdd092022d1 (2K, frischer Start, kleine Tasche).
+  Das Brasilien-Muster sind einzelne kurze schräge Striche im versetzten Raster, keine durchgehenden Streifen.
+  Dazu ein 5-Sekunden-Video (Kamerafahrt ins Brasilien-Trikot): Job 17df9918-f567-41c8-ab3c-b0382d2cfaea.
+- Ab jetzt läuft alle Higgsfield-Arbeit (KI-Bilder, KI-Videos) in der Session „Higgsfield“ (session_01HqjP8uAZy1wiBmY4STvPkB).
+  KI-Bilder und -Videos kommen nicht ins Repo.
 - scene/build_room_duo.py (Commit ffe01c9): Kopie der Szene mit nur BRA + GER und Relief aus den Trikot-Fotos. build_room.py
   bleibt unverändert.
 
