@@ -539,6 +539,25 @@ on every device without losing quality.
   desktop 1440 and phone 390, add from the room and from a card, no errors.
 - Not yet: the standalone product page (/products/…) keeps its layout (new colours only).
 
+## Runde 34 – Vorlage fürs nächste Rendern: nur Brasilien + Deutschland (2026-11-10)
+
+- Der Inhaber will das Zimmer am Ende neu rendern und auf der Website nutzen. Die Vorlage für den Look sind 2 KI-Bilder
+  von Higgsfield (nur Ideen, nicht im Repo, nicht für Posts). Sie liegen im Higgsfield-Konto: Zimmer = Job
+  fcda7500-01e7-48f3-9967-a285f6c78b3d, Bett = Job 6d08e0fe-a687-44dd-8fc8-d9632c3ef78e.
+- Was das Rendern übernehmen soll:
+  - An der Stange nur Brasilien und Deutschland, genau wie die echten Trikots (3 Streifen auf der Schulter, Wappen, AZUR-Logo).
+  - Die Trikots sind ein Teil des Zimmers und nicht groß im Fokus. Die Kamera beim Zimmer steht auf Augenhöhe, gerade von vorne, das ganze Zimmer ist im Bild.
+  - Die Bett-Ansicht zeigt fast nur Bett und Boden, ohne Trikots.
+  - Das Heft heißt „AZUR“ in der Logo-Schrift, auf beiden Ansichten (statt „ANSTOSS“).
+  - Boden aus dunkler Räuchereiche (fast Espresso), der Teppich anthrazit, das Zimmer insgesamt dunkler. Abendsonne und Spot
+    liegen auf der Stange, damit die Trikots herausstechen.
+  - Statt des blauen Kastens eine richtige Fußballtasche: Sporttasche mit Schultergurt, Schuhfach und Netztasche.
+  - Schuhe und Ball sehen benutzt aus: Kratzer, Gras- und Dreckspuren, offene Schnürsenkel.
+- Gerendert wird erst, wenn die Trikots per 3D-Scan neu kommen (render_request.json: gestoppt vom Inhaber). Noch offen:
+  Soll die Tasche „Nächster Drop“ wieder an die Stange?
+- scene/build_room_duo.py (Commit ffe01c9): Kopie der Szene mit nur BRA + GER und Relief aus den Trikot-Fotos. build_room.py
+  bleibt unverändert.
+
 ## Runde 27b – Blogbeiträge (2026-11-01)
 
 - Erste 7 Entwürfe wurden von außen gelöscht (nicht von Claude). Auf Wunsch neu angelegt, **ohne das Wort „Retro“**, als versteckte Entwürfe im Blog „Neuigkeiten“, mit SEO-Titel/-Beschreibung:
