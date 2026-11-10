@@ -85,6 +85,7 @@ Frankfurt (4), Ganzkörper-Fotos für die KI (6), Cover-Foto (9).
 | Fester Hook-Prompt des Owners | `.claude/skills/azur-hook-stratege/SKILL.md` |
 | Schnitt im Takt (Anleitung + Werkzeug) | `.claude/skills/azur-beat-schnitt/SKILL.md`, `azur/content/tools/beat_cut.py` |
 | Plan Kamerafahrten | `azur/content/KAMERAFAHRTEN.md` |
+| Ähnliche Marken auf Instagram | `azur/content/WETTBEWERB.md` |
 | KI-Bilder/-Videos, auch aus eigenen Fotos (Blotato „generate“ + kie.ai) | `.claude/skills/azur-ki-video/SKILL.md`, `azur/content/tools/kie_medien.py`, Plugin in `.claude/settings.json` |
 | Allgemeine Content-Skills (MIT, Ootto) | `.claude/skills/<name>/` |
 
