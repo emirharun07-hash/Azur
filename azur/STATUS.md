@@ -553,8 +553,12 @@ on every device without losing quality.
     liegen auf der Stange, damit die Trikots herausstechen.
   - Statt des blauen Kastens eine richtige Fußballtasche: Sporttasche mit Schultergurt, Schuhfach und Netztasche.
   - Schuhe und Ball sehen benutzt aus: Kratzer, Gras- und Dreckspuren, offene Schnürsenkel.
-- Gerendert wird erst, wenn die Trikots per 3D-Scan neu kommen (render_request.json: gestoppt vom Inhaber). Noch offen:
-  Soll die Tasche „Nächster Drop“ wieder an die Stange?
+- Gerendert wird erst, wenn die Trikots per 3D-Scan neu kommen (render_request.json: gestoppt vom Inhaber).
+- Update, gleicher Tag: neue Zimmer-Vorlage in 4K und höchster Qualität = Job a355774a-9814-477f-bb63-397393280cf0 (ersetzt
+  fcda7500 beim Zimmer). Neu darin:
+  - Die Tasche „Nächster Drop“ bleibt rechts an der Stange: dunkelgrauer Kleidersack, weißes AZUR-Logo, Reißverschluss,
+    weißer Anhänger mit „Nächster Drop“.
+  - Das Deutschland-Trikot bekommt das Stoffmuster vom Brasilien-Trikot (die diagonalen Streifen). Die Blätter bleiben genau gleich.
 - scene/build_room_duo.py (Commit ffe01c9): Kopie der Szene mit nur BRA + GER und Relief aus den Trikot-Fotos. build_room.py
   bleibt unverändert.
 
