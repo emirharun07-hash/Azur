@@ -1,0 +1,35 @@
+AZUR TERMINE – Mac
+==================
+
+Installieren (am zuverlässigsten über das Terminal)
+---------------------------------------------------
+1. Die ZIP-Datei doppelklicken. Es entsteht der Ordner "AZURTermine".
+2. Das Programm "Terminal" öffnen: Cmd + Leertaste, "Terminal" tippen, Enter.
+3. Im Terminal  bash  tippen und danach EIN Leerzeichen (noch nicht Enter).
+4. Die Datei "Installieren.command" aus dem Ordner ins Terminal-Fenster ziehen.
+   Dann steht dort etwa:  bash /Users/deinname/Downloads/AZURTermine/Installieren.command
+5. Enter drücken.
+
+Ist das Kampagnen Board schon installiert, geht es schnell. Sonst lädt der Installer
+einmalig etwa 100 MB (die Electron-Laufzeit). Danach liegt "AZUR Termine" in deinem
+Programme-Ordner (~/Programme) und startet.
+
+Warum nicht einfach doppelklicken? macOS blockiert Skripte aus dem Internet,
+die nicht bei Apple registriert sind. Über das Terminal geht es auf jedem Mac.
+
+Gemeinsam nutzen
+----------------
+Ist das Kampagnen Board auf diesem Mac mit eurer Cloud verbunden, verbindet sich
+die App von selbst. Oben rechts steht dann "Gemeinsam".
+Sonst unten auf "Gemeinsam nutzen" klicken und den Einladungscode eingeben.
+Den Code zeigt das Kampagnen Board unter "Teilen".
+
+Kleines Fenster
+---------------
+Oben auf "Klein" klicken (oder Cmd + Shift + K). Die App wird klein und bleibt vor
+allen anderen Fenstern. Mit "Groß" wird sie wieder groß.
+
+Entfernen
+---------
+Genauso wie oben, nur mit "Deinstallieren.command". Deine Einträge bleiben erhalten in
+~/Library/Application Support/AZUR Termine (und in eurer Cloud).

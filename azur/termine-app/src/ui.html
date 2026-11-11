@@ -1,0 +1,116 @@
+<header class="top">
+  <div class="top__in">
+    <h1 class="brand"><!--LOGO--><span>Termine</span></h1>
+    <p class="sync" id="sync" data-state="load" title="Lädt"><i></i><span>Lädt</span></p>
+    <div class="seg tabs" role="group" aria-label="Ansicht" id="views">
+      <button type="button" aria-pressed="true" data-view="liste">Liste</button>
+      <button type="button" aria-pressed="false" data-view="monate">Monate</button>
+    </div>
+    <button type="button" class="btn only-desk" id="mini" title="Kleines Fenster, bleibt vor allen anderen">Klein</button>
+    <button type="button" class="btn btn--primary w" id="add" aria-label="Neuer Eintrag">+<span class="x-long">&nbsp;Neu</span></button>
+  </div>
+</header>
+
+<div class="bar">
+  <p class="sum" id="sum" aria-live="polite"></p>
+  <div class="seg" role="group" aria-label="Zuständig" id="who">
+    <button type="button" aria-pressed="true" data-who="alle">Alle</button>
+    <button type="button" aria-pressed="false" data-who="emir">Emir</button>
+    <button type="button" aria-pressed="false" data-who="talha">Talha</button>
+  </div>
+  <label class="tick" for="show-done"><input type="checkbox" id="show-done"><span>Erledigte<span class="x-long"> zeigen</span></span></label>
+</div>
+
+<main class="wrap">
+  <section id="pane-liste" aria-label="Liste">
+    <p class="notice" id="notice" role="status" hidden></p>
+    <div id="list"><p class="empty">Lädt …</p></div>
+  </section>
+  <section id="pane-monate" aria-label="Monate">
+    <div class="mhead">
+      <h2>Monate</h2>
+      <div class="pager">
+        <button type="button" id="m-prev" aria-label="Einen Monat zurück">‹</button>
+        <button type="button" id="m-today">Heute</button>
+        <button type="button" id="m-next" aria-label="Einen Monat weiter">›</button>
+      </div>
+    </div>
+    <div class="months" id="months"></div>
+    <p class="legend">
+      <span><i class="m deadline"></i>Deadline</span>
+      <span><i class="m termin"></i>Termin</span>
+      <span><i class="m deadline late"></i>überfällig</span>
+    </p>
+  </section>
+</main>
+
+<footer class="foot">
+  <button type="button" class="link needs-export" id="export-all">Alle offenen Einträge in den Kalender</button>
+  <button type="button" class="link only-share" id="open-share">Gemeinsam nutzen</button>
+</footer>
+
+<dialog id="dlg-entry" aria-labelledby="entry-h">
+  <form class="form" id="entry-form">
+    <h2 id="entry-h" tabindex="-1">Neuer Eintrag</h2>
+    <label class="field" for="f-title"><span>Titel</span>
+      <input id="f-title" name="title" type="text" required maxlength="140" autocomplete="off" enterkeyhint="done"></label>
+    <fieldset class="field"><legend>Art</legend>
+      <div class="seg seg--full">
+        <label><input type="radio" name="kind" id="f-kind-termin" value="termin" checked><span>Termin</span></label>
+        <label><input type="radio" name="kind" id="f-kind-deadline" value="deadline"><span>Deadline</span></label>
+      </div>
+    </fieldset>
+    <div class="two">
+      <label class="field" for="f-date"><span>Datum</span>
+        <input id="f-date" name="date" type="date" required></label>
+      <div class="field"><label for="f-time" class="field"><span>Uhrzeit (wenn nötig)</span>
+        <input id="f-time" name="time" type="time"></label>
+        <button type="button" class="link" id="time-clear" hidden>Uhrzeit entfernen</button></div>
+    </div>
+    <fieldset class="field"><legend>Zuständig</legend>
+      <div class="seg seg--full">
+        <label><input type="radio" name="who" id="f-who-emir" value="emir"><span>Emir</span></label>
+        <label><input type="radio" name="who" id="f-who-talha" value="talha"><span>Talha</span></label>
+        <label><input type="radio" name="who" id="f-who-beide" value="beide" checked><span>Beide</span></label>
+      </div>
+    </fieldset>
+    <label class="field" for="f-note"><span>Notiz (wenn nötig)</span>
+      <textarea id="f-note" name="note" rows="3" maxlength="2000"></textarea></label>
+    <div class="cal" id="cal-box" hidden>
+      <p class="cal__h">In den Kalender übernehmen</p>
+      <div class="cal__b">
+        <a class="btn" id="cal-google" target="_blank" rel="noopener">Google Kalender</a>
+        <button type="button" class="btn needs-export" id="cal-file">Kalenderdatei</button>
+      </div>
+      <p class="hint needs-export" id="cal-hint">Die Kalenderdatei passt für Apple Kalender, Outlook und andere. Dein Kalender erinnert dich dann am Tag davor und am Tag selbst.</p>
+    </div>
+    <p class="msg" id="entry-msg" role="alert" hidden></p>
+    <div class="actions">
+      <button type="button" class="link link--late w" id="del" hidden>Löschen</button>
+      <span class="confirm" id="del-confirm" hidden>Wirklich löschen?
+        <button type="button" class="link link--late" id="del-yes">Ja, löschen</button>
+        <button type="button" class="link" id="del-no">Nein</button></span>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="cancel">Abbrechen</button>
+      <button type="submit" class="btn btn--primary w" id="save">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-day" aria-labelledby="day-h">
+  <div class="form">
+    <h2 id="day-h" tabindex="-1"></h2>
+    <div id="day-list"></div>
+    <div class="actions">
+      <span class="grow"></span>
+      <button type="button" class="btn" id="day-close">Schließen</button>
+      <button type="button" class="btn btn--primary w" id="day-add">+ Neu an diesem Tag</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlg-share" aria-labelledby="share-h">
+  <div class="form" id="share-box"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span id="toast-text"></span><button type="button" id="toast-act" hidden></button></div>

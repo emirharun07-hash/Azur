@@ -1,0 +1,31 @@
+AZUR TERMINE – Windows
+======================
+
+Installieren
+------------
+1. Die ZIP-Datei mit Rechtsklick > "Alle extrahieren ..." entpacken.
+   (Nicht direkt aus der ZIP heraus starten.)
+2. Im entpackten Ordner "AZURTermine" doppelt auf "Installieren.bat" klicken.
+3. Falls Windows "Der Computer wurde durch Windows geschützt" anzeigt:
+   auf "Weitere Informationen" und dann "Trotzdem ausführen" klicken.
+   Das kommt, weil die Datei nicht bei Microsoft registriert ist.
+4. Ist das Kampagnen Board schon installiert, geht es schnell. Sonst lädt der
+   Installer einmalig etwa 110 MB (die Electron-Laufzeit).
+   Danach startet die App. Sie liegt auf dem Desktop und im Startmenü.
+
+Gemeinsam nutzen
+----------------
+Ist das Kampagnen Board auf diesem PC mit eurer Cloud verbunden, verbindet sich
+die App von selbst. Oben rechts steht dann "Gemeinsam".
+Sonst unten auf "Gemeinsam nutzen" klicken und den Einladungscode eingeben.
+Den Code zeigt das Kampagnen Board unter "Teilen".
+
+Kleines Fenster
+---------------
+Oben auf "Klein" klicken. Die App wird klein und bleibt vor allen anderen Fenstern.
+Mit "Groß" wird sie wieder groß.
+
+Entfernen
+---------
+"Deinstallieren.bat" doppelklicken. Deine Einträge bleiben erhalten in
+%APPDATA%\AZUR Termine (und in eurer Cloud).

@@ -1,0 +1,16 @@
+{
+  "name": "azur-termine",
+  "productName": "AZUR Termine",
+  "version": "1.0.0",
+  "description": "Termine und Deadlines von AZUR, gemeinsam für zwei.",
+  "main": "main.js",
+  "author": "AZUR",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "33.4.11"
+  }
+}
