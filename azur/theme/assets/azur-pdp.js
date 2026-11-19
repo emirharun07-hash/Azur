@@ -198,7 +198,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
           <a class="azur-pdp__shop" target="_blank" rel="noopener">${c.openInShop || c.toProductPage || 'Im Shop öffnen'} <span aria-hidden="true">↗</span></a>
         </div>
         <fieldset class="azur-pdp__sizes">
-          <legend>Deine Größe</legend>
+          <legend>${A.config.copy.yourSize || 'Deine Größe'}</legend>
           <div class="azur-pdp__sizerow azur-pitch"><span class="azur-pitch__box is-top"></span><span class="azur-pitch__box is-bottom"></span></div>
         </fieldset>
         <div class="azur-pdp__buy">
@@ -221,7 +221,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.drawer = document.createElement('aside');
       this.drawer.className = 'azur-cart'; this.drawer.setAttribute('aria-label', c.cart); this.drawer.setAttribute('aria-hidden', 'true');
       this.drawer.innerHTML = `
-        <header class="azur-cart__head"><h2>${c.cart}</h2><button type="button" class="azur-cart__close" aria-label="Schließen">×</button></header>
+        <header class="azur-cart__head"><h2>${c.cart}</h2><button type="button" class="azur-cart__close" aria-label="${c.close || 'Schließen'}">×</button></header>
         <ul class="azur-cart__list"></ul>
         <footer class="azur-cart__foot">
           <p class="azur-cart__total"><span>${c.total}</span><strong></strong></p>
@@ -370,7 +370,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
         const res = await fetch(root + 'cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({ items: [{ id: Number(v.id), quantity: 1 }] }) });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.status >= 400) throw new Error(data.description || data.message || 'Das hat nicht geklappt.');
+        if (!res.ok || data.status >= 400) throw new Error(data.description || data.message || A.config.copy.failed || 'Das hat nicht geklappt.');
         b.textContent = c.added; b.classList.add('is-done');
         const cart = await fetch(root + 'cart.js', { headers: { Accept: 'application/json' } }).then(r => r.json()).catch(() => null);
         if (cart) { this.app.setCartCount(cart.item_count); this.showAfter(cart.total_price / 100); }
@@ -391,7 +391,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       else list.innerHTML = this.cart.map((l, i) => `
         <li class="azur-cart__line">
           <img src="${l.image}" alt="">
-          <div><p class="azur-cart__name">${l.name}</p><p class="azur-cart__meta">Größe ${l.size} · ${l.qty} ×</p></div>
+          <div><p class="azur-cart__name">${l.name}</p><p class="azur-cart__meta">${A.config.copy.size || 'Größe'} ${l.size} · ${l.qty} ×</p></div>
           <p class="azur-cart__price">${A.formatPrice(l.price * l.qty)}</p>
           <button type="button" data-remove="${i}" aria-label="${l.name} entfernen">Entfernen</button>
         </li>`).join('');
