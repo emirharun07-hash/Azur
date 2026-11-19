@@ -27,7 +27,11 @@
   window.AZUR_SETUP = function (A) {
     A.config.shopify = true;
     {% render 'azur-copy-en' %}
-    A.formatPrice = function (v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; };
+    A.formatPrice = function (v) {
+      if (v == null) return '';
+      try { return new Intl.NumberFormat({{ request.locale.iso_code | json }}, { style: 'currency', currency: {{ cart.currency.iso_code | json }} }).format(v); }
+      catch (e) { return v.toFixed(2).replace('.', ',') + ' €'; }
+    };
     A.store = { name: {{ shop.name | json }}, shipping: {{ shipping | json }}, freeShippingFrom: {{ settings.free_shipping_threshold | default: 0 | json }}, cartCount: {{ cart.item_count | json }} };
     A.config.copy.toProductPage = {{ 'azur.room.to_product_page' | t | json }};
     A.config.copy.adding = {{ 'azur.room.adding' | t | json }};

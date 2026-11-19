@@ -163,6 +163,9 @@
       this.canvas = canvas;
       this.gl = null;
       try { this.gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: true }); } catch (e) { this.gl = null; }
+      /* GPU context lost (tab in the background, driver reset): the same stand-in as without WebGL, kept until the
+         page is reloaded (rebuilding every texture is riskier than the still image; clicks keep working). */
+      canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.gl = null; if (this.onLost) this.onLost(); });
       this.view = null; this.mode = 'none';
       this.map = [0, 0, 1, 1]; this.parallax = [0, 0]; this.pan = 0.5; this.overscan = 0.03;
       this.dim = 1; this.cache = {};

@@ -130,6 +130,21 @@
     <div class="azur-loader" aria-hidden="true"><img class="azur-loader__neon" src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="" width="480" height="227"></div>
     <p class="azur-missing">{{ 'azur.room.missing' | t }}</p>
   </div>
+  <noscript>
+    <style>.azur-loader{display:none}.azur-noscript{position:fixed;inset:0;overflow:auto;padding:40px 24px;background:#F3EEE6;color:#15130F;font-family:Archivo,system-ui,sans-serif}.azur-noscript a{color:#0A6A9A}</style>
+    <div class="azur-noscript">
+      <h1>{{ shop.name | escape }}</h1>
+      <ul>
+        {%- for key in keys -%}
+          {%- assign nk = 'product_' | append: forloop.index -%}
+          {%- assign np = section.settings[nk] -%}
+          {%- if np != blank -%}
+            <li><a href="{{ np.url }}">{{ np.title | escape }}, {{ np.price | money }}</a></li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </noscript>
 </div>
 <nav aria-label="AZUR"><a class="azur-ghost" href="{{ routes.root_url }}" aria-label="{{ 'azur.room.ghost' | t }}"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a></nav>
 <div class="azur-fall" aria-hidden="true"></div>
@@ -151,7 +166,11 @@
       m = p.match(/^assets\/(?:scene\d\/)?(.+)$/);
       return m ? files + 'azr8-' + m[1].replace(/@/g, '-at-').replace(/\//g, '-') : p;
     };
-    A.formatPrice = function (v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; };
+    A.formatPrice = function (v) {
+      if (v == null) return '';
+      try { return new Intl.NumberFormat({{ request.locale.iso_code | json }}, { style: 'currency', currency: {{ cart.currency.iso_code | json }} }).format(v); }
+      catch (e) { return v.toFixed(2).replace('.', ',') + ' €'; }
+    };
     A.store = {
       name: {{ shop.name | json }},
       shipping: {{ shipping | json }},
@@ -234,7 +253,7 @@
       "options": [{ "value": "blend", "label": "Überblendung (Licht immer wie im Zimmer)" }, { "value": "video", "label": "Gerenderte Kamerafahrt (Video)" }],
       "info": "Die gerenderte Fahrt hat ihr eigenes Licht; je nach Uhrzeit springt es beim Ankommen." },
     { "type": "header", "content": "Produktansicht im Zimmer" },
-    { "type": "number", "id": "free_shipping_from", "label": "Kostenloser Versand ab (€)", "default": 90, "info": "Nach dem Hinzufügen zeigt die Produktansicht, wie viel noch fehlt. 0 = ausblenden." }
+    { "type": "number", "id": "free_shipping_from", "label": "Kostenloser Versand ab (€)", "default": 79.99, "info": "Nach dem Hinzufügen zeigt die Produktansicht, wie viel noch fehlt. 0 = ausblenden." }
   ],
   "blocks": [
     {

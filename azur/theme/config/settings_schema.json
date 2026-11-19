@@ -71,12 +71,14 @@
         "type": "text",
         "id": "shipping_cost",
         "label": "Versandkosten Deutschland",
+        "default": "1,99 €, ab 79,99 € kostenlos",
         "info": "Steht hinter „Versand“, z. B. „in Deutschland 1,99 €, ab 79,99 € kostenlos“. Muss zu Märkte → Versand passen. Leer = ausgeblendet."
       },
       {
         "type": "text",
         "id": "delivery_days",
         "label": "Lieferzeit in Werktagen",
+        "default": "2–5",
         "info": "Nur die Zahl oder Spanne, z. B. „2–4“. Ergibt „Lieferung in 2–4 Werktagen“. Leer = ausgeblendet."
       },
       {

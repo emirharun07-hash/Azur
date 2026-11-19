@@ -37,6 +37,11 @@
       this.comp = new A.Compositor(this.canvas);
       this.comp.viewsData = this.views; this.comp.onChange = () => this.kick();
       this.root.classList.toggle('no-webgl', !this.comp.ok);
+      this.comp.onLost = () => {                     // WebGL lost while open: show the still image of the current view
+        this.root.classList.add('no-webgl');
+        if (this.viewKey) { this.fallbackImg.src = A.url(A.config.assetBase + this.viewKey + '/beauty.webp'); this.fallbackImg.hidden = false; }
+        this.canvas.style.visibility = 'hidden';
+      };
       this.glowAmt = [0, 0, 0]; this.region = null;
       this.dayState = this.stateNow();
       this.comp.state = this.dayState; this.root.dataset.state = this.dayState;

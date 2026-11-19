@@ -99,7 +99,7 @@ AZUR.config = {
     addToCart: 'In den Warenkorb',
     added: 'Im Warenkorb',
     cart: 'Warenkorb', checkout: 'Zur Kasse', emptyCart: 'Dein Warenkorb ist leer.',
-    total: 'Summe', inclVat: 'inkl. MwSt.',
+    total: 'Summe', inclVat: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
     nav: ['Shop', 'Kollektion', 'Über uns'],
     dropTitle: 'Nächster Drop',
     dropText: 'Noch unter Verschluss.',
@@ -157,3 +157,6 @@ AZUR.config = {
    AZUR.config.urlMap (renders in Content > Files, logos in the theme's assets) and AZUR.config.inline (the JSON). */
 AZUR.url = p => (AZUR.config.urlMap ? AZUR.config.urlMap(p) : p);
 
+
+/* Escapes text before it goes into innerHTML (product names and descriptions come from the shop). */
+AZUR.esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));

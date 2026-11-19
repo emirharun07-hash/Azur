@@ -15,6 +15,14 @@
   const T = (k, d) => (window.AZUR_T && window.AZUR_T[k]) || d;
   const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
+  // Preisformat aus Seitendaten (Währung/Sprache), Rückfall EUR/de
+  const azurMoney = () => {
+    const cur = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || 'EUR';
+    const loc = document.documentElement.lang || 'de';
+    try { return new Intl.NumberFormat(loc, { style: 'currency', currency: cur }); }
+    catch (e) { return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }); }
+  };
+
   // Gemerkte Größe: nur Komfort, darf fehlen (privates Fenster, gesperrter Speicher).
   // Gelesen und gespeichert wird nur mit Einwilligung in „Präferenzen“ (Shopify Customer Privacy API,
   // Cookie-Banner unter Einstellungen → Kundendatenschutz). Ohne API oder ohne Zustimmung: nichts.
@@ -325,7 +333,7 @@
     function choose(radio) {
       if (picked) picked.textContent = radio ? radio.dataset.size : '';
       if (radio && priceEl && radio.dataset.price) {
-        priceEl.textContent = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(radio.dataset.price) / 100);
+        priceEl.textContent = azurMoney().format(Number(radio.dataset.price) / 100);
       }
     }
 

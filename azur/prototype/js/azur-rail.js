@@ -11,7 +11,7 @@
       const label = product.type === 'drop' ? `${product.name}. ${product.description}` : `${product.name}, ${A.formatPrice(product.price)}`;
       this.el = document.createElement('li');
       this.el.className = 'azur-g';
-      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${label}" data-index="${index}"></button>`;
+      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${A.esc(label)}" data-index="${index}"></button>`;
       this.hit = this.el.firstElementChild;
     }
   }
@@ -126,8 +126,8 @@
       if (i < 0 || !this.items[i] || !this.px || !this.px[i]) { el.classList.remove('is-on'); return; }
       const p = this.items[i].p;
       el.innerHTML = p.type === 'drop'
-        ? `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${p.description}</span><span class="azur-label__cta">${A.config.copy.view || 'Ansehen'}</span>`
-        : `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${A.formatPrice(p.price)}</span><span class="azur-label__cta">${A.config.copy.view}</span>`;
+        ? `<span class="azur-label__name">${A.esc(p.name)}</span><span class="azur-label__meta">${A.esc(p.description)}</span><span class="azur-label__cta">${A.config.copy.view || 'Ansehen'}</span>`
+        : `<span class="azur-label__name">${A.esc(p.name)}</span><span class="azur-label__meta">${A.esc(A.formatPrice(p.price))}</span><span class="azur-label__cta">${A.config.copy.view}</span>`;
       el.classList.add('is-on');
       this.labelFor = i;
     }
@@ -140,9 +140,9 @@
       this.app.drop.close();
       el.innerHTML = `
         <span class="azur-info__n">${String(i + 1).padStart(2, '0')}</span>
-        <span class="azur-info__name">${p.name}</span>
-        <span class="azur-info__price">${A.formatPrice(p.price)}</span>
-        <a class="azur-info__cta" href="${p.productUrl}" data-action="view">${c.viewJersey} <span aria-hidden="true">→</span></a>
+        <span class="azur-info__name">${A.esc(p.name)}</span>
+        <span class="azur-info__price">${A.esc(A.formatPrice(p.price))}</span>
+        <a class="azur-info__cta" href="${A.esc(p.productUrl)}" data-action="view">${c.viewJersey} <span aria-hidden="true">→</span></a>
         <button class="azur-info__back" type="button" data-action="back">${c.putBack}</button>`;
       el.classList.add('is-on');
     }
