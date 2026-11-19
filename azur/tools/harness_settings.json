@@ -1,0 +1,47 @@
+{
+  "_hinweis": "Test-Shop: Theme-Einstellungen wie im Live-Shop (config/settings_data.json, current), nur unkritische Werte. Werte hier ueberschreiben die Defaults aus config/settings_schema.json; 'sections' sind die festen Sections des Layouts. Versandwerte bewusst wie live, nicht korrigiert.",
+  "main_collection": "trikots",
+  "feature_product_1": "berlin-trikot-azur-collection",
+  "feature_product_2": "frankfurt-trikot-azur-collection",
+  "nav_collection": "nationaltrikots",
+  "about_page": "ueber-azur",
+  "support_email": "kontakt@azurclothing.com",
+  "shipping_cost": "in Deutschland 1,99 €, ab 79,99 € kostenlos",
+  "delivery_days": "2-5",
+  "free_shipping_threshold": "79.99",
+  "seo_home_title": "Azur",
+  "seo_home_description": "Trikots: Türkei, Deutschland, Brasilien, Berlin 030 und Frankfurt 069. Ab 54,99 €, Größen S–XL.",
+  "tax_note": "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.",
+  "returns_note": "14 Tage Rückgabe, kostenloser Rückversand",
+  "sections": {
+    "announcement": {
+      "type": "announcement",
+      "settings": {
+        "messages": "14 Tage kostenlose Rückgabe\nVersand ab 79,99 € kostenlos",
+        "link": ""
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {}
+    },
+    "footer": {
+      "type": "footer",
+      "settings": {
+        "line": "Fußballinspirierte Streetwear, entworfen in Berlin.",
+        "instagram": "",
+        "signup": true,
+        "signup_heading": "Neue Drops zuerst.",
+        "signup_text": "Trag deine Mail ein. Wir sagen dir Bescheid, sobald ein neues Trikot rauskommt.",
+        "signup_button": "Eintragen",
+        "signup_success": "Danke, du bist dabei. Kommt eine Bestätigungsmail, klick bitte auf den Link darin.",
+        "signup_teaser": false,
+        "signup_label": "Frankfurt 069"
+      }
+    },
+    "cart-drawer": {
+      "type": "cart-drawer",
+      "settings": {}
+    }
+  }
+}

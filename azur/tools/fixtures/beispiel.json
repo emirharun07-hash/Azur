@@ -1,0 +1,32 @@
+{
+  "products": {
+    "brasilien-trikot-azur-collection": {
+      "inventory": {"S": 3, "M": 12, "L": 0, "XL": 6},
+      "metafields": {
+        "custom": {
+          "fit": "Testwert Passform (Fixture)",
+          "material": "Testwert Material (Fixture)",
+          "model": "Testwert Model (Fixture)",
+          "care": "Testwert Pflege (Fixture)"
+        }
+      },
+      "media": 3
+    },
+    "deutschland-trikot-azur-collection": {
+      "inventory": {"S": 8, "M": 17, "L": 15, "XL": 10}
+    }
+  },
+  "settings": {},
+  "cart": [
+    {"handle": "deutschland-trikot-azur-collection", "size": "M", "qty": 1}
+  ],
+  "shop": {
+    "enabled_payment_types": ["paypal", "visa", "master", "apple_pay", "klarna"]
+  },
+  "pages": {
+    "groessentabelle": {
+      "title": "Größentabelle",
+      "content": "<p>Testinhalt der Größentabelle (Fixture, keine echten Maße).</p>"
+    }
+  }
+}

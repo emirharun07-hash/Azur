@@ -1,0 +1,6 @@
+# extra paths for check.sh screenshots, one per line (check.sh skips paths it already has)
+/password
+/cart
+/collections/trikots
+/products/brasilien-trikot-azur-collection
+/products/deutschland-trikot-azur-collection

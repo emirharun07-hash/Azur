@@ -61,9 +61,16 @@ if [ "$UP" = 1 ]; then
   echo "== screenshots"
   PATHS="/ /collections/trikots /products/brasilien-trikot-azur-collection /products/deutschland-trikot-azur-collection"
   if [ -f azur/tools/check_paths.txt ]; then
-    EXTRA=$(grep -v '^[[:space:]]*$' azur/tools/check_paths.txt | grep -v '^[[:space:]]*#')
-    PATHS="$PATHS $EXTRA"
+    for X in $(grep -v '^[[:space:]]*$' azur/tools/check_paths.txt | grep -v '^[[:space:]]*#'); do
+      case " $PATHS " in *" $X "*) ;; *) PATHS="$PATHS $X" ;; esac
+    done
   fi
+  # the test shop writes what it cannot render into the page: "HARNESS: …" and "translation missing: …"
+  : > "$OUT/harness_notes.txt"
+  for X in $PATHS "/?locale=en"; do
+    curl -s --noproxy '*' --max-time 20 "http://127.0.0.1:$PORT$X" | grep -oE "HARNESS: [^<]*|translation missing: [^<\"]*" | sort -u | sed "s|^|$X  |" >> "$OUT/harness_notes.txt"
+  done
+  if [ -s "$OUT/harness_notes.txt" ]; then echo "HARNESS-NOTES: $(wc -l < "$OUT/harness_notes.txt" | tr -d ' ') (siehe harness_notes.txt)"; fail harness; else rm -f "$OUT/harness_notes.txt"; fi
   # shellcheck disable=SC2086
   node azur/tools/harness_shots.cjs "http://127.0.0.1:$PORT" "$OUT/shots" $PATHS > "$OUT/shots.log" 2>&1
   SRC=$?
