@@ -5,7 +5,7 @@
 #   sh azur/tools/render_on_mac.sh moves      only the camera moves
 #   sh azur/tools/render_on_mac.sh queue      only the view plates and passes
 #
-# First run: installs uv, Python 3.11 and Blender's Python module into azur/.venv (about 1 GB, 5-10 minutes) and
+# Needs uv (brew install uv). First run: installs Python 3.11 and Blender's Python module into azur/.venv (about 1 GB, 5-10 minutes) and
 # downloads the CC0 textures (about 300 MB). Finished outputs are skipped; every new output is committed and pushed,
 # exactly like the cloud renders. Do not let the cloud render the same job at the same time.
 set -e
@@ -20,13 +20,14 @@ if [ -z "$(git config user.email)" ]; then
   exit 1
 fi
 
+# uv wird NICHT mehr aus dem Netz geladen und ausgefuehrt (kein "curl | sh"): fehlt es, Abbruch mit Hinweis.
 if ! command -v uv >/dev/null 2>&1; then
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="$HOME/.local/bin:$PATH"
+  echo "uv fehlt. Bitte installieren mit: brew install uv   (danach dieses Skript noch einmal starten)"
+  exit 1
 fi
 [ -d azur/.venv ] || uv venv -q -p 3.11 azur/.venv
 . azur/.venv/bin/activate
-uv pip install -q bpy==5.0.1 numpy pillow scikit-image scipy imageio-ffmpeg
+uv pip install -q -r azur/tools/requirements-render.txt
 
 export AZUR_GPU=1
 case "${1:-all}" in

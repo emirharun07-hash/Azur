@@ -16,6 +16,22 @@ $Zip     = Join-Path $Cache "electron-v$Version-win32-$Arch.zip"
 $Url     = "https://github.com/electron/electron/releases/download/v$Version/electron-v$Version-win32-$Arch.zip"
 $RcEdit  = Join-Path $Cache 'rcedit-x64.exe'
 
+# Soll-Pruefsummen SHA-256 (Quelle: https://github.com/electron/electron/releases/download/v33.4.11/SHASUMS256.txt, offizielle Release-Datei)
+$ShaTable = @{ 'arm64' = '9de9644304115cce6f7984648bfff72b68b5531cd183416fa138d86e710d591d'; 'x64' = 'f64c8a5a81d9b420b636fdba13e180f49d69f2198e1d86a8b01f858b17a9483c' }
+$ExpectedSha = $ShaTable[$Arch]
+# rcedit v2.0.0 (optional, nur fuer das .exe-Symbol): die Pruefsumme laesst sich aus keiner offiziellen Quelle belegen.
+# Bis sie eingetragen ist, wird rcedit NICHT geladen und NICHT benutzt (App laeuft trotzdem, nur mit Standard-Symbol).
+$RcEditSha = '[PRÜFSUMME EINTRAGEN]'
+
+# Prueft SHA-256 einer Datei. Bei Abweichung: Datei loeschen und abbrechen.
+function Assert-Sha256($Path, $Expected) {
+  $got = (Get-FileHash -Algorithm SHA256 -Path $Path).Hash.ToLower()
+  if ($got -ne $Expected.ToLower()) {
+    Remove-Item -Force -ErrorAction SilentlyContinue $Path
+    throw "Prüfsumme von $(Split-Path -Leaf $Path) stimmt nicht (erwartet $Expected, erhalten $got). Datei gelöscht, Installation abgebrochen."
+  }
+}
+
 function Step($t) { Write-Host ""; Write-Host "  > $t" -ForegroundColor Cyan }
 
 Write-Host ""
@@ -34,8 +50,10 @@ New-Item -ItemType Directory -Force -Path $Cache | Out-Null
 if (-not (Test-Path $Zip) -or (Get-Item $Zip).Length -lt 50MB) {
   Step "Electron $Version ($Arch) herunterladen, ca. 110 MB, nur beim ersten Mal ..."
   Invoke-WebRequest -Uri $Url -OutFile "$Zip.part" -UseBasicParsing
+  Assert-Sha256 "$Zip.part" $ExpectedSha
   Move-Item -Force "$Zip.part" $Zip
 }
+Assert-Sha256 $Zip $ExpectedSha
 
 Step 'App zusammenbauen'
 if (Test-Path $Dest) { Remove-Item -Recurse -Force $Dest }
@@ -50,7 +68,12 @@ $Icon = Join-Path $Dest 'resources\app\build\icon.ico'
 
 # Eigenes Symbol und Name in der .exe (für Taskleiste und Task-Manager). Nicht schlimm, falls es nicht klappt.
 try {
-  if (-not (Test-Path $RcEdit)) { Invoke-WebRequest -Uri 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe' -OutFile $RcEdit -UseBasicParsing }
+  if (-not (Test-Path $RcEdit)) {
+    if ($RcEditSha -like '`[PRÜFSUMME*') { throw 'rcedit: Soll-Prüfsumme fehlt [PRÜFSUMME EINTRAGEN]' }
+    Invoke-WebRequest -Uri 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe' -OutFile "$RcEdit.part" -UseBasicParsing
+    Assert-Sha256 "$RcEdit.part" $RcEditSha
+    Move-Item -Force "$RcEdit.part" $RcEdit
+  } else { Assert-Sha256 $RcEdit $RcEditSha }
   & $RcEdit $Exe --set-icon $Icon --set-version-string 'ProductName' $AppName --set-version-string 'FileDescription' $AppName | Out-Null
 } catch { Write-Host "    (Symbol der .exe konnte nicht gesetzt werden, die App funktioniert trotzdem.)" }
 
