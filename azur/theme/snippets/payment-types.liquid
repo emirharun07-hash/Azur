@@ -1,7 +1,18 @@
 {%- comment -%}
   Zahlungsarten, die im Checkout aktiv sind (shop.enabled_payment_types), als lesbare Liste: "Visa, Mastercard, PayPal".
   Die Liste kommt direkt aus Einstellungen → Zahlungen. Gibt nichts aus, wenn Shopify keine meldet.
+  Parameter: mode 'logos' = Logos als Liste (für unter dem Kaufknopf); ohne = Textliste wie bisher
 {%- endcomment -%}
+{%- if mode == 'logos' -%}
+  {%- if shop.enabled_payment_types.size > 0 -%}
+    {{ 'azur-pay.css' | asset_url | stylesheet_tag }}
+    <ul class="pay-icons" role="list" aria-label="{{ 'azur.general.pay_with' | t: list: '' | strip }}">
+      {%- for type in shop.enabled_payment_types -%}
+        <li class="pay-icons__item">{{ type | payment_type_svg_tag: class: 'pay-icons__svg' }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+{%- else -%}
 {%- liquid
   assign list = ''
   for type in shop.enabled_payment_types
@@ -42,3 +53,4 @@
   endfor
   echo list
 -%}
+{%- endif -%}

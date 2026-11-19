@@ -1,0 +1,3 @@
+.pay-icons { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+.pay-icons__item { line-height: 0; }
+.pay-icons__svg { width: 38px; height: 24px; display: block; }
