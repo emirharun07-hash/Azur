@@ -1,0 +1,12 @@
+# Python packages for rendering on the PC (render_on_windows.ps1, render_step.ps1), installed with
+#   uv pip install -r azur\tools\requirements-render.txt
+# into azur\.venv (Python 3.11). Every package gets a fixed version (==).
+# bpy 5.0.1: documented in azur/STATUS.md (3D toolchain).
+bpy==5.0.1
+# [OFFEN] The versions below are not documented anywhere in the repo yet. Fix them with the versions that work on
+# the PC: in azur\.venv run  uv pip freeze  and write the lines for these packages here with ==.
+numpy
+pillow
+scikit-image
+scipy
+imageio-ffmpeg
