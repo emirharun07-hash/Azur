@@ -64,7 +64,7 @@ sys.exit(1 if bad else 0)
 PYEOF
 
 echo "== feste Pfade in Werkzeugen"
-if git grep -n "/home/user" -- 'azur/tools/*.sh' 'azur/tools/*.cjs' 'azur/tools/*.py'; then fail pfade; fi
+if git grep -n "/home/user" -- ':!azur/tools/ci_check.sh' 'azur/tools/*.sh' 'azur/tools/*.cjs' 'azur/tools/*.py'; then fail pfade; fi
 
 echo "== Zaehler-Verbot"
 if grep -rniE "[0-9x}] ?/ ?50|[0-9x}] von 50|noch [0-9]+ (von|stück)" azur/prototype/js azur/theme/sections azur/theme/snippets azur/theme/templates; then fail zaehler; fi
