@@ -647,7 +647,7 @@
     initSound() {
       try { this.soundOn = localStorage.getItem('azur-sound') !== 'off'; } catch (e) { this.soundOn = true; }
       const btn = $('.azur-head__sound');
-      const sync = () => { if (!btn) return; btn.setAttribute('aria-pressed', String(this.soundOn)); btn.setAttribute('aria-label', this.soundOn ? 'Ton aus' : 'Ton an'); };
+      const sync = () => { if (!btn) return; btn.setAttribute('aria-pressed', String(this.soundOn)); btn.setAttribute('aria-label', this.soundOn ? (A.config.copy.soundOff || 'Ton aus') : (A.config.copy.soundOn || 'Ton an')); };
       if (btn) {
         btn.hidden = false; sync();
         btn.addEventListener('click', e => {

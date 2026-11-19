@@ -21,7 +21,7 @@
           <p class="azur-drop__error" role="alert" hidden></p>
         </form>
         <p class="azur-drop__legal">${c.dropLegal}</p>
-        <button class="azur-drop__close" type="button" aria-label="Schließen">×</button>`;
+        <button class="azur-drop__close" type="button" aria-label="${A.config.copy.close || 'Schließen'}">×</button>`;
       this.el.inert = true;                           // closed: its form takes no focus
       root.appendChild(this.el);
       this.card = document.createElement('div');
@@ -32,7 +32,7 @@
           <img class="azur-holo__logo" src="${A.url('assets/brand/azur-logo-ink.webp')}" alt="AZUR">
           <p class="azur-holo__title">${c.dropDone}</p>
           <p class="azur-holo__text">${c.dropDoneText}</p>
-          <p class="azur-holo__meta"><span>Nächster Drop</span><span class="azur-holo__mail"></span></p>
+          <p class="azur-holo__meta"><span>${A.config.copy.nextDrop || 'Nächster Drop'}</span><span class="azur-holo__mail"></span></p>
           <span class="azur-holo__notch azur-holo__notch--l" aria-hidden="true"></span>
           <span class="azur-holo__notch azur-holo__notch--r" aria-hidden="true"></span>
         </div>

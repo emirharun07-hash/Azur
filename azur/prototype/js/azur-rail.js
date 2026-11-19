@@ -20,7 +20,7 @@
     constructor(root, products, app) {
       this.app = app; this.root = root;
       this.list = document.createElement('ul');
-      this.list.className = 'azur-rail'; this.list.setAttribute('aria-label', 'Trikots am Kleiderständer');
+      this.list.className = 'azur-rail'; this.list.setAttribute('aria-label', A.config.copy.railLabel || 'Trikots am Kleiderständer');
       root.appendChild(this.list);
       this.items = products.map((p, i) => new Garment(p, i));
       this.items.forEach(g => this.list.appendChild(g.el));
@@ -126,7 +126,7 @@
       if (i < 0 || !this.items[i] || !this.px || !this.px[i]) { el.classList.remove('is-on'); return; }
       const p = this.items[i].p;
       el.innerHTML = p.type === 'drop'
-        ? `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${p.description}</span><span class="azur-label__cta">Ansehen</span>`
+        ? `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${p.description}</span><span class="azur-label__cta">${A.config.copy.view || 'Ansehen'}</span>`
         : `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${A.formatPrice(p.price)}</span><span class="azur-label__cta">${A.config.copy.view}</span>`;
       el.classList.add('is-on');
       this.labelFor = i;
