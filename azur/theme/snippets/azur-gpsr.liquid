@@ -1,0 +1,25 @@
+{%- comment -%}
+  Produktsicherheit (GPSR). Parameter: product.
+  Metafelder: custom.gpsr_hersteller (Pflicht, sonst keine Ausgabe), custom.gpsr_kontakt, custom.material, custom.care.
+  Nichts wird erfunden: leer = nicht sichtbar. Inhalte [ANWALT PRÜFEN].
+{%- endcomment -%}
+{%- liquid
+  assign g_maker = product.metafields.custom.gpsr_hersteller.value
+  assign g_contact = product.metafields.custom.gpsr_kontakt.value
+  assign g_material = product.metafields.custom.material.value
+  assign g_care = product.metafields.custom.care.value
+-%}
+{%- if g_maker and g_maker != blank -%}
+  {{ 'azur-legal.css' | asset_url | stylesheet_tag }}
+  <details class="acc gpsr">
+    <summary class="acc__head">{{ 'azur.gpsr.title' | t }}</summary>
+    <div class="acc__body">
+      <dl class="gpsr__list">
+        <div><dt>{{ 'azur.gpsr.maker' | t }}</dt><dd>{{ g_maker | escape | newline_to_br }}</dd></div>
+        {%- if g_contact and g_contact != blank -%}<div><dt>{{ 'azur.gpsr.contact' | t }}</dt><dd>{{ g_contact | escape | newline_to_br }}</dd></div>{%- endif -%}
+        {%- if g_material and g_material != blank -%}<div><dt>{{ 'azur.gpsr.material' | t }}</dt><dd>{{ g_material | escape | newline_to_br }}</dd></div>{%- endif -%}
+        {%- if g_care and g_care != blank -%}<div><dt>{{ 'azur.gpsr.care' | t }}</dt><dd>{{ g_care | escape | newline_to_br }}</dd></div>{%- endif -%}
+      </dl>
+    </div>
+  </details>
+{%- endif -%}

@@ -26,6 +26,7 @@
     render 'support-links', class: 'footer__link'
   endcapture
 -%}
+{{ 'azur-legal.css' | asset_url | stylesheet_tag }}
 <footer class="footer">
   {%- if section.settings.signup and template.suffix != 'drops' -%}
     <section class="footer__signup{% if section.settings.signup_teaser %} footer__signup--teaser{% endif %} wrap" id="drops" aria-labelledby="footer-signup-title">
@@ -84,10 +85,13 @@
     <nav class="footer__col" aria-labelledby="footer-legal">
       <h2 class="footer__head" id="footer-legal">{{ 'azur.footer.legal' | t }}</h2>
       <ul>
+        {%- assign wd = section.settings.withdraw_page -%}
+        {%- if wd.url != blank -%}<li><a class="footer__withdraw" href="{{ wd.url }}">{{ 'azur.legal.withdraw_link' | t }}</a></li>{%- endif -%}
         {%- assign listed = '|' -%}
         {%- for handle in legal -%}
           {%- assign h = handle | strip -%}
           {%- if h == 'contact' -%}{%- continue -%}{%- endif -%}
+          {%- if wd.handle == h -%}{%- continue -%}{%- endif -%}
           {%- assign lp = pages[h] -%}
           {%- if lp.url != blank -%}
             <li><a href="{{ lp.url }}">{{ lp.title }}</a></li>
@@ -119,6 +123,7 @@
   "settings": [
     { "type": "text", "id": "line", "label": "Zeile unter dem Logo", "default": "Fußballinspirierte Streetwear, entworfen in Berlin.", "info": "Leer = keine Zeile." },
     { "type": "url", "id": "instagram", "label": "Instagram-Profil", "info": "Leer = kein Link." },
+    { "type": "page", "id": "withdraw_page", "label": "Seite zum Widerrufen", "info": "Seite mit Template widerruf. Leer = Link „Vertrag widerrufen“ wird nicht gezeigt." },
     { "type": "header", "content": "Drops per Mail" },
     { "type": "checkbox", "id": "signup", "label": "Anmeldung zeigen", "default": true, "info": "Eingetragene Kontakte stehen unter Kunden mit den Tags newsletter und drops." },
     { "type": "text", "id": "signup_heading", "label": "Überschrift", "default": "Neue Drops zuerst." },

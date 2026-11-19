@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "azur-widerruf",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

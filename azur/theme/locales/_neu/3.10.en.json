@@ -1,0 +1,25 @@
+{
+  "azur": {
+    "legal": { "withdraw_link": "Withdraw from contract" },
+    "withdraw": {
+      "policy_html": "You can find the full withdrawal information at {{ link }}.",
+      "name": "Name",
+      "email": "Email",
+      "order": "Order number",
+      "item": "Item (optional)",
+      "date": "Date of order or delivery (optional)",
+      "required": "* Required",
+      "submit": "Confirm withdrawal",
+      "received": "We have received your withdrawal.",
+      "received_at": "Received on {{ date }} at {{ time }}.",
+      "mail_follows": "A confirmation will follow by email."
+    },
+    "gpsr": {
+      "title": "Product safety",
+      "maker": "Manufacturer / responsible person",
+      "contact": "Contact",
+      "material": "Material",
+      "care": "Care"
+    }
+  }
+}

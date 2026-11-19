@@ -1,0 +1,18 @@
+{
+  "pages": {
+    "widerruf": {"title": "Vertrag widerrufen", "content": "", "template_suffix": "widerruf"}
+  },
+  "settings": {
+    "sections": {"footer": {"settings": {"withdraw_page": "widerruf"}}}
+  },
+  "products": {
+    "brasilien-trikot-azur-collection": {
+      "metafields": {"custom": {
+        "gpsr_hersteller": "[Testwert Hersteller]\n[Testwert Anschrift]",
+        "gpsr_kontakt": "[Testwert Kontakt]",
+        "material": "[Testwert Material]",
+        "care": "[Testwert Pflege]"
+      }}
+    }
+  }
+}

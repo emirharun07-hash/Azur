@@ -1,0 +1,69 @@
+{%- comment -%}
+  Widerrufsseite (Template page.widerruf): kurze Erklärung, Formular (Shopify-Kontaktformular), Bestätigung mit Datum und Uhrzeit.
+  Achtung: Das Kontaktformular schickt dem Kunden KEINE automatische Mail. Siehe work/3.10/pflichten.md. [ANWALT PRÜFEN]
+{%- endcomment -%}
+{{ 'azur-legal.css' | asset_url | stylesheet_tag }}
+{%- assign refund = shop.refund_policy -%}
+<div class="legal wrap">
+  {% render 'legal-nav' %}
+  <article class="legal__body">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <div class="legal__text rte">
+      {%- if section.settings.intro != blank -%}{{ section.settings.intro }}{%- endif -%}
+      {%- if refund.url != blank and section.settings.show_policy_link -%}
+        {%- capture policy_link -%}<a class="link" href="{{ refund.url }}">{{ refund.title }}</a>{%- endcapture -%}
+        <p>{{ 'azur.withdraw.policy_html' | t: link: policy_link }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- form 'contact', class: 'form' -%}
+      {%- if form.posted_successfully? -%}
+        {%- assign now_date = 'now' | date: '%d.%m.%Y' -%}
+        {%- assign now_time = 'now' | date: '%H:%M' -%}
+        <div class="form__ok withdraw__ok" role="status" data-withdraw-ok>
+          <p><strong>{{ 'azur.withdraw.received' | t }}</strong></p>
+          <p>{{ 'azur.withdraw.received_at' | t: date: now_date, time: now_time }}</p>
+          <p>{{ 'azur.withdraw.mail_follows' | t }}</p>
+        </div>
+      {%- else -%}
+        {%- if form.errors -%}
+          <div class="form__error" role="alert">{{ form.errors | default_errors }}</div>
+        {%- endif -%}
+        <input type="hidden" name="contact[betreff]" value="Widerruf">
+        <input type="hidden" name="contact[body]" value="Widerruf">
+        <div class="form__row">
+          <label class="form__label" for="withdraw-name">{{ 'azur.withdraw.name' | t }} <span aria-hidden="true">*</span></label>
+          <input class="form__input" id="withdraw-name" type="text" name="contact[name]" autocomplete="name" required value="{{ form.name }}">
+        </div>
+        <div class="form__row">
+          <label class="form__label" for="withdraw-email">{{ 'azur.withdraw.email' | t }} <span aria-hidden="true">*</span></label>
+          <input class="form__input" id="withdraw-email" type="email" name="contact[email]" autocomplete="email" required value="{{ form.email }}">
+        </div>
+        <div class="form__row">
+          <label class="form__label" for="withdraw-order">{{ 'azur.withdraw.order' | t }} <span aria-hidden="true">*</span></label>
+          <input class="form__input" id="withdraw-order" type="text" name="contact[Bestellnummer]" required>
+        </div>
+        <div class="form__row">
+          <label class="form__label" for="withdraw-item">{{ 'azur.withdraw.item' | t }}</label>
+          <input class="form__input" id="withdraw-item" type="text" name="contact[Artikel]">
+        </div>
+        <div class="form__row">
+          <label class="form__label" for="withdraw-date">{{ 'azur.withdraw.date' | t }}</label>
+          <input class="form__input" id="withdraw-date" type="text" name="contact[Datum]">
+        </div>
+        <p class="form__hint">{{ 'azur.withdraw.required' | t }}</p>
+        <button class="btn btn--solid" type="submit">{{ 'azur.withdraw.submit' | t }}</button>
+      {%- endif -%}
+    {%- endform -%}
+  </article>
+</div>
+
+{% schema %}
+{
+  "name": "Widerruf",
+  "settings": [
+    { "type": "richtext", "id": "intro", "label": "Erklärung", "default": "<p>Hier kannst du deinen Kauf widerrufen.</p>" },
+    { "type": "checkbox", "id": "show_policy_link", "label": "Link zur Widerrufsbelehrung zeigen", "default": true, "info": "Verlinkt die Shopify-Richtlinie Rückerstattung. Der Text der Belehrung kommt vom Anwalt, nicht aus dem Theme." }
+  ]
+}
+{% endschema %}

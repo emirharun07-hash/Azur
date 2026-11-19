@@ -1,0 +1,6 @@
+/* Rechtliche Pflichten: Widerrufsseite, Produktsicherheit, Footer-Link. Nutzt nur Variablen aus azur.css. */
+.withdraw__ok { display: grid; gap: var(--s-2); }
+.gpsr__list { display: grid; gap: var(--s-3); }
+.gpsr__list dt { color: var(--c-grey-text); }
+.gpsr__list dd { margin: 0; overflow-wrap: anywhere; }
+.footer__col a.footer__withdraw { font-weight: 700; text-decoration: underline; text-underline-offset: 0.22em; }
