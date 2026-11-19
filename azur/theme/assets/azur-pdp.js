@@ -101,7 +101,7 @@ AZUR.config = {
     addToCart: 'In den Warenkorb',
     added: 'Im Warenkorb',
     cart: 'Warenkorb', checkout: 'Zur Kasse', emptyCart: 'Dein Warenkorb ist leer.',
-    total: 'Summe', inclVat: 'inkl. MwSt.',
+    total: 'Summe', inclVat: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
     nav: ['Shop', 'Kollektion', 'Über uns'],
     dropTitle: 'Nächster Drop',
     dropText: 'Noch unter Verschluss.',
@@ -159,6 +159,9 @@ AZUR.config = {
    AZUR.config.urlMap (renders in Content > Files, logos in the theme's assets) and AZUR.config.inline (the JSON). */
 AZUR.url = p => (AZUR.config.urlMap ? AZUR.config.urlMap(p) : p);
 
+
+/* Escapes text before it goes into innerHTML (product names and descriptions come from the shop). */
+AZUR.esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
 /* the page's products from snippets/azur-pdp-setup.liquid */
 if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
@@ -298,7 +301,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       q('.azur-pdp__sizerow').querySelectorAll('.azur-pl').forEach(el => el.remove());
       q('.azur-pdp__sizerow').insertAdjacentHTML('beforeend', product.variants.map((v, i) => {
         const [x, y] = pitchSpot(n, i), hx = n > 1 ? 12 + i * 76 / (n - 1) : 50;
-        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${v.id}" data-size="${v.title}" ${v.available ? '' : 'disabled'}><span>${v.title}</span></label>`;
+        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${A.esc(v.id)}" data-size="${A.esc(v.title)}" ${v.available ? '' : 'disabled'}><span>${A.esc(v.title)}</span></label>`;
       }).join(''));
       q('.azur-pdp__error').hidden = true;
       const add = q('.azur-pdp__add'); add.disabled = true; add.textContent = A.config.copy.chooseSize; add.classList.remove('is-done');
@@ -390,10 +393,10 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       if (!this.cart.length) list.innerHTML = `<li class="azur-cart__empty">${A.config.copy.emptyCart}</li>`;
       else list.innerHTML = this.cart.map((l, i) => `
         <li class="azur-cart__line">
-          <img src="${l.image}" alt="">
-          <div><p class="azur-cart__name">${l.name}</p><p class="azur-cart__meta">${A.config.copy.size || 'Größe'} ${l.size} · ${l.qty} ×</p></div>
-          <p class="azur-cart__price">${A.formatPrice(l.price * l.qty)}</p>
-          <button type="button" data-remove="${i}" aria-label="${l.name} entfernen">Entfernen</button>
+          <img src="${A.esc(l.image)}" alt="">
+          <div><p class="azur-cart__name">${A.esc(l.name)}</p><p class="azur-cart__meta">${A.config.copy.size || 'Größe'} ${A.esc(l.size)} · ${l.qty} ×</p></div>
+          <p class="azur-cart__price">${A.esc(A.formatPrice(l.price * l.qty))}</p>
+          <button type="button" data-remove="${i}" aria-label="${A.esc(l.name)} entfernen">Entfernen</button>
         </li>`).join('');
       const total = this.cart.reduce((s, l) => s + l.price * l.qty, 0);
       this.drawer.querySelector('.azur-cart__total strong').textContent = A.formatPrice(total);

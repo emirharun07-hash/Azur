@@ -101,7 +101,7 @@ AZUR.config = {
     addToCart: 'In den Warenkorb',
     added: 'Im Warenkorb',
     cart: 'Warenkorb', checkout: 'Zur Kasse', emptyCart: 'Dein Warenkorb ist leer.',
-    total: 'Summe', inclVat: 'inkl. MwSt.',
+    total: 'Summe', inclVat: 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.',
     nav: ['Shop', 'Kollektion', 'Über uns'],
     dropTitle: 'Nächster Drop',
     dropText: 'Noch unter Verschluss.',
@@ -159,6 +159,9 @@ AZUR.config = {
    AZUR.config.urlMap (renders in Content > Files, logos in the theme's assets) and AZUR.config.inline (the JSON). */
 AZUR.url = p => (AZUR.config.urlMap ? AZUR.config.urlMap(p) : p);
 
+
+/* Escapes text before it goes into innerHTML (product names and descriptions come from the shop). */
+AZUR.esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
 /* shop data, URLs and JSON from sections/azur-room.liquid */
 if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
@@ -449,6 +452,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.canvas = canvas;
       this.gl = null;
       try { this.gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: true }); } catch (e) { this.gl = null; }
+      /* GPU context lost (tab in the background, driver reset): the same stand-in as without WebGL, kept until the
+         page is reloaded (rebuilding every texture is riskier than the still image; clicks keep working). */
+      canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.gl = null; if (this.onLost) this.onLost(); });
       this.view = null; this.mode = 'none';
       this.map = [0, 0, 1, 1]; this.parallax = [0, 0]; this.pan = 0.5; this.overscan = 0.03;
       this.dim = 1; this.cache = {};
@@ -1038,7 +1044,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       const label = product.type === 'drop' ? `${product.name}. ${product.description}` : `${product.name}, ${A.formatPrice(product.price)}`;
       this.el = document.createElement('li');
       this.el.className = 'azur-g';
-      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${label}" data-index="${index}"></button>`;
+      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${A.esc(label)}" data-index="${index}"></button>`;
       this.hit = this.el.firstElementChild;
     }
   }
@@ -1153,8 +1159,8 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       if (i < 0 || !this.items[i] || !this.px || !this.px[i]) { el.classList.remove('is-on'); return; }
       const p = this.items[i].p;
       el.innerHTML = p.type === 'drop'
-        ? `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${p.description}</span><span class="azur-label__cta">${A.config.copy.view || 'Ansehen'}</span>`
-        : `<span class="azur-label__name">${p.name}</span><span class="azur-label__meta">${A.formatPrice(p.price)}</span><span class="azur-label__cta">${A.config.copy.view}</span>`;
+        ? `<span class="azur-label__name">${A.esc(p.name)}</span><span class="azur-label__meta">${A.esc(p.description)}</span><span class="azur-label__cta">${A.config.copy.view || 'Ansehen'}</span>`
+        : `<span class="azur-label__name">${A.esc(p.name)}</span><span class="azur-label__meta">${A.esc(A.formatPrice(p.price))}</span><span class="azur-label__cta">${A.config.copy.view}</span>`;
       el.classList.add('is-on');
       this.labelFor = i;
     }
@@ -1167,9 +1173,9 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.app.drop.close();
       el.innerHTML = `
         <span class="azur-info__n">${String(i + 1).padStart(2, '0')}</span>
-        <span class="azur-info__name">${p.name}</span>
-        <span class="azur-info__price">${A.formatPrice(p.price)}</span>
-        <a class="azur-info__cta" href="${p.productUrl}" data-action="view">${c.viewJersey} <span aria-hidden="true">→</span></a>
+        <span class="azur-info__name">${A.esc(p.name)}</span>
+        <span class="azur-info__price">${A.esc(A.formatPrice(p.price))}</span>
+        <a class="azur-info__cta" href="${A.esc(p.productUrl)}" data-action="view">${c.viewJersey} <span aria-hidden="true">→</span></a>
         <button class="azur-info__back" type="button" data-action="back">${c.putBack}</button>`;
       el.classList.add('is-on');
     }
@@ -1504,7 +1510,7 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       q('.azur-pdp__sizerow').querySelectorAll('.azur-pl').forEach(el => el.remove());
       q('.azur-pdp__sizerow').insertAdjacentHTML('beforeend', product.variants.map((v, i) => {
         const [x, y] = pitchSpot(n, i), hx = n > 1 ? 12 + i * 76 / (n - 1) : 50;
-        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${v.id}" data-size="${v.title}" ${v.available ? '' : 'disabled'}><span>${v.title}</span></label>`;
+        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${A.esc(v.id)}" data-size="${A.esc(v.title)}" ${v.available ? '' : 'disabled'}><span>${A.esc(v.title)}</span></label>`;
       }).join(''));
       q('.azur-pdp__error').hidden = true;
       const add = q('.azur-pdp__add'); add.disabled = true; add.textContent = A.config.copy.chooseSize; add.classList.remove('is-done');
@@ -1596,10 +1602,10 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       if (!this.cart.length) list.innerHTML = `<li class="azur-cart__empty">${A.config.copy.emptyCart}</li>`;
       else list.innerHTML = this.cart.map((l, i) => `
         <li class="azur-cart__line">
-          <img src="${l.image}" alt="">
-          <div><p class="azur-cart__name">${l.name}</p><p class="azur-cart__meta">${A.config.copy.size || 'Größe'} ${l.size} · ${l.qty} ×</p></div>
-          <p class="azur-cart__price">${A.formatPrice(l.price * l.qty)}</p>
-          <button type="button" data-remove="${i}" aria-label="${l.name} entfernen">Entfernen</button>
+          <img src="${A.esc(l.image)}" alt="">
+          <div><p class="azur-cart__name">${A.esc(l.name)}</p><p class="azur-cart__meta">${A.config.copy.size || 'Größe'} ${A.esc(l.size)} · ${l.qty} ×</p></div>
+          <p class="azur-cart__price">${A.esc(A.formatPrice(l.price * l.qty))}</p>
+          <button type="button" data-remove="${i}" aria-label="${A.esc(l.name)} entfernen">Entfernen</button>
         </li>`).join('');
       const total = this.cart.reduce((s, l) => s + l.price * l.qty, 0);
       this.drawer.querySelector('.azur-cart__total strong').textContent = A.formatPrice(total);
@@ -1950,6 +1956,11 @@ if (window.AZUR_SETUP) window.AZUR_SETUP(window.AZUR);
       this.comp = new A.Compositor(this.canvas);
       this.comp.viewsData = this.views; this.comp.onChange = () => this.kick();
       this.root.classList.toggle('no-webgl', !this.comp.ok);
+      this.comp.onLost = () => {                     // WebGL lost while open: show the still image of the current view
+        this.root.classList.add('no-webgl');
+        if (this.viewKey) { this.fallbackImg.src = A.url(A.config.assetBase + this.viewKey + '/beauty.webp'); this.fallbackImg.hidden = false; }
+        this.canvas.style.visibility = 'hidden';
+      };
       this.glowAmt = [0, 0, 0]; this.region = null;
       this.dayState = this.stateNow();
       this.comp.state = this.dayState; this.root.dataset.state = this.dayState;
