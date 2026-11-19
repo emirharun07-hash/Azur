@@ -129,6 +129,7 @@ def build_files():
         out.append((files_name(rel), RAW + 'azur/prototype/' + rel))
     from urllib.parse import quote
     out = [(n, quote(u, safe=':/')) for n, u in out]
+    out.sort()                                                      # feste Reihenfolge (os.walk ist je Dateisystem anders)
     json.dump([{'filename': n, 'url': u} for n, u in out], open(os.path.join(OUT, 'files.json'), 'w'), indent=0)
     return out
 
