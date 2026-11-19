@@ -174,3 +174,14 @@
 @media (prefers-reduced-motion: reduce) {
   .ss * { transition: none !important; }
 }
+
+/* Handy: Name, Preis, Größen und Kaufknopf im ersten Bildschirm (390×844) */
+@media (max-width: 899px) {
+  .ss-strip { height: 64px; }
+  .ss-strip__logo img { height: 32px; }
+  .ss-main { gap: 0.75rem; padding-top: 0.5rem; }
+  .ss-info { gap: 0.625rem; }
+  .ss-media__slide { aspect-ratio: auto; height: min(30svh, 260px); padding: 3%; }
+  .ss-media__dots { margin-top: 0; }
+  .ss-media__dot { height: 1.25rem; }
+}
