@@ -1,0 +1,176 @@
+/* AZUR W1 Schnellspur (sections/azur-schnellspur.liquid): leichte Produktseite für Reels, dunkel wie das Zimmer.
+   Handy zuerst (390 px). Ab 900 px zweispaltig: Bild | Kauf, damit der Kaufknopf ohne Scrollen sichtbar bleibt.
+   Schrift: Martian Mono aus dem Layout (schon vorgeladen, keine weitere Schriftdatei). */
+.ss {
+  --ss-bg: #0b0b0c;
+  --ss-paper: #f1eee8;
+  --ss-text: #a9aaa9;
+  --ss-line: #34363a;
+  --ss-panel: #141517;
+  --ss-electric: #16B8FF;
+  /* dunkler Satz für die geteilten Bausteine (Anmeldung, Links), wie .drops--dark in azur.css */
+  --c-paper: var(--ss-bg); --c-surface: var(--ss-panel); --c-plate: var(--ss-panel); --c-ink: var(--ss-paper);
+  --c-grey-text: var(--ss-text); --c-grey-line: var(--ss-line); --c-grey-soft: #5a5c60;
+  --c-acc: var(--ss-paper); --c-acc-ink: var(--ss-bg); --c-error: #ff8a80; --focus: var(--ss-electric);
+  background: var(--ss-bg);
+  color: var(--ss-paper);
+  color-scheme: dark;
+  padding-bottom: 2.5rem;
+}
+.ss :focus-visible { outline: 2px solid var(--ss-electric); outline-offset: 3px; }
+
+/* 1 Zimmer-Streifen */
+.ss-strip { position: relative; height: 120px; overflow: hidden; background: var(--ss-bg); display: grid; place-items: center; }
+.ss-strip__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ss-strip--image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 55%, var(--ss-bg)); pointer-events: none; }
+.ss-strip__glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(40% 70% at 50% 55%, rgb(22 184 255 / 0.22), transparent 70%),
+    radial-gradient(70% 120% at 50% 120%, rgb(241 238 232 / 0.06), transparent 70%);
+}
+.ss-strip__logo { position: relative; z-index: 1; display: block; }
+.ss-strip__logo img { width: auto; height: 44px; filter: drop-shadow(0 0 6px rgb(22 184 255 / 0.55)) drop-shadow(0 0 18px rgb(22 184 255 / 0.3)); }
+
+/* Gerüst */
+.ss-main { display: grid; gap: 1.5rem; width: 100%; max-width: 520px; margin-inline: auto; padding: 0.75rem 16px 0; }
+.ss-info { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+
+/* 2 Produktbild */
+.ss-media { min-width: 0; }
+.ss-media__track {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
+  background: radial-gradient(80% 60% at 50% 30%, #1d1f22, var(--ss-panel));
+  box-shadow: inset 0 0 0 1px var(--ss-line), inset 0 18px 40px rgb(0 0 0 / 0.55);
+}
+.ss-media__track::-webkit-scrollbar { display: none; }
+.ss-media__slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 9 / 10; display: grid; place-items: center; padding: 6%; }
+.ss-media__slide img { width: 100%; height: 100%; object-fit: contain; }
+.ss-media__placeholder { width: 60%; height: auto; fill: var(--ss-line); }
+.ss-media__dots { display: flex; justify-content: center; gap: 0.25rem; margin-top: 0.25rem; }
+.ss-media__dot { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; }
+.ss-media__dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ss-line); transition: background 0.2s; }
+.ss-media__dot[aria-current="true"]::before { background: var(--ss-paper); }
+
+/* 3 Name und Drop-Zeile */
+.ss-title { font-size: 1.375rem; line-height: 1.15; font-weight: 600; font-stretch: 112.5%; letter-spacing: 0; text-transform: uppercase; text-wrap: balance; }
+.ss-drop { margin-top: -0.5rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ss-text); }
+.ss-drop::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 0.5rem; border-radius: 50%; background: var(--ss-electric); box-shadow: 0 0 8px var(--ss-electric); vertical-align: 0.1em; }
+
+/* 4 Preis als Museumsschild */
+.ss-tag {
+  justify-self: start; display: grid; gap: 0.125rem; padding: 0.625rem 0.875rem 0.5rem;
+  background: #efebe3; color: #141414; border: 1px solid #d6cfc2; border-radius: 2px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 6px 16px rgb(0 0 0 / 0.45);
+}
+.ss-tag__price { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.ss-tag__note { max-width: 17rem; font-size: 0.625rem; line-height: 1.4; color: #55524c; }
+
+/* 5 Größen */
+.ss-buy { display: grid; gap: 0.75rem; }
+.ss-sizes { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.ss-sizes__legend { float: left; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ss-text); }
+.ss-sizes__chart { grid-column: 2; justify-self: end; font-size: 0.75rem; color: var(--ss-paper); text-decoration: underline; text-underline-offset: 0.25em; }
+.ss-sizes__row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: 0.5rem; }
+.ss-size {
+  position: relative; display: grid; align-content: center; justify-items: center; gap: 0.125rem;
+  min-height: 56px; padding: 0.375rem 0.125rem; border: 1px solid var(--ss-line); background: var(--ss-panel);
+  cursor: pointer; text-align: center; transition: border-color 0.15s, background 0.15s;
+}
+.ss-size__name { font-size: 1rem; font-weight: 600; line-height: 1.2; }
+.ss-size__hint { font-size: 0.5625rem; line-height: 1.2; letter-spacing: 0.02em; color: var(--ss-text); }
+.ss-size__hint--few { color: var(--ss-electric); }
+.ss-size:hover { border-color: #6b6e73; }
+.ss-size__input:checked + .ss-size { border-color: var(--ss-electric); background: rgb(22 184 255 / 0.1); box-shadow: 0 0 0 1px var(--ss-electric) inset; }
+.ss-size__input:focus-visible + .ss-size { outline: 2px solid var(--ss-electric); outline-offset: 2px; }
+.ss-size--gone { cursor: not-allowed; background: transparent; border-style: dashed; color: #6b6e73; }
+.ss-size--gone .ss-size__name { text-decoration: line-through; text-decoration-thickness: 1px; }
+.ss-size--gone:hover { border-color: var(--ss-line); }
+
+/* 6 Kaufen */
+.ss-error { font-size: 0.8125rem; color: var(--c-error); }
+.ss-add {
+  display: grid; place-items: center; width: 100%; min-height: 56px; padding: 0.5rem 1rem;
+  background: var(--ss-paper); color: var(--ss-bg); border: 1px solid var(--ss-paper);
+  font-size: 0.9375rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  transition: background 0.15s, color 0.15s;
+}
+.ss-add:not(:disabled):hover { background: #ffffff; }
+.ss-add:disabled { background: transparent; color: var(--ss-text); border-color: var(--ss-line); }
+.ss-add[aria-busy="true"] { cursor: progress; }
+.ss-add__go { display: none; }
+.ss-buy:has(.ss-size__input:checked) .ss-add__go,
+.ss-buy.is-picked .ss-add__go { display: inline; }
+.ss-buy:has(.ss-size__input:checked) .ss-add__pick,
+.ss-buy.is-picked .ss-add__pick { display: none; }
+.ss-dynamic:empty { display: none; }
+.ss-dynamic .shopify-payment-button__button { width: 100%; min-height: 48px; border-radius: 0; }
+.ss-dynamic .shopify-payment-button__more-options { color: var(--ss-text); }
+
+/* 7 Versand, Rückgabe, Zahlarten */
+.ss-service, .ss-pay { font-size: 0.75rem; line-height: 1.5; color: var(--ss-text); }
+.ss-service a, .ss-pay a { color: var(--ss-paper); text-decoration: underline; text-underline-offset: 0.2em; }
+.ss-pay { margin-top: -0.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; }
+.ss-pay svg { width: 38px; height: 24px; }
+
+/* 8 das andere Drop-Trikot */
+.ss-other {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 0.875rem;
+  margin-top: 0.5rem; padding: 0.625rem; border: 1px solid var(--ss-line); background: var(--ss-panel);
+  transition: border-color 0.15s;
+}
+.ss-other:hover { border-color: #6b6e73; }
+.ss-other__img { width: 72px; height: 80px; object-fit: contain; background: #1b1c1f; }
+.ss-other__text { display: grid; gap: 0.125rem; min-width: 0; }
+.ss-other__name { font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; }
+.ss-other__price { font-size: 0.8125rem; color: var(--ss-paper); }
+.ss-other__free { font-size: 0.6875rem; color: var(--ss-electric); }
+.ss-other__arrow { padding-right: 0.25rem; font-size: 1.125rem; }
+
+/* 9 Ins Zimmer */
+.ss-room {
+  justify-self: center; display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; margin-top: 0.5rem;
+  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ss-paper);
+  border-bottom: 1px solid var(--ss-line);
+}
+.ss-room::after { content: "→"; }
+.ss-room:hover { border-color: var(--ss-electric); }
+
+/* 10 ganz ausverkauft: leerer Rahmen (Shadowbox) mit Schild „vergeben“, dann Anmeldung */
+.ss--gone .ss-media { opacity: 0.4; filter: grayscale(1); }
+.ss-gone { display: grid; gap: 1rem; }
+.ss-frame { display: grid; grid-template-columns: minmax(0, 11rem) auto; align-items: end; gap: 0.875rem; margin: 0; }
+.ss-frame__box {
+  position: relative; aspect-ratio: 4 / 5; padding: 12px;
+  background: linear-gradient(145deg, #2a2b2e, #151618); border: 1px solid #3c3e42;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.6);
+}
+.ss-frame__wall {
+  position: absolute; inset: 12px; display: block;
+  background: radial-gradient(70% 45% at 50% 0%, rgb(241 238 232 / 0.1), transparent 75%), #0e0f10;
+  box-shadow: inset 0 12px 26px rgb(0 0 0 / 0.85), inset 0 0 0 1px #000;
+}
+.ss-frame__wall::after { /* leichter Glanz auf dem Glas */
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.06) 45%, transparent 55%);
+}
+.ss-frame__tag {
+  display: grid; gap: 0.125rem; margin-bottom: 0.75rem; padding: 0.5rem 0.625rem;
+  background: #efebe3; color: #141414; border: 1px solid #d6cfc2; font-size: 0.625rem; line-height: 1.35;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.45);
+}
+.ss-frame__tag b { font-size: 0.875rem; font-weight: 600; }
+.ss-gone__title { margin-top: 0.5rem; font-size: 1rem; font-weight: 600; text-transform: uppercase; text-wrap: balance; }
+.ss-gone .signup__email { color: var(--ss-paper); background: var(--ss-panel); }
+
+/* Laptop: zweispaltig, Bild links, Kauf rechts */
+@media (min-width: 900px) {
+  .ss { padding-bottom: 4rem; }
+  .ss-strip { height: 140px; }
+  .ss-main { max-width: 980px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 3rem; padding-top: 1.5rem; }
+  .ss-media { position: sticky; top: calc(var(--header-bottom, 64px) + 1rem); align-self: start; }
+  .ss-title { font-size: 1.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss * { transition: none !important; }
+}

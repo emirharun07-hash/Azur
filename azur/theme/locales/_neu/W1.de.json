@@ -1,0 +1,16 @@
+{
+  "azur": {
+    "schnellspur": {
+      "choose_size": "Größe wählen",
+      "add": "In die Tasche",
+      "adding": "Kommt in die Tasche …",
+      "failed": "Das hat nicht geklappt. Versuch es bitte noch einmal.",
+      "taken": "vergeben",
+      "few": "nur noch wenige",
+      "empty_frame": "Leerer Rahmen: {{ title }} ist vergeben",
+      "notify_title": "Sag mir Bescheid beim nächsten Drop",
+      "pair_free": "Dazu, dann ist der Versand frei",
+      "to_room": "Ins Zimmer gehen"
+    }
+  }
+}

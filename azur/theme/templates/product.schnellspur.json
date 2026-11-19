@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "main": {
+      "type": "azur-schnellspur",
+      "settings": {
+        "drop_line": "Drop 01 · Limitiert auf 50 Stück",
+        "other_product": "deutschland-trikot-azur-collection",
+        "other_product_b": "brasilien-trikot-azur-collection"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

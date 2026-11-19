@@ -1,0 +1,236 @@
+{%- comment -%}
+  W1 Schnellspur: leichte Produktseite für Reels und den Bio-Link, erreichbar als /products/<handle>?view=schnellspur.
+  Kauf in 2 Tipps (Größe, „In die Tasche“), kein WebGL, keine Abhängigkeit zum Zimmer (azur-room.js).
+  Von oben: Zimmer-Streifen · Produktbild (+ Punkte) · Name, Drop-Zeile · Preis als Museumsschild · Größen · Kaufen ·
+  Versand/Rückgabe/Zahlarten · das andere Drop-Trikot · „Ins Zimmer gehen“.
+  Ganz ausverkauft: leerer Rahmen mit Schild „vergeben“ und Anmeldung für den nächsten Drop.
+  Knappheit ohne Zahl: „nur noch wenige“ erst bei echtem Bestand 1–3 der Größe, ausverkaufte Größe = „vergeben“.
+  Ohne JavaScript: Größen sind Radioknöpfe, das Formular sendet normal an /cart/add.
+  Ab 900 px zweispaltig (Bild | Kauf), damit der Kaufknopf auf dem Laptop ohne Scrollen sichtbar bleibt.
+{%- endcomment -%}
+{{ 'azur-schnellspur.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'azur-schnellspur.js' | asset_url }}" defer></script>
+{%- liquid
+  assign form_id = 'ss-' | append: section.id
+  assign images = product.media | where: 'media_type', 'image'
+  assign first_variant = product.selected_or_first_available_variant
+  assign price = first_variant.price | money
+
+  # das andere Drop-Trikot: das eingestellte, das nicht dieses ist (eine Vorlage für beide Trikots)
+  assign other = section.settings.other_product
+  if other == blank or other.id == product.id
+    assign other = section.settings.other_product_b
+  endif
+  assign show_other = false
+  if other != blank and other.id != product.id and other.available
+    assign show_other = true
+  endif
+  assign pair_free = false
+  if show_other
+    assign threshold = settings.free_shipping_threshold | times: 100 | round
+    assign pair = product.price | plus: other.price
+    if threshold > 0 and product.price < threshold and pair >= threshold
+      assign pair_free = true
+    endif
+  endif
+  assign chart_id = form_id | append: '-chart'
+  assign chart_rows = settings.size_chart | strip | newline_to_br | split: '<br />'
+-%}
+
+<article class="ss{% unless product.available %} ss--gone{% endunless %}" data-ss
+  data-ss-adding="{{ 'azur.schnellspur.adding' | t | escape }}"
+  data-ss-failed="{{ 'azur.schnellspur.failed' | t | escape }}">
+
+  <div class="ss-strip{% if section.settings.strip_image != blank %} ss-strip--image{% endif %}">
+    {%- if section.settings.strip_image != blank -%}
+      {{
+        section.settings.strip_image
+        | image_url: width: 1440
+        | image_tag:
+          widths: '480, 780, 1080, 1440',
+          sizes: '100vw',
+          loading: 'eager',
+          alt: '',
+          class: 'ss-strip__img'
+      }}
+    {%- else -%}
+      <span class="ss-strip__glow" aria-hidden="true"></span>
+    {%- endif -%}
+    <a class="ss-strip__logo" href="{{ routes.root_url }}"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a>
+  </div>
+
+  <div class="ss-main">
+    <section class="ss-media" aria-label="{{ 'azur.product.choose_image' | t }}">
+      <ul class="ss-media__track" data-ss-track>
+        {%- for media in images -%}
+          {%- liquid
+            assign loading = 'lazy'
+            assign priority = 'auto'
+            if forloop.first
+              assign loading = 'eager'
+              assign priority = 'high'
+            endif
+          -%}
+          <li class="ss-media__slide" id="{{ form_id }}-m{{ forloop.index }}">
+            {{
+              media
+              | image_url: width: 800
+              | image_tag:
+                widths: '400, 600, 800',
+                sizes: '(min-width: 900px) 460px, 100vw',
+                loading: loading,
+                fetchpriority: priority,
+                alt: media.alt
+            }}
+          </li>
+        {%- else -%}
+          <li class="ss-media__slide">{{ 'product-apparel-1' | placeholder_svg_tag: 'ss-media__placeholder' }}</li>
+        {%- endfor -%}
+      </ul>
+      {%- if images.size > 1 -%}
+        <div class="ss-media__dots">
+          {%- for media in images -%}
+            <a class="ss-media__dot" href="#{{ form_id }}-m{{ forloop.index }}" data-ss-dot="{{ forloop.index0 }}"{% if forloop.first %} aria-current="true"{% endif %}><span class="sr-only">{{ 'azur.product.image_n' | t: n: forloop.index }}</span></a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </section>
+
+    <div class="ss-info">
+      <h1 class="ss-title">{{ product.title }}</h1>
+      {%- if section.settings.drop_line != blank -%}
+        <p class="ss-drop">{{ section.settings.drop_line }}</p>
+      {%- endif -%}
+
+      <div class="ss-tag">
+        <p class="ss-tag__price">{{ price }}</p>
+        {%- if settings.tax_note != blank -%}<p class="ss-tag__note">{{ settings.tax_note }}</p>{%- endif -%}
+      </div>
+
+      {%- if product.available -%}
+        {%- form 'product', product, id: form_id, class: 'ss-buy', data-ss-form: '' -%}
+          <fieldset class="ss-sizes">
+            <legend class="ss-sizes__legend">{{ 'azur.cart.size' | t }}</legend>
+            {%- if settings.size_chart != blank -%}
+              <button class="ss-sizes__chart link" type="button" popovertarget="{{ chart_id }}">{{ 'azur.product.size_chart' | t }}</button>
+            {%- endif -%}
+            <div class="ss-sizes__row" style="--n: {{ product.variants.size | at_most: 6 }}">
+              {%- for variant in product.variants -%}
+                {%- liquid
+                  assign vid = form_id | append: '-' | append: variant.id
+                  assign few = false
+                  if variant.available and variant.inventory_management == 'shopify' and variant.inventory_quantity > 0 and variant.inventory_quantity <= 3
+                    assign few = true
+                  endif
+                -%}
+                <input class="ss-size__input sr-only" type="radio" name="id" id="{{ vid }}" value="{{ variant.id }}"
+                  {%- if variant.available %} required{% else %} disabled{% endif %}>
+                <label class="ss-size{% unless variant.available %} ss-size--gone{% endunless %}" for="{{ vid }}">
+                  <span class="ss-size__name">{{ variant.option1 }}</span>
+                  {%- if variant.available == false -%}
+                    <span class="ss-size__hint">{{ 'azur.schnellspur.taken' | t }}</span>
+                  {%- elsif few -%}
+                    <span class="ss-size__hint ss-size__hint--few">{{ 'azur.schnellspur.few' | t }}</span>
+                  {%- endif -%}
+                </label>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+          <p class="ss-error" role="alert" data-ss-error hidden></p>
+          <button class="ss-add" type="submit" name="add" data-ss-add>
+            <span class="ss-add__pick">{{ 'azur.schnellspur.choose_size' | t }}</span>
+            <span class="ss-add__go" data-ss-label>{{ 'azur.schnellspur.add' | t }} · {{ price }}</span>
+          </button>
+          <div class="ss-dynamic">{{ form | payment_button }}</div>
+        {%- endform -%}
+      {%- else -%}
+        <div class="ss-gone">
+          <figure class="ss-frame" aria-label="{{ 'azur.schnellspur.empty_frame' | t: title: product.title | escape }}">
+            <div class="ss-frame__box" aria-hidden="true"><span class="ss-frame__wall"></span></div>
+            <figcaption class="ss-frame__tag"><span>{{ product.title }}</span><b>{{ 'azur.schnellspur.taken' | t }}</b></figcaption>
+          </figure>
+          <h2 class="ss-gone__title">{{ 'azur.schnellspur.notify_title' | t }}</h2>
+          {% render 'signup-form', id: 'schnellspur', tags: 'newsletter, drops, drop02' %}
+        </div>
+      {%- endif -%}
+
+      {%- capture ship -%}{% render 'shipping-line' %}{%- endcapture -%}
+      {%- capture pay -%}{% render 'payment-types', mode: 'logos' %}{%- endcapture -%}
+      {%- if ship != blank or settings.returns_note != blank -%}
+        <p class="ss-service">
+          {{- ship -}}
+          {%- if ship != blank and settings.returns_note != blank %} · {% endif -%}
+          {%- if settings.returns_note != blank -%}{{ settings.returns_note | escape }}{%- endif -%}
+        </p>
+      {%- endif -%}
+      {%- if pay != blank -%}<div class="ss-pay">{{ pay }}</div>{%- endif -%}
+
+      {%- if show_other -%}
+        {%- assign other_img = other.featured_media -%}
+        <a class="ss-other" href="{{ other.url }}?view=schnellspur">
+          {%- if other_img != blank -%}
+            {{
+              other_img
+              | image_url: width: 240
+              | image_tag:
+                widths: '120, 240',
+                sizes: '96px',
+                loading: 'lazy',
+                alt: '',
+                class: 'ss-other__img'
+            }}
+          {%- endif -%}
+          <span class="ss-other__text">
+            <b class="ss-other__name">{{ other.title }}</b>
+            <span class="ss-other__price">{{ other.price | money }}</span>
+            {%- if pair_free -%}<span class="ss-other__free">{{ 'azur.schnellspur.pair_free' | t }}</span>{%- endif -%}
+          </span>
+          <span class="ss-other__arrow" aria-hidden="true">→</span>
+        </a>
+      {%- endif -%}
+
+      <a class="ss-room" href="{{ routes.root_url }}">{{ 'azur.schnellspur.to_room' | t }}</a>
+    </div>
+  </div>
+</article>
+
+{%- if settings.size_chart != blank and product.available -%}
+  <div class="chart" id="{{ chart_id }}" popover role="dialog" aria-labelledby="{{ chart_id }}-title">
+    <div class="chart__head">
+      <h2 class="chart__title" id="{{ chart_id }}-title">{{ 'azur.product.size_chart' | t }}</h2>
+      <button class="chart__close" type="button" popovertarget="{{ chart_id }}" popovertargetaction="hide">{{ 'azur.general.close' | t }}</button>
+    </div>
+    <table class="chart__table">
+      <thead>
+        <tr><th scope="col">{{ 'azur.cart.size' | t }}</th><th scope="col">{{ 'azur.product.chest' | t }}</th><th scope="col">{{ 'azur.product.length' | t }}</th></tr>
+      </thead>
+      <tbody>
+        {%- for row in chart_rows -%}
+          {%- assign cells = row | strip | split: '|' -%}
+          {%- if cells.size < 2 -%}{%- continue -%}{%- endif -%}
+          <tr>
+            <th scope="row">{{ cells[0] | strip }}</th>
+            <td>{{ cells[1] | remove: 'cm' | strip }}</td>
+            <td>{{ cells[2] | remove: 'cm' | strip }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+{%- endif -%}
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "Schnellspur (Reels)",
+  "settings": [
+    { "type": "image_picker", "id": "strip_image", "label": "Zimmer-Streifen", "info": "Schmales Bild oben (ca. 120 px hoch). Leer = dunkle Fläche mit Logo." },
+    { "type": "text", "id": "drop_line", "label": "Drop-Zeile", "default": "Drop 01 · Limitiert auf 50 Stück", "info": "Keine Bestandszahl (kein „noch X“)." },
+    { "type": "product", "id": "other_product", "label": "Das andere Drop-Trikot", "info": "Wird unten als Karte gezeigt, wenn verfügbar." },
+    { "type": "product", "id": "other_product_b", "label": "Ersatz, wenn die Seite selbst dieses Trikot zeigt", "info": "Eine Vorlage für beide Trikots: auf der Seite von Trikot 1 erscheint Trikot 2 und umgekehrt." }
+  ]
+}
+{% endschema %}
