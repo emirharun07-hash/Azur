@@ -1,6 +1,6 @@
 /* AZUR room: browser regression test of the built page (tools/build_artifact.py -> azur/.cache/publish).
    Serves the package itself, opens it in headless Chromium (desktop and phone) and walks the paths that broke before:
-   product view open/close (button, ×, Escape), the 3D jersey redrawing for every jersey, the drop card, jersey links.
+   product view open/close (button, ×, Escape), the product view showing the photo of every jersey, the drop card, jersey links.
 
    Usage:  node azur/tools/test_room.cjs [publishDir] [screenshotDir]
    Env:    PLAYWRIGHT=<path to the playwright module>  CHROMIUM=<path to chrome>   (defaults: the cloud container's)
@@ -27,7 +27,7 @@ function serve() {
 
 (async () => {
   const srv = await serve(), url = `http://127.0.0.1:${srv.address().port}/_test.html`;
-  const exe = process.env.CHROMIUM || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', '/opt/pw-browsers/chromium'].find(p => fs.existsSync(p));
+  const exe = process.env.CHROMIUM || ['/opt/pw-browsers/chromium'].find(p => fs.existsSync(p));
   const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-proxy-server', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const logs = []; let fails = 0;
   const ok = (name, cond, s) => { if (!cond) fails++; logs.push((cond ? 'PASS ' : 'FAIL ') + name + (cond ? '' : ' ' + JSON.stringify(s))); };
@@ -51,18 +51,16 @@ function serve() {
     let p = await mk({ width: 1440, height: 810 });
     await p.goto(url); await p.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 }); await p.waitForTimeout(3000);
     const D = await dropIdx(p), n = await p.evaluate(() => AZUR.products.length);
-    // every jersey from the room: its product view opens, its own model draws, the view closes again
-    await p.evaluate(() => { const v = AZUR.app.shop.viewer; if (v) { v._n = 0; const d = v.draw.bind(v); v.draw = () => { v._n++; d(); }; } });
+    // every jersey from the room: its product view opens, shows its own photo, the view closes again
+    const photo = p => p.evaluate(() => { const i = document.querySelector('.azur-pdp__img'); return { src: (i.getAttribute('src') || '').split('/').pop(), loaded: i.complete && i.naturalWidth > 0, shown: i.getBoundingClientRect().width > 50 }; });
     for (let i = 0; i < n; i++) {
       if (i === D) continue;
       const k = await keyOf(p, i);
       if (!await click(p, i)) { ok(`room: ${k} found under the pointer`, false, {}); continue; }
-      await p.waitForFunction(() => AZUR.app.shop.pdp.classList.contains('has-model'), null, { timeout: 15000 }).catch(() => {});
-      const n0 = await p.evaluate(() => AZUR.app.shop.viewer._n);       // the idle turn keeps drawing (slow software GL: give it time)
-      await p.waitForFunction(n0 => AZUR.app.shop.viewer._n > n0, n0, { timeout: 4000 }).catch(() => {});
-      const v = await p.evaluate(() => { const v = AZUR.app.shop.viewer; return { url: (v.url || '').split('/').pop(), draws: v._n, model: AZUR.app.shop.pdp.classList.contains('has-model') }; });
+      await p.waitForFunction(() => { const i = document.querySelector('.azur-pdp__img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 15000 }).catch(() => {});
+      const v = await photo(p);
       const s = await st(p);
-      ok(`room: ${k} opens with its own 3D model, which keeps drawing`, s.pdp && s.prod === k && v.model && v.url.startsWith(k + '.') && v.draws > n0, { s, v, n0 });
+      ok(`room: ${k} opens with its own photo`, s.pdp && s.prod === k && v.src.startsWith(k + '.') && v.loaded && v.shown, { s, v });
       await shot(p, `pdp_${k}.png`, '.azur-pdp__stage');
       await p.keyboard.press('Escape'); await p.waitForTimeout(700);
       const s2 = await st(p); ok(`room: Escape closes ${k}`, !s2.pdp && s2.dim === 1 && !s2.hash, s2);
@@ -84,7 +82,7 @@ function serve() {
       s = await st(p); ok('drop: another jersey still answers to hover', s.hover === 2 && s.label, s);
       await p.mouse.click(pt[0], pt[1]); await p.waitForTimeout(1200);
       s = await st(p); ok('drop: a click on it opens its product view and closes the card', s.pdp && !s.drop && s.sel === -1 && !s.hasSel, s);
-      if (s.pdp) { await p.click('.azur-pdp__back'); await p.waitForTimeout(700); }
+      if (s.pdp) { await p.click('.azur-pdp__x'); await p.waitForTimeout(700); }
       await click(p, D); await p.waitForTimeout(1500); await p.click('.azur-drop__close'); await p.waitForTimeout(500);
       s = await st(p); ok('drop: × closes the card', !s.drop && s.sel === -1, s);
       await click(p, D); await p.waitForTimeout(1500); await p.keyboard.press('Escape'); await p.waitForTimeout(500);
@@ -101,12 +99,11 @@ function serve() {
     await p.close(); p = await mk({ width: 1440, height: 810 });
     await p.goto(url + '#' + h); await p.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 }); await p.waitForTimeout(1500);
     s = await st(p); ok('page opened with a jersey link shows its product view', s.pdp && s.sel === -1, s);
-    // rapid open/close, then the viewer still works
+    // rapid open/close, then the product view still shows the right photo
     for (const i of [3, 0, 3, 4, 3, 1]) { await p.evaluate(i => AZUR.app.openProduct(i), i); await p.waitForTimeout(120); await p.evaluate(() => AZUR.app.shop.close()); }
     await p.evaluate(() => AZUR.app.openProduct(4)); await p.waitForTimeout(2500);
-    const vs = await p.evaluate(() => { const v = AZUR.app.shop.viewer; return { url: (v.url || '').split('/').pop(), running: v.running, parts: v.parts.length, model: AZUR.app.shop.pdp.classList.contains('has-model') }; });
-    const k4 = await keyOf(p, 4);
-    ok('rapid open/close: the last jersey opened is the one shown', vs.url.startsWith(k4 + '.') && vs.running && vs.parts > 0 && vs.model, vs);
+    const vs = await photo(p), k4 = await keyOf(p, 4), pd = await st(p);
+    ok('rapid open/close: the last jersey opened is the one shown', pd.pdp && pd.prod === k4 && vs.src.startsWith(k4 + '.') && vs.loaded && vs.shown, { vs, pd });
     await p.close();
     // phone
     p = await mk({ width: 390, height: 844 }, true);
@@ -132,7 +129,7 @@ function serve() {
     await p.evaluate(() => AZUR.app.openProduct(0)); await p.waitForTimeout(900);
     let add = await p.evaluate(() => document.querySelector('.azur-pdp__add').disabled);
     ok('cart: add button waits for a size', add, { add });
-    await p.click('.azur-size >> nth=1'); await p.click('.azur-pdp__add'); await p.waitForTimeout(700);
+    await p.click('.azur-pl:not(:has(input:disabled)) >> nth=1'); await p.click('.azur-pdp__add'); await p.waitForTimeout(700);
     let c = await p.evaluate(() => ({ lines: AZUR.app.shop.cart.length, after: !document.querySelector('.azur-pdp__after').hidden,
       ship: document.querySelector('.azur-pdp__ship').textContent, bag: !document.querySelector('.azur-head__bag').hidden,
       count: document.querySelector('.azur-head__count').textContent }));
@@ -142,6 +139,10 @@ function serve() {
       .map(e => ({ c: e.className, h: Math.round(e.getBoundingClientRect().height), want: e.scrollHeight })).filter(x => x.h < x.want * 0.8));   // tight display type overflows its box a little on purpose
     ok('cart: nothing in the product column is squeezed after adding', lay.length === 0, lay);
     await shot(p, 'pdp_added.png');
+    // the cart slides in by itself ~0.5 s after adding and covers the "keep looking" button: check that, close it, then continue
+    const slid = await p.evaluate(() => AZUR.app.shop.drawer.classList.contains('is-on'));
+    ok('cart: the cart slides in after adding', slid, { slid });
+    await p.click('.azur-cart__close'); await p.waitForTimeout(600);
     await p.click('.azur-pdp__after [data-act="more"]'); await p.waitForTimeout(900);
     s = await st(p); ok('cart: "keep looking" closes the product view', !s.pdp && s.dim === 1, s);
     await p.click('.azur-head__bag'); await p.waitForTimeout(500);
@@ -224,7 +225,7 @@ function serve() {
     const gh = await p.evaluate(() => getComputedStyle(document.querySelector('.azur-ghost')).visibility);
     ok('logo: hidden (no Tab stop) while nothing covers the room', gh === 'hidden', { gh });
     await p.evaluate(() => AZUR.app.openProduct(2)); await p.waitForTimeout(1200);
-    await p.click('.azur-ghost'); await p.waitForTimeout(700);
+    await p.click('.azur-ghost', { timeout: 4000 }).catch(() => {}); await p.waitForTimeout(700);
     s = await st(p); ok('logo: a click closes the product view', !s.pdp, s);
     await p.close();
   } catch (e) { fails++; logs.push('FAIL exception: ' + e.message.split('\n')[0]); }
@@ -239,8 +240,8 @@ function serve() {
     let s = await p.evaluate(() => ({ gl: AZUR.app.comp.ok, fb: !document.querySelector('.azur-fallback').hidden, err: document.documentElement.classList.contains('azur-error') }));
     ok('no WebGL: the still image shows instead', !s.gl && s.fb && !s.err, s);
     const pt = await find(p, 3); if (pt) await p.mouse.click(pt[0], pt[1]); await p.waitForTimeout(1200);
-    s = await p.evaluate(() => ({ pdp: AZUR.app.shop.pdp.classList.contains('is-on'), model: AZUR.app.shop.pdp.classList.contains('has-model'), img: document.querySelector('.azur-pdp__img').naturalWidth > 0 }));
-    ok('no WebGL: a click opens the product view with the photo', !!pt && s.pdp && !s.model && s.img, s);
+    s = await p.evaluate(() => ({ pdp: AZUR.app.shop.pdp.classList.contains('is-on'), img: document.querySelector('.azur-pdp__img').naturalWidth > 0 }));
+    ok('no WebGL: a click opens the product view with the photo', !!pt && s.pdp && s.img, s);
   } catch (e) { fails++; logs.push('FAIL exception (no WebGL): ' + e.message.split('\n')[0]); }
   await b2.close();
   console.log(logs.join('\n')); console.log(fails ? `${fails} failed` : 'all passed');

@@ -1,7 +1,7 @@
 const { chromium } = require('/opt/node-tools/node_modules/playwright');
 const SPKI = process.env.CCR_SPKI;
 (async () => {
-  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium',
     args: ['--no-proxy-server', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const out = process.argv[2] || '/tmp';
   const logs = [];
