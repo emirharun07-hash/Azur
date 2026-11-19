@@ -18,7 +18,7 @@ Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertr
 
 Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem Sie oder ein von Ihnen benannter Dritter, der nicht der Beförderer ist, die Waren in Besitz genommen haben bzw. hat.
 
-Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (Azur GbR, Erlenstraße 1, 12167 Berlin, Deutschland, E-Mail: kontakt@azurclothing.com) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das beigefügte Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben ist.
+Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (Azur GbR, [Geschäftsadresse], Deutschland, E-Mail: kontakt@azurclothing.com) mittels einer eindeutigen Erklärung (z. B. ein mit der Post versandter Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das beigefügte Muster-Widerrufsformular verwenden, das jedoch nicht vorgeschrieben ist.
 
 Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.
 
@@ -38,7 +38,7 @@ Sie müssen für einen etwaigen Wertverlust der Waren nur aufkommen, wenn dieser
 
 (Wenn Sie den Vertrag widerrufen wollen, dann füllen Sie bitte dieses Formular aus und senden Sie es zurück.)
 
-– An Azur GbR, Erlenstraße 1, 12167 Berlin, Deutschland, E-Mail: kontakt@azurclothing.com
+– An Azur GbR, [Geschäftsadresse], Deutschland, E-Mail: kontakt@azurclothing.com
 – Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über den Kauf der folgenden Waren (*)
 – Bestellt am (*)/erhalten am (*)
 – Name des/der Verbraucher(s)
@@ -74,7 +74,7 @@ Fragen zur Bestellung: kontakt@azurclothing.com
 ## 3. Allgemeine Geschäftsbedingungen (AGB)
 
 **1. Geltungsbereich**
-Diese AGB gelten für alle Bestellungen über den Onlineshop azurclothing.com der Azur GbR, Erlenstraße 1, 12167 Berlin (im Folgenden „wir“).
+Diese AGB gelten für alle Bestellungen über den Onlineshop azurclothing.com der Azur GbR, [Geschäftsadresse] (im Folgenden „wir“).
 
 **2. Vertragsschluss**
 Die Darstellung der Produkte im Shop ist kein bindendes Angebot. Mit dem Klick auf „Zahlungspflichtig bestellen“ geben Sie ein verbindliches Angebot ab. Den Eingang bestätigen wir per E-Mail. Der Vertrag kommt zustande, wenn wir die Bestellung annehmen, spätestens mit dem Versand der Ware.

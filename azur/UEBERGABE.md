@@ -6,7 +6,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
 ## Die Marke
 
 - **AZUR Clothing**, Shopify-Shop **azurclothing.com** (intern `5vpchz-hd.myshopify.com`), Euro, Deutschland.
-- Gründer: Emir (schreibt mit Claude, „Owner“) und Talha.
+- Gründer: [Name 1] (schreibt mit Claude, „Owner“) und [Name 2].
 - **Produkte** (alle aktiv, Größen S–XL):
 
   | Trikot | Preis | Adresse |
@@ -129,7 +129,7 @@ das Wichtigste zusammen. Die Einzelheiten zu jeder Runde stehen in `azur/STATUS.
   - Zu tun: in LUCID registrieren (kostenlos), einen Vertrag mit einem Systembetreiber schließen (kostet etwas)
     und die Mengen in LUCID melden. Das muss vor dem ersten verschickten Paket erledigt sein.
   - Name wie beim Finanzamt und bei PayPal. Markennamen „Azur“ und der Firmenname (Verpackung ist neutral).
-  - Stand 4.11.: In LUCID registriert, Registrierungsnummer DE1483502731285 (steht ohnehin im öffentlichen
+  - Stand 4.11.: In LUCID registriert, Registrierungsnummer [LUCID-Nr.] (steht ohnehin im öffentlichen
     Register). Unternehmensname dort: „Azur“. Das ist richtig: Nicht eingetragene GbRs geben laut LUCID ihre
     Geschäftsbezeichnung an, und die ist laut Gewerbeanmeldung „Azur“. Verkauf ist erst ab etwa Januar 2027 geplant, darum
     den Systemvertrag im Dezember für 2027 abschließen und danach die Mengen in LUCID melden. Der Shop ist
