@@ -1,0 +1,67 @@
+{%- comment -%} Über Azur: Text links, gestickte Signatur rechts, darunter ein schlichtes Datenblatt und der Weg zum Kontakt. {%- endcomment -%}
+{%- assign contact = pages['contact'] -%}
+<section class="about wrap" aria-labelledby="about-title-{{ section.id }}">
+  <div class="about__text">
+    <p class="about__kicker">{{ page.title | default: section.settings.kicker }}</p>
+    <h1 class="about__title" id="about-title-{{ section.id }}">{{ section.settings.title }}</h1>
+    {%- if section.settings.lead != blank -%}<p class="about__lead">{{ section.settings.lead }}</p>{%- endif -%}
+    <div class="about__body rte">
+      {%- if page.content != blank -%}{{ page.content }}{%- else -%}{{ section.settings.text }}{%- endif -%}
+    </div>
+  </div>
+  <figure class="about__img">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 1400 | image_tag: widths: '600, 900, 1400', sizes: '(min-width: 1024px) 45vw, 100vw', loading: 'eager' }}
+    {%- else -%}
+      <img src="{{ 'campaign-detail.jpg' | asset_url }}" alt="{{ 'azur.alt.signature' | t }}" width="1200" height="800">
+    {%- endif -%}
+  </figure>
+
+  {%- if section.blocks.size > 0 -%}
+    <dl class="facts" aria-label="{{ section.settings.facts_title }}">
+      {%- for block in section.blocks -%}
+        <div class="facts__row" {{ block.shopify_attributes }}>
+          <dt>{{ block.settings.label }}</dt>
+          <dd>{{ block.settings.value }}</dd>
+        </div>
+      {%- endfor -%}
+    </dl>
+  {%- endif -%}
+
+  {%- if section.settings.ask_title != blank and contact.url != blank -%}
+    <p class="about__ask">{{ section.settings.ask_title }} <a class="link" href="{{ contact.url }}">{{ contact.title }}</a></p>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Über Azur",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Zeile über der Headline (wenn die Seite keinen Titel hat)", "default": "Über Azur" },
+    { "type": "text", "id": "title", "label": "Headline", "default": "Ein Label aus Berlin." },
+    { "type": "text", "id": "lead", "label": "Kernsatz", "default": "Azur verbindet Fußballkultur mit Streetwear." },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text (wenn die Seite keinen Inhalt hat)",
+      "default": "<p>Wir nehmen die Codes des Fußballtrikots, Kragen, Paspeln, Wappen, Rückennummer, und setzen sie auf lockere Schnitte für den Alltag.</p>"
+    },
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Leer = gestickte Signatur (Nahaufnahme)" },
+    { "type": "text", "id": "facts_title", "label": "Überschrift Datenblatt", "default": "Stand heute" },
+    { "type": "text", "id": "ask_title", "label": "Satz vor dem Kontakt-Link", "default": "Fragen zu Größen, Bestellung oder Kooperation?" }
+  ],
+  "blocks": [
+    {
+      "type": "fact",
+      "name": "Datenpunkt",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Bezeichnung", "default": "Sitz" },
+        { "type": "text", "id": "value", "label": "Wert", "default": "Berlin" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Über Azur" }
+  ]
+}
+{% endschema %}

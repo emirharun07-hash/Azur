@@ -1,0 +1,29 @@
+<div class="wrap">
+  <header class="page-head">
+    <h1 class="page-title">{{ blog.title }}</h1>
+  </header>
+  {%- paginate blog.articles by 12 -%}
+    <ul class="list">
+      {%- for article in blog.articles -%}
+        <li>
+          <a class="list__item" href="{{ article.url }}">
+            <span>{{ article.title }}</span>
+            <span class="list__meta">{{ article.published_at | date: '%d.%m.%Y' }}</span>
+          </a>
+        </li>
+      {%- else -%}
+        <li class="list__none">{{ 'azur.general.no_posts' | t }}</li>
+      {%- endfor -%}
+    </ul>
+    {%- if paginate.pages > 1 -%}
+      {%- assign pg_next = 'azur.general.next' | t -%}{%- assign pg_prev = 'azur.general.previous' | t -%}<nav class="pager" aria-label="{{ 'azur.general.pages' | t }}">{{ paginate | default_pagination: next: pg_next, previous: pg_prev }}</nav>
+    {%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Blog",
+  "settings": []
+}
+{% endschema %}

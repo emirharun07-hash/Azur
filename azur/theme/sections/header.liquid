@@ -15,16 +15,16 @@
       {%- comment -%} beide Signaturen; welche sichtbar ist, entscheidet die Palette (azur.css, --logo-ink / --logo-paper) {%- endcomment -%}
       {%- render 'logo', tone: 'ink', eager: true, class: 'logo--ink' -%}
       {%- render 'logo', tone: 'paper', eager: true, class: 'logo--paper' -%}
-      <span class="sr-only">Startseite</span>
+      <span class="sr-only">{{ 'azur.general.home' | t }}</span>
     </a>
 
     <div class="header__end">
       <a class="header__icon header__cart" href="{{ routes.cart_url }}" data-cart-open aria-haspopup="dialog">
         {%- comment -%} Runde 17: die Sporttasche als echtes 3D-Bild (azur/design/render_bag.py), schwarz auf Weiß, weiß über dem Zimmer {%- endcomment -%}
         <span class="bag3d" aria-hidden="true"><img class="logo--ink" src="{{ 'azur-bag-ink.webp' | asset_url }}" alt="" width="119" height="90"><img class="logo--paper" src="{{ 'azur-bag-paper.webp' | asset_url }}" alt="" width="120" height="93"></span>
-        <span class="sr-only">Warenkorb,</span>
+        <span class="sr-only">{{ 'azur.header.cart' | t }}</span>
         <span class="header__count" data-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</span>
-        <span class="sr-only">Artikel</span>
+        <span class="sr-only">{{ 'azur.header.items' | t }}</span>
       </a>
     </div>
   </div>

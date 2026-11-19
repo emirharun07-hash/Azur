@@ -6,15 +6,15 @@
 {%- assign shipping_page = pages[settings.shipping_page_handle] -%}
 <ul class="trust{% if class %} {{ class }}{% endif %}">
   {%- if settings.shipping_cost != blank -%}
-    <li class="trust__row"><span class="trust__k">Versand</span><span class="trust__v">{{ settings.shipping_cost | escape }}</span></li>
+    <li class="trust__row"><span class="trust__k">{{ 'azur.trust.shipping' | t }}</span><span class="trust__v">{{ settings.shipping_cost | escape }}</span></li>
   {%- endif -%}
   {%- if settings.delivery_days != blank -%}
-    <li class="trust__row"><span class="trust__k">Lieferung</span><span class="trust__v">in {{ settings.delivery_days | escape }} Werktagen</span></li>
+    <li class="trust__row"><span class="trust__k">{{ 'azur.trust.delivery' | t }}</span><span class="trust__v">{{ 'azur.trust.delivery_days' | t: days: settings.delivery_days }}</span></li>
   {%- elsif request.design_mode -%}
-    <li class="trust__row"><span class="trust__k">Lieferung</span><span class="trust__v">{% render 'placeholder', text: 'Lieferzeit fehlt (Theme-Einstellungen → Azur)' %}</span></li>
+    <li class="trust__row"><span class="trust__k">{{ 'azur.trust.delivery' | t }}</span><span class="trust__v">{% render 'placeholder', text: 'Lieferzeit fehlt (Theme-Einstellungen → Azur)' %}</span></li>
   {%- endif -%}
   {%- if settings.returns_note != blank -%}
-    <li class="trust__row"><span class="trust__k">Rückgabe</span><span class="trust__v">
+    <li class="trust__row"><span class="trust__k">{{ 'azur.trust.returns' | t }}</span><span class="trust__v">
       {%- if shipping_page.url != blank -%}
         <a class="link" href="{{ shipping_page.url }}">{{ settings.returns_note | escape }}</a>
       {%- else -%}

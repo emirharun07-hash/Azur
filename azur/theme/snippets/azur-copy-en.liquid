@@ -1,0 +1,84 @@
+{%- comment -%}
+  Runde 29: englische Texte für das Zimmer und die Produktansicht (assets/azur-room.js, assets/azur-pdp.js).
+  Wird in window.AZUR_SETUP aufgerufen und legt die Texte über A.config.copy, nur wenn die Sprache nicht Deutsch ist.
+  Deutsch steht unverändert in den JS-Dateien. Texte aus den Theme-Einstellungen (Drop-Titel, Schnitt) kommen aus den
+  Übersetzungen im Shopify-Admin.
+{%- endcomment -%}
+{%- if request.locale.iso_code != 'de' -%}
+(function (c, en) {
+      var merge = function (a, b) {
+        for (var k in b) {
+          if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object') merge(a[k], b[k]);
+          else a[k] = b[k];
+        }
+      };
+      merge(c, en);
+    })(A.config.copy, {
+      hintDesktop: 'Pick a jersey',
+      hintMobile: 'Tap a jersey',
+      view: 'View',
+      viewJersey: 'View jersey',
+      putBack: 'Hang it back',
+      backToRoom: 'Back to the room',
+      room: 'Room', rail: 'Rail', bed: 'Bed',
+      chooseSize: 'Choose size',
+      addToCart: 'Add to cart',
+      added: 'In your cart',
+      cart: 'Cart', checkout: 'Checkout', emptyCart: 'Your cart is empty.',
+      total: 'Total', inclVat: 'incl. VAT',
+      nav: ['Shop', 'Collection', 'About us'],
+      dropTitle: 'Next drop',
+      dropText: 'Still under wraps.',
+      dropPlaceholder: 'Your email address',
+      dropButton: 'Notify me',
+      dropLegal: 'By signing up you get emails from AZUR about new drops. You can unsubscribe at any time.',
+      dropDone: 'You are in.',
+      dropDoneText: 'We will let you know before the drop goes live.',
+      dropInvalid: 'Please enter a valid email address.',
+      dropFailed: 'That did not work. Please try again in a moment.',
+      bedTease: 'Psst. Flip through the magazine on the duvet.',
+      bedTeaseNight: 'Psst. The magazine slipped off the bed. Take a look.',
+      magSpot: 'Read ANSTOSS',
+      mag: {
+        label: 'ANSTOSS, issue 01. The AZUR magazine',
+        prev: 'Previous page', next: 'Next page', close: 'Close the magazine',
+        coverWord: 'Cover', backWord: 'Back cover',
+        issue: 'Issue 01 · The AZUR magazine',
+        coverAlt: 'Two kids playing football in the morning mist, one doing a bicycle kick, one in goal.',
+        coverLines: ['Two cities.', 'Three countries.', 'One room.'],
+        coverSticker: 'With lookbook: all jerseys',
+        editorialKicker: 'Editorial',
+        editorialHead: 'Kick-off.',
+        editorialLead: 'Posters on the wall, the ball under the bed, tomorrow’s jersey already laid out. That is how it starts.',
+        about: ['We take the colours and symbols of countries and cities and put them on a clean, simple jersey.',
+                'Emblems and the Azur signature on the chest. Worn on the pitch and after.'],
+        signNote: 'Emir Kilic and Talha Zaffar, founders of AZUR',
+        storyAlt: 'A player in a red shirt kicks a ball across a sunny meadow.',
+        storyQuote: 'Worn on the pitch and after.',
+        lookKicker: 'Lookbook',
+        tocKicker: 'In this issue',
+        toRail: 'See it on the rail', toProduct: 'View', toShop: 'In the shop',
+        dropKicker: 'Preview',
+        dropHead: 'Next drop',
+        dropText: 'Something is still hanging on the rail under the cover. Still under wraps. Sign up and you will be the first to know.',
+        toDrop: 'To the covered jersey on the rail',
+        bye: 'Until the next kick-off.',
+        credits: 'Photos: sasint, Negative Space (CC0)'
+      },
+      roomHint: 'Click the rail or the bed',
+      goBed: 'To the bed', goRail: 'To the rail',
+      menu: 'Menu', menuClose: 'Close menu', bag: 'Sports bag (cart)',
+      menuLinks: [['Shop', 'rail'], ['Collection', 'rail'], ['About us', 'mag'], ['Room', 'room']],
+      shipTo: '{x} more for free shipping',
+      shipFree: 'Shipping is free',
+      keepLooking: 'Keep looking', toCart: 'To the bag',
+      openInShop: 'Open in shop',
+      close: 'Close',
+      railLabel: 'Jerseys on the clothes rail',
+      nextDrop: 'Next drop',
+      yourSize: 'Your size',
+      size: 'Size',
+      failed: 'That did not work.',
+      soundOn: 'Sound on', soundOff: 'Sound off'
+    });
+{%- endif -%}

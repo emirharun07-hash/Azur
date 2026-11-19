@@ -6,13 +6,14 @@
 {%- liquid
   assign bits = ''
   if part != 'time' and settings.shipping_cost != blank
-    assign bits = 'Versand ' | append: settings.shipping_cost
+    assign bits = 'azur.shipping.cost' | t: cost: settings.shipping_cost
   endif
   if part != 'cost' and settings.delivery_days != blank
     if bits != ''
       assign bits = bits | append: ' · '
     endif
-    assign bits = bits | append: 'Lieferung in ' | append: settings.delivery_days | append: ' Werktagen'
+    assign delivery = 'azur.shipping.delivery' | t: days: settings.delivery_days
+    assign bits = bits | append: delivery
   endif
   assign shipping_page = pages[settings.shipping_page_handle]
 -%}

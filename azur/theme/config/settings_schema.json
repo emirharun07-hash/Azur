@@ -1,0 +1,152 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Azur",
+    "theme_version": "2.0.0",
+    "theme_author": "Azur",
+    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
+    "theme_support_url": "https://help.shopify.com"
+  },
+  {
+    "name": "Azur",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Shop"
+      },
+      {
+        "type": "collection",
+        "id": "main_collection",
+        "label": "Shop-Kollektion",
+        "info": "Ziel von „Shop“ in Navigation und Footer. Quelle für „Weitere Trikots“ bei den übrigen Trikots."
+      },
+      {
+        "type": "product",
+        "id": "feature_product_1",
+        "label": "Hauptprodukt 1",
+        "info": "Erster Menüpunkt, Stadt-Trikot für „Weitere Trikots“. Aktuell: Berlin 030."
+      },
+      {
+        "type": "product",
+        "id": "feature_product_2",
+        "label": "Hauptprodukt 2",
+        "info": "Zweiter Menüpunkt, Stadt-Trikot für „Weitere Trikots“. Aktuell: Frankfurt 069."
+      },
+      {
+        "type": "collection",
+        "id": "nav_collection",
+        "label": "Kategorie in Navigation und Footer",
+        "info": "Menüpunkt nach den Stadt-Trikots, Link im Footer und in der Brotkrumen-Navigation. Aktuell: Nationaltrikots."
+      },
+      {
+        "type": "page",
+        "id": "about_page",
+        "label": "Seite „Über Azur“"
+      },
+      {
+        "type": "header",
+        "content": "Service & Rechtliches"
+      },
+      {
+        "type": "text",
+        "id": "legal_pages",
+        "label": "Seiten im Footer (Handles, kommagetrennt)",
+        "default": "contact,impressum,agb,datenschutzerklarung,versand-widerrufsrecht",
+        "info": "Nur veröffentlichte Seiten werden verlinkt. Shopify-Richtlinien (Einstellungen → Richtlinien) kommen automatisch dazu."
+      },
+      {
+        "type": "text",
+        "id": "support_email",
+        "label": "Support-E-Mail",
+        "info": "Erscheint auf der Kontaktseite. Nachrichten aus dem Kontaktformular gehen an die Absender-E-Mail unter Einstellungen → Benachrichtigungen, nicht an diese Adresse."
+      },
+      {
+        "type": "text",
+        "id": "tax_note",
+        "label": "Steuerhinweis",
+        "default": "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.",
+        "info": "Bei Preis, Warenkorb und im Footer. Muss zu Einstellungen → Steuern und Zölle passen."
+      },
+      {
+        "type": "text",
+        "id": "shipping_cost",
+        "label": "Versandkosten Deutschland",
+        "info": "Steht hinter „Versand“, z. B. „in Deutschland 1,99 €, ab 79,99 € kostenlos“. Muss zu Märkte → Versand passen. Leer = ausgeblendet."
+      },
+      {
+        "type": "text",
+        "id": "delivery_days",
+        "label": "Lieferzeit in Werktagen",
+        "info": "Nur die Zahl oder Spanne, z. B. „2–4“. Ergibt „Lieferung in 2–4 Werktagen“. Leer = ausgeblendet."
+      },
+      {
+        "type": "text",
+        "id": "returns_note",
+        "label": "Rückgabe",
+        "default": "14 Tage Rückgabe, kostenloser Rückversand",
+        "info": "Steht auf der Produktseite, in der Service-Zeile und im Warenkorb. Muss zu deiner Widerrufsbelehrung passen. Leer = ausgeblendet."
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_threshold",
+        "label": "Kostenloser Versand ab (Betrag in der Währung des Markts)",
+        "default": "79.99",
+        "info": "Nur die Zahl mit Punkt, z. B. „79.99“. Für „Noch … bis zum kostenlosen Versand“ im Warenkorb. Muss zu Märkte → Versand passen. Leer = keine Anzeige."
+      },
+      {
+        "type": "text",
+        "id": "shipping_page_handle",
+        "label": "Handle der Versandseite",
+        "default": "versand-widerrufsrecht",
+        "info": "Versandkosten und Lieferzeit verlinken dorthin, sobald die Seite veröffentlicht ist."
+      },
+      {
+        "type": "header",
+        "content": "Suchmaschinen & Teilen"
+      },
+      {
+        "type": "text",
+        "id": "seo_home_title",
+        "label": "Titel der Startseite",
+        "default": "Azur – Trikots aus Berlin: Berlin 030, Frankfurt 069",
+        "info": "Für Google und geteilte Links, höchstens ca. 60 Zeichen. Ein Titel unter Onlineshop → Einstellungen hat Vorrang."
+      },
+      {
+        "type": "textarea",
+        "id": "seo_home_description",
+        "label": "Beschreibung der Startseite",
+        "default": "Trikots von Azur aus Berlin: Berlin 030, Frankfurt 069 und Nationaltrikots für Türkei, Deutschland und Brasilien. Größen S bis XL.",
+        "info": "Für Google und geteilte Links, höchstens ca. 155 Zeichen. Eine Beschreibung unter Onlineshop → Einstellungen hat Vorrang."
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Quadratisch, mindestens 192 × 192 px. Leer = Azur-Signatur auf Schwarz."
+      },
+      {
+        "type": "header",
+        "content": "Produkte"
+      },
+      {
+        "type": "textarea",
+        "id": "product_meta",
+        "label": "Produkt-Codes",
+        "default": "berlin-trikot-azur-collection | 030 | ber | Schwarz / Creme / Bordeaux |\nfrankfurt-trikot-azur-collection | 069 | ffm | Creme / Dunkelgrün / Gold |\nturkei-trikot-azur-collection | TUR | tur | Rot / Weiß | Kökler. Birlik. Azim. Gelecek.\ndeutschland-trikot-azur-collection | GER | ger | Weiß / Schwarz |\nbrasilien-trikot-azur-collection | BRA | bra | Gelb / Grün |",
+        "info": "Eine Zeile pro Produkt: Handle | Code | Farbwelt (ber = dunkel mit Bordeaux, ffm = hell mit Dunkelgrün, sonst neutral) | Farben | Zeile unter dem Kaufknopf"
+      },
+      {
+        "type": "text",
+        "id": "filter_sizes",
+        "label": "Größen im Filter",
+        "default": "S,M,L,XL"
+      },
+      {
+        "type": "textarea",
+        "id": "size_chart",
+        "label": "Größentabelle",
+        "info": "Eine Zeile pro Größe: Größe | Brustbreite in cm | Länge in cm, z. B. „M | 56 | 72“. Nur gemessene Werte eintragen. Leer = kein Link „Größentabelle“."
+      }
+    ]
+  }
+]

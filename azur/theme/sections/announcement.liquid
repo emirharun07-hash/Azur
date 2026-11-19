@@ -21,7 +21,7 @@
     endif
   endfor
   if items == blank and settings.shipping_cost != blank
-    assign t = 'Versand ' | append: settings.shipping_cost | escape
+    assign t = 'azur.shipping.cost' | t: cost: settings.shipping_cost | escape
     assign items = '<li class="bar__item">' | append: t | append: '</li>'
   endif
   assign tag = 'div'

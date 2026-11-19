@@ -1,13 +1,27 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "room": {
       "type": "azur-room",
       "settings": {
         "product_1": "frankfurt-trikot-azur-collection",
+        "fit_1": "Klassischer Schnitt",
         "product_2": "berlin-trikot-azur-collection",
+        "fit_2": "Lockerer Schnitt",
         "product_3": "brasilien-trikot-azur-collection",
         "product_4": "deutschland-trikot-azur-collection",
-        "product_5": "turkei-trikot-azur-collection"
+        "product_5": "turkei-trikot-azur-collection",
+        "drop_title": "Nächster Drop",
+        "drop_text": "Noch unter Verschluss.",
+        "free_shipping_from": 79.99
       }
     },
     "campaign": {

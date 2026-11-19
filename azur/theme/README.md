@@ -1,5 +1,7 @@
 # AZUR theme files (Phase 2)
 
+Stand 19.11.2026: Dieser Ordner spiegelt das Live-Theme Runde 33 (alle Textdateien außer config/settings_data.json). Generierte Dateien kommen aus azur/prototype über azur/tools/build_theme.py. azur/theme-runde29 ist nur noch Archiv.
+
 Files for the Shopify theme **"Azur Zimmer Runde 8 (Entwurf)"** (`gid://shopify/OnlineStoreTheme/209556078931`, a copy
 of the live theme "Azur Zimmer Runde 7 (Entwurf)" `209492050259`, which the owner published after round 7).
 Only these files are added or changed in the copy; everything else stays the live theme's. (Round 7: Files azr7-, the

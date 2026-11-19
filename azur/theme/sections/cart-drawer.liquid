@@ -20,8 +20,8 @@
   <div class="drawer__scrim" data-cart-close></div>
   <div class="drawer__panel">
     <header class="drawer__head">
-      <h2 class="drawer__title" id="cart-title">Warenkorb <span class="drawer__count" data-cart-count>{{ cart.item_count }}</span></h2>
-      <button class="drawer__close" type="button" data-cart-close>Schließen</button>
+      <h2 class="drawer__title" id="cart-title">{{ 'cart.general.title' | t }} <span class="drawer__count" data-cart-count>{{ cart.item_count }}</span></h2>
+      <button class="drawer__close" type="button" data-cart-close>{{ 'azur.general.close' | t }}</button>
     </header>
 
     <p class="drawer__status" role="status" data-cart-status></p>
@@ -30,8 +30,8 @@
     <div class="drawer__content" data-cart-content data-count="{{ cart.item_count }}">
       {%- if cart.item_count > 0 -%}
         {%- liquid
-          # Kostenloser Versand in Deutschland: echte Rechnung aus dem Warenkorb, keine Zeitgrenzen
-          assign threshold = settings.free_shipping_threshold | times: 100
+          # Kostenloser Versand (alle Märkte, Grenze in der Währung des Markts): echte Rechnung aus dem Warenkorb, keine Zeitgrenzen
+          assign threshold = settings.free_shipping_threshold | times: 100 | round
           assign rest = threshold | minus: cart.total_price
           assign pct = 100
           if threshold > 0 and rest > 0
@@ -42,9 +42,10 @@
           <div class="freeship">
             <p class="freeship__text">
               {%- if rest > 0 -%}
-                Noch <b>{% render 'price', amount: rest %}</b> bis zum kostenlosen Versand in Deutschland
+                {%- capture rest_price %}{% render 'price', amount: rest %}{% endcapture -%}
+                {{ 'azur.cart.rest_html' | t: amount: rest_price }}
               {%- else -%}
-                Kostenloser Versand in Deutschland ✓
+                {{ 'azur.cart.free' | t }}
               {%- endif -%}
             </p>
             <span class="freeship__bar" aria-hidden="true"><span style="width: {{ pct }}%"></span><i class="freeship__ball" style="left: {{ pct }}%"></i></span>
@@ -61,16 +62,16 @@
               </a>
               <div class="line__info">
                 <p class="line__name"><a href="{{ item.url }}">{{ label }}</a></p>
-                <p class="line__meta">{{ item.product.options.first | default: 'Größe' }} {{ item.variant.option1 }}</p>
-                <div class="qty" role="group" aria-label="Menge {{ label }}, {{ item.variant.option1 }}">
-                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | minus: 1 }}" aria-label="Eins weniger"{% if item.quantity <= 1 %} disabled{% endif %}>−</button>
+                <p class="line__meta">{{ 'azur.cart.size' | t }} {{ item.variant.option1 }}</p>
+                <div class="qty" role="group" aria-label="{{ 'azur.cart.quantity_for' | t: label: label, size: item.variant.option1 }}">
+                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | minus: 1 }}" aria-label="{{ 'azur.cart.one_less' | t }}"{% if item.quantity <= 1 %} disabled{% endif %}>−</button>
                   <span class="qty__n">{{ item.quantity }}</span>
-                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | plus: 1 }}" aria-label="Eins mehr">+</button>
+                  <button class="qty__btn" type="button" data-qty="{{ item.quantity | plus: 1 }}" aria-label="{{ 'azur.cart.one_more' | t }}">+</button>
                 </div>
               </div>
               <div class="line__side">
                 <p class="line__price">{% render 'price', amount: item.final_line_price %}</p>
-                <button class="line__remove link" type="button" data-qty="0">Entfernen<span class="sr-only">: {{ label }}, {{ item.variant.option1 }}</span></button>
+                <button class="line__remove link" type="button" data-qty="0">{{ 'azur.cart.remove' | t }}<span class="sr-only">: {{ label }}, {{ item.variant.option1 }}</span></button>
               </div>
             </li>
           {%- endfor -%}
@@ -78,28 +79,28 @@
 
         <form class="drawer__foot" action="{{ routes.cart_url }}" method="post">
           <p class="drawer__total">
-            <span>Zwischensumme</span>
+            <span>{{ 'azur.cart.subtotal' | t }}</span>
             <span class="drawer__sum">{% render 'price', amount: cart.total_price %}</span>
           </p>
           <p class="drawer__note">
             {{- settings.tax_note -}}
             {%- if ship != blank %}<br>{{ ship }}{% endif -%}
-            {%- if payments != blank %}<br>Zahlung mit {{ payments }}{% endif -%}
+            {%- if payments != blank %}<br>{{ 'azur.general.pay_with' | t: list: payments }}{% endif -%}
           </p>
-          <button class="btn btn--solid btn--block" type="submit" name="checkout">Zur Kasse <span class="arrow" aria-hidden="true">→</span></button>
+          <button class="btn btn--solid btn--block" type="submit" name="checkout">{{ 'azur.cart.checkout' | t }} <span class="arrow" aria-hidden="true">→</span></button>
           {%- if additional_checkout_buttons -%}
             <div class="drawer__express">{{ content_for_additional_checkout_buttons }}</div>
           {%- endif -%}
         </form>
       {%- else -%}
         <div class="drawer__empty">
-          <p class="drawer__empty-title">Dein Warenkorb ist leer.</p>
+          <p class="drawer__empty-title">{{ 'azur.cart.empty' | t }}</p>
           {%- assign p1 = settings.feature_product_1 -%}
           {%- assign p2 = settings.feature_product_2 -%}
           <ul class="drawer__empty-links">
             {%- if p1 -%}<li><a class="btn btn--line btn--block" href="{{ p1.url }}">{% render 'product-field', product: p1, field: 'label' %} <span class="arrow" aria-hidden="true">→</span></a></li>{%- endif -%}
             {%- if p2 -%}<li><a class="btn btn--line btn--block" href="{{ p2.url }}">{% render 'product-field', product: p2, field: 'label' %} <span class="arrow" aria-hidden="true">→</span></a></li>{%- endif -%}
-            <li><a class="btn btn--solid btn--block" href="{{ shop_coll.url }}">Zum Shop <span class="arrow" aria-hidden="true">→</span></a></li>
+            <li><a class="btn btn--solid btn--block" href="{{ shop_coll.url }}">{{ 'azur.general.to_shop' | t }} <span class="arrow" aria-hidden="true">→</span></a></li>
           </ul>
         </div>
       {%- endif -%}

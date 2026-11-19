@@ -1,0 +1,43 @@
+{%- comment -%}
+  Drops per Mail: Teaser-Bild (Standard: Frankfurt-Trikot), große Überschrift, kurzer Text, E-Mail-Feld (snippets/signup-form). Für die Seite „Drops“
+  (Link für Instagram-Bio) und optional auf der Startseite. Der Footer zeigt dieselbe Anmeldung klein auf allen
+  anderen Seiten.
+{%- endcomment -%}
+<section class="drops{% if section.settings.dark %} drops--dark{% endif %}" id="{{ section.settings.anchor | default: 'drops' }}" aria-labelledby="drops-title-{{ section.id }}">
+  <div class="drops__inner{% if section.settings.teaser %} drops__inner--teaser{% endif %} wrap">
+    {%- if section.settings.teaser -%}
+      {%- render 'teaser', image: section.settings.image, label: section.settings.label, class: 'drops__teaser' -%}
+    {%- endif -%}
+    <div class="drops__main">
+      <header class="drops__head">
+        {%- if section.settings.kicker != blank -%}<p class="drops__kicker">{{ section.settings.kicker }}</p>{%- endif -%}
+        <h2 class="drops__title" id="drops-title-{{ section.id }}">{{ section.settings.heading }}</h2>
+      </header>
+      <div class="drops__body">
+        {%- if section.settings.text != blank -%}<p class="drops__text">{{ section.settings.text }}</p>{%- endif -%}
+        {%- render 'signup-form', id: section.id, button: section.settings.button, success: section.settings.success -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Drops per Mail",
+  "settings": [
+    { "type": "checkbox", "id": "dark", "label": "Dunkler Grund", "default": false },
+    { "type": "checkbox", "id": "teaser", "label": "Teaser-Bild zeigen", "default": true },
+    { "type": "image_picker", "id": "image", "label": "Teaser-Bild", "info": "Leer = Frankfurt-Trikot von vorne, groß angeschnitten." },
+    { "type": "text", "id": "label", "label": "Zeile auf dem Bild", "default": "Frankfurt 069", "info": "Leer = keine." },
+    { "type": "text", "id": "kicker", "label": "Zeile oben", "default": "Drops per Mail" },
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Neue Drops zuerst." },
+    { "type": "text", "id": "text", "label": "Text", "default": "Trag deine Mail ein. Wir sagen dir Bescheid, sobald ein neues Trikot rauskommt." },
+    { "type": "text", "id": "button", "label": "Button", "default": "Eintragen" },
+    { "type": "text", "id": "success", "label": "Text nach dem Eintragen", "default": "Danke, du bist dabei. Kommt eine Bestätigungsmail, klick bitte auf den Link darin." },
+    { "type": "text", "id": "anchor", "label": "Sprungziel", "default": "drops", "info": "Links mit #drops springen hierher." }
+  ],
+  "presets": [
+    { "name": "Drops per Mail" }
+  ]
+}
+{% endschema %}

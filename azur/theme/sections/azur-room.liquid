@@ -13,9 +13,9 @@
 {%- liquid
   assign files_base = 'azr8-probe.webp' | file_url | split: 'azr8-probe.webp' | first
   assign keys = 'frankfurt,berlin,brasilien,deutschland,tuerkei' | split: ','
-  assign shipping = 'Versand in Deutschland'
+  assign shipping = 'azur.shipping.germany' | t
   if settings.shipping_cost != blank
-    assign shipping = 'Versand ' | append: settings.shipping_cost
+    assign shipping = 'azur.shipping.cost' | t: cost: settings.shipping_cost
   endif
 -%}
 <style>
@@ -110,28 +110,28 @@
 <div id="azur" class="azur campaign--dark" data-view="room" data-hero>
   <div class="azur-head">
     <div class="azur-head__right">
-      <button class="azur-head__sound" type="button" aria-pressed="true" aria-label="Ton aus" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9.5h3.6L12 6v12l-4.4-3.5H4z"/><path class="wave" d="M15.5 9.6a3.4 3.4 0 0 1 0 4.8M18 7.2a6.8 6.8 0 0 1 0 9.6"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
+      <button class="azur-head__sound" type="button" aria-pressed="true" aria-label="{{ 'azur.room.sound_off' | t }}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9.5h3.6L12 6v12l-4.4-3.5H4z"/><path class="wave" d="M15.5 9.6a3.4 3.4 0 0 1 0 4.8M18 7.2a6.8 6.8 0 0 1 0 9.6"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
     </div>
   </div>
-  <div class="azur-stage" role="region" aria-label="Das Zimmer">
+  <div class="azur-stage" role="region" aria-label="{{ 'azur.room.stage' | t }}">
     <div class="azur-world">
       <canvas class="azur-canvas" aria-hidden="true"></canvas>
-      <img class="azur-fallback" alt="Ein Kinderzimmer voller Fußballposter, ein Kleiderständer mit AZUR-Trikots, ein AZUR-Neonschild." hidden>
+      <img class="azur-fallback" alt="{{ 'azur.alt.room' | t }}" hidden>
       <div class="azur-layer"></div>
     </div>
     <canvas class="azur-snap" aria-hidden="true" hidden></canvas>
     <p class="azur-hint" aria-live="polite"></p>
     <p class="azur-tease" aria-live="polite"></p>
-    <nav class="azur-views" aria-label="Ansicht wählen">
-      <button type="button" data-view="bed">Bett</button>
-      <button type="button" data-view="room">Zimmer</button>
-      <button type="button" data-view="rail">Ständer</button>
+    <nav class="azur-views" aria-label="{{ 'azur.room.views' | t }}">
+      <button type="button" data-view="bed">{{ 'azur.room.bed' | t }}</button>
+      <button type="button" data-view="room">{{ 'azur.room.room' | t }}</button>
+      <button type="button" data-view="rail">{{ 'azur.room.rail' | t }}</button>
     </nav>
     <div class="azur-loader" aria-hidden="true"><img class="azur-loader__neon" src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="" width="480" height="227"></div>
-    <p class="azur-missing">Das Zimmer lädt nicht. Alle Trikots findest du weiter unten.</p>
+    <p class="azur-missing">{{ 'azur.room.missing' | t }}</p>
   </div>
 </div>
-<nav aria-label="AZUR"><a class="azur-ghost" href="{{ routes.root_url }}" aria-label="AZUR, zurück ins Zimmer"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a></nav>
+<nav aria-label="AZUR"><a class="azur-ghost" href="{{ routes.root_url }}" aria-label="{{ 'azur.room.ghost' | t }}"><img src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="AZUR" width="480" height="227"></a></nav>
 <div class="azur-fall" aria-hidden="true"></div>
 
 <script>
@@ -142,6 +142,7 @@
     var files = {{ files_base | json }};
     var brand = { 'azur-logo-paper.webp': {{ 'azur-logo-paper.webp' | asset_url | json }}, 'azur-logo-ink.webp': {{ 'azur-logo-ink.webp' | asset_url | json }} };
     A.config.shopify = true;
+    {% render 'azur-copy-en' %}
     A.config.flights = {{ section.settings.flights | default: 'blend' | json }};
     A.config.inline = {% render 'azur-room-data' %};
     A.config.urlMap = function (p) {
@@ -157,8 +158,8 @@
       freeShippingFrom: {{ section.settings.free_shipping_from | default: 0 | json }},
       cartCount: {{ cart.item_count | json }}
     };
-    A.config.copy.toProductPage = 'Zur Produktseite';
-    A.config.copy.adding = 'Wird hinzugefügt …';
+    A.config.copy.toProductPage = {{ 'azur.room.to_product_page' | t | json }};
+    A.config.copy.adding = {{ 'azur.room.adding' | t | json }};
     A.config.copy.dropTitle = {{ section.settings.drop_title | json }};
     A.config.copy.dropText = {{ section.settings.drop_text | json }};
     {%- assign pages = section.blocks | where: 'type', 'mag_page' -%}

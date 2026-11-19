@@ -1,0 +1,69 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "about",
+      "blocks": {
+        "f1": {
+          "type": "fact",
+          "settings": {
+            "label": "Sitz",
+            "value": "Berlin"
+          }
+        },
+        "f2": {
+          "type": "fact",
+          "settings": {
+            "label": "Städte",
+            "value": "Berlin 030, Frankfurt 069"
+          }
+        },
+        "f3": {
+          "type": "fact",
+          "settings": {
+            "label": "Außerdem",
+            "value": "Türkei, Deutschland, Brasilien"
+          }
+        },
+        "f4": {
+          "type": "fact",
+          "settings": {
+            "label": "Größen",
+            "value": "S, M, L, XL"
+          }
+        },
+        "f5": {
+          "type": "fact",
+          "settings": {
+            "label": "Preis",
+            "value": "54,99 € je Trikot, kein Ausweis der Umsatzsteuer (§ 19 UStG)"
+          }
+        }
+      },
+      "block_order": [
+        "f1",
+        "f2",
+        "f3",
+        "f4",
+        "f5"
+      ],
+      "settings": {
+        "title": "Ein Label aus Berlin.",
+        "lead": "Azur verbindet Fußballkultur mit Streetwear.",
+        "facts_title": "Stand heute",
+        "ask_title": "Fragen zu Größen, Bestellung oder Kooperation?"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

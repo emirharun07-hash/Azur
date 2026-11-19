@@ -1,0 +1,25 @@
+{% layout none %}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'azur.general.gift_card' | t }} — {{ shop.name }}</title>
+  {{ 'azur.css' | asset_url | stylesheet_tag }}
+  {{ content_for_header }}
+</head>
+<body class="template-password">
+  <div class="gate">
+    <div class="gate__inner wrap">
+      {%- render 'logo', tone: 'paper', class: 'gate__logo', eager: true -%}
+      <div class="gate__text">
+        <p class="gate__kicker">{{ 'azur.general.gift_card' | t }}</p>
+        <h1 class="gate__title">{{ gift_card.balance | money }}</h1>
+        <p class="gate__msg">Code: {{ gift_card.code | format_code }}</p>
+        {%- if gift_card.expired -%}<p class="gate__msg">{%- assign exp = gift_card.expires_on | date: '%d.%m.%Y' -%}{{ 'azur.general.expired_on' | t: date: exp }}</p>{%- endif -%}
+      </div>
+      <a class="btn btn--line" href="{{ shop.url }}">{{ 'azur.general.to_shop' | t }} <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</body>
+</html>

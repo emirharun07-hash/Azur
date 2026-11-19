@@ -6,7 +6,7 @@
   Parameter: product, form_id
 {%- endcomment -%}
 {%- liquid
-  assign option_name = product.options.first | default: 'Größe'
+  assign option_name = 'azur.cart.size' | t
   assign chart_id = form_id | append: '-chart'
   assign chart_rows = settings.size_chart | strip | newline_to_br | split: '<br />'
 -%}
@@ -16,7 +16,7 @@
     <span class="sizes__picked" data-size-picked aria-hidden="true"></span>
   </legend>
   {%- if settings.size_chart != blank -%}
-    <button class="sizes__chart link" type="button" popovertarget="{{ chart_id }}">Größentabelle</button>
+    <button class="sizes__chart link" type="button" popovertarget="{{ chart_id }}">{{ 'azur.product.size_chart' | t }}</button>
   {%- elsif request.design_mode -%}
     <span class="sizes__chart">{% render 'placeholder', text: 'Größentabelle fehlt' %}</span>
   {%- endif -%}
@@ -30,7 +30,7 @@
         {%- if product.selected_variant and variant.id == product.selected_variant.id and variant.available %} checked{% endif %}>
       <label class="size" for="{{ vid }}"{% unless variant.available %} data-soldout{% endunless %}>
         {{- variant.option1 -}}
-        {%- unless variant.available %}<span class="sr-only"> – ausverkauft</span>{% endunless -%}
+        {%- unless variant.available %}<span class="sr-only">{{ 'azur.general.sold_out_sr' | t }}</span>{% endunless -%}
       </label>
     {%- endfor -%}
   </div>
@@ -39,12 +39,12 @@
 {%- if settings.size_chart != blank -%}
   <div class="chart" id="{{ chart_id }}" popover role="dialog" aria-labelledby="{{ chart_id }}-title">
     <div class="chart__head">
-      <h2 class="chart__title" id="{{ chart_id }}-title">Größentabelle</h2>
-      <button class="chart__close" type="button" popovertarget="{{ chart_id }}" popovertargetaction="hide">Schließen</button>
+      <h2 class="chart__title" id="{{ chart_id }}-title">{{ 'azur.product.size_chart' | t }}</h2>
+      <button class="chart__close" type="button" popovertarget="{{ chart_id }}" popovertargetaction="hide">{{ 'azur.general.close' | t }}</button>
     </div>
     <table class="chart__table">
       <thead>
-        <tr><th scope="col">{{ option_name }}</th><th scope="col">Brustbreite (cm)</th><th scope="col">Länge (cm)</th></tr>
+        <tr><th scope="col">{{ option_name }}</th><th scope="col">{{ 'azur.product.chest' | t }}</th><th scope="col">{{ 'azur.product.length' | t }}</th></tr>
       </thead>
       <tbody>
         {%- for row in chart_rows -%}

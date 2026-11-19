@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
+  <meta name="facebook-domain-verification" content="bvkt9jb1bpgguhn422h4xnp6nstfof" />
   <link rel="canonical" href="{{ canonical_url }}">
   {%- render 'head-icons' %}
   {%- liquid
@@ -22,7 +23,7 @@
   <title>
     {{- title -}}
     {%- if current_tags %} – {{ current_tags | join: ', ' }}{% endif -%}
-    {%- if current_page and current_page != 1 %} – Seite {{ current_page }}{% endif -%}
+    {%- if current_page and current_page != 1 %} – {{ 'azur.general.page' | t: n: current_page }}{% endif -%}
     {%- unless title contains shop.name %} — {{ shop.name }}{% endunless -%}
   </title>
   {%- if description != blank %}
@@ -62,13 +63,14 @@
     }
   </style>
   <script>document.documentElement.className = 'js';</script>
+  {%- render 'azur-i18n' %}
   {%- render 'azur-variants' %}
   {{ 'azur.css' | asset_url | stylesheet_tag }}
 
   {{ content_for_header }}
 </head>
 <body class="template-{{ template.name }}">
-  <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+  <a class="skip-link" href="#inhalt">{{ 'azur.general.skip' | t }}</a>
 
   {% section 'announcement' %}
   {% section 'header' %}

@@ -1,0 +1,43 @@
+{%- comment -%}
+  Service-Zeile: Versandkosten und Lieferzeit (Theme-Einstellungen) plus ein freier Punkt, z. B. Widerrufsrecht.
+  Alles verlinkt auf die Versandseite, sobald sie veröffentlicht ist. Leere Punkte entfallen.
+{%- endcomment -%}
+{%- liquid
+  capture cost
+    render 'shipping-line', part: 'cost'
+  endcapture
+  capture time
+    render 'shipping-line', part: 'time'
+  endcapture
+  assign shipping_page = pages[settings.shipping_page_handle]
+-%}
+{%- if cost != blank or time != blank or section.settings.note != blank -%}
+  <section class="service wrap" aria-label="Service">
+    <ul class="service__list">
+      {%- if cost != blank -%}<li class="service__item">{{ cost }}</li>{%- endif -%}
+      {%- if time != blank -%}<li class="service__item">{{ time }}</li>{%- endif -%}
+      {%- if section.settings.note != blank -%}
+        <li class="service__item">
+          {%- if shipping_page.url != blank -%}
+            <a class="link" href="{{ shipping_page.url }}">{{ section.settings.note }}</a>
+          {%- else -%}
+            {{ section.settings.note }}
+          {%- endif -%}
+        </li>
+      {%- endif -%}
+    </ul>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Service-Zeile",
+  "settings": [
+    { "type": "paragraph", "content": "Versandkosten und Lieferzeit kommen aus Theme-Einstellungen → Azur." },
+    { "type": "text", "id": "note", "label": "Weiterer Punkt", "default": "14 Tage Rückgabe, kostenloser Rückversand", "info": "Leer = ausgeblendet. Muss zu deiner Widerrufsbelehrung passen." }
+  ],
+  "presets": [
+    { "name": "Service-Zeile" }
+  ]
+}
+{% endschema %}

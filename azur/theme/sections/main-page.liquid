@@ -1,0 +1,15 @@
+{%- comment -%} Standardseite (Impressum, AGB, Datenschutz, Versand …) mit Seitenleiste. {%- endcomment -%}
+<div class="legal wrap">
+  {% render 'legal-nav' %}
+  <article class="legal__body">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <div class="legal__text rte">{{ page.content }}</div>
+  </article>
+</div>
+
+{% schema %}
+{
+  "name": "Seite",
+  "settings": []
+}
+{% endschema %}

@@ -31,7 +31,7 @@
     endif
   endfor
 
-  assign name = product.title | split: ' –' | first | split: ' Trikot' | first | strip
+  assign name = product.title | split: ' –' | first | split: ' Trikot' | first | split: ' Jersey' | first | strip
   if field == 'name'
     assign out = name
   elsif field == 'code' and out == ''

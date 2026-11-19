@@ -19,17 +19,17 @@
   {%- if form.posted_successfully? -%}
     <div class="signup__ok" role="status">
       <span class="signup__tick" aria-hidden="true">✓</span>
-      <p><strong>Du bist eingetragen.</strong> {{ success | default: 'Kommt eine Bestätigungsmail, klick bitte auf den Link darin.' }}</p>
+      <p>{%- assign success_default = 'azur.signup.success' | t -%}<strong>{{ 'azur.signup.done' | t }}</strong> {{ success | default: success_default }}</p>
     </div>
   {%- else -%}
     <input type="hidden" name="contact[tags]" value="{{ tag_list | escape }}">
-    <label class="signup__label" for="{{ form_id }}-email">E-Mail-Adresse</label>
+    <label class="signup__label" for="{{ form_id }}-email">{{ 'azur.signup.label' | t }}</label>
     <div class="signup__row">
       <input class="form__input signup__email" id="{{ form_id }}-email" type="email" name="contact[email]"
-        placeholder="name@beispiel.de" autocomplete="email" autocapitalize="off" spellcheck="false" inputmode="email" required
+        placeholder="{{ 'azur.signup.placeholder' | t }}" autocomplete="email" autocapitalize="off" spellcheck="false" inputmode="email" required
         aria-describedby="{{ form_id }}-error" data-signup-email
         {%- if form.errors %} aria-invalid="true"{% endif %}>
-      <button class="btn btn--solid signup__btn" type="submit">{{ button | default: 'Eintragen' }}</button>
+      <button class="btn btn--solid signup__btn" type="submit">{%- assign button_default = 'azur.signup.button' | t -%}{{ button | default: button_default }}</button>
     </div>
     <p class="signup__error" id="{{ form_id }}-error" role="alert" data-signup-error{% unless form.errors %} hidden{% endunless %}>
       {%- if form.errors -%}
@@ -43,8 +43,8 @@
       {%- endif -%}
     </p>
     <p class="signup__legal">
-      Mails von {{ shop.name }} zu neuen Drops und Neuigkeiten. Abmelden geht jederzeit über den Link in jeder Mail.
-      {%- if shop.privacy_policy %} <a class="link" href="{{ shop.privacy_policy.url }}">Datenschutz</a>{% endif -%}
+      {{ 'azur.signup.legal' | t: shop: shop.name }}
+      {%- if shop.privacy_policy %} <a class="link" href="{{ shop.privacy_policy.url }}">{{ 'azur.signup.privacy' | t }}</a>{% endif -%}
     </p>
   {%- endif -%}
 {%- endform -%}

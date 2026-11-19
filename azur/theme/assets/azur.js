@@ -11,6 +11,8 @@
   const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
   const root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Runde 29: Texte für andere Sprachen kommen aus snippets/azur-i18n.liquid (window.AZUR_T); Deutsch steht hier
+  const T = (k, d) => (window.AZUR_T && window.AZUR_T[k]) || d;
   const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
   // Gemerkte Größe: nur Komfort, darf fehlen (privates Fenster, gesperrter Speicher).
@@ -77,7 +79,7 @@
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.status >= 400) {
-      const msg = data.description || data.message || 'Das hat nicht geklappt (' + res.status + ').';
+      const msg = data.description || data.message || T('failed', 'Das hat nicht geklappt') + ' (' + res.status + ').';
       throw new Error(msg);
     }
     return data;
@@ -85,7 +87,7 @@
 
   async function fetchDrawer() {
     const res = await fetch(root + '?sections=' + SECTION, { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error('Warenkorb konnte nicht geladen werden.');
+    if (!res.ok) throw new Error(T('cartLoad', 'Warenkorb konnte nicht geladen werden.'));
     return res.json();
   }
 
@@ -169,7 +171,7 @@
       const data = await cartRequest('cart/change.js', { id: key, quantity: quantity });
       applyDrawer(data.sections);
       setError('');
-      if (quantity === 0) setStatus('Artikel entfernt.');
+      if (quantity === 0) setStatus(T('removed', 'Artikel entfernt.'));
       // Fokus auf denselben Knopf in der neu gerenderten Zeile, sonst auf "Schließen"
       const line = $('[data-line="' + CSS.escape(key) + '"]', drawer);
       const again = line && which && $('[aria-label="' + which + '"]', line);
@@ -244,8 +246,8 @@
     form.addEventListener('submit', (e) => {
       const value = input.value.trim();
       let text = '';
-      if (!value) text = 'Bitte gib deine E-Mail-Adresse ein.';
-      else if (!input.checkValidity() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(value)) text = 'Diese Adresse ist nicht vollständig, z. B. name@beispiel.de.';
+      if (!value) text = T('emailEmpty', 'Bitte gib deine E-Mail-Adresse ein.');
+      else if (!input.checkValidity() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(value)) text = T('emailBad', 'Diese Adresse ist nicht vollständig, z. B. name@beispiel.de.');
       if (text) {
         e.preventDefault();
         show(text);
@@ -350,7 +352,7 @@
       const radio = radios.find((r) => r.checked);
       if (!radio) {
         e.preventDefault();
-        showError('Bitte wähle zuerst eine Größe.');
+        showError(T('chooseSize', 'Bitte wähle zuerst eine Größe.'));
         const first = radios.find((r) => !r.disabled);
         if (first) first.focus();
         return;
@@ -360,11 +362,11 @@
       showError('');
       btn.disabled = true;
       btn.setAttribute('aria-busy', 'true');
-      label.textContent = 'Wird hinzugefügt …';
+      label.textContent = T('adding', 'Wird hinzugefügt …');
       try {
-        const data = await addToCart(radio.value, productLabel + ', Größe ' + radio.dataset.size);
-        status.textContent = 'Hinzugefügt: ' + productLabel + ', Größe ' + radio.dataset.size + '.';
-        label.textContent = 'Hinzugefügt';
+        const data = await addToCart(radio.value, productLabel + ', ' + T('size', 'Größe') + ' ' + radio.dataset.size);
+        status.textContent = T('addedPrefix', 'Hinzugefügt: ') + productLabel + ', ' + T('size', 'Größe') + ' ' + radio.dataset.size + '.';
+        label.textContent = T('added', 'Hinzugefügt');
         // Runde 17: das Plus dreht sich zur Anzahl dieser Größe im Warenkorb, dann gleitet der Warenkorb herein
         const line = data && data.items && data.items.find((i) => String(i.variant_id || i.id) === String(radio.value));
         btn.dataset.qty = line && line.quantity ? line.quantity : 1;

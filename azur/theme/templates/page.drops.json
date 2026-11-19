@@ -1,0 +1,43 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "drops": {
+      "type": "drops",
+      "settings": {
+        "dark": true,
+        "kicker": "Drops per Mail",
+        "heading": "Neue Drops zuerst.",
+        "text": "Trag deine Mail ein. Wir sagen dir Bescheid, sobald ein neues Trikot rauskommt.",
+        "button": "Eintragen",
+        "anchor": "drops"
+      }
+    },
+    "products": {
+      "type": "product-pair",
+      "settings": {
+        "products": [
+          "berlin-trikot-azur-collection",
+          "frankfurt-trikot-azur-collection",
+          "turkei-trikot-azur-collection",
+          "deutschland-trikot-azur-collection",
+          "brasilien-trikot-azur-collection"
+        ],
+        "large": 2,
+        "label": "Jetzt im Shop",
+        "link_label": "Alle ansehen"
+      }
+    }
+  },
+  "order": [
+    "drops",
+    "products"
+  ]
+}

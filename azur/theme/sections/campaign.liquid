@@ -1,0 +1,120 @@
+{%- comment -%}
+  Einstieg: ein Motiv über die volle Breite, Zeile, Preis des Produkts und ein Link unten links. Der Header liegt auf der
+  Startseite durchsichtig darüber (data-hero), auf dunklem Grund mit hellem Logo.
+  Mit Foto (Einstellung "Kampagnenfoto"): Foto füllt die Fläche; unter 768 px das Hochformat, wenn gesetzt.
+  Ohne Foto: Stadt-Trikot freigestellt, groß und unten angeschnitten, auf hellem (Standard) oder dunklem Grund.
+  Motiv und Ansicht wählbar, Standard Frankfurt, Rückseite (assets/campaign-<stadt>[-back].webp).
+  Link-Ziel ohne eigene Angabe: das Produkt zum Motiv.
+{%- endcomment -%}
+{%- liquid
+  assign p = section.settings.product
+  assign link = section.settings.link
+  if link == blank
+    assign link = p.url | default: settings.main_collection.url | default: routes.all_products_collection_url
+  endif
+  if p
+    capture label
+      render 'product-field', product: p, field: 'label'
+    endcapture
+  endif
+  assign photo = section.settings.image
+  assign photo_mobile = section.settings.image_mobile | default: photo
+
+  assign cutout = 'campaign-' | append: section.settings.motif
+  if section.settings.view == 'back'
+    assign cutout = cutout | append: '-back'
+  endif
+  # Seitenverhältnis je Datei, damit nichts springt
+  case cutout
+    when 'campaign-frankfurt'
+      assign cut_w = 1138
+      assign cut_h = 1187
+    when 'campaign-frankfurt-back'
+      assign cut_w = 1112
+      assign cut_h = 1191
+    when 'campaign-berlin'
+      assign cut_w = 1141
+      assign cut_h = 1201
+    else
+      assign cut_w = 1126
+      assign cut_h = 1211
+  endcase
+-%}
+<section class="campaign campaign--{{ section.settings.scheme | default: 'light' }}{% if photo %} campaign--photo{% endif %}" aria-labelledby="campaign-title-{{ section.id }}" data-hero>
+  {%- if p -%}
+    {%- comment -%} Klickfläche fürs Bild; per Tastatur führt der Textlink dorthin {%- endcomment -%}
+    <a class="campaign__media" href="{{ p.url }}"{% if link == p.url %} tabindex="-1" aria-hidden="true"{% else %} aria-label="{{ 'azur.general.view_label' | t: label: label }}"{% endif %}>
+  {%- else -%}
+    <div class="campaign__media">
+  {%- endif -%}
+    {%- if photo -%}
+      <picture>
+        <source media="(max-width: 47.99em)" srcset="{{ photo_mobile | image_url: width: 900 }} 900w, {{ photo_mobile | image_url: width: 1400 }} 1400w" sizes="100vw">
+        {{ photo | image_url: width: 2400 | image_tag: class: 'campaign__photo', widths: '1200, 1800, 2400', sizes: '100vw', loading: 'eager', fetchpriority: 'high', alt: '' }}
+      </picture>
+    {%- else -%}
+      <img class="campaign__cutout" src="{{ cutout | append: '.webp' | asset_url }}" width="{{ cut_w }}" height="{{ cut_h }}" alt="" fetchpriority="high" decoding="async">
+    {%- endif -%}
+  {%- if p -%}</a>{%- else -%}</div>{%- endif -%}
+
+  <div class="campaign__text">
+    <div class="campaign__name">
+      <h1 class="campaign__title" id="campaign-title-{{ section.id }}">{{ section.settings.headline }}</h1>
+      {%- if p and section.settings.show_price -%}
+        <p class="campaign__price">{% render 'price', amount: p.price %}</p>
+      {%- endif -%}
+    </div>
+    {%- if section.settings.link_label != blank -%}
+      <a class="campaign__link" href="{{ link }}">{{ section.settings.link_label }} <span class="arrow" aria-hidden="true">→</span></a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Einstieg: Motiv",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Produkt zum Motiv", "info": "Klick aufs Bild führt dorthin." },
+    { "type": "image_picker", "id": "image", "label": "Kampagnenfoto", "info": "Ersetzt das freigestellte Trikot. Ab 2400 px Breite." },
+    { "type": "image_picker", "id": "image_mobile", "label": "Kampagnenfoto Smartphone (Hochformat)", "info": "Optional, z. B. 4:5. Leer = Ausschnitt aus dem Kampagnenfoto." },
+    {
+      "type": "select",
+      "id": "motif",
+      "label": "Motiv ohne Foto",
+      "options": [
+        { "value": "frankfurt", "label": "Frankfurt 069" },
+        { "value": "berlin", "label": "Berlin 030" }
+      ],
+      "default": "frankfurt",
+      "info": "Passend zum Produkt oben wählen."
+    },
+    {
+      "type": "select",
+      "id": "view",
+      "label": "Ansicht ohne Foto",
+      "options": [
+        { "value": "back", "label": "Hinten (Nummer)" },
+        { "value": "front", "label": "Vorne" }
+      ],
+      "default": "back"
+    },
+    {
+      "type": "select",
+      "id": "scheme",
+      "label": "Grund ohne Foto",
+      "options": [
+        { "value": "light", "label": "Hell" },
+        { "value": "dark", "label": "Dunkel" }
+      ],
+      "default": "light"
+    },
+    { "type": "text", "id": "headline", "label": "Zeile", "default": "Frankfurt 069" },
+    { "type": "checkbox", "id": "show_price", "label": "Preis des Produkts zeigen", "default": true },
+    { "type": "text", "id": "link_label", "label": "Link", "default": "Zum Trikot" },
+    { "type": "url", "id": "link", "label": "Link-Ziel", "info": "Leer = Produkt zum Motiv" }
+  ],
+  "presets": [
+    { "name": "Einstieg: Motiv" }
+  ]
+}
+{% endschema %}

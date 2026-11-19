@@ -1,0 +1,18 @@
+{%- liquid
+  assign shop_coll = settings.main_collection
+  if shop_coll.url == blank
+    assign shop_coll = collections.all
+  endif
+-%}
+<section class="notfound wrap">
+  <p class="notfound__num" aria-hidden="true">404</p>
+  <h1 class="page-title">{{ 'azur.general.not_found' | t }}</h1>
+  <a class="btn btn--solid" href="{{ shop_coll.url }}">{{ 'azur.general.to_shop' | t }} <span class="arrow" aria-hidden="true">→</span></a>
+</section>
+
+{% schema %}
+{
+  "name": "404",
+  "settings": []
+}
+{% endschema %}

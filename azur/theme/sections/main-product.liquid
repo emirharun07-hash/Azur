@@ -68,46 +68,46 @@
 -%}
 
 <article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}">
-  <nav class="crumbs wrap" aria-label="Brotkrumen">
+  <nav class="crumbs wrap" aria-label="{{ 'azur.product.crumbs' | t }}">
     <ol>
-      <li><a class="link" href="{{ routes.root_url }}">Startseite</a></li>
+      <li><a class="link" href="{{ routes.root_url }}">{{ 'azur.general.home' | t }}</a></li>
       <li><a class="link" href="{{ crumb.url }}">{{ crumb.title }}</a></li>
       <li aria-current="page">{{ label }}</li>
     </ol>
   </nav>
 
-  <section class="gallery" aria-label="Bilder: {{ label }}" data-gallery>
+  <section class="gallery" aria-label="{{ 'azur.product.images' | t: label: label }}" data-gallery>
     <div class="gallery__stage">
       {%- if images.size > 1 -%}
         <button class="gallery__arrow gallery__arrow--prev" type="button" data-gallery-prev>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span class="sr-only">Vorheriges Bild</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span class="sr-only">{{ 'azur.product.prev_image' | t }}</span>
         </button>
       {%- endif -%}
-      <ul class="gallery__track" data-track tabindex="0" aria-label="Produktbilder. Mit den Pfeiltasten wechseln.">
+      <ul class="gallery__track" data-track tabindex="0" aria-label="{{ 'azur.product.track' | t }}">
         {%- for media in images -%}
           {%- liquid
             assign a = media.alt | downcase
             assign head = a | slice: 0, 6
-            assign view = 'Bild ' | append: forloop.index
+            assign view = 'azur.product.image_n' | t: n: forloop.index
             if a contains '3/4'
               assign view = '3/4'
             elsif head == 'detail'
               assign view = 'Detail'
             elsif a contains 'seitenansicht'
-              assign view = 'Seite'
+              assign view = 'azur.product.view_side' | t
             elsif a contains 'rückseite' or a contains 'hinten'
-              assign view = 'Hinten'
+              assign view = 'azur.product.view_back' | t
             elsif a contains 'vorderseite' or a contains 'vorne'
-              assign view = 'Vorne'
+              assign view = 'azur.product.view_front' | t
             elsif forloop.first
-              assign view = 'Vorne'
+              assign view = 'azur.product.view_front' | t
             endif
             assign loading = 'lazy'
             if forloop.first
               assign loading = 'eager'
             endif
           -%}
-          <li class="gallery__slide" data-view="{{ view }}" aria-label="{{ forloop.index }} von {{ forloop.length }}: {{ view }}">
+          <li class="gallery__slide" data-view="{{ view }}" aria-label="{{ 'azur.product.slide' | t: index: forloop.index, count: forloop.length, view: view }}">
             <button class="gallery__zoom" type="button" data-zoom="{{ media | image_url: width: 2400 }}" data-zoom-alt="{{ media.alt | escape }}">
               {{
                 media
@@ -119,7 +119,7 @@
                   fetchpriority: 'auto',
                   alt: media.alt
               }}
-              <span class="sr-only">Vergrößern</span>
+              <span class="sr-only">{{ 'azur.product.zoom' | t }}</span>
             </button>
             {%- if forloop.first and notes_count > 0 -%}<div class="notes" aria-hidden="true">{{ notes_marks }}</div>{%- endif -%}
           </li>
@@ -129,19 +129,19 @@
       </ul>
       {%- if images.size > 1 -%}
         <button class="gallery__arrow gallery__arrow--next" type="button" data-gallery-next>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="sr-only">Nächstes Bild</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="sr-only">{{ 'azur.product.next_image' | t }}</span>
         </button>
       {%- endif -%}
     </div>
     {%- if images.size > 1 -%}
-      <div class="gallery__dots" role="group" aria-label="Bild wählen">
+      <div class="gallery__dots" role="group" aria-label="{{ 'azur.product.choose_image' | t }}">
         {%- for media in images -%}
-          <button class="gallery__dot" type="button" data-go="{{ forloop.index0 }}"{% if forloop.first %} aria-current="true"{% endif %}><span class="sr-only">Bild {{ forloop.index }}</span></button>
+          <button class="gallery__dot" type="button" data-go="{{ forloop.index0 }}"{% if forloop.first %} aria-current="true"{% endif %}><span class="sr-only">{{ 'azur.product.image_n' | t: n: forloop.index }}</span></button>
         {%- endfor -%}
       </div>
     {%- endif -%}
   </section>
-  {%- if notes_count > 0 -%}<ol class="notes__list" aria-label="Details am Trikot">{{ notes_items }}</ol>{%- endif -%}
+  {%- if notes_count > 0 -%}<ol class="notes__list" aria-label="{{ 'azur.product.notes' | t }}">{{ notes_items }}</ol>{%- endif -%}
 
   <div class="pdp__info">
     <h1 class="pdp__title">{{ label }}</h1>
@@ -152,7 +152,7 @@
       <p class="pdp__error" data-buy-error role="alert" hidden></p>
       <button class="pdp__add" type="submit" name="add" data-buy-btn{% unless product.available %} disabled{% endunless %}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
-        <span class="sr-only" data-buy-label>{% if product.available %}In den Warenkorb{% else %}Ausverkauft{% endif %}</span>
+        <span class="sr-only" data-buy-label>{% if product.available %}{{ 'products.product.add_to_cart' | t }}{% else %}{{ 'products.product.sold_out' | t }}{% endif %}</span>
       </button>
       <p class="pdp__status" data-buy-status role="status"></p>
     {%- endform -%}
@@ -191,7 +191,7 @@
             <div class="facts__row"><dt>Material</dt><dd>{% render 'placeholder', text: 'Metafeld custom.material fehlt' %}</dd></div>
           {%- endif -%}
           {%- if f_care != blank -%}
-            <div class="facts__row"><dt>Pflege</dt><dd>{{ f_care | escape | newline_to_br }}</dd></div>
+            <div class="facts__row"><dt>{{ 'azur.product.care' | t }}</dt><dd>{{ f_care | escape | newline_to_br }}</dd></div>
           {%- elsif request.design_mode -%}
             <div class="facts__row"><dt>Pflege</dt><dd>{% render 'placeholder', text: 'Metafeld custom.care fehlt' %}</dd></div>
           {%- endif -%}
@@ -201,7 +201,7 @@
       <div class="pdp__more">
         {%- comment -%} leer: versteckt, die Admin-Bearbeitung (azur/admin) blendet sie zum Schreiben ein {%- endcomment -%}
         <details class="acc" open{% if product.description == blank %} hidden{% endif %}>
-          <summary class="acc__head">Beschreibung</summary>
+          <summary class="acc__head">{{ 'azur.product.description' | t }}</summary>
           <div class="acc__body rte" data-azur-edit="product" data-product-id="{{ product.id }}">{{ product.description }}</div>
         </details>
         {%- for block in section.blocks -%}
@@ -227,8 +227,8 @@
       </div>
   </div>
 
-  <dialog class="zoom" data-zoom-dialog aria-label="Bild vergrößert">
-    <button class="zoom__close" type="button" data-zoom-close>Schließen</button>
+  <dialog class="zoom" data-zoom-dialog aria-label="{{ 'azur.product.zoomed' | t }}">
+    <button class="zoom__close" type="button" data-zoom-close>{{ 'azur.general.close' | t }}</button>
     <div class="zoom__pane"><img class="zoom__img" alt="" width="2400" height="2400" data-zoom-img></div>
   </dialog>
 </article>

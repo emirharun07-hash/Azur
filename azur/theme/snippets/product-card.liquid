@@ -40,7 +40,7 @@
     {%- if product.available -%}
       <span class="card__sizes">{{ size_text }}</span>
     {%- else -%}
-      <span class="card__sizes">Ausverkauft</span>
+      <span class="card__sizes">{{ 'products.product.sold_out' | t }}</span>
     {%- endif -%}
   </a>
 </article>

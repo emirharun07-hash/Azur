@@ -8,9 +8,9 @@
     back   wohin „schließen“ führt, wenn man nicht aus dem Shop kam
 {%- endcomment -%}
 {%- liquid
-  assign shipping = 'Versand in Deutschland'
+  assign shipping = 'azur.shipping.germany' | t
   if settings.shipping_cost != blank
-    assign shipping = 'Versand ' | append: settings.shipping_cost
+    assign shipping = 'azur.shipping.cost' | t: cost: settings.shipping_cost
   endif
 -%}
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
@@ -26,11 +26,12 @@
 <script>
   window.AZUR_SETUP = function (A) {
     A.config.shopify = true;
+    {% render 'azur-copy-en' %}
     A.formatPrice = function (v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; };
     A.store = { name: {{ shop.name | json }}, shipping: {{ shipping | json }}, freeShippingFrom: {{ settings.free_shipping_threshold | default: 0 | json }}, cartCount: {{ cart.item_count | json }} };
-    A.config.copy.toProductPage = 'Zur Produktseite';
-    A.config.copy.adding = 'Wird hinzugefügt …';
-    A.config.copy.close = 'Schließen';
+    A.config.copy.toProductPage = {{ 'azur.room.to_product_page' | t | json }};
+    A.config.copy.adding = {{ 'azur.room.adding' | t | json }};
+    A.config.copy.close = {{ 'azur.general.close' | t | json }};
     A.pdp = { page: {% if one %}{{ one.handle | json }}{% else %}null{% endif %}, shop: {{ back | default: routes.all_products_collection_url | default: '/collections/all' | json }} };
     A.products = [
       {%- if one -%}

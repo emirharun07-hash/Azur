@@ -1,0 +1,36 @@
+{%- comment -%}
+  Open Graph und Twitter-Karte für geteilte Links.
+  Bild: page_image (Produktbild, Kollektionsbild oder Onlineshop → Einstellungen → Social-Sharing-Bild),
+  sonst assets/share.jpg (Signatur und Frankfurt-Rückseite, 1200 × 630).
+  Parameter: title, description
+{%- endcomment -%}
+<meta property="og:site_name" content="{{ shop.name | escape }}">
+<meta property="og:locale" content="{{ 'azur.general.og_locale' | t }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:title" content="{{ title | escape }}">
+{%- if description != blank %}
+  <meta property="og:description" content="{{ description | escape }}">
+{%- endif %}
+{%- if product %}
+  <meta property="og:type" content="product">
+  <meta property="product:price:amount" content="{{ product.price | divided_by: 100.0 }}">
+  <meta property="product:price:currency" content="{{ cart.currency.iso_code }}">
+{%- else %}
+  <meta property="og:type" content="website">
+{%- endif %}
+{%- if page_image %}
+  {%- liquid
+    assign og_w = page_image.width | at_most: 1200
+    assign og_h = og_w | divided_by: page_image.aspect_ratio | round
+  %}
+  <meta property="og:image" content="https:{{ page_image | image_url: width: 1200 }}">
+  <meta property="og:image:width" content="{{ og_w }}">
+  <meta property="og:image:height" content="{{ og_h }}">
+  <meta property="og:image:alt" content="{{ page_image.alt | default: title | escape }}">
+{%- else %}
+  <meta property="og:image" content="https:{{ 'share.jpg' | asset_url }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ shop.name | escape }}">
+{%- endif %}
+<meta name="twitter:card" content="summary_large_image">

@@ -1,0 +1,11 @@
+{%- comment -%}
+  Favicon und Apple-Touch-Icon. Eigenes Bild über Theme-Einstellungen → Azur → Favicon,
+  sonst die Signatur auf Schwarz (assets/favicon.png, assets/apple-touch-icon.png).
+{%- endcomment -%}
+{%- if settings.favicon != blank %}
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ settings.favicon | image_url: width: 192, height: 192, crop: 'center' }}">
+  <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180, height: 180, crop: 'center' }}">
+{%- else %}
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ 'favicon.png' | asset_url }}">
+  <link rel="apple-touch-icon" href="{{ 'apple-touch-icon.png' | asset_url }}">
+{%- endif %}

@@ -1,0 +1,20 @@
+{%- comment -%}
+  Runde 29: Texte aus assets/azur.js (Warenkorb, Kaufknopf, Anmeldung) für andere Sprachen als Deutsch.
+  azur.js liest sie über T(key, deutscher Text); auf Deutsch gibt dieses Snippet nichts aus.
+{%- endcomment -%}
+{%- if request.locale.iso_code != 'de' -%}
+<script>
+  window.AZUR_T = {
+    failed: 'That did not work',
+    cartLoad: 'The cart could not be loaded.',
+    removed: 'Item removed.',
+    emailEmpty: 'Please enter your email address.',
+    emailBad: 'This address is not complete, e.g. name@example.com.',
+    chooseSize: 'Please choose a size first.',
+    adding: 'Adding …',
+    size: 'size',
+    addedPrefix: 'Added: ',
+    added: 'Added'
+  };
+</script>
+{%- endif -%}

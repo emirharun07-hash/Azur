@@ -1,0 +1,48 @@
+{%- comment -%}
+  Produkte auf der Startseite als Raster: Zeile und „Alle ansehen“ oben, darunter die Karten.
+  Die ersten Karten (Einstellung „Große Karten“) stehen halb breit, alle weiteren zu dritt, auf jeder Bildschirmbreite.
+  Bei zwei großen und drei weiteren: Berlin und Frankfurt oben, die Nationaltrikots darunter.
+{%- endcomment -%}
+{%- liquid
+  assign coll = settings.main_collection
+  if coll.url == blank
+    assign coll = collections.all
+  endif
+  assign large = section.settings.large | default: 0
+-%}
+{%- if section.settings.products.size > 0 -%}
+  <section class="lineup" aria-labelledby="lineup-title-{{ section.id }}">
+    <header class="lineup__head wrap">
+      <h2 class="lineup__title" id="lineup-title-{{ section.id }}">{{ section.settings.label }}</h2>
+      {%- if section.settings.link_label != blank -%}
+        <a class="lineup__all" href="{{ coll.url }}">{{ section.settings.link_label }}</a>
+      {%- endif -%}
+    </header>
+    <div class="lineup__grid wrap">
+      {%- for p in section.settings.products limit: 8 -%}
+        {%- liquid
+          assign card_size = 'small'
+          if forloop.index <= large
+            assign card_size = 'large'
+          endif
+        -%}
+        {% render 'product-card', product: p, size: card_size %}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Produkte (Startseite)",
+  "settings": [
+    { "type": "product_list", "id": "products", "label": "Produkte", "limit": 8 },
+    { "type": "range", "id": "large", "label": "Große Karten am Anfang", "min": 0, "max": 4, "step": 2, "default": 2, "info": "Halb breit. Alle weiteren stehen zu dritt." },
+    { "type": "text", "id": "label", "label": "Zeile oben", "default": "Trikots" },
+    { "type": "text", "id": "link_label", "label": "Link zum Shop", "default": "Alle ansehen" }
+  ],
+  "presets": [
+    { "name": "Produkte (Startseite)" }
+  ]
+}
+{% endschema %}
