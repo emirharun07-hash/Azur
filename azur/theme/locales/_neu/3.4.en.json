@@ -1,0 +1,13 @@
+{
+  "azur": {
+    "password": {
+      "clock_label": "Countdown to launch",
+      "start_at": "Launch on {{ date }}, {{ time }}",
+      "unit_d": "Days",
+      "unit_h": "Hrs",
+      "unit_m": "Min",
+      "unit_s": "Sec",
+      "instagram": "Instagram"
+    }
+  }
+}
