@@ -22,7 +22,7 @@
 <div class="shop" data-collection>
   <header class="shop__head wrap">
     <a class="back-home" href="{{ routes.root_url }}"><span class="arrow" aria-hidden="true">←</span> {{ 'azur.general.home' | t }}</a>
-    <h1 class="sr-only">{{ collection.title }}</h1>
+    <h1 class="sr-only">{{ collection.title | escape }}</h1>
     {%- if cities.url != blank and countries.url != blank -%}
       <nav class="shop__tabs" aria-label="{{ 'azur.collection.jerseys' | t }}">
         <a href="{{ countries.url }}"{% if collection.handle != cities.handle %} aria-current="page"{% endif %}>{{ 'azur.collection.countries' | t }}</a>

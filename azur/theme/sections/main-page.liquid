@@ -2,7 +2,7 @@
 <div class="legal wrap">
   {% render 'legal-nav' %}
   <article class="legal__body">
-    <h1 class="page-title">{{ page.title }}</h1>
+    <h1 class="page-title">{{ page.title | escape }}</h1>
     <div class="legal__text rte">{{ page.content }}</div>
   </article>
 </div>

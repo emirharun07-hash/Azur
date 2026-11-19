@@ -5,7 +5,7 @@
   <ul class="list">
     {%- for c in collections -%}
       {%- if c.products_count > 0 -%}
-        <li><a class="list__item" href="{{ c.url }}"><span>{{ c.title }}</span><span class="list__meta">{{ c.products_count }}</span></a></li>
+        <li><a class="list__item" href="{{ c.url }}"><span>{{ c.title | escape }}</span><span class="list__meta">{{ c.products_count }}</span></a></li>
       {%- endif -%}
     {%- endfor -%}
   </ul>

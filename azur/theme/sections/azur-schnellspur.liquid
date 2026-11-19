@@ -97,7 +97,7 @@
     </section>
 
     <div class="ss-info">
-      <h1 class="ss-title">{{ product.title }}</h1>
+      <h1 class="ss-title">{{ product.title | escape }}</h1>
       {%- if section.settings.drop_line != blank -%}
         <p class="ss-drop">{{ section.settings.drop_line }}</p>
       {%- endif -%}
@@ -147,7 +147,7 @@
         <div class="ss-gone">
           <figure class="ss-frame" aria-label="{{ 'azur.schnellspur.empty_frame' | t: title: product.title | escape }}">
             <div class="ss-frame__box" aria-hidden="true"><span class="ss-frame__wall"></span></div>
-            <figcaption class="ss-frame__tag"><span>{{ product.title }}</span><b>{{ 'azur.schnellspur.taken' | t }}</b></figcaption>
+            <figcaption class="ss-frame__tag"><span>{{ product.title | escape }}</span><b>{{ 'azur.schnellspur.taken' | t }}</b></figcaption>
           </figure>
           <h2 class="ss-gone__title">{{ 'azur.schnellspur.notify_title' | t }}</h2>
           {% render 'signup-form', id: 'schnellspur', tags: 'newsletter, drops, drop02' %}
@@ -181,7 +181,7 @@
             }}
           {%- endif -%}
           <span class="ss-other__text">
-            <b class="ss-other__name">{{ other.title }}</b>
+            <b class="ss-other__name">{{ other.title | escape }}</b>
             <span class="ss-other__price">{{ other.price | money }}</span>
             {%- if pair_free -%}<span class="ss-other__free">{{ 'azur.schnellspur.pair_free' | t }}</span>{%- endif -%}
           </span>

@@ -130,7 +130,14 @@
     "password": {
       "wrong": "That password is not right.",
       "label": "Password",
-      "have": "Got a password?"
+      "have": "Got a password?",
+      "clock_label": "Countdown to launch",
+      "start_at": "Launch on {{ date }}, {{ time }}",
+      "unit_d": "Days",
+      "unit_h": "Hrs",
+      "unit_m": "Min",
+      "unit_s": "Sec",
+      "instagram": "Instagram"
     },
     "signup": {
       "done": "You are signed up.",
@@ -147,7 +154,8 @@
       "shipping": "Shipping and returns"
     },
     "legal": {
-      "title": "Service & legal"
+      "title": "Service & legal",
+      "withdraw_link": "Withdraw from contract"
     },
     "alt": {
       "signature": "The Azur signature, embroidered in white on black fabric",
@@ -165,6 +173,38 @@
       "ghost": "AZUR, back to the room",
       "to_product_page": "Go to product page",
       "adding": "Adding …"
+    },
+    "withdraw": {
+      "policy_html": "You can find the full withdrawal information at {{ link }}.",
+      "name": "Name",
+      "email": "Email",
+      "order": "Order number",
+      "item": "Item (optional)",
+      "date": "Date of order or delivery (optional)",
+      "required": "* Required",
+      "submit": "Confirm withdrawal",
+      "received": "We have received your withdrawal.",
+      "received_at": "Received on {{ date }} at {{ time }}.",
+      "mail_follows": "A confirmation will follow by email."
+    },
+    "gpsr": {
+      "title": "Product safety",
+      "maker": "Manufacturer / responsible person",
+      "contact": "Contact",
+      "material": "Material",
+      "care": "Care"
+    },
+    "schnellspur": {
+      "choose_size": "Choose size",
+      "add": "Add to bag",
+      "adding": "Adding to bag …",
+      "failed": "That didn't work. Please try again.",
+      "taken": "taken",
+      "few": "only a few left",
+      "empty_frame": "Empty frame: {{ title }} is taken",
+      "notify_title": "Tell me about the next drop",
+      "pair_free": "Add it and shipping is free",
+      "to_room": "Enter the room"
     }
   }
 }

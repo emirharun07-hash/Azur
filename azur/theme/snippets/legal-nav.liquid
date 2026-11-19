@@ -9,14 +9,14 @@
         {%- assign h = handle | strip -%}
         {%- assign lp = pages[h] -%}
         {%- if lp.url != blank -%}
-          <li><a href="{{ lp.url }}"{% if page.id == lp.id %} aria-current="page"{% endif %}>{{ lp.title }}</a></li>
+          <li><a href="{{ lp.url }}"{% if page.id == lp.id %} aria-current="page"{% endif %}>{{ lp.title | escape }}</a></li>
           {%- assign listed = listed | append: lp.title | append: '|' -%}
         {%- endif -%}
       {%- endfor -%}
       {%- for policy in shop.policies -%}
         {%- assign key = '|' | append: policy.title | append: '|' -%}
         {%- unless listed contains key -%}
-          <li><a href="{{ policy.url }}"{% if request.path == policy.url %} aria-current="page"{% endif %}>{{ policy.title }}</a></li>
+          <li><a href="{{ policy.url }}"{% if request.path == policy.url %} aria-current="page"{% endif %}>{{ policy.title | escape }}</a></li>
         {%- endunless -%}
       {%- endfor -%}
     </ul>

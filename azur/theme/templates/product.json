@@ -16,7 +16,7 @@
           "type": "collapsible",
           "settings": {
             "title": "Versand & Rückgabe",
-            "text": "<p>Ab 79,99 Bestellwert (in deiner Währung) kostenlos. Sonst: Deutschland 1,99 € (Express 9,99 €), EU 2,99 €, Schweiz 2,99 CHF, Vereinigtes Königreich 2,99 £, USA 3,99 $.</p><p>14 Tage Rückgabe, kostenloser Rückversand.</p>",
+            "text": "<p>Versand nur innerhalb Deutschlands: 1,99 €, ab 79,99 € Bestellwert kostenlos.</p><p>14 Tage Rückgabe, kostenloser Rückversand.</p>",
             "show_shipping_link": true,
             "open": false
           }

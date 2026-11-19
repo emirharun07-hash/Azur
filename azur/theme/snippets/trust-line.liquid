@@ -15,7 +15,9 @@
   {%- endif -%}
   {%- if settings.returns_note != blank -%}
     <li class="trust__row"><span class="trust__k">{{ 'azur.trust.returns' | t }}</span><span class="trust__v">
-      {%- if shipping_page.url != blank -%}
+      {%- if shop.refund_policy.url != blank -%}
+        <a class="link" href="{{ shop.refund_policy.url }}">{{ settings.returns_note | escape }}</a>
+      {%- elsif shipping_page.url != blank -%}
         <a class="link" href="{{ shipping_page.url }}">{{ settings.returns_note | escape }}</a>
       {%- else -%}
         {{ settings.returns_note | escape }}

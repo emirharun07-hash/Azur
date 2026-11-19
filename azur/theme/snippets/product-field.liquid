@@ -1,6 +1,7 @@
 {%- comment -%}
   Gibt ein Zusatzfeld zu einem Produkt aus. Quelle: Theme-Einstellung "Produkt-Codes"
   (eine Zeile pro Produkt: Handle | Code | Farbwelt | Farben | Zeile).
+  Ausgabe ist HTML-escaped (für Text und Attribute), nicht noch einmal escapen.
 
   Aufruf: {% render 'product-field', product: product, field: 'code' %}
   field: name   "Berlin" bzw. "Berlin 030" (Produkttitel ohne " Trikot" und " – …")
@@ -47,5 +48,5 @@
     endif
   endif
 
-  echo out
+  echo out | escape
 -%}

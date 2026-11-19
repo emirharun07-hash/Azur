@@ -60,7 +60,7 @@
         <li><a href="{{ shop_coll.url }}">{{ 'azur.footer.all_jerseys' | t }}</a></li>
         {%- if p1 -%}<li><a href="{{ p1.url }}">{% render 'product-field', product: p1, field: 'label' %}</a></li>{%- endif -%}
         {%- if p2 -%}<li><a href="{{ p2.url }}">{% render 'product-field', product: p2, field: 'label' %}</a></li>{%- endif -%}
-        {%- if cat.url != blank -%}<li><a href="{{ cat.url }}">{{ cat.title }}</a></li>{%- endif -%}
+        {%- if cat.url != blank -%}<li><a href="{{ cat.url }}">{{ cat.title | escape }}</a></li>{%- endif -%}
       </ul>
     </nav>
 
@@ -75,7 +75,7 @@
       <h2 class="footer__head" id="footer-brand">{{ shop.name }}</h2>
       <ul>
         {%- if about.url != blank -%}<li><a href="{{ about.url }}">{{ 'azur.footer.about' | t }}</a></li>{%- endif -%}
-        {%- if support_links == blank and contact.url != blank -%}<li><a href="{{ contact.url }}">{{ contact.title }}</a></li>{%- endif -%}
+        {%- if support_links == blank and contact.url != blank -%}<li><a href="{{ contact.url }}">{{ contact.title | escape }}</a></li>{%- endif -%}
         {%- if section.settings.instagram != blank -%}
           <li><a href="{{ section.settings.instagram }}" target="_blank" rel="noopener">Instagram<span class="sr-only">{{ 'azur.general.new_window' | t }}</span></a></li>
         {%- endif -%}
@@ -94,14 +94,14 @@
           {%- if wd.handle == h -%}{%- continue -%}{%- endif -%}
           {%- assign lp = pages[h] -%}
           {%- if lp.url != blank -%}
-            <li><a href="{{ lp.url }}">{{ lp.title }}</a></li>
+            <li><a href="{{ lp.url }}">{{ lp.title | escape }}</a></li>
             {%- assign listed = listed | append: lp.title | append: '|' -%}
           {%- endif -%}
         {%- endfor -%}
         {%- comment -%} Shopify-Richtlinien, außer es gibt schon eine Seite mit demselben Titel {%- endcomment -%}
         {%- for policy in shop.policies -%}
           {%- assign key = '|' | append: policy.title | append: '|' -%}
-          {%- unless listed contains key -%}<li><a href="{{ policy.url }}">{{ policy.title }}</a></li>{%- endunless -%}
+          {%- unless listed contains key -%}<li><a href="{{ policy.url }}">{{ policy.title | escape }}</a></li>{%- endunless -%}
         {%- endfor -%}
       </ul>
     </nav>

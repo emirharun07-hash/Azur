@@ -7,11 +7,11 @@
 <div class="legal wrap">
   {% render 'legal-nav' %}
   <article class="legal__body">
-    <h1 class="page-title">{{ page.title }}</h1>
+    <h1 class="page-title">{{ page.title | escape }}</h1>
     <div class="legal__text rte">
       {%- if section.settings.intro != blank -%}{{ section.settings.intro }}{%- endif -%}
       {%- if refund.url != blank and section.settings.show_policy_link -%}
-        {%- capture policy_link -%}<a class="link" href="{{ refund.url }}">{{ refund.title }}</a>{%- endcapture -%}
+        {%- capture policy_link -%}<a class="link" href="{{ refund.url }}">{{ refund.title | escape }}</a>{%- endcapture -%}
         <p>{{ 'azur.withdraw.policy_html' | t: link: policy_link }}</p>
       {%- endif -%}
     </div>

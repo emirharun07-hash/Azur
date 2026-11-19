@@ -1,13 +1,13 @@
 <div class="wrap">
   <header class="page-head">
-    <h1 class="page-title">{{ blog.title }}</h1>
+    <h1 class="page-title">{{ blog.title | escape }}</h1>
   </header>
   {%- paginate blog.articles by 12 -%}
     <ul class="list">
       {%- for article in blog.articles -%}
         <li>
           <a class="list__item" href="{{ article.url }}">
-            <span>{{ article.title }}</span>
+            <span>{{ article.title | escape }}</span>
             <span class="list__meta">{{ article.published_at | date: '%d.%m.%Y' }}</span>
           </a>
         </li>

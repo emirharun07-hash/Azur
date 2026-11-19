@@ -67,11 +67,11 @@
   endfor
 -%}
 
-<article class="pdp pdp--yz" data-product data-product-label="{{ label | strip | escape }}">
+<article class="pdp pdp--yz" data-product data-product-label="{{ label | strip }}">
   <nav class="crumbs wrap" aria-label="{{ 'azur.product.crumbs' | t }}">
     <ol>
       <li><a class="link" href="{{ routes.root_url }}">{{ 'azur.general.home' | t }}</a></li>
-      <li><a class="link" href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+      <li><a class="link" href="{{ crumb.url }}">{{ crumb.title | escape }}</a></li>
       <li aria-current="page">{{ label }}</li>
     </ol>
   </nav>
@@ -219,7 +219,7 @@
             <div class="acc__body rte">
               {{ block.settings.text }}
               {%- if has_link -%}
-                <p><a class="link acc__link" href="{{ shipping_page.url }}">{{ shipping_page.title }}</a></p>
+                <p><a class="link acc__link" href="{{ shipping_page.url }}">{{ shipping_page.title | escape }}</a></p>
               {%- endif -%}
             </div>
           </details>
@@ -258,7 +258,7 @@
   "settings": [
     { "type": "textarea", "id": "notes", "label": "Hinweise am Trikot (erstes Bild)",
       "info": "Eine Zeile pro Hinweis: Handle | x in % | y in % | Titel | Text. x und y zählen im quadratischen Vorderseiten-Bild von links oben. Nur Angaben eintragen, die stimmen.",
-      "default": "brasilien-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, grün abgesetzt\nbrasilien-trikot-azur-collection | 40 | 34 | Signatur | Azur-Schriftzug auf der Brust\nbrasilien-trikot-azur-collection | 61 | 32 | Wappen | Wappen mit fünf Sternen, gestickt\nbrasilien-trikot-azur-collection | 78 | 45 | Ärmel | Streifen an den Ärmeln, grünes Bündchen\ndeutschland-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, schwarz abgesetzt\ndeutschland-trikot-azur-collection | 39 | 33 | Signatur | Azur-Schriftzug auf der Brust\ndeutschland-trikot-azur-collection | 63 | 33 | Wappen | Adler mit vier Sternen, gestickt\ndeutschland-trikot-azur-collection | 80 | 45 | Ärmel | Drei Streifen, schwarzes Bündchen\nturkei-trikot-azur-collection | 50 | 19 | Kragen | Rundkragen in Weiß\nturkei-trikot-azur-collection | 39 | 32 | Signatur | Azur-Schriftzug auf der Brust\nturkei-trikot-azur-collection | 63 | 31 | Emblem | Halbmond und Stern, gestickt\nturkei-trikot-azur-collection | 31 | 83 | Etikett | Azur-Etikett am Saum" }
+      "default": "brasilien-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, grün abgesetzt\nbrasilien-trikot-azur-collection | 40 | 34 | Signatur | Azur-Schriftzug auf der Brust\nbrasilien-trikot-azur-collection | 61 | 32 | Emblem | Eigenes AZUR-Emblem, gestickt\nbrasilien-trikot-azur-collection | 78 | 45 | Ärmel | Streifen an den Ärmeln, grünes Bündchen\ndeutschland-trikot-azur-collection | 50 | 20 | Kragen | Rundkragen, schwarz abgesetzt\ndeutschland-trikot-azur-collection | 39 | 33 | Signatur | Azur-Schriftzug auf der Brust\ndeutschland-trikot-azur-collection | 63 | 33 | Emblem | Eigenes AZUR-Emblem, gestickt\ndeutschland-trikot-azur-collection | 80 | 45 | Ärmel | Drei Streifen, schwarzes Bündchen\nturkei-trikot-azur-collection | 50 | 19 | Kragen | Rundkragen in Weiß\nturkei-trikot-azur-collection | 39 | 32 | Signatur | Azur-Schriftzug auf der Brust\nturkei-trikot-azur-collection | 63 | 31 | Emblem | Halbmond und Stern, gestickt\nturkei-trikot-azur-collection | 31 | 83 | Etikett | Azur-Etikett am Saum" }
   ],
   "blocks": [
     {

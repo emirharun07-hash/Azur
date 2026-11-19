@@ -1,0 +1,5 @@
+{%- comment -%}
+  Link "Vertrag widerrufen" im Warenkorb (Seite mit Handle widerruf). Fehlt die Seite, entfällt der Link.
+{%- endcomment -%}
+{%- assign wd = pages['widerruf'] -%}
+{%- if wd.url != blank -%}<p class="cart-withdraw"><a class="link" href="{{ wd.url }}">{{ 'azur.legal.withdraw_link' | t }}</a></p>{%- endif -%}

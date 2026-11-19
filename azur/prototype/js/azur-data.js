@@ -86,8 +86,8 @@ AZUR.products = [
 /* Store facts used on the product page (from the live theme settings). */
 AZUR.store = {
   name: 'Azur',
-  shipping: 'Versand in Deutschland 1,99 €, ab 90 € kostenlos',
-  freeShippingFrom: 90,                 // euros; the product view counts down to it after something goes into the bag
+  shipping: 'Versand in Deutschland 1,99 €, ab 79,99 € kostenlos',
+  freeShippingFrom: 79.99,                 // euros; the product view counts down to it after something goes into the bag
   supportEmail: 'kontakt@azurclothing.com'
 };
 
