@@ -115,6 +115,33 @@ function serve() {
     if (s.pdp) { await p.click('.azur-pdp__x'); await p.waitForTimeout(700); }
     s = await st(p); ok('phone: × closes it', !s.pdp, s);
     await p.close();
+    // W3: the buy bar on the phone: bar -> size -> bag in three taps; no bar on the desktop
+    {
+      p = await mk({ width: 390, height: 844 }, true);
+      await p.goto(url); await p.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 });
+      await p.waitForFunction(() => document.querySelector('.azur-buybar.is-on') && document.querySelector('.azur-buybar__name').textContent, null, { timeout: 15000 }).catch(() => {});
+      await p.evaluate(() => { try { localStorage.removeItem('azur-cart'); } catch (e) { } AZUR.app.shop.cart = []; });
+      const bar = await p.evaluate(() => { const e = document.querySelector('.azur-buybar'), r = e.getBoundingClientRect(), v = document.querySelector('.azur-views').getBoundingClientRect();
+        return { on: e.classList.contains('is-on'), h: Math.round(r.height), bottom: Math.round(r.bottom), name: e.querySelector('.azur-buybar__name').textContent, price: e.querySelector('.azur-buybar__price').textContent,
+          btn: e.querySelector('button').textContent, tabsAbove: v.bottom <= r.top + 1, hint: getComputedStyle(document.querySelector('.azur-hint')).display }; });
+      ok('phone: buy bar shows name, price and "Größe wählen" (height >= 56, tabs above, hint gone)', bar.on && bar.h >= 56 && bar.name && /€/.test(bar.price) && /Größe wählen/.test(bar.btn) && bar.tabsAbove && bar.hint === 'none', bar);
+      await shot(p, 'phone_buybar.png');
+      await p.tap('.azur-buybar__btn'); await p.waitForTimeout(1500);                                   // tap 1
+      s = await st(p);
+      const vis = await p.evaluate(() => { const r = document.querySelector('.azur-pdp__sizes').getBoundingClientRect(); const f = document.querySelector('.azur-pdp__sizes input[name="azur-size"]');
+        return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement === f }; });
+      ok('phone: the bar opens the product view with the sizes in sight and focused', s.pdp && vis.top >= 0 && vis.bottom <= vis.vh && vis.focus, { s, vis });
+      await shot(p, 'phone_buybar_size.png');
+      await p.tap('.azur-pl:not(:has(input:disabled)) >> nth=1'); await p.waitForTimeout(300);          // tap 2
+      await p.tap('.azur-pdp__add'); await p.waitForTimeout(800);                                       // tap 3
+      const cc = await p.evaluate(() => ({ lines: AZUR.app.shop.cart.length, qty: AZUR.app.shop.cart.reduce((n, l) => n + l.qty, 0) }));
+      ok('phone: buy bar -> size -> bag in 3 taps', cc.lines === 1 && cc.qty === 1, cc);
+      await p.close();
+      p = await mk({ width: 1440, height: 810 });
+      await p.goto(url); await p.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 }); await p.waitForTimeout(1500);
+      ok('desktop: no buy bar', await p.evaluate(() => !document.querySelector('.azur-buybar') || getComputedStyle(document.querySelector('.azur-buybar')).display === 'none'), {});
+      await p.close();
+    }
 
     // cart (prototype cart): size, add, free-shipping hint, keep looking, the bag in the header, removing a line
     p = await mk({ width: 1440, height: 810 });

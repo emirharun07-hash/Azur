@@ -55,6 +55,7 @@
       this.pan = 0.5; this.panVel = 0;
       this.light = A.light.current();
       this.buildChrome();
+      this.buildBuybar();
       if (cfg.shopify) this.bindScrollAway();
       this.bindPointer(); this.bindKeys();
       // Runde 26: big texture uploads wait for a quiet moment at the room (compositor idle()): not while the visitor
@@ -878,6 +879,63 @@
       });
     }
 
+    /* ---------------------------------------------------------------- W3: the fixed buy bar on phones
+       Name and price of the jersey (or frame) in the middle, one button. It follows the swipe only once the rail has
+       settled; the button opens that jersey's product view and brings the sizes into sight (start -> bar -> size -> bag). */
+    buildBuybar() {
+      if (!this.isMobile) return;
+      const c = A.config.copy;
+      const el = document.createElement('div'); el.className = 'azur-buybar'; el.inert = true;
+      el.innerHTML = '<p class="azur-buybar__txt"><span class="azur-buybar__name" aria-live="polite"></span><span class="azur-buybar__price"></span></p>'
+        + '<button class="azur-buybar__btn" type="button"></button>';
+      this.stage.appendChild(el);
+      this.buybar = { el, name: el.querySelector('.azur-buybar__name'), price: el.querySelector('.azur-buybar__price'), btn: el.querySelector('button'), idx: -2, cand: -2, candT: 0, on: false };
+      this.buybar.btn.textContent = c.chooseSize || 'Größe wählen';
+      this.buybar.btn.addEventListener('click', () => this.buybarAct());
+    }
+    buybarWanted() {
+      const sh = this.shop, de = document.documentElement;
+      return this.isMobile && this.viewKey === 'rail_m' && !this.busy && this.rail.selected < 0
+        && !(sh && sh.pdp && sh.pdp.classList.contains('is-on')) && !(sh && sh.drawer && sh.drawer.classList.contains('is-on'))
+        && !this.root.classList.contains('is-reading') && !this.root.classList.contains('is-loading') && !this.drop.el.classList.contains('is-on')
+        && !this.drop.card.classList.contains('is-on') && !de.classList.contains('azur-pdp-open') && !de.classList.contains('azur-mag-open');
+    }
+    stepBuybar(t) {
+      const b = this.buybar; if (!b) return;
+      const want = this.buybarWanted();
+      if (want !== b.on) { b.on = want; b.el.classList.toggle('is-on', want); b.el.inert = !want; this.root.classList.toggle('has-buybar', want); if (want) this.hideHint(); }
+      if (!want) { b.cand = -2; return; }
+      const settled = !this.dragging && Math.abs(this.panVel) <= 0.05 && this.snapPan != null && Math.abs(this.snapPan - this.pan) <= 2e-3;
+      if (!settled && b.idx !== -2) { b.cand = -2; return; }
+      const i = this.nearestGarment();
+      if (i < 0 || i === b.idx) { b.cand = i; return; }
+      if (i !== b.cand) { b.cand = i; b.candT = t; return; }
+      if (t - b.candT >= (b.idx === -2 ? 0 : 220)) this.setBuybar(i);          // quiet: not at every swipe frame
+    }
+    setBuybar(i) {
+      const b = this.buybar, p = A.products[i], c = A.config.copy; if (!p) return;
+      b.idx = i;
+      const gone = p.type === 'product' && p.available === false;
+      b.name.textContent = p.type === 'product' ? p.name.replace(/\s*Trikot$/i, '') : p.name;
+      b.price.textContent = p.type !== 'product' ? '' : gone ? (c.taken || 'vergeben') : A.formatPrice(p.price);
+      b.btn.textContent = p.type === 'product' && !gone ? (c.chooseSize || 'Größe wählen') : (c.notifyMe || 'Bescheid sagen');
+      b.el.classList.toggle('is-gone', p.type !== 'product' || gone);
+    }
+    buybarAct() {
+      const b = this.buybar, i = b && b.idx, p = A.products[i]; if (!p) return;
+      if (p.type !== 'product' || p.available === false) {                      // next drop / gone: the sign-up
+        const di = p.type === 'drop' ? i : A.products.findIndex(q => q.type === 'drop');
+        if (di >= 0) { this.hideHint(); this.select(di); }
+        return;
+      }
+      this.openProduct(i);
+      setTimeout(() => {
+        const sz = this.shop.pdp.querySelector('.azur-pdp__sizes'); if (!sz) return;
+        sz.scrollIntoView({ block: 'center', behavior: this.reduced ? 'auto' : 'smooth' });
+        const f = sz.querySelector('input[name="azur-size"]'); if (f) f.focus({ preventScroll: true });
+      }, 120);
+    }
+
     /* phones: the pan value that puts garment i in the middle of the screen, and the garment nearest the middle */
     panSpan() { return this.stage.clientWidth * (1 / this.comp.map[2] - 1) || 1; }
     panFor(i) {
@@ -1033,6 +1091,7 @@
       this.applySway(t, swaying);
       if ((this.dirty || pmove) && !this.covered) { this.comp.render(this.light); this.dirty = false; }
       if (this.wallDue && t > (this.wallRetry || 0)) { if (this.sampleWall()) this.wallDue = false; else this.wallRetry = t + 400; }
+      this.stepBuybar(t);
       requestAnimationFrame(tt => this.frame(tt));
     }
 
