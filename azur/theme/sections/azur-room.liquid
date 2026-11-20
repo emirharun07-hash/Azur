@@ -87,7 +87,7 @@
      (theme-color nimmt es nicht mehr), Chrome am Handy nach theme-color (azur-fall.js). */
   html:has(.azur[data-hero]):not(.azur-light), html:has(.azur[data-hero]):not(.azur-light) body {
     background: linear-gradient(var(--c-paper), var(--c-paper)) 0 var(--azur-end, 100lvh) / 100% 100% no-repeat #0b0b0c; }
-  html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views, .azur-dots) { visibility: hidden; }
+  html.azur-diving .azur[data-hero] :is(.azur-hint, .azur-label, .azur-drop, .azur-tease, .azur-views, .azur-dots, .azur-plaque, .azur-dropline) { visibility: hidden; }
   html.azur-light .header--overlay:not(.is-solid) { color: var(--c-ink) !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--paper { display: none !important; }
   html.azur-light .header--overlay:not(.is-solid) .header__logo .logo--ink { display: block !important; }
@@ -113,6 +113,9 @@
       <button class="azur-head__sound" type="button" aria-pressed="true" aria-label="{{ 'azur.room.sound_off' | t }}" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9.5h3.6L12 6v12l-4.4-3.5H4z"/><path class="wave" d="M15.5 9.6a3.4 3.4 0 0 1 0 4.8M18 7.2a6.8 6.8 0 0 1 0 9.6"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
     </div>
   </div>
+  {%- if section.settings.drop_line != blank %}
+  <p class="azur-dropline">{{ section.settings.drop_line | escape }}</p>
+  {%- endif %}
   <div class="azur-stage" role="region" aria-label="{{ 'azur.room.stage' | t }}">
     <div class="azur-world">
       <canvas class="azur-canvas" aria-hidden="true"></canvas>
@@ -159,6 +162,8 @@
     A.config.shopify = true;
     {% render 'azur-copy-en' %}
     A.config.flights = {{ section.settings.flights | default: 'blend' | json }};
+    A.config.plaques = {{ section.settings.plaques | json }};
+    A.config.copy.taken = {{ 'azur.room.taken' | t | json }};
     A.config.inline = {% render 'azur-room-data' %};
     A.config.urlMap = function (p) {
       var m = p.match(/^assets\/brand\/(.+)$/);
@@ -199,7 +204,10 @@
         {%- assign fk = 'fit_' | append: forloop.index -%}
         {%- assign ak = 'accent_' | append: forloop.index -%}
         {%- assign p = section.settings[pk] -%}
-        {%- if p != blank -%}
+        {%- comment -%} Z1: an empty field keeps its place (the jerseys are matched to the renders by order) {%- endcomment -%}
+        {%- if p == blank -%}
+        { id: null, type: 'gone', key: {{ key | json }}, name: '', price: null, variants: [] },
+        {%- else -%}
         {
           id: {{ p.id | json }}, type: 'product', key: {{ key | json }}, handle: {{ p.handle | json }},
           name: {{ p.title | json }}, price: {{ p.price | divided_by: 100.0 | json }}, currency: {{ cart.currency.iso_code | json }},
@@ -207,8 +215,14 @@
           productUrl: {{ p.url | json }},
           description: {{ p.description | strip_html | strip_newlines | truncatewords: 45 | json }},
           fit: {{ section.settings[fk] | json }}, accent: {{ section.settings[ak] | json }},
+          available: {{ p.available | json }}, limited: {{ section.settings.limited_text | json }},
+          {%- comment -%} Z1: only a flag per size (1 to 3 left), never the stock itself {%- endcomment %}
           variants: [
-            {%- for v in p.variants -%}{ id: {{ v.id }}, title: {{ v.title | json }}, available: {{ v.available | json }} }{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
+            {%- for v in p.variants -%}
+              {%- assign low = false -%}
+              {%- if v.inventory_management == 'shopify' and v.inventory_quantity > 0 and v.inventory_quantity <= 3 -%}{%- assign low = true -%}{%- endif -%}
+              { id: {{ v.id }}, title: {{ v.title | json }}, available: {{ v.available | json }}, low: {{ low | json }} }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
           ]
         },
         {%- endif -%}
@@ -244,6 +258,10 @@
     { "type": "product", "id": "product_5", "label": "Haken 5: Türkei" },
     { "type": "text", "id": "fit_5", "label": "Schnitt 5", "default": "Regular Fit" },
     { "type": "color", "id": "accent_5", "label": "Akzent 5", "default": "#a5141c" },
+    { "type": "header", "content": "Museumsschilder und Drop-Zeile" },
+    { "type": "checkbox", "id": "plaques", "label": "Schilder an den Trikots zeigen", "default": true, "info": "Name, Preis und darunter der Text unten; ist ein Trikot in allen Größen weg, steht dort „vergeben“. Nur in der Ansicht Ständer/Wand." },
+    { "type": "text", "id": "limited_text", "label": "Text auf dem Schild", "default": "Limitiert auf 50 Stück", "info": "Ohne Stückzahl: es gibt keinen Zähler." },
+    { "type": "text", "id": "drop_line", "label": "Drop-Zeile unter dem Header", "default": "Drop 01 · Brasilien & Deutschland · Limitiert auf je 50 Stück · 54,99 €", "info": "Leer = ausgeblendet." },
     { "type": "header", "content": "Hülle: nächster Drop" },
     { "type": "text", "id": "drop_title", "label": "Titel", "default": "Nächster Drop" },
     { "type": "text", "id": "drop_text", "label": "Text", "default": "Noch unter Verschluss." },

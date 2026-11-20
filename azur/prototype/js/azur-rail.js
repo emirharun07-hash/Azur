@@ -1,18 +1,46 @@
 /* AZUR — the garment rail. The jerseys are part of the rendered room (scene3); this layer keeps what sits on top of
    them: a keyboard target over each jersey, the hover label, the line under a chosen one, and the pendulum each jersey
-   swings on (the compositor bends the plate by those angles). The pointer finds jerseys by the rendered id mask. */
+   swings on (the compositor bends the plate by those angles). The pointer finds jerseys by the rendered id mask.
+   Z1: a museum plaque next to each jersey (name, price, "Limitiert auf 50 Stück" or "vergeben"); an empty product
+   field of the section comes as { type: 'gone' } and keeps its place on the rail, but is no target at all. */
 (function () {
   const A = window.AZUR = window.AZUR || {};
+
+  /* Z1 plaques. With slot.plaque (views.json v2: four points of the plaque in the render) the plaque sits on its
+     centre. Without it (scene3: jerseys on the rail, they overlap, so there is no room beside them) it hangs below
+     the jersey, a little to the right: the middle of its top edge at the hem (slot.bottom) moved dx jersey widths
+     (slot.width, in u) to the right and dy jersey heights down.
+     Only in these views; elsewhere (the room's long shot) they are too small and the drop line speaks for them. */
+  const PLAQUE_AT = { rail: { dx: 0.06, dy: 0.035 }, rail_m: { dx: 0.04, dy: 0.03 } };
+  /* Two plaques that touch (phones): the left one steps aside to the lower left, by PLAQUE_SHIFT px to the left and
+     the tallest plaque's height plus PLAQUE_GAP down, so it is clear of both neighbours. Checked from right to left;
+     a plaque next to one that already stepped down stays: a zigzag of two rows, never a staircase. */
+  const PLAQUE_GAP = 6, PLAQUE_SHIFT = 10;
+  const plaqueName = name => String(name || '').replace(/\s*\bTrikot\b\s*/gi, ' ').replace(/\s+/g, ' ').trim();
 
   class Garment {
     constructor(product, index) {
       this.p = product; this.i = index;
       this.theta = 0; this.omega = 0; this.rip = 0; this.phase = index * 1.7;
-      const label = product.type === 'drop' ? `${product.name}. ${product.description}` : `${product.name}, ${A.formatPrice(product.price)}`;
+      this.gone = product.type === 'gone';
       this.el = document.createElement('li');
       this.el.className = 'azur-g';
+      this.hit = null; this.plaque = null;
+      if (this.gone) { this.el.hidden = true; return; }   // an empty product field: keeps its place, nothing to press
+      const c = A.config.copy, taken = product.type === 'product' && product.available === false;
+      const label = product.type === 'drop' ? `${product.name}. ${product.description}`
+        : `${product.name}, ${A.formatPrice(product.price)}${taken ? ', ' + (c.taken || 'vergeben') : ''}`;
       this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${A.esc(label)}" data-index="${index}"></button>`;
       this.hit = this.el.firstElementChild;
+      if (product.type !== 'product' || A.config.plaques === false) return;
+      // the plaque: the button above already says all of it to a screen reader
+      const pl = this.plaque = document.createElement('div');
+      pl.className = 'azur-plaque' + (taken ? ' is-taken' : ''); pl.dataset.index = index; pl.setAttribute('aria-hidden', 'true');
+      const line = (cls, text) => { if (!text) return; const e = document.createElement('span'); e.className = 'azur-plaque__' + cls; e.textContent = text; pl.appendChild(e); };
+      line('name', plaqueName(product.name));
+      line('price', A.formatPrice(product.price));
+      line('note', taken ? (c.taken || 'vergeben') : product.limited);
+      this.el.appendChild(pl);
     }
   }
 
@@ -31,11 +59,26 @@
       this.info = document.createElement('div'); this.info.className = 'azur-info'; this.info.setAttribute('role', 'region'); this.info.setAttribute('aria-live', 'polite');
       root.appendChild(this.info);
       this.bind();
+      this.guardGone();
+    }
+
+    /* An empty product field (type 'gone') is still a jersey in the render and in its id mask. The app reads the mask
+       (garmentAt); here its answer is filtered, so such a jersey gets no hover, no click and no selection. */
+    guardGone() {
+      const app = this.app, items = this.items;
+      if (!items.some(g => g.gone) || typeof app.garmentAt !== 'function') return;
+      const read = app.garmentAt;
+      app.garmentAt = function (x, y) {
+        const i = read.call(this, x, y);
+        return i >= 0 && items[i] && items[i].gone ? -1 : i;
+      };
     }
 
     bind() {
       this.list.addEventListener('click', e => {
-        const b = e.target.closest('.azur-g__hit'); if (b) this.app.onGarmentClick(+b.dataset.index);
+        const b = e.target.closest('.azur-g__hit, .azur-plaque'); if (!b) return;
+        if (b.classList.contains('azur-plaque')) e.stopPropagation();   // the stage would read the room under it as well
+        this.app.onGarmentClick(+b.dataset.index);
       });
       this.list.addEventListener('focusin', e => {
         const b = e.target.closest('.azur-g__hit'); if (b) this.setHover(+b.dataset.index, true);
@@ -44,7 +87,10 @@
       this.list.addEventListener('keydown', e => {
         const b = e.target.closest('.azur-g__hit'); if (!b || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
         e.preventDefault();
-        const j = Math.max(0, Math.min(this.items.length - 1, +b.dataset.index + (e.key === 'ArrowRight' ? 1 : -1)));
+        const step = e.key === 'ArrowRight' ? 1 : -1;
+        let j = +b.dataset.index + step;
+        while (this.items[j] && !this.items[j].hit) j += step;      // empty places are skipped
+        if (!this.items[j]) return;
         this.items[j].hit.focus();
         if (this.selected >= 0 && this.view !== 'room') this.app.select(j);
       });
@@ -61,8 +107,17 @@
       this.view = viewKey; this.viewData = viewData; this.comp = comp;
       this.root.classList.toggle('is-room', viewKey === 'room');
       this.root.classList.toggle('is-mobile', viewKey === 'rail_m');
+      const base = String(viewKey || '').split('@')[0];
+      this.plaqueAt = PLAQUE_AT[base] || null;
+      this.root.classList.toggle('has-plaques', !!this.plaqueAt);
       const slots = (viewData && viewData.slots) || [], scale = (A.config.views[viewKey] || {}).garmentScale || 1;
-      this.geom = this.items.map((g, i) => slots[i] ? { top: slots[i].top, bottom: slots[i].bottom, depthM: slots[i].depth, scale } : null);
+      // views.json v2 names its slots (key): then a jersey finds its own; scene3 slots go by order
+      const named = slots.some(s => s && s.key);
+      this.geom = this.items.map((g, i) => {
+        const s = named ? slots.find(x => x && x.key === g.p.key) : slots[i];
+        return s && !g.gone ? { top: s.top, bottom: s.bottom, width: s.width, plaque: s.plaque, depthM: s.depth, scale } : null;
+      });
+      this.items.forEach(g => { g.plSize = null; });                // fonts and texts may have changed: measure again
       this.place();
     }
 
@@ -82,6 +137,44 @@
         const near = [this.px[i - 1], this.px[i + 1]].filter(Boolean).map(q => Math.abs(q.x - p.x));
         const w = Math.min(p.w, near.length ? Math.min(...near) * 1.05 : p.w);
         Object.assign(g.el.style, { width: w + 'px', height: p.h + 'px', transform: `translate3d(${(p.x - w / 2).toFixed(1)}px, ${p.y.toFixed(1)}px, 0)` });
+        g.origin = [p.x - w / 2, p.y];
+      });
+      this.placePlaques();
+    }
+
+    /* The plaques: on the screen like the jerseys (parallax, swipe), but they do not swing. */
+    placePlaques() {
+      const comp = this.comp, at = this.plaqueAt;
+      if (!at) return;
+      const boxes = [];
+      this.items.forEach((g, i) => {
+        const geo = this.geom[i], el = g.plaque;
+        if (!el || !geo || !this.px[i]) return;
+        const d = this.app.depthAt(geo.top[0], geo.top[1], geo.depthM);
+        let x, y, centred = false;   // x: middle of the plaque, y: its top (centred: its middle)
+        if (geo.plaque && geo.plaque.length >= 4) {
+          const u = geo.plaque.reduce((s, q) => s + q[0], 0) / geo.plaque.length, v = geo.plaque.reduce((s, q) => s + q[1], 0) / geo.plaque.length;
+          [x, y] = comp.toScreen(u, v, d); centred = true;
+        } else {
+          const wU = geo.width || 0.2, hV = geo.bottom[1] - geo.top[1];
+          [x, y] = comp.toScreen(geo.bottom[0] + at.dx * wU, geo.bottom[1] + at.dy * hV, d);
+        }
+        if (!g.plSize || !g.plSize.w) g.plSize = { w: el.offsetWidth, h: el.offsetHeight };
+        const { w, h } = g.plSize;
+        x -= w / 2; if (centred) y -= h / 2;
+        boxes.push({ g, x, y, w, h });
+      });
+      // two that touch: the left one steps aside to the lower left (see PLAQUE_GAP)
+      boxes.sort((a, b) => a.x - b.x);
+      const rowH = Math.max(0, ...boxes.map(q => q.h));
+      for (let k = boxes.length - 2; k >= 0; k--) {
+        const a = boxes[k], b = boxes[k + 1];
+        if (b.down) continue;
+        const over = a.x + a.w + PLAQUE_GAP - b.x;
+        if (over > 0 && a.y < b.y + b.h && b.y < a.y + a.h) { a.x -= PLAQUE_SHIFT; a.y = b.y + rowH + PLAQUE_GAP; a.down = true; }
+      }
+      boxes.forEach(({ g, x, y }) => {
+        g.plaque.style.transform = `translate3d(${(x - g.origin[0]).toFixed(1)}px, ${(y - g.origin[1]).toFixed(1)}px, 0)`;
       });
     }
 

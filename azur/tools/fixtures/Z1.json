@@ -1,0 +1,7 @@
+{
+  "products": {
+    "brasilien-trikot-azur-collection": {"inventory": {"S": 8, "M": 3, "L": 12, "XL": 10}},
+    "deutschland-trikot-azur-collection": {"inventory": {"S": 8, "M": 17, "L": 15, "XL": 2}}
+  },
+  "cart": []
+}
