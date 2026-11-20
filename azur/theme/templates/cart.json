@@ -11,7 +11,10 @@
   "sections": {
     "main": {
       "type": "main-cart",
-      "settings": {}
+      "settings": {
+        "upsell_a": "brasilien-trikot-azur-collection",
+        "upsell_b": "deutschland-trikot-azur-collection"
+      }
     }
   },
   "order": [
