@@ -213,6 +213,7 @@
           name: {{ p.title | json }}, price: {{ p.price | divided_by: 100.0 | json }}, currency: {{ cart.currency.iso_code | json }},
           image: {{ p.featured_image | image_url: width: 1000 | json }}, imageAspect: {{ p.featured_image.aspect_ratio | default: 0.75 | json }},
           productUrl: {{ p.url | json }},
+          extra: {% render 'azur-product-json', product: p %},
           description: {{ p.description | strip_html | strip_newlines | truncatewords: 45 | json }},
           fit: {{ section.settings[fk] | json }}, accent: {{ section.settings[ak] | json }},
           available: {{ p.available | json }}, limited: {{ section.settings.limited_text | json }},

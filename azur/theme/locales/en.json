@@ -206,6 +206,9 @@
       "notify_title": "Tell me about the next drop",
       "pair_free": "Add it and shipping is free",
       "to_room": "Enter the room"
+    },
+    "pdp": {
+      "limited": "Limited to 50 pieces"
     }
   }
 }

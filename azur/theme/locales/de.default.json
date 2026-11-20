@@ -206,6 +206,9 @@
       "notify_title": "Sag mir Bescheid beim nächsten Drop",
       "pair_free": "Dazu, dann ist der Versand frei",
       "to_room": "Ins Zimmer gehen"
+    },
+    "pdp": {
+      "limited": "Limitiert auf 50 Stück"
     }
   }
 }
