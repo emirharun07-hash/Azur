@@ -21,11 +21,11 @@ fail() { case " $FAILS " in *" $1 "*) ;; *) FAILS="${FAILS:+$FAILS, }$1" ;; esac
 KNOWN_FAIL='keyboard: Tab and Shift+Tab stay inside the product view
 logo: a click closes the product view'
 
-# a. python environment
+# a. python environment (rjsmin: whitespace/comment remover for the JS bundles; AZUR_MINIFY=0 builds them unminified)
 VENV=${AZUR_VENV:-/tmp/azur-venv}
 PY=$VENV/bin/python
 if [ ! -x "$PY" ]; then
-  uv venv --python 3.11 "$VENV" -q && uv pip install -q --python "$PY" pillow "python-liquid==2.3.6" || { echo "venv could not be created"; echo "CHECK FAIL (build)"; exit 1; }
+  uv venv --python 3.11 "$VENV" -q && uv pip install -q --python "$PY" pillow "python-liquid==2.3.6" rjsmin==1.3.0 || { echo "venv could not be created"; echo "CHECK FAIL (build)"; exit 1; }
 fi
 
 # b. build
