@@ -87,7 +87,8 @@
       if (A.Panel) this.panel = new A.Panel(this);
 
       const start = this.isMobile ? cfg.startView.mobile : cfg.startView.desktop;
-      await this.enterView(start);
+      // W4: phones show the still of this time of day first; the light passes follow the first touch (or 3 s of quiet)
+      if (!(this.isMobile && this.comp.ok && this.stillBase() && await this.enterStill(start))) await this.enterView(start);
       this.root.classList.add('is-ready');
       this.lastT = performance.now(); this.lightAt = 0; this.running = true;
       this.light = A.light.current(); this.rail.applyLight(this.light); this.applyAmbient();
@@ -135,7 +136,10 @@
       const geo = this.rail.wallGeo, comp = this.comp; if (!geo || !geo.sample || !comp.cssW) return true;
       const [u0, v0, u1, v1] = geo.sample, N = 8;
       let src, sx, sy, sw, sh;
-      if (comp.ok && comp.canvas.width && !this.canvas.style.visibility) {
+      if (this.still) {                                  // W4: the still shows the whole plate
+        const im = this.still.img; if (!im.complete || !im.naturalWidth) return false;
+        src = im; sx = u0 * im.naturalWidth; sy = v0 * im.naturalHeight; sw = (u1 - u0) * im.naturalWidth; sh = (v1 - v0) * im.naturalHeight;
+      } else if (comp.ok && comp.canvas.width && !this.canvas.style.visibility) {
         const k = comp.canvas.width / comp.cssW, f = comp.focus || 0.6, a = comp.toScreen(u0, v0, f), b = comp.toScreen(u1, v1, f);
         const x0 = Math.max(0, a[0]), x1 = Math.min(comp.cssW, b[0]), y0 = Math.max(0, a[1]), y1 = Math.min(comp.cssH, b[1]);
         if (x1 - x0 < 4 || y1 - y0 < 2) return true;
@@ -174,7 +178,7 @@
     }
     /* The still copy for a crossfade, with the wall drawn into it (the canvas has no HTML in it). */
     snapshot() {
-      const ok = this.comp.snapshotInto(this.snapCtx);
+      const ok = this.still ? this.drawStill(this.snapCtx) : this.comp.snapshotInto(this.snapCtx);
       if (ok && this.rail.wall && this.rail.wallGeo && this.comp.cssW) this.rail.wall.paintInto(this.snapCtx, this.snap.width / this.comp.cssW);
       return ok;
     }
@@ -201,6 +205,7 @@
         Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1' }); this.snap.hidden = false;
       }
       await this.comp.setState(st);
+      if (this.still) await this.setStill(st);                   // W4: still the still: the one of the new time of day
       this.comp.render(this.light); this.placeChrome(); this.setTease(); this.kick(); this.wallDue = true;
       if (fade) { await this.snap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in-out' }).finished.catch(() => { }); this.snap.hidden = true; }
       this.stateBusy = false;
@@ -231,7 +236,123 @@
       return Object.assign({}, bv, { slots });
     }
 
+    /* ---------------------------------------------------------------- W4: still first (phones)
+       With A.config.stills (base path of still-<state>.webp, one per time of day, made by tools/make_stills.cjs) a phone
+       shows that still image first, laid exactly where the canvas will draw (cover fit, overscan, pan). The rail, the
+       plaques, the buy bar and taps on the jerseys work on it (views.json and ids.png only). The light passes are asked
+       for at the first touch, scroll or key, or 3 s after the page loaded; then the canvas takes over under a short
+       crossfade. Data saver (Save-Data, prefers-reduced-data): only a touch of the room loads them. Empty: as before.
+       ?stills=/path/ (same site) or ?stills= (off) overrides it, for tests. */
+    stillBase() {
+      let b = A.config.stills || '';
+      const q = (location.search.match(/[?&]stills=([^&#]*)/) || [])[1];
+      if (q != null) { try { b = decodeURIComponent(q); } catch (e) { b = ''; } if (!/^(\/(?![/\\])|assets\/)[\w\-./]*$/.test(b)) b = ''; }
+      return b;
+    }
+    async enterStill(key) {
+      const v = this.viewData(key);
+      if (!v.res) return false;
+      const box = document.createElement('div'); box.className = 'azur-still-box'; box.setAttribute('aria-hidden', 'true');
+      Object.assign(box.style, { position: 'absolute', inset: '0', overflow: 'hidden', pointerEvents: 'none' });
+      const img = document.createElement('img'); img.className = 'azur-still'; img.alt = '';
+      img.setAttribute('fetchpriority', 'high'); img.decoding = 'async';
+      Object.assign(img.style, { position: 'absolute', left: '0', top: '0', maxWidth: 'none', transformOrigin: '0 0' });
+      box.appendChild(img); this.canvas.after(box);
+      this.still = { box, img, key, off: [] };
+      const shown = this.setStill(this.dayState);
+      this.viewKey = key; this.useClip(key);
+      this.comp.stillView(key);
+      if (!await shown) {                                // no still for this time of day: start as without stills
+        box.remove(); this.still = null; this.comp.view = null; this.comp.mode = 'none';
+        return false;
+      }
+      this.root.dataset.view = key; this.root.dataset.mode = 'still';
+      this.fallbackImg.hidden = true;
+      const slots = v.slots || [];
+      this.comp.focus = this.encDepth(slots.length ? slots.reduce((s, x) => s + x.depth, 0) / slots.length : 2.5);
+      this.pan = key.startsWith('rail_m') ? 0.38 : 0.5;
+      this.rail.layout(key, v, this.comp);
+      this.rail.setSelected(-1); this.rail.setHover(-1);
+      this.drop.close();
+      this.updateChips();
+      this.resize();
+      this.wallDue = true;
+      this.armStill();
+      return true;
+    }
+    /* The still of a time of day; resolves true once it can be shown, false when it is missing. */
+    setStill(st) {
+      const s = this.still, img = s && s.img;
+      if (!img) return Promise.resolve(false);
+      return new Promise(res => {
+        img.onload = () => (img.decode ? img.decode().catch(() => { }) : Promise.resolve()).then(() => { this.wallDue = true; res(true); });
+        img.onerror = () => res(false);
+        img.src = A.url(this.stillBase() + 'still-' + st + '.webp');
+      });
+    }
+    /* The still where the canvas draws the plate: the whole plate at the canvas's scale, shifted by the crop. */
+    placeStill() {
+      const s = this.still, c = this.comp; if (!s || !c.cssW) return;
+      const [ox, oy, zx, zy] = c.map, w = c.cssW / zx, h = c.cssH / zy, dim = c.dim;
+      const k = [w, h, ox, oy, dim].map(x => x.toFixed(4)).join();
+      if (k === s.placed) return; s.placed = k;
+      Object.assign(s.img.style, { width: w.toFixed(2) + 'px', height: h.toFixed(2) + 'px',
+        transform: `translate3d(${(-ox * w).toFixed(2)}px,${(-oy * h).toFixed(2)}px,0)`, filter: dim < 0.999 ? `brightness(${dim.toFixed(3)})` : '' });
+    }
+    /* The still into a 2D canvas the size of the room's canvas (crossfades, camera moves). */
+    drawStill(g) {
+      const c = this.comp, im = this.still.img, cv = g.canvas; if (!c.cssW) return false;
+      cv.width = this.canvas.width; cv.height = this.canvas.height;
+      g.clearRect(0, 0, cv.width, cv.height);
+      if (!im.complete || !im.naturalWidth) return true;
+      const k = cv.width / c.cssW, [ox, oy, zx, zy] = c.map, w = c.cssW / zx, h = c.cssH / zy;
+      if (c.dim < 0.999) g.filter = `brightness(${c.dim.toFixed(3)})`;
+      g.drawImage(im, -ox * w * k, -oy * h * k, w * k, h * k);
+      g.filter = 'none';
+      return true;
+    }
+    /* When the passes may come: the first touch, scroll or key, or 3 s after the page's load; with data saver only a touch
+       of the room. */
+    armStill() {
+      const s = this.still, nc = navigator.connection, go = () => this.wakeStill();
+      s.save = !!(nc && nc.saveData === true) || matchMedia('(prefers-reduced-data: reduce)').matches;
+      const on = (t, n, opt) => { t.addEventListener(n, go, opt); s.off.push(() => t.removeEventListener(n, go, opt)); };
+      if (s.save) { ['pointerdown', 'touchstart'].forEach(n => on(this.stage, n, { passive: true })); return; }
+      ['pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(n => on(window, n, { passive: true, capture: true }));
+      const later = () => { if (this.still === s) s.timer = setTimeout(go, 3000); };
+      if (document.readyState === 'complete') later();
+      else { window.addEventListener('load', later, { once: true }); s.off.push(() => window.removeEventListener('load', later)); }
+    }
+    /* The passes load in the background (uploads in quiet moments), then the canvas shows the same picture in the light of
+       the moment and the still fades away. */
+    async wakeStill() {
+      const s = this.still; if (!s || s.woke) return;
+      s.woke = true; clearTimeout(s.timer); s.off.forEach(f => f()); s.off = [];
+      const key = s.key, mode = await this.comp.load(key, this.passes, false);
+      if (this.still !== s) return;                     // another view took over meanwhile (enterView let the still go)
+      const v = this.viewData(key), cv = this.comp.cache[key];
+      if (cv && !cv.size && v.res) cv.size = v.res.slice();
+      this.comp.view = cv; this.comp.mode = mode;
+      this.root.dataset.mode = mode; this.root.classList.toggle('is-missing', mode === 'none');
+      await this.loadDepth(key);
+      if (this.still !== s) return;
+      this.resize(); this.comp.render(this.light);
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // the canvas is on screen under the still
+      if (this.still !== s) return;
+      if (cv && cv.upgrade) setTimeout(() => cv.upgrade && cv.upgrade(), 600);
+      this.dropStill(!this.reduced);
+    }
+    dropStill(fade) {
+      const s = this.still; if (!s) return;
+      this.still = null; s.woke = true; clearTimeout(s.timer); s.off.forEach(f => f()); s.off = [];
+      const gone = () => s.box.remove();
+      if (fade) s.box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: 'ease-in-out' }).finished.then(gone, gone);
+      else gone();
+      this.wallDue = true; this.kick();
+    }
+
     async enterView(key) {
+      if (this.still) this.dropStill(false);            // W4: a move away from the still (its copy covers the change)
       const prevBase = (this.viewKey || '').split('@')[0];
       this.viewKey = key;
       this.useClip(key);
@@ -377,7 +498,7 @@
       return this.flightBox;
     }
     preloadMoves() {
-      if (A.config.flights !== 'video') return;
+      if (A.config.flights !== 'video' || (this.still && this.still.save)) return;   // W4: data saver waits on the still
       Object.keys(this.moves || {}).forEach(name => {
         if (this.isMobile !== name.startsWith('rail_m-') || !this.moves[name].video) return;
         const pre = this.flightPrefix(name);
@@ -1037,7 +1158,7 @@
     resize() {
       this.comp.pan = this.pan;
       this.comp.layout(this.stage.clientWidth, this.stage.clientHeight, this.dpr());
-      this.rail.place(); this.placeChrome();
+      this.rail.place(); this.placeChrome(); this.placeStill();
       this.dirty = true; this.kick();
     }
     kick() { this.dirty = true; }
@@ -1085,6 +1206,7 @@
       // selection dims the room smoothly
       const dT = this.dimTarget == null ? 1 : this.dimTarget;
       if (Math.abs(this.comp.dim - dT) > 0.002) { this.comp.dim += (dT - this.comp.dim) * Math.min(1, dt * 6); this.dirty = true; }
+      if (this.still) this.placeStill();                            // W4: the still follows pan and dim as the canvas would
       this.stepRoom(dt);
       if ((pmove || this.dirty) && !this.diving) { this.rail.place(); this.placeChrome(); }   // hidden while the page scrolls away
       const swaying = this.rail.step(dt, this.reduced);
@@ -1122,7 +1244,7 @@
     /* The rail's pendulums bend the rendered plate (compositor sway). Idle breathing renders at 30 fps,
        a swinging jersey at full rate; nothing moves behind the product view or the magazine. */
     applySway(t, swaying) {
-      const cv = this.comp.view; if (!cv || !this.comp.ok) return;
+      const cv = this.comp.view; if (!cv || !this.comp.ok || cv.mode === 'still') return;
       if (this.rail.wallGeo) { if (this.comp.swayOn) { this.comp.setSway([], [], []); this.dirty = true; } return; }   // D5: nothing swings
       if (!cv.swayA && cv.idsImg && !cv.swayTried) {
         cv.swayTried = true;

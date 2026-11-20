@@ -9,6 +9,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const pw = require(process.env.PLAYWRIGHT || (fs.existsSync('/opt/node-tools/node_modules/playwright') ? '/opt/node-tools/node_modules/playwright' : 'playwright'));
 const ROOT = path.resolve(process.argv[2] || path.join(__dirname, '..', '.cache', 'publish'));
 const SHOTS = process.argv[3] || null;
+const STILLS = path.resolve(process.env.STILLS || path.join(__dirname, '..', '.cache', 'stills'));   // W4
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
   '.png': 'image/png', '.mp4': 'video/mp4', '.webm': 'video/webm', '.glb': 'model/gltf-binary' };
 
@@ -18,6 +19,12 @@ function serve() {
   const srv = http.createServer((req, res) => {
     const u = decodeURIComponent(req.url.split('?')[0]);
     if (u === '/' || u === '/_test.html') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end(page); }
+    if (u.startsWith('/_stills/')) {           // W4: the phone's still images (tools/make_stills.cjs); without them a stand-in
+      const n = path.basename(u), own = path.join(STILLS, n);
+      const f = /^still-[a-z]+\.webp$/.test(n) ? (fs.existsSync(own) ? own : path.join(ROOT, 'assets', 'scene3', 'views', 'rail_m', 'beauty.webp')) : null;
+      if (!f || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { 'Content-Type': 'image/webp' }); return fs.createReadStream(f).pipe(res);
+    }
     const f = path.join(ROOT, path.normalize(u).replace(/^(\.\.[/\\])+/, ''));
     if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'Content-Type': TYPES[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
@@ -115,6 +122,40 @@ function serve() {
     if (s.pdp) { await p.click('.azur-pdp__x'); await p.waitForTimeout(700); }
     s = await st(p); ok('phone: × closes it', !s.pdp, s);
     await p.close();
+    // W4: still first on the phone (?stills=/_stills/): the still shows with plaques and buy bar, no light pass is asked
+    // for before a touch; a tap on a jersey works on the still and the canvas takes over (rail); on the wall the passes
+    // come 3 s after load without any input, and a frame opens its product view
+    for (const wall of [false, true]) {
+      const tag = wall ? 'still (wall)' : 'still';
+      p = await mk({ width: 390, height: 844 }, true);
+      const asked = []; p.on('request', r => { if (/\/rail_m\/(?:lo\/|md\/)?(?:sky|sun_low|sun_high|neon|lamp|ceiling|street|spot)\.webp/.test(r.url())) asked.push(r.url()); });
+      await p.goto(url + '?stills=/_stills/' + (wall ? '&wall=mockup' : '')); await p.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 });
+      await p.waitForFunction(() => document.querySelector('.azur-buybar.is-on') && AZUR.app.rail.px && AZUR.app.rail.px.some(Boolean), null, { timeout: 5000 }).catch(() => {});
+      const geo = () => p.evaluate(() => { const a = AZUR.app, i = document.querySelector('.azur-still'), c = a.comp, [ox, oy, zx, zy] = c.map;
+        return { mode: a.root.dataset.mode, still: !!i && i.complete && i.naturalWidth > 0, w: i ? parseFloat(i.style.width) : 0, want: c.cssW / zx, ids: !!(c.view && c.view.idsImg),
+          plaques: document.querySelectorAll('.azur-plaque:not([hidden])').length, bar: !!document.querySelector('.azur-buybar.is-on'), ready: a.root.classList.contains('is-ready') }; });
+      let g = await geo();
+      ok(`${tag}: the still shows first, laid like the canvas, with plaques and buy bar, no pass asked for`,
+        g.mode === 'still' && g.still && Math.abs(g.w - g.want) < 1 && g.plaques > 0 && g.bar && g.ready && asked.length === 0, { g, asked: asked.length });
+      await shot(p, wall ? 'phone_still_wall.png' : 'phone_still.png');
+      if (!wall) {
+        const pt = await find(p, 3); if (pt) await p.mouse.click(pt[0], pt[1]); await p.waitForTimeout(1500);
+        s = await st(p); ok(`${tag}: a tap on a jersey opens its product view`, !!pt && s.pdp, { s, pt });
+        if (s.pdp) { await p.click('.azur-pdp__x'); await p.waitForTimeout(700); }
+      } else {
+        await p.waitForTimeout(500); g = await geo();
+        ok(`${tag}: no pass before 3 s after load without input`, g.mode === 'still' && asked.length === 0, { g, asked: asked.length });
+      }
+      await p.waitForFunction(() => AZUR.app.root.dataset.mode === 'passes' && !document.querySelector('.azur-still'), null, { timeout: 15000 }).catch(() => {});
+      g = await geo();
+      ok(`${tag}: then the passes load and the canvas takes over (the still is gone)`, g.mode === 'passes' && asked.length > 0 && !g.still, { g, asked: asked.length });
+      if (wall) {
+        const gi = await p.evaluate(() => AZUR.app.nearestGarment());
+        const wp = gi >= 0 && await find(p, gi); if (wp) await p.mouse.click(wp[0], wp[1]); await p.waitForTimeout(1500);
+        s = await st(p); ok(`${tag}: the frame in the middle opens (product view or drop sign-up)`, !!wp && (s.pdp || s.drop), { s, wp, gi });
+      }
+      await p.close();
+    }
     // W3: the buy bar on the phone: bar -> size -> bag in three taps; no bar on the desktop
     {
       p = await mk({ width: 390, height: 844 }, true);

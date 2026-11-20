@@ -343,6 +343,20 @@
       return v.mode;
     }
 
+    /* W4: the first picture on a phone is a still image (A.config.stills, azur-app.js enterStill): the view's geometry
+       (views.json res) without its passes, so the rail's frames, the plaques and the hit areas (ids.png) work before
+       a single light pass is asked for. Not cached: load() makes the real view later. render() draws nothing for it,
+       the still lies over the canvas. */
+    stillView(key) {
+      const vd = this.viewsData && this.viewsData[key], vc = A.config.views[key] || {};
+      const v = { key, mode: 'still', tex: {}, scales: {}, imgs: {}, state: this.state, size: vd && vd.res ? vd.res.slice() : null };
+      v.platePx = v.size; v.ready = Promise.resolve();
+      // the garments' ids for a tap on the rail (the wall finds its frames by their corners)
+      if (vc.ids !== false && vc.masks !== false && !A.wallOn) loadImage(A.config.assetBase + key + '/ids.png').then(im => { v.idsImg = im; });
+      this.view = v; this.mode = v.mode;
+      return v;
+    }
+
     /* GPU memory: only the views used last keep their pass textures (A.config.gpuViews, 2); the others give them back
        but keep their mixed picture (v.lit), so a change of view never waits for uploads: the passes come back in idle
        time (restoreSoon) and the picture is mixed again when the light has moved meanwhile. */
@@ -669,6 +683,7 @@
     render(state) {
       const gl = this.gl; if (!gl || !this.view) return;
       const v = this.view, u = this.u;
+      if (v.mode === 'still') return;                // W4: the still image shows it (stillView)
       if (v.mode === 'passes') this.mix(state);
       gl.useProgram(this.drawP.p);
       gl.viewport(0, 0, this.canvas.width, this.canvas.height);

@@ -46,7 +46,7 @@
   .shopify-section:has(> .azur[data-hero]) { background: #0b0b0c; }
   .azur[data-hero] { height: calc(100vh + var(--azur-lip) - var(--azur-peek)); height: calc(100lvh + var(--azur-lip) - var(--azur-peek)); }
   .azur[data-hero] > .azur-stage { bottom: auto; height: 100vh; height: 100svh; min-height: 30rem; }
-  .azur[data-hero] .azur-canvas { -webkit-box-reflect: below 0 linear-gradient(transparent calc(100% - 22vh), rgb(0 0 0 / .85)); }
+  .azur[data-hero] .azur-canvas, .azur[data-hero] .azur-still-box { -webkit-box-reflect: below 0 linear-gradient(transparent calc(100% - 22vh), rgb(0 0 0 / .85)); }
   .azur-fall { position: relative; z-index: 4; display: block; height: var(--azur-lip); margin-top: calc(-1 * var(--azur-lip));
     background: var(--c-paper); border-radius: var(--azur-lip) var(--azur-lip) 0 0 !important; box-shadow: var(--azur-shadow); pointer-events: none; }
   @media (max-width: 47.99em) { .azur-fall { height: calc(var(--azur-lip) + 3rem); } }
@@ -170,6 +170,10 @@
     A.config.wall.mode = {{ section.settings.wall_mode | default: 'aus' | json }};
     A.config.wall.images = { brasilien: {{ 'azur-wall-brasilien.webp' | asset_url | json }}, deutschland: {{ 'azur-wall-deutschland.webp' | asset_url | json }} };
     A.config.copy.taken = {{ 'azur.room.taken' | t | json }};
+    /* W4: Standbild zuerst am Handy. Leer = aus (wie bisher). Sobald die Standbilder als Dateien hochgeladen sind
+       (Inhalte > Dateien: azr8-stills-still-morning.webp, -day, -evening, -night; gemacht mit azur/tools/make_stills.cjs),
+       hier 'assets/scene3/stills/' eintragen: urlMap macht daraus die Dateinamen. */
+    A.config.stills = '';
     A.config.inline = {% render 'azur-room-data' %};
     A.config.urlMap = function (p) {
       var m = p.match(/^assets\/brand\/(.+)$/);
