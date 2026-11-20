@@ -1,0 +1,102 @@
+{%- comment -%}
+  P1: Zusatzfelder eines Trikots für die Produktansicht im Zimmer-Stil (assets/azur-room.js, assets/azur-pdp.js), als
+  JSON-Objekt. Aufruf im Zimmer (sections/azur-room.liquid, je Produkt): extra: {% render 'azur-product-json', product: p %}
+  Auf Shop- und Produktseiten über snippets/azur-pdp-item.liquid (shared: false; die gemeinsamen Angaben setzt dort
+  snippets/azur-pdp-setup.liquid einmal mit part: 'shared').
+  Nichts wird erfunden: leere Metafelder fehlen im Objekt, die Ansicht blendet den Abschnitt dann aus. Keine Stückzahlen.
+  Metafelder: custom.material, custom.care, custom.size_table (Text „Größe | Brust | Länge“ je Zeile oder HTML-Tabelle),
+              custom.gpsr_hersteller, custom.gpsr_kontakt. Größentabelle sonst aus der Theme-Einstellung size_chart.
+  Parameter: product
+             shared  false = ohne die gemeinsamen Angaben
+             part    'shared' = nur die gemeinsamen Angaben {"ship", "time", "returns", "pay"} (HTML-Texte), ohne product
+{%- endcomment -%}
+{%- liquid
+  assign with_shared = true
+  if shared == false
+    assign with_shared = false
+  endif
+  if part == 'shared' or with_shared
+    capture s_ship
+      render 'shipping-line', part: 'cost'
+    endcapture
+    capture s_time
+      render 'shipping-line', part: 'time'
+    endcapture
+    capture s_pay
+      render 'payment-types', mode: 'logos'
+    endcapture
+    assign s_returns = ''
+    if settings.returns_note != blank
+      # Link wie in trust-line.liquid (K1): Rückgaberichtlinie, sonst die Versandseite, sonst ohne Link
+      assign s_note = settings.returns_note | escape
+      assign s_page = pages[settings.shipping_page_handle]
+      if shop.refund_policy.url != blank
+        assign s_returns = '<a class="link" href="' | append: shop.refund_policy.url | append: '">' | append: s_note | append: '</a>'
+      elsif s_page.url != blank
+        assign s_returns = '<a class="link" href="' | append: s_page.url | append: '">' | append: s_note | append: '</a>'
+      else
+        assign s_returns = s_note
+      endif
+    endif
+    assign j_ship = s_ship | strip | json
+    assign j_time = s_time | strip | json
+    assign j_returns = s_returns | strip | json
+    assign j_pay = s_pay | strip | json
+    assign shared_json = '{"ship": ' | append: j_ship | append: ', "time": ' | append: j_time | append: ', "returns": ' | append: j_returns | append: ', "pay": ' | append: j_pay | append: '}'
+  endif
+  assign images = product.media | where: 'media_type', 'image'
+  assign f_material = product.metafields.custom.material.value | strip
+  assign f_care = product.metafields.custom.care.value | strip
+  assign f_maker = product.metafields.custom.gpsr_hersteller.value | strip
+  assign f_contact = product.metafields.custom.gpsr_kontakt.value | strip
+  assign f_table = product.metafields.custom.size_table.value | strip
+
+  assign table = ''
+  assign rows_src = ''
+  if f_table != blank
+    if f_table contains '<table'
+      assign table = f_table
+    elsif f_table contains '|'
+      assign rows_src = f_table
+    else
+      assign table = f_table | escape | newline_to_br | prepend: '<p>' | append: '</p>'
+    endif
+  elsif settings.size_chart != blank
+    assign rows_src = settings.size_chart | strip
+  endif
+  if rows_src != blank
+    assign rows = rows_src | newline_to_br | split: '<br />'
+    assign body = ''
+    for row in rows
+      assign cells = row | strip | split: '|'
+      if cells.size < 2
+        continue
+      endif
+      assign c0 = cells[0] | strip | escape
+      assign c1 = cells[1] | remove: 'cm' | strip | escape
+      assign c2 = cells[2] | remove: 'cm' | strip | escape
+      assign body = body | append: '<tr><th scope="row">' | append: c0 | append: '</th><td>' | append: c1 | append: '</td><td>' | append: c2 | append: '</td></tr>'
+    endfor
+    if body != ''
+      assign t_size = 'azur.cart.size' | t
+      assign t_chest = 'azur.product.chest' | t
+      assign t_length = 'azur.product.length' | t
+      assign table = '<table><thead><tr><th scope="col">' | append: t_size | append: '</th><th scope="col">' | append: t_chest | append: '</th><th scope="col">' | append: t_length | append: '</th></tr></thead><tbody>' | append: body | append: '</tbody></table>'
+    endif
+  endif
+-%}
+{%- if part == 'shared' -%}{{ shared_json }}{%- else -%}
+{"media": [
+  {%- for m in images -%}
+    {"src": {{ m | image_url: width: 1200 | json }}, "alt": {{ m.alt | default: product.title | json }}, "w": {{ m.width | default: 1200 | json }}, "h": {{ m.height | default: 1600 | json }}}
+    {%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+]
+{%- if f_material != blank -%}, "material": {{ f_material | json }}{%- endif -%}
+{%- if f_care != blank -%}, "care": {{ f_care | json }}{%- endif -%}
+{%- if table != blank -%}, "sizeTable": {{ table | strip | json }}{%- endif -%}
+{%- if f_maker != blank -%}, "gpsr": {"maker": {{ f_maker | json }}{% if f_contact != blank %}, "contact": {{ f_contact | json }}{% endif %}}{%- endif -%}
+, "limited": {{ 'azur.pdp.limited' | t | json }}
+{%- if with_shared -%}, "shared": {{ shared_json }}{%- endif -%}
+}
+{%- endif -%}

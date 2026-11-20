@@ -1,6 +1,7 @@
 {%- comment -%}
   Ein Trikot für die Produktansicht aus dem Zimmer (Runde 19, assets/azur-pdp.js), als JS-Objekt wie A.products im
   Zimmer (sections/azur-room.liquid). Schnitt: Metafeld custom.fit, sonst wie im Zimmer (Städte Retro, Länder Regular).
+  P1: Bilder, Material/Pflege, Größentabelle, Produktsicherheit und „Limitiert“ in extra (snippets/azur-product-json.liquid).
   Parameter: p  Produkt
 {%- endcomment -%}
 {%- liquid
@@ -30,7 +31,8 @@
   image: {{ p.featured_image | image_url: width: 1000 | json }}, imageAspect: {{ p.featured_image.aspect_ratio | default: 0.75 | json }},
   productUrl: {{ p.url | json }},
   description: {{ p.description | strip_html | strip_newlines | truncatewords: 45 | json }},
-  fit: {{ fit | json }},
+  fit: {{ fit | json }}, available: {{ p.available | json }},
+  extra: {% render 'azur-product-json', product: p, shared: false %},
   variants: [
     {%- for v in p.variants -%}{ id: {{ v.id }}, title: {{ v.title | json }}, available: {{ v.available | json }} }{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
   ]

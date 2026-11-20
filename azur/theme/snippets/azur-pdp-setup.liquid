@@ -6,11 +6,18 @@
     list   Trikots der Seite (Shop)
     one    das Trikot der Produktseite (die Ansicht ist dann die Seite; schließen geht zurück)
     back   wohin „schließen“ führt, wenn man nicht aus dem Shop kam
+  P1: je Trikot ein verstecktes Produktformular mit Shopifys Direktkauf-Knopf (die Ansicht holt es sich beim Öffnen),
+  Versand/Lieferzeit/Rückgabe/Zahlarten einmal vorgerendert (A.pdp.shared); auf der Produktseite zusätzlich bis zu drei
+  andere verfügbare Trikots der Shop-Kollektion (für die Zeile „Dazu: …“).
 {%- endcomment -%}
 {%- liquid
   assign shipping = 'azur.shipping.germany' | t
   if settings.shipping_cost != blank
     assign shipping = 'azur.shipping.cost' | t: cost: settings.shipping_cost
+  endif
+  assign peers = settings.main_collection.products
+  if settings.main_collection == blank
+    assign peers = collections.all.products
   endif
 -%}
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
@@ -36,14 +43,45 @@
     A.config.copy.toProductPage = {{ 'azur.room.to_product_page' | t | json }};
     A.config.copy.adding = {{ 'azur.room.adding' | t | json }};
     A.config.copy.close = {{ 'azur.general.close' | t | json }};
-    A.pdp = { page: {% if one %}{{ one.handle | json }}{% else %}null{% endif %}, shop: {{ back | default: routes.all_products_collection_url | default: '/collections/all' | json }} };
+    A.pdp = { page: {% if one %}{{ one.handle | json }}{% else %}null{% endif %}, shop: {{ back | default: routes.all_products_collection_url | default: '/collections/all' | json }},
+      shared: {% render 'azur-product-json', part: 'shared' %} };
     A.products = [
       {%- if one -%}
         {%- render 'azur-pdp-item', p: one -%}
+        {%- assign n_peers = 0 -%}
+        {%- for p in peers -%}
+          {%- if p.handle == one.handle or p.available != true or n_peers >= 3 -%}{%- continue -%}{%- endif -%}
+          {%- assign n_peers = n_peers | plus: 1 -%}
+          ,{%- render 'azur-pdp-item', p: p -%}
+        {%- endfor -%}
       {%- else -%}
         {%- for p in list -%}{%- render 'azur-pdp-item', p: p -%}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
       {%- endif -%}
     ];
   };
 </script>
+{%- comment -%} P1: Direktkauf (Shopify braucht ein echtes Produktformular im Seiten-HTML); unsichtbar, bis die Ansicht es holt {%- endcomment -%}
+<div class="azur-pdp-forms" inert aria-hidden="true" style="position:absolute;left:0;top:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);">
+  {%- if one -%}
+    {%- assign p = one -%}
+    {%- if p.available -%}
+      <div data-azur-buy="{{ p.handle | escape }}">
+        {%- form 'product', p, class: 'azur-pdp__form' -%}
+          <input type="hidden" name="id" value="{{ p.selected_or_first_available_variant.id }}">
+          {{ form | payment_button }}
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    {%- for p in list -%}
+      {%- unless p.available -%}{%- continue -%}{%- endunless -%}
+      <div data-azur-buy="{{ p.handle | escape }}">
+        {%- form 'product', p, class: 'azur-pdp__form' -%}
+          <input type="hidden" name="id" value="{{ p.selected_or_first_available_variant.id }}">
+          {{ form | payment_button }}
+        {%- endform -%}
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+</div>
 <script src="{{ 'azur-pdp.js' | asset_url }}" defer></script>

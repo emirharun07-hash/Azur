@@ -1,0 +1,14 @@
+{
+  "products": {
+    "brasilien-trikot-azur-collection": {
+      "media": 3,
+      "metafields": {"custom": {
+        "material": "[Testwert Material]",
+        "care": "[Testwert Pflege, Zeile 1]\n[Testwert Pflege, Zeile 2]",
+        "size_table": "S | [Testwert] | [Testwert]\nM | [Testwert] | [Testwert]\nL | [Testwert] | [Testwert]\nXL | [Testwert] | [Testwert]",
+        "gpsr_hersteller": "[Testwert Hersteller]\n[Testwert Anschrift]",
+        "gpsr_kontakt": "[Testwert Kontakt]"
+      }}
+    }
+  }
+}
