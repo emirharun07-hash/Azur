@@ -1,9 +1,0 @@
-{
-  "azur": {
-    "cart": {
-      "upsell_line": "Add it and shipping is free",
-      "upsell_sizes": "Choose a size",
-      "upsell_pick": "Add {{ label }} in size {{ size }}"
-    }
-  }
-}

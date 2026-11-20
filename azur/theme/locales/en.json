@@ -80,7 +80,10 @@
       "subtotal": "Subtotal",
       "checkout": "Checkout",
       "empty": "Your cart is empty.",
-      "update": "Update"
+      "update": "Update",
+      "upsell_line": "Add it and shipping is free",
+      "upsell_sizes": "Choose a size",
+      "upsell_pick": "Add {{ label }} in size {{ size }}"
     },
     "product": {
       "crumbs": "Breadcrumb",

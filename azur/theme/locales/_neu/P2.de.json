@@ -1,9 +1,0 @@
-{
-  "azur": {
-    "cart": {
-      "upsell_line": "Dazu, dann ist der Versand gratis",
-      "upsell_sizes": "Größe wählen",
-      "upsell_pick": "{{ label }} in Größe {{ size }} dazulegen"
-    }
-  }
-}
