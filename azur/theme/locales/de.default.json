@@ -104,7 +104,9 @@
       "zoomed": "Bild vergrößert",
       "size_chart": "Größentabelle",
       "chest": "Brustbreite (cm)",
-      "length": "Länge (cm)"
+      "length": "Länge (cm)",
+      "low_few": "nur noch wenige",
+      "low_line": "Größe {{ size }}: nur noch wenige"
     },
     "collection": {
       "jerseys": "Trikots",

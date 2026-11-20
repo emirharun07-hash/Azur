@@ -521,6 +521,32 @@ html.azur-pdp-open { overflow: hidden; }
 .azur-pdp__upsellsizes button:disabled { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
 .azur-pdp__upsell[aria-busy="true"] { opacity: .6; }
 
+/* ==== P3 Knappheit ==== */
+/* Quiet, no numbers, no warning colours: a small dot on a size with only a few left (the line „Größe M: nur noch wenige“ appears
+   under the sizes for the chosen size); a taken size is struck through and opens „Bescheid sagen“ when tapped. */
+.azur-pl__dot { position: absolute; top: 9px; right: 9px; width: 7px; height: 7px; border-radius: 50% !important; background: var(--t-mut); pointer-events: none; }
+.azur-pl input:checked ~ .azur-pl__dot { background: var(--t-acc-ink); }
+.azur-pl.is-taken button { all: unset; display: block; box-sizing: border-box; cursor: pointer; }
+.azur-pl.is-taken button:focus-visible span { outline: 2px solid var(--t-acc); outline-offset: 4px; }
+.azur-pl.is-taken span { opacity: .35; text-decoration: line-through; }
+.azur-pl.is-taken button:hover span, .azur-pl.is-taken button.is-on span { opacity: .6; border-color: var(--t-ink); }
+.azur-pdp__lowline, .azur-pdp__notifydone { margin: 0; font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--t-mut); }
+.azur-pdp__lowline[hidden], .azur-pdp__notifydone[hidden], .azur-pdp__notify[hidden], .azur-pdp__notifyerr[hidden] { display: none; }
+.azur-pdp__notify { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid var(--t-line); }
+.azur-pdp__notifytitle { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 650; }
+.azur-pdp__notifyrow { display: flex; gap: 6px; }
+.azur-pdp__notifyrow input { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--t-ink); background: transparent; border: 1px solid var(--t-line); border-radius: 0 !important; }
+.azur-pdp__notifyrow input:focus-visible, .azur-pdp__notifyrow button:focus-visible { outline: 2px solid var(--t-acc); outline-offset: 2px; }
+.azur-pdp__notifyrow button { flex: none; min-height: 44px; padding: 0 14px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 650; color: var(--t-acc-ink); background: var(--t-acc); border: 0; }
+.azur-pdp__notifyrow button:disabled { opacity: .5; cursor: default; }
+.azur-pdp__notifyerr { margin: 0; font-size: 12px; color: var(--t-ink); }
+.azur-pdp__notifylegal { margin: 0; font-size: 11px; line-height: 1.35; color: var(--t-mut); }
+/* wide screens: the pitch gets a little lower while the form is open, so the form stays above the buy bar */
+@media (min-width: 861px) { .azur-pdp__sizes.is-notify .azur-pitch { aspect-ratio: 26 / 19; } }
+@media (max-width: 860px) {
+  .azur-pl__dot { top: 7px; right: 7px; }
+}
+
 /* ------------------------------------------------------------------ ANSTOSS: the magazine on the duvet (bed view easter egg) */
 
 .azur-mag { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; }

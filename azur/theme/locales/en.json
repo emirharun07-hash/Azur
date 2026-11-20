@@ -104,7 +104,9 @@
       "zoomed": "Enlarged image",
       "size_chart": "Size chart",
       "chest": "Chest width (cm)",
-      "length": "Length (cm)"
+      "length": "Length (cm)",
+      "low_few": "only a few left",
+      "low_line": "Size {{ size }}: only a few left"
     },
     "collection": {
       "jerseys": "Jerseys",

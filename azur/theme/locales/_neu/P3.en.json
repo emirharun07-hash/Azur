@@ -1,8 +1,0 @@
-{
-  "azur": {
-    "product": {
-      "low_few": "only a few left",
-      "low_line": "Size {{ size }}: only a few left"
-    }
-  }
-}
