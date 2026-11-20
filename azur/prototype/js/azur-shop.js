@@ -21,6 +21,8 @@
     material: 'Material', care: 'Pflege', maker: 'Hersteller / Verantwortlicher', contact: 'Kontakt', directCheckout: 'Direkt zur Kasse',
     chooseSizeFirst: 'Erst Größe wählen', pairWith: 'Dazu: {name}', pairFree: '2 Trikots = Versand frei', images: 'Bilder',
     prevImage: 'Vorheriges Bild', nextImage: 'Nächstes Bild', limited: 'Limitiert auf 50 Stück' };
+  /* P2 texts (German defaults; texte-en.json of P2) */
+  Object.assign(P1, { upsellFree: '+ {price} · Versand dann frei', upsellSize: 'Größe wählen', upsellAdded: 'Liegt im Warenkorb.' });
   const tx = k => { const c = A.config && A.config.copy; return c && c[k] != null ? c[k] : P1[k]; };
   const shopRoot = () => (window.Shopify && Shopify.routes && Shopify.routes.root) || '/';
   /* what Tab can reach: one stop per radio group (the checked one, else the first), nothing hidden, inert or folded away */
@@ -95,6 +97,7 @@
         <div class="azur-pdp__after" role="status" hidden>
           <p class="azur-pdp__shipnow"></p>
           <div class="azur-pdp__bar" aria-hidden="true"><i></i><b></b></div>
+          <div class="azur-pdp__upsell" hidden></div>
           <div class="azur-pdp__acts2">
             <button type="button" data-act="more">${c.keepLooking}</button>
             <button type="button" ${this.live ? 'data-cart-open' : 'data-act="cart"'}>${c.toCart}</button>
@@ -132,6 +135,7 @@
         if (t.dataset.act === 'chart') this.sheet(this.pdp.querySelector('.azur-pdp__sheet').hidden);
         if (t.dataset.act === 'sheet-close') this.sheet(false);
         if (t.dataset.act === 'direct') this.direct(e);
+        if (t.dataset.act === 'upsell') this.upsellAdd(t);
         if (t.dataset.act === 'pair' && this.pairWith) { this.open(this.pairWith, null, this.from); }
       });
       // the photos: the dots follow the swipe; ←/→ on the photos
@@ -411,12 +415,12 @@
       this.save(); this.renderCart();
       const b = this.pdp.querySelector('.azur-pdp__add'); b.textContent = A.config.copy.added; b.classList.add('is-done');
       this.app.bumpCart();
-      this.showAfter(this.cart.reduce((s, l) => s + l.price * l.qty, 0));
+      this.showAfter(this.cart.reduce((s, l) => s + l.price * l.qty, 0), this.cart.reduce((s, l) => s + l.qty, 0));
       setTimeout(() => this.toggleCart(true), this.app.reduced ? 0 : 500);     // „Warenkorb gleitet herein“
     }
 
     /* After the bag: how far to free shipping (A.store.freeShippingFrom, euros), keep looking or go to the bag. */
-    showAfter(total) {
+    showAfter(total, count) {
       const c = A.config.copy, from = Number(A.store && A.store.freeShippingFrom) || 0, box = this.pdp.querySelector('.azur-pdp__after');
       const ship = box.querySelector('.azur-pdp__shipnow'), bar = box.querySelector('.azur-pdp__bar');
       if (from > 0) {
@@ -425,7 +429,64 @@
         bar.hidden = false; bar.style.setProperty('--p', '0');
         requestAnimationFrame(() => requestAnimationFrame(() => bar.style.setProperty('--p', Math.min(1, total / from).toFixed(3))));
       } else { ship.textContent = c.added + ' ✓'; bar.hidden = true; }
+      this.upsell(total, count);
       box.hidden = false;
+    }
+
+    /* P2: after the bag, the other jersey in small (picture, name, sizes, „+ price · shipping free then“). Only while exactly one
+       jersey lies in the bag, the other one is available and the free shipping line is not reached yet. No pop-up: it sits in the
+       „after“ box above the two buttons, which stay where they are. No discount, no set price. */
+    upsell(total, count) {
+      const box = this.pdp.querySelector('.azur-pdp__upsell'); box.replaceChildren(); box.hidden = true; this.upsellFor = null;
+      const from = Number(A.store && A.store.freeShippingFrom) || 0, p = this.product;
+      if (!p || !(from > 0) || !(total < from) || Number(count) !== 1) return;
+      const other = (A.products || []).find(o => o && o.type === 'product' && o.handle !== p.handle && o.key !== p.key && o.available !== false
+        && (o.variants || []).some(v => v.available));
+      if (!other) return;
+      this.upsellFor = other;
+      const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+      const head = el('div', 'azur-pdp__upsellhead');
+      if (other.image) { const im = el('img'); im.src = other.image; im.alt = ''; im.width = 40; im.height = 40; im.loading = 'lazy'; im.decoding = 'async'; head.appendChild(im); }
+      const t = el('p', 'azur-pdp__upselltext'), b = el('b', null, other.name);
+      t.append(b, el('span', null, String(tx('upsellFree')).replace('{price}', A.formatPrice(other.price))));
+      head.appendChild(t);
+      const sizes = el('div', 'azur-pdp__upsellsizes'); sizes.setAttribute('role', 'group'); sizes.setAttribute('aria-label', tx('upsellSize') + ': ' + other.name);
+      (other.variants || []).forEach(v => {
+        const x = el('button', null, v.title); x.type = 'button'; x.dataset.act = 'upsell'; x.dataset.variant = v.id;
+        if (!v.available) x.disabled = true;
+        sizes.appendChild(x);
+      });
+      box.append(head, sizes); box.hidden = false;
+    }
+
+    async upsellAdd(btn) {
+      const other = this.upsellFor, id = btn.dataset.variant, box = this.pdp.querySelector('.azur-pdp__upsell');
+      if (!other || !id) return;
+      const err = this.pdp.querySelector('.azur-pdp__error');
+      box.querySelectorAll('button').forEach(x => { x.disabled = true; }); box.setAttribute('aria-busy', 'true');
+      try {
+        if (this.live) {
+          const root = shopRoot();
+          const res = await fetch(root + 'cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ items: [{ id: Number(id), quantity: 1 }] }) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data.status >= 400) throw new Error(data.description || data.message || A.config.copy.failed || 'Das hat nicht geklappt.');
+          const cart = await fetch(root + 'cart.js', { headers: { Accept: 'application/json' } }).then(r => r.json()).catch(() => null);
+          if (cart) { this.app.setCartCount(cart.item_count); this.showAfter(cart.total_price / 100, cart.item_count); }
+          else { box.hidden = true; }
+          document.dispatchEvent(new CustomEvent('azur:cart-changed', { detail: cart }));
+        } else {
+          const v = other.variants.find(x => String(x.id) === String(id));
+          this.cart.push({ variant: v.id, key: other.key, name: other.name, size: v.title, price: other.price, image: other.image, qty: 1 });
+          this.save(); this.renderCart();
+          this.showAfter(this.cart.reduce((s, l) => s + l.price * l.qty, 0), this.cart.reduce((s, l) => s + l.qty, 0));
+        }
+        this.app.bumpCart();
+        const more = this.pdp.querySelector('[data-act="more"]'); if (more) more.focus({ preventScroll: true });
+      } catch (e) {
+        err.textContent = e.message; err.hidden = false;
+        box.querySelectorAll('button').forEach((x, i) => { x.disabled = !(other.variants[i] && other.variants[i].available); });
+      } finally { box.removeAttribute('aria-busy'); }
     }
 
     async addLive(v) {
@@ -439,8 +500,8 @@
         if (!res.ok || data.status >= 400) throw new Error(data.description || data.message || A.config.copy.failed || 'Das hat nicht geklappt.');
         b.textContent = c.added; b.classList.add('is-done');
         const cart = await fetch(root + 'cart.js', { headers: { Accept: 'application/json' } }).then(r => r.json()).catch(() => null);
-        if (cart) { this.app.setCartCount(cart.item_count); this.showAfter(cart.total_price / 100); }
-        else this.showAfter(0);
+        if (cart) { this.app.setCartCount(cart.item_count); this.showAfter(cart.total_price / 100, cart.item_count); }
+        else this.showAfter(0, 0);
         this.app.bumpCart();
         document.dispatchEvent(new CustomEvent('azur:cart-changed', { detail: cart }));   // themes can refresh their own count
         // „Warenkorb gleitet herein“: the theme's drawer (its opener in the after box loads it fresh and keeps the focus here)

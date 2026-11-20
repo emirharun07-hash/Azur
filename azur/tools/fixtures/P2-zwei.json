@@ -1,0 +1,4 @@
+{
+  "settings": {"sections": {"cart-drawer": {"settings": {"upsell_a": "brasilien-trikot-azur-collection", "upsell_b": "deutschland-trikot-azur-collection"}}}},
+  "cart": [{"handle": "brasilien-trikot-azur-collection", "size": "M", "qty": 1}, {"handle": "deutschland-trikot-azur-collection", "size": "L", "qty": 1}]
+}

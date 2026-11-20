@@ -504,6 +504,23 @@ html.azur-pdp-open { overflow: hidden; }
   .azur-regie { top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; right: auto; left: 14px; }   /* off the view chips */
 }
 
+/* ==== P2 Zweites Trikot ==== */
+/* After the bag: the other jersey in small, inside the „after“ box above its two buttons (they stay put, the box grows upward). */
+.azur-pdp__upsell { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid var(--t-line); }
+.azur-pdp__upsell[hidden] { display: none; }
+.azur-pdp__upsellhead { display: flex; align-items: center; gap: 10px; }
+.azur-pdp__upsellhead img { flex: none; width: 40px; height: 40px; object-fit: contain; }
+.azur-pdp__upselltext { margin: 0; display: grid; gap: 1px; font-size: 13px; line-height: 1.3; }
+.azur-pdp__upselltext b { font-weight: 650; }
+.azur-pdp__upselltext span { color: var(--t-mut); }
+.azur-pdp__upsellsizes { display: flex; flex-wrap: wrap; gap: 6px; }
+.azur-pdp__upsellsizes button { flex: 1 1 0; min-width: 44px; min-height: 44px; padding: 0 8px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 650;
+  color: var(--t-ink); background: transparent; border: 1px solid var(--t-line); }
+.azur-pdp__upsellsizes button:hover:not(:disabled) { border-color: var(--t-ink); }
+.azur-pdp__upsellsizes button:focus-visible { outline: 2px solid var(--t-acc); outline-offset: 2px; }
+.azur-pdp__upsellsizes button:disabled { opacity: .4; cursor: not-allowed; text-decoration: line-through; }
+.azur-pdp__upsell[aria-busy="true"] { opacity: .6; }
+
 /* ------------------------------------------------------------------ ANSTOSS: the magazine on the duvet (bed view easter egg) */
 
 .azur-mag { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; }

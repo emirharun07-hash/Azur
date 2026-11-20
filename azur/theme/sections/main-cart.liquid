@@ -1,4 +1,5 @@
 {%- comment -%} Warenkorbseite (ohne JavaScript und bei direktem Aufruf von /cart). {%- endcomment -%}
+{{ 'azur-upsell.css' | asset_url | stylesheet_tag }}
 {%- liquid
   assign shop_coll = settings.main_collection
   if shop_coll.url == blank
@@ -57,6 +58,50 @@
         {%- render 'azur-withdraw-link' -%}
       </div>
     </form>
+  {%- liquid
+    assign threshold = settings.free_shipping_threshold | times: 100 | round
+    assign rest = threshold | minus: cart.total_price
+  -%}
+  {%- comment -%}
+    P2: zweites Trikot anbieten. Nur wenn GENAU ein Trikot (Menge 1) im Warenkorb liegt, die Versandgrenze noch nicht erreicht ist und
+    das andere Trikot (upsell_a <-> upsell_b) verfügbar ist. Kein Rabatt, kein Set-Preis. Ohne JavaScript sendet jeder Größenknopf
+    das Formular an /cart/add; mit JavaScript (azur.js, data-upsell) wird der Warenkorb neu gezeichnet.
+  {%- endcomment -%}
+  {%- liquid
+    assign up = nil
+    if cart.item_count == 1 and threshold > 0 and rest > 0 and section.settings.upsell_a != blank and section.settings.upsell_b != blank
+      assign in_cart = cart.items.first.product.id
+      if in_cart == section.settings.upsell_a.id
+        assign up = section.settings.upsell_b
+      elsif in_cart == section.settings.upsell_b.id
+        assign up = section.settings.upsell_a
+      endif
+      if up != nil and up.available != true
+        assign up = nil
+      endif
+    endif
+  -%}
+  {%- if up != nil -%}
+    {%- capture up_label -%}{% render 'product-field', product: up, field: 'label' %}{%- endcapture -%}
+    <form class="upsell" data-upsell action="{{ routes.cart_add_url }}" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="form_type" value="product">
+      <div class="upsell__head">
+        {%- if up.featured_image -%}
+          {{ up.featured_image | image_url: width: 120 | image_tag: widths: '60, 120', sizes: '3rem', alt: '', loading: 'lazy', class: 'upsell__img' }}
+        {%- endif -%}
+        <p class="upsell__text">
+          <span class="upsell__name">{{ up_label }}</span>
+          <span class="upsell__price">{{ up.price | money }}</span>
+        </p>
+      </div>
+      <p class="upsell__line">{{ 'azur.cart.upsell_line' | t }}</p>
+      <div class="upsell__sizes" role="group" aria-label="{{ 'azur.cart.upsell_sizes' | t }}: {{ up_label }}">
+        {%- for v in up.variants -%}
+          <button class="upsell__size" type="submit" name="id" value="{{ v.id }}"{% unless v.available %} disabled{% endunless %} aria-label="{{ 'azur.cart.upsell_pick' | t: label: up_label, size: v.option1 }}">{{ v.option1 }}</button>
+        {%- endfor -%}
+      </div>
+    </form>
+  {%- endif -%}
   {%- else -%}
     <div class="cartpage__empty">
       <p class="drawer__empty-title">{{ 'azur.cart.empty' | t }}</p>
@@ -68,6 +113,10 @@
 {% schema %}
 {
   "name": "Warenkorb",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "Zweites Trikot anbieten" },
+    { "type": "product", "id": "upsell_a", "label": "Trikot A" },
+    { "type": "product", "id": "upsell_b", "label": "Trikot B", "info": "Liegt A im Warenkorb, wird B angeboten und umgekehrt." }
+  ]
 }
 {% endschema %}

@@ -211,6 +211,29 @@
     });
   }
 
+  // P2: zweites Trikot im Warenkorb (Karte „Dazu, dann ist der Versand gratis“): ein Tipp auf eine Größe legt es dazu, der Inhalt wird neu gezeichnet.
+  // Auf der Warenkorbseite (außerhalb der Seitenleiste) sendet das Formular normal an /cart/add.
+  if (drawer) {
+    drawer.addEventListener('submit', async (e) => {
+      const form = e.target.closest('[data-upsell]');
+      if (!form) return;
+      e.preventDefault();
+      const btn = e.submitter || $('.upsell__size:not(:disabled)', form);
+      if (!btn || !btn.value) return;
+      form.classList.add('is-busy');
+      try {
+        const data = await cartRequest('cart/add.js', { items: [{ id: Number(btn.value), quantity: 1 }] });
+        applyDrawer(data.sections);
+        setError('');
+        setStatus(T('upsellAdded', 'Liegt im Warenkorb.'));
+        $('.drawer__close', drawer).focus();
+      } catch (err) {
+        form.classList.remove('is-busy');
+        setError(err.message);
+      }
+    });
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && drawer && !drawer.hidden) closeDrawer();
   });
