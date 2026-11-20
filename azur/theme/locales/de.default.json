@@ -40,7 +40,7 @@
       "view_label": "{{ label }} ansehen",
       "new_window": " (neues Fenster)",
       "pay_with": "Zahlung mit {{ list }}",
-      "sold_out_sr": " – ausverkauft",
+      "sold_out_sr": " – vergeben",
       "collections": "Kollektionen",
       "not_found": "Diese Seite gibt es nicht.",
       "no_posts": "Noch keine Beiträge.",

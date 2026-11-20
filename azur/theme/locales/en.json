@@ -40,7 +40,7 @@
       "view_label": "View {{ label }}",
       "new_window": " (opens in a new window)",
       "pay_with": "Pay with {{ list }}",
-      "sold_out_sr": " – sold out",
+      "sold_out_sr": " – taken",
       "collections": "Collections",
       "not_found": "This page does not exist.",
       "no_posts": "No posts yet.",
