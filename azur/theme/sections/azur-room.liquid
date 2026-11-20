@@ -107,6 +107,9 @@
 </style>
 {{ 'azur-room.css' | asset_url | stylesheet_tag }}
 
+{%- comment -%} D5: die Wand (Testmodus): drei Rahmen hinter Glas statt des Ständers {%- endcomment -%}
+{%- assign wall_on = false -%}
+{%- if section.settings.wall_mode == 'mockup' -%}{%- assign wall_on = true -%}{%- endif -%}
 <div id="azur" class="azur campaign--dark" data-view="room" data-hero>
   <div class="azur-head">
     <div class="azur-head__right">
@@ -119,7 +122,7 @@
   <div class="azur-stage" role="region" aria-label="{{ 'azur.room.stage' | t }}">
     <div class="azur-world">
       <canvas class="azur-canvas" aria-hidden="true"></canvas>
-      <img class="azur-fallback" alt="{{ 'azur.alt.room' | t }}" hidden>
+      <img class="azur-fallback" alt="{% if wall_on %}{{ 'azur.wall.alt_room' | t }}{% else %}{{ 'azur.alt.room' | t }}{% endif %}" hidden>
       <div class="azur-layer"></div>
     </div>
     <canvas class="azur-snap" aria-hidden="true" hidden></canvas>
@@ -128,7 +131,7 @@
     <nav class="azur-views" aria-label="{{ 'azur.room.views' | t }}">
       <button type="button" data-view="bed">{{ 'azur.room.bed' | t }}</button>
       <button type="button" data-view="room">{{ 'azur.room.room' | t }}</button>
-      <button type="button" data-view="rail">{{ 'azur.room.rail' | t }}</button>
+      <button type="button" data-view="rail">{% if wall_on %}{{ 'azur.wall.rail' | t }}{% else %}{{ 'azur.room.rail' | t }}{% endif %}</button>
     </nav>
     <div class="azur-loader" aria-hidden="true"><img class="azur-loader__neon" src="{{ 'azur-logo-paper.webp' | asset_url }}" alt="" width="480" height="227"></div>
     <p class="azur-missing">{{ 'azur.room.missing' | t }}</p>
@@ -163,6 +166,9 @@
     {% render 'azur-copy-en' %}
     A.config.flights = {{ section.settings.flights | default: 'blend' | json }};
     A.config.plaques = {{ section.settings.plaques | json }};
+    A.config.wall = A.config.wall || {};
+    A.config.wall.mode = {{ section.settings.wall_mode | default: 'aus' | json }};
+    A.config.wall.images = { brasilien: {{ 'azur-wall-brasilien.webp' | asset_url | json }}, deutschland: {{ 'azur-wall-deutschland.webp' | asset_url | json }} };
     A.config.copy.taken = {{ 'azur.room.taken' | t | json }};
     A.config.inline = {% render 'azur-room-data' %};
     A.config.urlMap = function (p) {
@@ -263,11 +269,15 @@
     { "type": "checkbox", "id": "plaques", "label": "Schilder an den Trikots zeigen", "default": true, "info": "Name, Preis und darunter der Text unten; ist ein Trikot in allen Größen weg, steht dort „vergeben“. Nur in der Ansicht Ständer/Wand." },
     { "type": "text", "id": "limited_text", "label": "Text auf dem Schild", "default": "Limitiert auf 50 Stück", "info": "Ohne Stückzahl: es gibt keinen Zähler." },
     { "type": "text", "id": "drop_line", "label": "Drop-Zeile unter dem Header", "default": "Drop 01 · Brasilien & Deutschland · Limitiert auf je 50 Stück · 54,99 €", "info": "Leer = ausgeblendet." },
-    { "type": "header", "content": "Hülle: nächster Drop" },
+    { "type": "header", "content": "Hülle (Wand: leerer Rahmen): nächster Drop" },
     { "type": "text", "id": "drop_title", "label": "Titel", "default": "Nächster Drop" },
     { "type": "text", "id": "drop_text", "label": "Text", "default": "Noch unter Verschluss." },
     { "type": "text", "id": "drop_tags", "label": "Tags für die Anmeldung", "default": "newsletter, drops" },
-    { "type": "header", "content": "Ortswechsel (Bett, Ständer)" },
+    { "type": "header", "content": "Wand (Test)" },
+    { "type": "select", "id": "wall_mode", "label": "Wand vor dem Ständer", "default": "aus",
+      "options": [{ "value": "aus", "label": "Aus (Ständer wie gerendert)" }, { "value": "mockup", "label": "Mockup: Rahmen hinter Glas" }],
+      "info": "Mockup: eine Wand verdeckt den Ständer, Brasilien und Deutschland hängen in Rahmen, der dritte Rahmen ist leer (nächster Drop). Ein vergebenes Trikot zeigt einen leeren Rahmen." },
+    { "type": "header", "content": "Ortswechsel (Bett, Ständer/Wand)" },
     { "type": "select", "id": "flights", "label": "Übergang", "default": "blend",
       "options": [{ "value": "blend", "label": "Überblendung (Licht immer wie im Zimmer)" }, { "value": "video", "label": "Gerenderte Kamerafahrt (Video)" }],
       "info": "Die gerenderte Fahrt hat ihr eigenes Licht; je nach Uhrzeit springt es beim Ankommen." },

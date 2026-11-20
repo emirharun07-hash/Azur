@@ -43,6 +43,51 @@ AZUR.config = {
   },
   outline: { strength: 0.95, ease: 9 },
 
+  /* D5: the wall (interim, until the new renders): a free-standing wall in front of the old rail (scene3), three
+     shadowbox frames on it (Brasilien, Deutschland, the next drop), drawn as HTML over the rendered room.
+     mode: 'aus' (default) | 'mockup'; the theme sets it (section setting wall_mode), ?wall=mockup overrides it for tests.
+     Geometry: plate uv (0..1 from the top-left), four points clockwise from the top-left, from the camera model of
+     D1 (work/D1/geometrie.py, interim): the wall stands at y 2.65 m, x 0.52..3.00 m, up to top (m; lower than in D1 so
+     the neon sign stays free); frames on it with their plaque, depth in metres for the parallax.
+     sample: a strip of bare back wall in this view (plate uv: u0, v0, u1, v1) whose colour the wall takes. */
+  wall: {
+    mode: 'aus',
+    images: { brasilien: 'assets/products/wall/brasilien.webp', deutschland: 'assets/products/wall/deutschland.webp' },
+    // the room view with the wall reads as a free-standing partition in the middle of the room (D5 check): on desktop
+    // the visit starts at the wall; the room stays one click away. null keeps startView.desktop.
+    startDesktop: 'rail',
+    albedo: 0.78,             // display brightness of the back wall in full daylight: the frames' light is the wall's / this
+    room: {
+      top: 1.80, depth: 2.871, sample: [0.47, 0.455, 0.62, 0.49],
+      partition: [[0.3843, 0.2144], [0.8046, 0.2435], [0.7203, 0.7036], [0.411, 0.6039]],
+      cap: [[0.3888, 0.2125], [0.8008, 0.2405], [0.8046, 0.2435], [0.3843, 0.2144]],
+      floor: [[0.3986, 0.5999], [0.7385, 0.7095], [0.7497, 0.7754], [0.3776, 0.6431]],
+      frames: {
+        brasilien:   { frame: [[0.3878, 0.2367], [0.5065, 0.2466], [0.5056, 0.4926], [0.4033, 0.4686]], plaque: [[0.4844, 0.492], [0.5075, 0.4975], [0.5074, 0.5205], [0.4847, 0.5147]], depth: 2.896 },
+        deutschland: { frame: [[0.516, 0.2474], [0.6567, 0.2592], [0.6317, 0.5222], [0.5136, 0.4945]], plaque: [[0.604, 0.5204], [0.6307, 0.5268], [0.6284, 0.5509], [0.6022, 0.5443]], depth: 2.679 },
+        drop:        { frame: [[0.6643, 0.2955], [0.7864, 0.3082], [0.7482, 0.5215], [0.6436, 0.4985]], plaque: [[0.7133, 0.5196], [0.744, 0.5265], [0.7394, 0.5526], [0.7093, 0.5455]], depth: 2.487 }
+      }
+    },
+    rail: {
+      top: 1.72, depth: 1.964, sample: [0.12, 0.74, 0.55, 0.86],
+      partition: [[-0.0487, 0.205], [0.8229, 0.2166], [0.8029, 1.2046], [-0.0127, 1.2489]],
+      frames: {
+        brasilien:   { frame: [[0.0377, 0.2249], [0.3128, 0.2282], [0.3192, 0.7729], [0.0538, 0.7792]], plaque: [[0.268, 0.7907], [0.3237, 0.7893], [0.3244, 0.8475], [0.2689, 0.8491]], depth: 1.858 },
+        deutschland: { frame: [[0.3326, 0.2285], [0.5973, 0.2316], [0.594, 0.7663], [0.3383, 0.7724]], plaque: [[0.5367, 0.784], [0.5905, 0.7826], [0.5901, 0.8398], [0.5365, 0.8414]], depth: 1.894 },
+        drop:        { frame: [[0.6158, 0.2949], [0.8087, 0.2964], [0.8008, 0.7027], [0.6128, 0.7065]], plaque: [[0.7387, 0.7219], [0.7913, 0.7207], [0.7902, 0.7776], [0.7379, 0.7789]], depth: 1.925 }
+      }
+    },
+    rail_m: {
+      top: 1.68, depth: 1.519, sample: [0.05, 0.68, 0.72, 0.78], parallax: 0,
+      partition: [[-0.3027, 0.2165], [1.2648, 0.2165], [1.2007, 1.1131], [-0.2355, 1.1131]],
+      frames: {
+        brasilien:   { frame: [[0.0333, 0.2929], [0.3549, 0.2929], [0.3594, 0.6266], [0.0479, 0.6266]], plaque: [[0.2989, 0.6358], [0.3647, 0.6358], [0.3652, 0.6713], [0.2996, 0.6713]], depth: 1.439 },
+        deutschland: { frame: [[0.3784, 0.2929], [0.7, 0.2929], [0.6937, 0.6266], [0.3822, 0.6266]], plaque: [[0.6206, 0.6358], [0.6865, 0.6358], [0.6858, 0.6713], [0.6202, 0.6713]], depth: 1.439 },
+        drop:        { frame: [[0.7227, 0.3322], [0.965, 0.3322], [0.9537, 0.5894], [0.7173, 0.5894]], plaque: [[0.8705, 0.6001], [0.9366, 0.6001], [0.9351, 0.6358], [0.8693, 0.6358]], depth: 1.439 }
+      }
+    }
+  },
+
   /* The room through the day, on the visitor's clock (hours). Night: he is asleep; morning: the duvet thrown back;
      day: he is out (fewer things on the floor); evening: the school bag is back. */
   dayStates: [{ from: 6.5, state: 'morning' }, { from: 9, state: 'day' }, { from: 17, state: 'evening' }, { from: 23, state: 'night' }],
@@ -149,6 +194,17 @@ AZUR.config = {
     shipFree: 'Versand ist kostenlos',
     keepLooking: 'Weiter umsehen', toCart: 'Zur Tasche',
     openInShop: 'Im Shop öffnen',
+    /* D5: only with the wall on (A.config.wall.mode 'mockup'): these replace the rail's words above */
+    wall: {
+      rail: 'Wand', railLabel: 'Trikots an der Wand', putBack: 'Schließen',
+      roomHint: 'Klick auf die Wand oder aufs Bett', goRail: 'Zur Wand',
+      altRoom: 'Ein Kinderzimmer mit Fußballpostern. An der Wand hängen zwei AZUR-Trikots in Rahmen hinter Glas, darüber ein AZUR-Neonschild.',
+      mag: {
+        toRail: 'An der Wand ansehen',
+        dropText: 'Ein Rahmen an der Wand ist noch leer. Noch unter Verschluss. Trag dich ein, dann erfährst du es zuerst.',
+        toDrop: 'Zum leeren Rahmen'
+      }
+    },
     prototypeNote: 'Prototyp · Warenkorb und Anmeldung sind simuliert'
   }
 };

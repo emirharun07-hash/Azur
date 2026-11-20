@@ -228,6 +228,40 @@ function serve() {
     await p.click('.azur-ghost', { timeout: 4000 }).catch(() => {}); await p.waitForTimeout(700);
     s = await st(p); ok('logo: a click closes the product view', !s.pdp, s);
     await p.close();
+
+    // D5: the wall (?wall=mockup): three frames instead of the rail, Brasilien opens its product view, the third frame
+    // (next drop) opens the drop card; a jersey that is gone (available false) hangs as an empty frame: the sign-up
+    const wallPage = async gone => {
+      const q = await mk({ width: 1440, height: 810 });
+      if (gone) await q.addInitScript(k => { let A; Object.defineProperty(window, 'AZUR', { configurable: true, get: () => A, set: v => { if (v === A) return; A = v; let P;
+        Object.defineProperty(A, 'products', { configurable: true, enumerable: true, get: () => P, set: x => { P = x; (x || []).forEach(o => { if (o.key === k) o.available = false; }); } }); } }); }, gone);
+      await q.goto(url + '?wall=mockup'); await q.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 });
+      await q.evaluate(() => AZUR.app.viewKey === 'rail' || AZUR.app.go('rail'));
+      await q.waitForFunction(() => AZUR.app.viewKey === 'rail' && !AZUR.app.busy && !!AZUR.app.rail.wallGeo, null, { timeout: 20000 }).catch(() => {});
+      await q.waitForTimeout(1500);
+      return q;
+    };
+    const keyIdx = (q, k) => q.evaluate(k => AZUR.products.findIndex(x => x.key === k), k);
+    p = await wallPage(null);
+    let w = await p.evaluate(() => ({ on: AZUR.wallOn, view: AZUR.app.viewKey, wall: !!document.querySelector('.azur-wall:not([hidden])'),
+      frames: document.querySelectorAll('.azur-g.is-wall:not([hidden]) .azur-g__hit').length, chip: document.querySelector('.azur-views button[data-view="rail"]').textContent.trim() }));
+    ok('wall: three frames on the wall (desktop starts at the wall, chip says Wand)', w.on && w.view === 'rail' && w.wall && w.frames === 3 && w.chip === 'Wand', w);
+    const BR = await keyIdx(p, 'brasilien');
+    await click(p, BR); await p.waitForTimeout(1500);
+    s = await st(p); ok('wall: the Brasilien frame opens its product view', s.pdp && s.prod === 'brasilien', s);
+    await p.keyboard.press('Escape'); await p.waitForTimeout(1200);
+    await click(p, D); await p.waitForTimeout(1500);
+    s = await st(p); ok('wall: the third frame (next drop) opens the drop card', s.drop && !s.pdp, s);
+    await shot(p, 'wall_drop_1440.png');
+    await p.close();
+    p = await wallPage('deutschland');
+    const DE = await keyIdx(p, 'deutschland');
+    w = await p.evaluate(i => { const g = document.querySelectorAll('.azur-g')[i]; return { taken: g.classList.contains('is-taken'), shirt: !!g.querySelector('.azur-wf__shirt'),
+      plaque: (document.querySelector(`.azur-plaque[data-index="${i}"]`) || {}).textContent || '' }; }, DE);
+    ok('wall: a jersey that is gone hangs as an empty frame, plaque "vergeben"', w.taken && !w.shirt && /vergeben/i.test(w.plaque), w);
+    await click(p, DE); await p.waitForTimeout(1500);
+    s = await st(p); ok('wall: the empty frame opens the drop sign-up', s.drop && !s.pdp && s.sel === D, s);
+    await p.close();
   } catch (e) { fails++; logs.push('FAIL exception: ' + e.message.split('\n')[0]); }
   await b.close();
 
@@ -242,6 +276,16 @@ function serve() {
     const pt = await find(p, 3); if (pt) await p.mouse.click(pt[0], pt[1]); await p.waitForTimeout(1200);
     s = await p.evaluate(() => ({ pdp: AZUR.app.shop.pdp.classList.contains('is-on'), img: document.querySelector('.azur-pdp__img').naturalWidth > 0 }));
     ok('no WebGL: a click opens the product view with the photo', !!pt && s.pdp && s.img, s);
+    // D5: the wall works without WebGL too (over the still image)
+    const q = await (await b2.newContext({ viewport: { width: 1440, height: 810 } })).newPage();
+    q.on('pageerror', e => { fails++; logs.push(`FAIL page error (no WebGL, wall): ${e.message}`); });
+    await q.goto(url + '?wall=mockup'); await q.waitForFunction(() => window.AZUR && AZUR.app && AZUR.app.running, null, { timeout: 30000 });
+    await q.waitForFunction(() => AZUR.app.viewKey === 'rail' && !!AZUR.app.rail.wallGeo, null, { timeout: 20000 }).catch(() => {}); await q.waitForTimeout(1500);
+    const bi = await q.evaluate(() => AZUR.products.findIndex(x => x.key === 'brasilien'));
+    const wp = await find(q, bi); if (wp) await q.mouse.click(wp[0], wp[1]); await q.waitForTimeout(1200);
+    s = await q.evaluate(() => ({ gl: AZUR.app.comp.ok, frames: document.querySelectorAll('.azur-g.is-wall:not([hidden]) .azur-g__hit').length,
+      pdp: AZUR.app.shop.pdp.classList.contains('is-on'), prod: AZUR.app.shop.product && AZUR.app.shop.product.key }));
+    ok('no WebGL: the wall shows three frames, Brasilien opens', !s.gl && s.frames === 3 && !!wp && s.pdp && s.prod === 'brasilien', s);
   } catch (e) { fails++; logs.push('FAIL exception (no WebGL): ' + e.message.split('\n')[0]); }
   await b2.close();
   console.log(logs.join('\n')); console.log(fails ? `${fails} failed` : 'all passed');

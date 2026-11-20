@@ -18,6 +18,96 @@
   const PLAQUE_GAP = 6, PLAQUE_SHIFT = 10;
   const plaqueName = name => String(name || '').replace(/\s*\bTrikot\b\s*/gi, ' ').replace(/\s+/g, ' ').trim();
 
+  /* D5: the wall (A.config.wall, A.wallOn = mode 'mockup'). A free-standing wall in front of the rendered rail hides it;
+     three shadowbox frames hang on it (these keys), drawn in HTML and set onto the render's perspective by a CSS
+     homography (four corners from comp.toScreen). Nothing swings; the frames are the targets, not the id mask. */
+  const WALL_KEYS = ['brasilien', 'deutschland', 'drop'];
+  const WALL_PX = { product: [410, 480], drop: [310, 370] };      // base size of a frame in CSS px (2 mm a pixel)
+  /* The projective map of the rectangle 0..w x 0..h onto the quad p (four screen points clockwise from the top-left):
+     x = (a s + b t + c) / (g s + h t + 1) with s, t from 0 to 1 (Heckbert's square-to-quad). */
+  function quadCoef(p) {
+    const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = p;
+    const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+    let g = 0, h = 0;
+    if (Math.abs(sx) > 1e-9 || Math.abs(sy) > 1e-9) { const den = dx1 * dy2 - dx2 * dy1 || 1e-9; g = (sx * dy2 - dx2 * sy) / den; h = (dx1 * sy - sx * dy1) / den; }
+    return [x1 - x0 + g * x1, x3 - x0 + h * x3, x0, y1 - y0 + g * y1, y3 - y0 + h * y3, y0, g, h];
+  }
+  function quadMatrix(w, h, p) {   // CSS matrix3d is column-major; the element needs transform-origin 0 0
+    const [a, b, c, d, e, f, g, k] = quadCoef(p), n = x => +x.toFixed(6);
+    return `matrix3d(${n(a / w)},${n(d / w)},0,${n(g / w)},${n(b / h)},${n(e / h)},0,${n(k / h)},0,0,1,0,${n(c)},${n(f)},0,1)`;
+  }
+  function inQuad(x, y, q) {
+    let inside = false;
+    for (let i = 0, j = q.length - 1; i < q.length; j = i++) {
+      const [xi, yi] = q[i], [xj, yj] = q[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  /* A point of the quad q at (s, t) in 0..1 (bilinear: close enough for the snapshot drawing). */
+  const quadAt = (q, s, t) => lerp2(lerp2(q[0], q[1], s), lerp2(q[3], q[2], s), t);
+
+  class Wall {
+    constructor(rail) {
+      this.rail = rail; this.geo = null; this.quad = null; this.color = null;
+      const el = this.el = document.createElement('div');
+      el.className = 'azur-wall'; el.setAttribute('aria-hidden', 'true'); el.hidden = true;
+      el.innerHTML = '<div class="azur-wall__floor"></div><div class="azur-wall__face"><span class="azur-wall__shade"></span></div><div class="azur-wall__cap"></div>';
+      [this.floor, this.face, this.cap] = el.children;
+      rail.root.insertBefore(el, rail.list);
+    }
+    layout(geo) {
+      this.geo = geo; this.el.hidden = !geo; if (!geo) { this.quad = null; return; }
+      this.faceH = Math.round(1000 * geo.top / 2.48);   // the face's base box keeps the wall's proportions (2.48 m wide)
+      this.face.style.height = this.faceH + 'px';
+      this.cap.hidden = !geo.cap; this.floor.hidden = !geo.floor;
+    }
+    place(comp, d) {
+      const g = this.geo; if (!g || !comp.cssW) return;
+      const S = q => q.map(p => comp.toScreen(p[0], p[1], d));
+      this.quad = S(g.partition);
+      this.face.style.transform = quadMatrix(1000, this.faceH, this.quad);
+      if (g.cap) this.cap.style.transform = quadMatrix(1000, 24, S(g.cap));
+      if (g.floor) this.floor.style.transform = quadMatrix(1000, 130, S(g.floor));
+    }
+    contains(x, y) { return !!this.quad && inQuad(x, y, this.quad); }
+
+    /* The camera moves and the light changes crossfade from a still copy of the canvas, which has no HTML in it: the
+       wall and its frames are drawn into that copy (flat colours, the jerseys as images), so the old rail never
+       flashes. k: canvas pixels per CSS pixel. */
+    paintInto(ctx, k) {
+      if (!this.quad || this.el.hidden) return;
+      const col = this.color || { bins: [[0.62, 0.6, 0.57]], tint: [0.8, 0.78, 0.75] };
+      const rgb = c => `rgb(${c.map(v => Math.round(Math.max(0, Math.min(1, v)) * 255)).join(',')})`;
+      const poly = q => { ctx.beginPath(); q.forEach(([x, y], i) => (i ? ctx.lineTo(x * k, y * k) : ctx.moveTo(x * k, y * k))); ctx.closePath(); };
+      ctx.save();
+      const q = this.quad, l = quadAt(q, 0, 0.5), r = quadAt(q, 1, 0.5);
+      const grad = ctx.createLinearGradient(l[0] * k, l[1] * k, r[0] * k, r[1] * k), n = col.bins.length;
+      col.bins.forEach((b, j) => grad.addColorStop(n > 1 ? j / (n - 1) : 0, rgb(b)));
+      poly(q); ctx.fillStyle = grad; ctx.fill();
+      const rail = this.rail;
+      rail.items.forEach((g, i) => {
+        const p = rail.px && rail.px[i]; if (!p || !p.quad || !g.wall) return;
+        const f = p.quad, inner = [quadAt(f, 0.05, 0.043), quadAt(f, 0.95, 0.043), quadAt(f, 0.95, 0.957), quadAt(f, 0.05, 0.957)];
+        poly(f); ctx.fillStyle = '#121212'; ctx.fill();
+        poly(inner); ctx.fillStyle = g.p.type === 'drop' ? '#0d1117' : '#192430'; ctx.fill();
+        const im = g.shirt;
+        if (im && im.complete && im.naturalWidth && !g.taken) {
+          // the jersey: 84 % of the inner height, centred; an affine map from three corners of its box
+          const ih = 0.84, iw = ih * (im.naturalWidth / im.naturalHeight) * (WALL_PX.product[1] / WALL_PX.product[0]) * 0.914 / 0.9;
+          const s0 = 0.5 - iw / 2, t0 = 0.08;
+          const o = quadAt(inner, s0, t0), ax = quadAt(inner, s0 + iw, t0), ay = quadAt(inner, s0, t0 + ih);
+          ctx.save();
+          ctx.setTransform((ax[0] - o[0]) * k / im.naturalWidth, (ax[1] - o[1]) * k / im.naturalWidth, (ay[0] - o[0]) * k / im.naturalHeight, (ay[1] - o[1]) * k / im.naturalHeight, o[0] * k, o[1] * k);
+          ctx.drawImage(im, 0, 0); ctx.restore();
+        }
+        ctx.save(); ctx.globalCompositeOperation = 'multiply'; poly(inner); ctx.fillStyle = rgb(col.tint); ctx.fill(); ctx.restore();
+      });
+      ctx.restore();
+    }
+  }
+
   class Garment {
     constructor(product, index) {
       this.p = product; this.i = index;
@@ -30,16 +120,24 @@
       const c = A.config.copy, taken = product.type === 'product' && product.available === false;
       const label = product.type === 'drop' ? `${product.name}. ${product.description}`
         : `${product.name}, ${A.formatPrice(product.price)}${taken ? ', ' + (c.taken || 'vergeben') : ''}`;
-      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${A.esc(label)}" data-index="${index}"></button>`;
+      // D5: on the wall a jersey is a frame behind glass; a jersey that is gone leaves its frame empty
+      this.wall = !!(A.wallOn && WALL_KEYS.includes(product.key)); this.taken = taken;
+      const img = this.wall && product.type === 'product' && !taken && ((A.config.wall || {}).images || {})[product.key];
+      const frame = this.wall ? `<span class="azur-wf" aria-hidden="true"><span class="azur-wf__cone"></span><span class="azur-wf__box"><span class="azur-wf__felt"></span>${img ? `<img class="azur-wf__shirt" src="${A.esc(A.url(img))}" alt="" decoding="async" draggable="false">` : ''}<span class="azur-wf__light"></span><span class="azur-wf__glass"></span></span></span>` : '';
+      this.el.innerHTML = `<button class="azur-g__hit" type="button" aria-label="${A.esc(label)}" data-index="${index}">${frame}</button>`;
       this.hit = this.el.firstElementChild;
-      if (product.type !== 'product' || A.config.plaques === false) return;
+      this.shirt = this.hit.querySelector('.azur-wf__shirt');
+      if (this.wall) this.el.classList.add('is-wall', product.type === 'drop' ? 'is-drop' : 'is-product', ...(taken ? ['is-taken'] : []));
+      if ((product.type !== 'product' && !this.wall) || A.config.plaques === false) return;
       // the plaque: the button above already says all of it to a screen reader
       const pl = this.plaque = document.createElement('div');
-      pl.className = 'azur-plaque' + (taken ? ' is-taken' : ''); pl.dataset.index = index; pl.setAttribute('aria-hidden', 'true');
+      pl.className = 'azur-plaque' + (taken ? ' is-taken' : '') + (this.wall ? ' is-wall' : ''); pl.dataset.index = index; pl.setAttribute('aria-hidden', 'true');
       const line = (cls, text) => { if (!text) return; const e = document.createElement('span'); e.className = 'azur-plaque__' + cls; e.textContent = text; pl.appendChild(e); };
       line('name', plaqueName(product.name));
-      line('price', A.formatPrice(product.price));
-      line('note', taken ? (c.taken || 'vergeben') : product.limited);
+      if (product.type === 'product') {
+        line('price', A.formatPrice(product.price));
+        line('note', taken ? (c.taken || 'vergeben') : product.limited);
+      }
       this.el.appendChild(pl);
     }
   }
@@ -50,6 +148,7 @@
       this.list = document.createElement('ul');
       this.list.className = 'azur-rail'; this.list.setAttribute('aria-label', A.config.copy.railLabel || 'Trikots am Kleiderständer');
       root.appendChild(this.list);
+      this.wall = A.wallOn ? new Wall(this) : null; this.wallGeo = null;
       this.items = products.map((p, i) => new Garment(p, i));
       this.items.forEach(g => this.list.appendChild(g.el));
       this.hover = -1; this.selected = -1; this.view = null; this.geom = []; this.t = 0;
@@ -77,7 +176,8 @@
     bind() {
       this.list.addEventListener('click', e => {
         const b = e.target.closest('.azur-g__hit, .azur-plaque'); if (!b) return;
-        if (b.classList.contains('azur-plaque')) e.stopPropagation();   // the stage would read the room under it as well
+        // the stage would read the room under it as well (a frame on the wall is a real target too)
+        if (b.classList.contains('azur-plaque') || this.wallGeo) e.stopPropagation();
         this.app.onGarmentClick(+b.dataset.index);
       });
       this.list.addEventListener('focusin', e => {
@@ -110,6 +210,19 @@
       const base = String(viewKey || '').split('@')[0];
       this.plaqueAt = PLAQUE_AT[base] || null;
       this.root.classList.toggle('has-plaques', !!this.plaqueAt);
+      // D5: the views with a wall (room, rail, rail_m): the frames instead of the rendered jerseys
+      const wg = this.wall && A.config.wall && A.config.wall[base];
+      this.wallGeo = wg && wg.frames ? wg : null;
+      this.root.classList.toggle('is-walled', !!this.wallGeo);
+      if (this.wall) this.wall.layout(this.wallGeo);
+      if (this.wallGeo) {
+        this.geom = this.items.map(g => {
+          const f = g.wall && !g.gone && this.wallGeo.frames[g.p.key];
+          return f ? { wall: true, frame: f.frame, plaque: f.plaque, depthM: f.depth } : null;
+        });
+        this.items.forEach(g => { g.plSize = null; });
+        this.place(); return;
+      }
       const slots = (viewData && viewData.slots) || [], scale = (A.config.views[viewKey] || {}).garmentScale || 1;
       // views.json v2 names its slots (key): then a jersey finds its own; scene3 slots go by order
       const named = slots.some(s => s && s.key);
@@ -124,6 +237,7 @@
     /* Screen boxes of the jerseys (resize, pan, parallax); the keyboard targets sit on them (focus ring in place). */
     place() {
       const comp = this.comp; if (!comp || !comp.cssW) return;
+      if (this.wallGeo) return this.placeWall(comp);
       this.px = this.geom.map((g, i) => {
         if (!g) return null;
         const d = this.app.depthAt(g.top[0], g.top[1], g.depthM);
@@ -137,7 +251,28 @@
         const near = [this.px[i - 1], this.px[i + 1]].filter(Boolean).map(q => Math.abs(q.x - p.x));
         const w = Math.min(p.w, near.length ? Math.min(...near) * 1.05 : p.w);
         Object.assign(g.el.style, { width: w + 'px', height: p.h + 'px', transform: `translate3d(${(p.x - w / 2).toFixed(1)}px, ${p.y.toFixed(1)}px, 0)` });
+        if (g.wall && g.hit) Object.assign(g.hit.style, { width: '', height: '', transform: '' });
         g.origin = [p.x - w / 2, p.y];
+      });
+      this.placePlaques();
+    }
+
+    /* D5: the wall and its frames on the screen. px[i]: the frame's box (x its middle, y its top) and its quad. */
+    placeWall(comp) {
+      const app = this.app;
+      this.wall.place(comp, app.encDepth(this.wallGeo.depth));
+      this.px = this.geom.map(g => {
+        if (!g) return null;
+        const d = app.encDepth(g.depthM), q = g.frame.map(p => comp.toScreen(p[0], p[1], d));
+        const xs = q.map(p => p[0]), ys = q.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+        return { x: (x0 + x1) / 2, y: y0, w: x1 - x0, h: y1 - y0, quad: q, d };
+      });
+      this.items.forEach((g, i) => {
+        const p = this.px[i]; g.el.hidden = !p; if (!p) return;
+        Object.assign(g.el.style, { width: '0px', height: '0px', transform: 'none' });
+        g.origin = [0, 0];
+        const [W, H] = WALL_PX[g.p.type === 'drop' ? 'drop' : 'product'];
+        Object.assign(g.hit.style, { width: W + 'px', height: H + 'px', transform: quadMatrix(W, H, p.quad) });
       });
       this.placePlaques();
     }
@@ -146,6 +281,17 @@
     placePlaques() {
       const comp = this.comp, at = this.plaqueAt;
       if (!at) return;
+      if (this.wallGeo) {          // D5: on the wall each plaque has its place under its frame (right-aligned with it)
+        this.items.forEach((g, i) => {
+          const geo = this.geom[i], el = g.plaque, p = this.px && this.px[i];
+          if (!el || !geo || !p || !geo.plaque) return;
+          const q = geo.plaque.map(pt => comp.toScreen(pt[0], pt[1], p.d));
+          if (!g.plSize || !g.plSize.w) g.plSize = { w: el.offsetWidth, h: el.offsetHeight };
+          const x = Math.max(q[1][0], q[2][0]) - g.plSize.w, y = Math.min(q[0][1], q[1][1]);
+          el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+        });
+        return;
+      }
       const boxes = [];
       this.items.forEach((g, i) => {
         const geo = this.geom[i], el = g.plaque;
@@ -256,6 +402,12 @@
        on their jerseys. Returns true while something swings. */
     step(dt, reduced) {
       this.t += dt;
+      if (this.wallGeo) {          // D5: a frame on a wall does not swing
+        this.items.forEach(g => { g.theta = 0; g.omega = 0; g.rip = 0; });
+        if (this.swayAng) { this.swayAng.fill(0); this.swayRip.fill(0); }
+        this.positionOverlays();
+        return false;
+      }
       const sw = A.config.motion.sway, mi = A.config.motion.intensity * A.config.interactionStrength, n = this.items.length;
       if (!this.swayAng) { this.swayAng = new Array(n).fill(0); this.swayRip = new Array(n).fill(0); }
       let moving = false;
@@ -301,4 +453,5 @@
   }
 
   A.Rail = Rail;
+  A.inQuad = inQuad;
 })();

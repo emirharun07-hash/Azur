@@ -29,6 +29,7 @@
       if (this.isMobile || this.coarse) { cfg.gpuViews = 1; cfg.maskScale = 0.5; }
       this.root.classList.toggle('is-mobile', this.isMobile);
       this.applyPalette();
+      this.setupWall();
 
       // the room through the day: jerseys on real hangers in the renders, hover outlines, states by the hour
       const base = cfg.assetBase;
@@ -101,6 +102,82 @@
       window.addEventListener('hashchange', () => this.handleHash());    // links inside the page (#bett, #anstoss, a jersey)
     }
 
+    /* D5: the wall (A.config.wall.mode: 'aus' | 'mockup'; ?wall=mockup or ?wall=aus overrides it, for tests).
+       With it on, the words for the rail become the wall's, the flights blend (the rendered flights show the rail) and
+       the rail views open on the wall (azur-rail.js Wall). */
+    setupWall() {
+      const cfg = A.config, w = cfg.wall = cfg.wall || {};
+      const q = (location.search.match(/[?&]wall=(mockup|aus)\b/) || [])[1];
+      if (q) w.mode = q;
+      A.wallOn = w.mode === 'mockup';
+      this.root.classList.toggle('has-wall', A.wallOn);
+      if (!A.wallOn) return;
+      cfg.flights = 'blend';
+      if (w.startDesktop && cfg.startView) cfg.startView.desktop = w.startDesktop;
+      const c = cfg.copy, wc = c.wall || {};
+      Object.entries(wc).forEach(([k, v]) => { if (k === 'mag') c.mag = Object.assign(c.mag || {}, v); else if (k !== 'rail' && k !== 'altRoom') c[k] = v; });
+      if (wc.rail) {
+        c.rail = wc.rail;
+        ['rail', 'rail_m'].forEach(k => { if (cfg.views[k]) cfg.views[k].label = wc.rail; });
+        const chip = document.querySelector('.azur-views button[data-view="rail"]'); if (chip) chip.textContent = wc.rail;
+      }
+      if (wc.altRoom && this.fallbackImg) this.fallbackImg.alt = wc.altRoom;
+      ['rail', 'rail_m', 'room'].forEach(k => { const g = w[k]; if (g && g.parallax != null && cfg.views[k]) cfg.views[k].parallax = g.parallax; });
+      if (this.fallbackImg) this.fallbackImg.addEventListener('load', () => { this.wallDue = true; });
+      this.wallDue = true;
+    }
+    /* The wall takes the colour of the back wall at this light: a strip of bare wall in the view (wall[view].sample),
+       read from the drawn canvas (or the still image without WebGL) in 8 columns. CSS variables on the room:
+       --azur-wall (mean), --azur-wall-grad (the columns, left to right), --azur-wall-tint (what the light does to the
+       frames' contents: multiply), --azur-spot (how much the frame's own spot adds: strong at night). */
+    sampleWall() {
+      const geo = this.rail.wallGeo, comp = this.comp; if (!geo || !geo.sample || !comp.cssW) return true;
+      const [u0, v0, u1, v1] = geo.sample, N = 8;
+      let src, sx, sy, sw, sh;
+      if (comp.ok && comp.canvas.width && !this.canvas.style.visibility) {
+        const k = comp.canvas.width / comp.cssW, f = comp.focus || 0.6, a = comp.toScreen(u0, v0, f), b = comp.toScreen(u1, v1, f);
+        const x0 = Math.max(0, a[0]), x1 = Math.min(comp.cssW, b[0]), y0 = Math.max(0, a[1]), y1 = Math.min(comp.cssH, b[1]);
+        if (x1 - x0 < 4 || y1 - y0 < 2) return true;
+        src = comp.canvas; sx = x0 * k; sy = y0 * k; sw = (x1 - x0) * k; sh = (y1 - y0) * k;
+      } else {
+        const im = this.fallbackImg; if (!im || !im.complete || !im.naturalWidth) return false;
+        src = im; sx = u0 * im.naturalWidth; sy = v0 * im.naturalHeight; sw = (u1 - u0) * im.naturalWidth; sh = (v1 - v0) * im.naturalHeight;
+      }
+      const c = this.wallCv || (this.wallCv = document.createElement('canvas')); c.width = N * 6; c.height = 6;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      let data;
+      try { g.drawImage(src, sx, sy, sw, sh, 0, 0, N * 6, 6); data = g.getImageData(0, 0, N * 6, 6).data; } catch (e) { return true; }   // a foreign image: keep the default colours
+      // per column the middle half of its pixels by brightness (a stray dark edge in the strip does not darken the wall)
+      const bins = [];
+      for (let j = 0; j < N; j++) {
+        const px = [];
+        for (let y = 0; y < 6; y++) for (let x = j * 6; x < j * 6 + 6; x++) { const i = (y * N * 6 + x) * 4; px.push([data[i] / 255, data[i + 1] / 255, data[i + 2] / 255]); }
+        px.sort((p, q) => (p[0] + p[1] + p[2]) - (q[0] + q[1] + q[2]));
+        const mid = px.slice(Math.floor(px.length * 0.25), Math.ceil(px.length * 0.75));
+        bins.push([0, 1, 2].map(ch => mid.reduce((s2, p) => s2 + p[ch], 0) / mid.length));
+      }
+      const lum = x => 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2];
+      const avg = [0, 1, 2].map(ch => bins.reduce((s2, b) => s2 + b[ch], 0) / N), L = Math.max(0.01, lum(avg));
+      const kL = Math.min(1.15, L / ((A.config.wall || {}).albedo || 0.78));
+      const tint = avg.map(x => Math.min(1, kL * (0.72 + 0.28 * x / L)));
+      const sp = (this.light && this.light.weights && this.light.weights.spot) || [0, 0, 0];
+      const spot = Math.max(0, Math.min(1, lum(sp) * 0.6 / (0.25 + L)));
+      const rgb = x => `rgb(${x.map(v => Math.round(Math.max(0, Math.min(1, v)) * 255)).join(' ')})`, r = this.root.style;
+      r.setProperty('--azur-wall', rgb(avg));
+      r.setProperty('--azur-wall-dim', rgb(avg.map(x => x * 0.72)));
+      r.setProperty('--azur-wall-grad', `linear-gradient(90deg, ${bins.map((b, j) => `${rgb(b)} ${(j / (N - 1) * 100).toFixed(1)}%`).join(', ')})`);
+      r.setProperty('--azur-wall-tint', rgb(tint));
+      r.setProperty('--azur-spot', spot.toFixed(3));
+      if (this.rail.wall) this.rail.wall.color = { bins, tint, avg };
+      return true;
+    }
+    /* The still copy for a crossfade, with the wall drawn into it (the canvas has no HTML in it). */
+    snapshot() {
+      const ok = this.comp.snapshotInto(this.snapCtx);
+      if (ok && this.rail.wall && this.rail.wallGeo && this.comp.cssW) this.rail.wall.paintInto(this.snapCtx, this.snap.width / this.comp.cssW);
+      return ok;
+    }
+
     /* Background downloads (sharper copies, the other views, the flights) only while the room is on screen: someone who
        scrolled on to the shop does not need them; they start once the visitor is back at the top. */
     atRoom(fn) { if (!this.diving) fn(); else setTimeout(() => this.atRoom(fn), 2000); }
@@ -119,11 +196,11 @@
       this.stateBusy = true; this.dayState = st; this.root.dataset.state = st;
       const fade = !this.reduced && !this.busy && this.comp.ok && this.root.classList.contains('is-ready');
       if (fade) {
-        this.comp.render(this.light); this.comp.snapshotInto(this.snapCtx);
+        this.comp.render(this.light); this.snapshot();
         Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1' }); this.snap.hidden = false;
       }
       await this.comp.setState(st);
-      this.comp.render(this.light); this.placeChrome(); this.setTease(); this.kick();
+      this.comp.render(this.light); this.placeChrome(); this.setTease(); this.kick(); this.wallDue = true;
       if (fade) { await this.snap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, easing: 'ease-in-out' }).finished.catch(() => { }); this.snap.hidden = true; }
       this.stateBusy = false;
       if (this.root.classList.contains('is-ready')) this.atRoom(() => this.preloadMoves());      // the flights of this time of day
@@ -176,6 +253,7 @@
       this.drop.close();
       this.updateChips();
       this.resize();
+      this.wallDue = true;
     }
 
     /* Fake camera move: the current frame pushes toward the target and blurs, the next view settles in. */
@@ -217,7 +295,7 @@
         await this.playMove(mv, to);
       } else if (!this.reduced && from.split('@')[0] === to.split('@')[0]) {
         // a garment taken off / put back without rendered frames yet: a short crossfade
-        this.comp.render(this.light); this.comp.snapshotInto(this.snapCtx);
+        this.comp.render(this.light); this.snapshot();
         Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1' }); this.snap.hidden = false;
         await this.enterView(to); this.comp.render(this.light);
         await this.snap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-out' }).finished.catch(() => { });
@@ -234,7 +312,7 @@
        new view settles from a little closer (forward) or further in (back). Nothing scales below the stage, no blur. */
     async blendMove(to, back, focus, fromBase) {
       const m = A.config.motion.pan, W = this.stage.clientWidth;
-      this.comp.render(this.light); this.comp.snapshotInto(this.snapCtx);
+      this.comp.render(this.light); this.snapshot();
       Object.assign(this.snap.style, { transform: '', filter: '', opacity: '1', transformOrigin: `${focus[0]}px ${focus[1]}px` });
       this.snap.hidden = false; this.layer.classList.add('is-moving'); this.root.classList.add('is-flying');   // labels wait for the landing
       await this.enterView(to); this.comp.render(this.light);
@@ -382,6 +460,7 @@
       let target = i >= 0 ? `${railKey}@${i}` : railKey;
       const ps = this.passes && this.passes[target];
       if (i >= 0 && !(ps && Object.keys(ps).length >= 7)) target = railKey;   // pose not rendered yet: select on the rail as it hangs
+      if (A.wallOn) target = railKey;                                 // D5: on the wall nothing is taken off a rail
       if (this.viewKey === target && (target.includes('@') || this.rail.selected === i)) return;
       this.rail.setSelected(-1); this.rail.setHover(-1); this.root.classList.remove('has-selection');
       if (i < 0) this.drop.close();                                   // the drop card goes with its selection (no view change here)
@@ -404,6 +483,11 @@
     }
     /* Garment under a stage point: reads the rendered id mask of the current view. -1 = none. */
     garmentAt(x, y) {
+      if (this.rail.wallGeo) {                                        // D5: the frames on the wall, by their quads
+        const px = this.rail.px || [];
+        for (let i = px.length - 1; i >= 0; i--) if (px[i] && px[i].quad && A.inQuad(x, y, px[i].quad)) return i;
+        return -1;
+      }
       const cv = this.comp.view; if (!cv) return -1;
       // a posed view (rail@i) reads its rail's mask for the garments still hanging; the posed one is found by its box
       const posed = cv.key.includes('@'), v = posed ? this.comp.cache[cv.key.split('@')[0]] : cv;
@@ -429,6 +513,11 @@
     onGarmentClick(i) {
       if (this.dragMoved) return;
       const p = A.products[i]; if (!p) return;
+      // D5: an empty frame on the wall (the jersey is gone): the sign-up for the next drop
+      if (A.wallOn && p.type === 'product' && p.available === false) {
+        const di = A.products.findIndex(q => q.type === 'drop');
+        if (di >= 0) { this.hideHint(); return this.select(di); }
+      }
       this.rail.kickGarment(i, A.config.motion.sway.clickKick);
       if (p.type === 'product') {                                  // straight to the product view
         this.hideHint();
@@ -468,6 +557,7 @@
     showOnRail(i) { return this.select(i); }
     openProduct(i) {
       const p = A.products[i]; if (!p) return;
+      const g = this.rail.items[i]; if (g && g.wall) g.el.classList.add('is-picked');   // D5: its frame steps forward
       this.shop.open(p, this.rail.garmentRect(i));
     }
     /* "Weiter umsehen" after the bag: back to the rail, where everything waves once. */
@@ -476,7 +566,9 @@
       else if (this.viewKey === 'bed') await this.go('room');
       setTimeout(() => { this.rail.wave(); this.kick(); }, 250);
     }
-    afterProductClose() { const s = this.rail.selected; if (s >= 0) this.rail.items[s].hit.focus({ preventScroll: true }); }
+    afterProductClose() {
+      this.rail.items.forEach(g => g.el.classList.remove('is-picked'));
+      const s = this.rail.selected; if (s >= 0) this.rail.items[s].hit.focus({ preventScroll: true }); }
     setWorldDim(d = 1, blur = 0) {
       this.dimTarget = d;
       // Runde 27: no blur on touch screens; a filtered WebGL canvas needs another full-screen buffer at the screen's
@@ -709,7 +801,9 @@
     targets() { return A.config.targets[this.viewKey.split('@')[0]] || []; }
     /* Which outline region (bed, rail, magazine) is at a stage point: masks.png R, G, B (half size). */
     regionAt(x, y) {
-      const cv = this.comp.view, t = this.targets(); if (!cv || !cv.masksImg || !t.length) return null;
+      const cv = this.comp.view, t = this.targets(), wall = this.rail.wallGeo && this.rail.wall;
+      if (wall && wall.contains(x, y)) return t.includes('rail') ? 'rail' : null;   // D5: the wall stands in front
+      if (!cv || !cv.masksImg || !t.length) return null;
       const d = this.masksData(cv); if (!d) return null;
       let [u, w] = this.comp.toPlate(x, y);
       const dep = this.depthAt(u, w), f = this.comp.focus || 0.6;
@@ -719,7 +813,7 @@
       const i = (py * d.w + px) * 4, r = d.data[i], g = d.data[i + 1], b = d.data[i + 2];
       if (b > 127 && t.includes('mag')) return 'mag';
       if (r > 127 && t.includes('bed')) return 'bed';
-      if (g > 127 && t.includes('rail')) return 'rail';
+      if (g > 127 && t.includes('rail') && !wall) return 'rail';
       return null;
     }
     masksData(cv) {
@@ -747,6 +841,7 @@
       if (t === this.region && !fromDot) return;
       this.region = t;
       this.stage.classList.toggle('is-going', !!t);
+      if (this.rail.wall) this.rail.wall.el.classList.toggle('is-lit', t === 'rail');
       const el = this.goLabel; if (!el) return;
       // at the bed, the bed means ANSTOSS (the magazine on it): its label shows at the magazine's dot
       const lt = t === 'bed' && this.viewKey.split('@')[0] === 'bed' ? 'mag' : t;
@@ -771,9 +866,12 @@
       const cv = this.comp.view, t = this.targets(), d = cv && cv.masksImg ? this.masksData(cv) : null;
       Object.entries(this.dots).forEach(([k, b]) => {
         // no dot for the place you are already at (the bed in the bed view): it still glows and answers a click
-        const a = d && t.includes(k) && k !== this.viewKey.split('@')[0] && d.anchors[k];
+        const wg = k === 'rail' && this.rail.wallGeo;
+        // D5: the wall's dot sits on the wall, a little below the middle of its top edge
+        const a = wg ? (t.includes(k) && (q => [(q[0][0] + q[1][0]) / 2 * 0.88 + (q[2][0] + q[3][0]) / 2 * 0.12, (q[0][1] + q[1][1]) / 2 * 0.88 + (q[2][1] + q[3][1]) / 2 * 0.12])(wg.partition))
+          : d && t.includes(k) && k !== this.viewKey.split('@')[0] && d.anchors[k];
         b.hidden = !a; if (!a) return;
-        const p = this.comp.toScreen(a[0], a[1], this.depthAt(a[0], a[1]));
+        const p = this.comp.toScreen(a[0], a[1], wg ? this.encDepth(wg.depth) : this.depthAt(a[0], a[1]));
         const W = this.stage.clientWidth, H = this.stage.clientHeight;
         if (p[0] < 24 || p[1] < 24 || p[0] > W - 24 || p[1] > H - 24) { b.hidden = true; return; }
         b.style.left = p[0].toFixed(1) + 'px'; b.style.top = p[1].toFixed(1) + 'px';
@@ -897,7 +995,7 @@
         this.lightAt = t; this.lightDirty = false;
         const l = A.light.current(), sig = [l.exposure, l.window, l.night, ...l.sky].map(v => v.toFixed(3)).join();
         this.light = l;
-        if (sig !== this.lightSig) { this.lightSig = sig; this.rail.applyLight(l); this.applyAmbient(); this.dirty = true; }
+        if (sig !== this.lightSig) { this.lightSig = sig; this.rail.applyLight(l); this.applyAmbient(); this.dirty = true; this.wallDue = true; }
         const st = this.stateNow(); if (st !== this.dayState) this.changeState(st);
       }
       // parallax eases toward the pointer (phones have none: a room that sways on its own costs battery and feels laggy)
@@ -934,6 +1032,7 @@
       const swaying = this.rail.step(dt, this.reduced);
       this.applySway(t, swaying);
       if ((this.dirty || pmove) && !this.covered) { this.comp.render(this.light); this.dirty = false; }
+      if (this.wallDue && t > (this.wallRetry || 0)) { if (this.sampleWall()) this.wallDue = false; else this.wallRetry = t + 400; }
       requestAnimationFrame(tt => this.frame(tt));
     }
 
@@ -942,13 +1041,13 @@
       const c = this.comp, h = this.rail.hover;
       // hover outlines fade in and out
       const S = (A.config.outline || {}).strength || 0.9, ease = Math.min(1, dt * ((A.config.outline || {}).ease || 9));
-      const want = ['bed', 'rail', 'mag'].map(k => this.region === k ? S : 0);
+      const want = ['bed', 'rail', 'mag'].map(k => this.region === k && !(k === 'rail' && this.rail.wallGeo) ? S : 0);   // D5: the wall lights up in CSS
       let glowCh = false;
       want.forEach((w, k) => { const n = this.glowAmt[k] + (w - this.glowAmt[k]) * ease;
         if (Math.abs(n - w) < 2e-3) { if (this.glowAmt[k] !== w) glowCh = true; this.glowAmt[k] = w; } else { this.glowAmt[k] = n; glowCh = true; } });
       if (glowCh) { c.setGlow(this.glowAmt.slice()); this.dirty = true; }
       if (h >= 0) c.hover = h + 1;
-      const target = h >= 0 && !this.viewKey.includes('@') ? 1 : 0;
+      const target = h >= 0 && !this.viewKey.includes('@') && !this.rail.wallGeo ? 1 : 0;
       const ha = c.hoverAmt + (target - c.hoverAmt) * Math.min(1, dt * 9);
       if (Math.abs(ha - c.hoverAmt) > 1e-3) { c.hoverAmt = ha; this.dirty = true; } else c.hoverAmt = target;
       const vid = this.video, hasWin = c.view && c.view.win;
@@ -965,6 +1064,7 @@
        a swinging jersey at full rate; nothing moves behind the product view or the magazine. */
     applySway(t, swaying) {
       const cv = this.comp.view; if (!cv || !this.comp.ok) return;
+      if (this.rail.wallGeo) { if (this.comp.swayOn) { this.comp.setSway([], [], []); this.dirty = true; } return; }   // D5: nothing swings
       if (!cv.swayA && cv.idsImg && !cv.swayTried) {
         cv.swayTried = true;
         (window.requestIdleCallback || (f => setTimeout(f, 60)))(() => { this.comp.buildSway(cv, A.products.length); this.kick(); });
