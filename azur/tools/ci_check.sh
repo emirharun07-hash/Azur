@@ -10,7 +10,7 @@ fail() { FAILS="${FAILS:+$FAILS, }$1"; }
 VENV=${AZUR_VENV:-/tmp/azur-ci-venv}
 if [ ! -x "$VENV/bin/python" ]; then
   python3 -m venv "$VENV" || { echo "venv fehlt"; exit 1; }
-  "$VENV/bin/pip" install -q pillow "python-liquid==2.3.6" rjsmin || { echo "pip fehlgeschlagen"; exit 1; }
+  "$VENV/bin/pip" install -q pillow "python-liquid==2.3.6" "rjsmin==1.3.0" || { echo "pip fehlgeschlagen"; exit 1; }
 fi
 PY=$VENV/bin/python
 
