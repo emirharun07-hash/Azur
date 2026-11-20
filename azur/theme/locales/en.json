@@ -172,7 +172,8 @@
       "missing": "The room is not loading. You will find all jerseys further down.",
       "ghost": "AZUR, back to the room",
       "to_product_page": "Go to product page",
-      "adding": "Adding …"
+      "adding": "Adding …",
+      "taken": "taken"
     },
     "withdraw": {
       "policy_html": "You can find the full withdrawal information at {{ link }}.",

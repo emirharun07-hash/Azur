@@ -172,7 +172,8 @@
       "missing": "Das Zimmer lädt nicht. Alle Trikots findest du weiter unten.",
       "ghost": "AZUR, zurück ins Zimmer",
       "to_product_page": "Zur Produktseite",
-      "adding": "Wird hinzugefügt …"
+      "adding": "Wird hinzugefügt …",
+      "taken": "vergeben"
     },
     "withdraw": {
       "policy_html": "Die vollständige Widerrufsbelehrung findest du unter {{ link }}.",
