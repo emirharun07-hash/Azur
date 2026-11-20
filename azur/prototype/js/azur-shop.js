@@ -23,6 +23,9 @@
     prevImage: 'Vorheriges Bild', nextImage: 'Nächstes Bild', limited: 'Limitiert auf 50 Stück' };
   /* P2 texts (German defaults; texte-en.json of P2) */
   Object.assign(P1, { upsellFree: '+ {price} · Versand dann frei', upsellSize: 'Größe wählen', upsellAdded: 'Liegt im Warenkorb.' });
+  /* P3 texts (German defaults; texte-en.json of P3). Scarcity without numbers: only the flags „low“ (stock 1 to 3) and „taken“. */
+  Object.assign(P1, { lowFew: 'nur noch wenige', lowLine: 'Größe {size}: nur noch wenige', takenSr: '{size}, vergeben', notifyTitle: 'Größe {size} ist vergeben.',
+    notifyButton: 'Bescheid sagen', notifyMail: 'E-Mail', notifyDone: 'Wir schreiben dir beim nächsten Drop.' });
   const tx = k => { const c = A.config && A.config.copy; return c && c[k] != null ? c[k] : P1[k]; };
   const shopRoot = () => (window.Shopify && Shopify.routes && Shopify.routes.root) || '/';
   /* what Tab can reach: one stop per radio group (the checked one, else the first), nothing hidden, inert or folded away */
@@ -74,6 +77,18 @@
           <legend>${A.config.copy.yourSize || 'Deine Größe'}</legend>
           <button class="azur-pdp__chart" type="button" data-act="chart" aria-haspopup="dialog" aria-expanded="false" hidden>${tx('sizeChart')}</button>
           <div class="azur-pdp__sizerow azur-pitch"><span class="azur-pitch__box is-top"></span><span class="azur-pitch__box is-bottom"></span></div>
+          <p class="azur-pdp__lowline" role="status" hidden></p>
+          <form class="azur-pdp__notify" novalidate hidden>
+            <p class="azur-pdp__notifytitle"></p>
+            <div class="azur-pdp__notifyrow">
+              <label class="azur-sr" for="azur-pdp-notify-mail">${tx('notifyMail')}</label>
+              <input id="azur-pdp-notify-mail" type="email" name="contact[email]" autocomplete="email" inputmode="email" spellcheck="false" placeholder="${c.dropPlaceholder || ''}" required>
+              <button type="submit">${tx('notifyButton')}</button>
+            </div>
+            <p class="azur-pdp__notifyerr" role="alert" hidden></p>
+            <p class="azur-pdp__notifylegal">${c.dropLegal || ''}</p>
+          </form>
+          <p class="azur-pdp__notifydone" role="status" hidden></p>
         </fieldset>
         <div class="azur-pdp__aside" hidden><ul class="azur-pdp__lines"></ul><div class="azur-pdp__pay"></div></div>
         <div class="azur-pdp__buy">
@@ -136,6 +151,7 @@
         if (t.dataset.act === 'sheet-close') this.sheet(false);
         if (t.dataset.act === 'direct') this.direct(e);
         if (t.dataset.act === 'upsell') this.upsellAdd(t);
+        if (t.dataset.act === 'notify') this.notifyOpen(t.dataset.size, t.dataset.variant, t);
         if (t.dataset.act === 'pair' && this.pairWith) { this.open(this.pairWith, null, this.from); }
       });
       // the photos: the dots follow the swipe; ←/→ on the photos
@@ -150,9 +166,11 @@
         if (!(this.media && this.media.length > 1)) return;
         e.preventDefault(); this.go(this.gi + (e.key === 'ArrowRight' ? 1 : -1));
       });
+      this.pdp.querySelector('.azur-pdp__notify').addEventListener('submit', e => { e.preventDefault(); this.notifySend(); });
       this.pdp.addEventListener('change', e => {
         if (e.target.name === 'azur-size') {
           this.size = e.target.value;
+          this.sizeNote(e.target.dataset.size, this.lowIds.has(String(e.target.value)));
           const b = this.pdp.querySelector('.azur-pdp__add');
           b.disabled = false; b.textContent = A.config.copy.addToCart; b.classList.remove('is-done');
           this.pdp.querySelector('.azur-pdp__after').hidden = true;
@@ -215,9 +233,15 @@
       // die Größen als Spieler: Aufstellung auf dem Feld (breit), auf dem Handy in einer Reihe (--hx)
       const n = product.variants.length;
       q('.azur-pdp__sizerow').querySelectorAll('.azur-pl').forEach(el => el.remove());
+      // P3: „low“ = stock 1 to 3 (a flag per size from the room, or the ids in extra.low; never a number). A taken size is a
+      // button, not a radio: it cannot be chosen, but it can be tapped for „Bescheid sagen“.
+      this.lowIds = new Set(product.variants.filter(v => v.available && (v.low === true || (x.low || []).map(String).includes(String(v.id)))).map(v => String(v.id)));
+      this.notifyClose(); this.sizeNote(null);
       q('.azur-pdp__sizerow').insertAdjacentHTML('beforeend', product.variants.map((v, i) => {
-        const [x, y] = pitchSpot(n, i), hx = n > 1 ? 12 + i * 76 / (n - 1) : 50;
-        return `<label class="azur-pl" style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"><input type="radio" name="azur-size" value="${A.esc(v.id)}" data-size="${A.esc(v.title)}" ${v.available ? '' : 'disabled'}><span>${A.esc(v.title)}</span></label>`;
+        const [x, y] = pitchSpot(n, i), hx = n > 1 ? 12 + i * 76 / (n - 1) : 50, pos = `style="--x:${x}%;--y:${y}%;--hx:${hx.toFixed(1)}%"`;
+        if (!v.available) return `<span class="azur-pl is-taken" ${pos}><button type="button" data-act="notify" data-size="${A.esc(v.title)}" data-variant="${A.esc(v.id)}" aria-disabled="true" aria-haspopup="true" aria-label="${A.esc(String(tx('takenSr')).replace('{size}', v.title))}"><span aria-hidden="true">${A.esc(v.title)}</span></button></span>`;
+        const dot = this.lowIds.has(String(v.id)) ? `<i class="azur-pl__dot" role="img" aria-label="${A.esc(tx('lowFew'))}"></i>` : '';
+        return `<label class="azur-pl" ${pos}><input type="radio" name="azur-size" value="${A.esc(v.id)}" data-size="${A.esc(v.title)}"><span>${A.esc(v.title)}</span>${dot}</label>`;
       }).join(''));
       q('.azur-pdp__error').hidden = true;
       const add = q('.azur-pdp__add'); add.disabled = true; add.textContent = A.config.copy.chooseSize; add.classList.remove('is-done');
@@ -255,6 +279,64 @@
       if (back && back !== document.body && back.isConnected && back.getClientRects().length) back.focus({ preventScroll: true });
       else if (!f) this.app.afterProductClose();
       if (f && f.closed) f.closed();
+    }
+
+    /* P3: under the sizes, for the CHOSEN size only: „Größe M: nur noch wenige“. Empty / null = no line. */
+    sizeNote(size, low) {
+      const n = this.pdp.querySelector('.azur-pdp__lowline');
+      n.textContent = size && low ? String(tx('lowLine')).replace('{size}', size) : ''; n.hidden = !(size && low);
+      if (size) this.notifyClose();                     // choosing a size closes the „vergeben“ form
+    }
+
+    /* P3: a taken size was tapped: a small form (e-mail + button) in the view. It posts the same customer form as the drop
+       sign-up (tags „newsletter, drops, bescheid-<key>-<size>“). */
+    notifyOpen(size, variant, btn) {
+      const f = this.pdp.querySelector('.azur-pdp__notify'), done = this.pdp.querySelector('.azur-pdp__notifydone');
+      this.size = null; this.directReady && this.directReady(false);
+      this.pdp.querySelectorAll('input[name="azur-size"]').forEach(r => { r.checked = false; });
+      const b = this.pdp.querySelector('.azur-pdp__add'); b.disabled = true; b.textContent = A.config.copy.chooseSize;
+      this.sizeNote(null);
+      this.notifyFor = size; done.hidden = true; done.textContent = '';
+      f.querySelector('.azur-pdp__notifytitle').textContent = String(tx('notifyTitle')).replace('{size}', size);
+      f.querySelector('.azur-pdp__notifyerr').hidden = true;
+      f.hidden = false; this.pdp.querySelector('.azur-pdp__sizes').classList.add('is-notify');
+      this.pdp.querySelectorAll('.azur-pl.is-taken button').forEach(x => x.classList.toggle('is-on', x === btn));
+      f.querySelector('input').focus({ preventScroll: true });
+      if (window.matchMedia('(max-width: 860px)').matches) f.scrollIntoView({ block: 'center', behavior: this.app.reduced ? 'auto' : 'smooth' });   // not under the buy bar
+    }
+    notifyClose() {
+      const f = this.pdp.querySelector('.azur-pdp__notify'); if (!f) return;
+      f.hidden = true; this.notifyFor = null;
+      this.pdp.querySelector('.azur-pdp__sizes').classList.remove('is-notify');
+      this.pdp.querySelector('.azur-pdp__notifydone').hidden = true;
+      this.pdp.querySelectorAll('.azur-pl.is-taken button.is-on').forEach(x => x.classList.remove('is-on'));
+    }
+    async notifySend() {
+      const f = this.pdp.querySelector('.azur-pdp__notify'), err = f.querySelector('.azur-pdp__notifyerr'), c = A.config.copy;
+      const mail = f.querySelector('input').value.trim(), size = this.notifyFor;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { err.textContent = c.dropInvalid || ''; err.hidden = false; return; }
+      err.hidden = true;
+      const tag = 'bescheid-' + (this.product.key || this.product.handle || 'trikot') + '-' + String(size).toLowerCase().replace(/[^a-z0-9]+/g, '');
+      const btn = f.querySelector('button'); btn.disabled = true;
+      try {
+        if (A.config.shopify) await this.postContact(mail, 'newsletter, drops, ' + tag);
+        const done = this.pdp.querySelector('.azur-pdp__notifydone');
+        done.textContent = tx('notifyDone'); done.hidden = false; f.hidden = true; f.reset();
+      } catch (x) { err.textContent = x.message; err.hidden = false; }
+      finally { btn.disabled = false; }
+    }
+    /* same customer form as the drop sign-up (azur-drop.js postLive, snippets/signup-form.liquid); a small copy here because
+       the product view also runs on pages without the room (azur-pdp.js bundle has no azur-drop.js) */
+    async postContact(mail, tags) {
+      const fields = { form_type: 'customer', utf8: '✓', 'contact[email]': mail, 'contact[tags]': tags };
+      const fd = new FormData(); Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+      const res = await fetch(shopRoot() + 'contact', { method: 'POST', body: fd, credentials: 'same-origin' });
+      if (/challenge/.test(res.url)) {             // Shopify wants a bot check: post the form normally
+        const f = document.createElement('form'); f.method = 'post'; f.action = shopRoot() + 'contact'; f.hidden = true;
+        Object.entries(fields).forEach(([k, v]) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = v; f.appendChild(i); });
+        document.body.appendChild(f); f.submit(); return;
+      }
+      if (!res.ok) throw new Error(A.config.copy.dropFailed || 'Das hat nicht geklappt. Bitte versuch es gleich noch einmal.');
     }
 
     /* P1: the photos. media [{src, alt, w, h}] from the snippet; without it the one shop photo. The first loads at once,

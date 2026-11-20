@@ -3,7 +3,7 @@
   JSON-Objekt. Aufruf im Zimmer (sections/azur-room.liquid, je Produkt): extra: {% render 'azur-product-json', product: p %}
   Auf Shop- und Produktseiten über snippets/azur-pdp-item.liquid (shared: false; die gemeinsamen Angaben setzt dort
   snippets/azur-pdp-setup.liquid einmal mit part: 'shared').
-  Nichts wird erfunden: leere Metafelder fehlen im Objekt, die Ansicht blendet den Abschnitt dann aus. Keine Stückzahlen.
+  Nichts wird erfunden: leere Metafelder fehlen im Objekt, die Ansicht blendet den Abschnitt dann aus. Keine Stückzahlen. P3: "low" = Varianten-IDs mit Bestand 1–3 (nur das Flag).
   Metafelder: custom.material, custom.care, custom.size_table (Text „Größe | Brust | Länge“ je Zeile oder HTML-Tabelle),
               custom.gpsr_hersteller, custom.gpsr_kontakt. Größentabelle sonst aus der Theme-Einstellung size_chart.
   Parameter: product
@@ -97,6 +97,15 @@
 {%- if table != blank -%}, "sizeTable": {{ table | strip | json }}{%- endif -%}
 {%- if f_maker != blank -%}, "gpsr": {"maker": {{ f_maker | json }}{% if f_contact != blank %}, "contact": {{ f_contact | json }}{% endif %}}{%- endif -%}
 , "limited": {{ 'azur.pdp.limited' | t | json }}
+{%- comment -%} P3: IDs der Größen mit knappem Bestand (Flag, keine Zahl); gleiche Regel wie `low` in sections/azur-room.liquid {%- endcomment -%}
+, "low": [
+  {%- assign n_low = 0 -%}
+  {%- for v in product.variants -%}
+    {%- if v.inventory_management == 'shopify' and v.inventory_quantity > 0 and v.inventory_quantity <= 3 -%}
+      {%- if n_low > 0 -%},{%- endif -%}{{ v.id | json }}{%- assign n_low = n_low | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+]
 {%- if with_shared -%}, "shared": {{ shared_json }}{%- endif -%}
 }
 {%- endif -%}
